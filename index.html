@@ -274,38 +274,82 @@
   }
   .variable-separator span{padding:8px 0;white-space:nowrap}
   .prompt-variable-header{
-    display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    margin-bottom:16px;padding:17px 18px;border:1px solid var(--line);
+    border-radius:16px;background:var(--panel-2)
   }
-  .prompt-variable-header label{display:block;color:var(--text);font-size:17px;margin-bottom:5px}
-  .prompt-variable-list{display:flex;flex-direction:column;gap:14px}
+  .prompt-variable-header h3{margin:0 0 5px;font-size:21px}
+  .prompt-variable-header p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+  .prompt-variable-list{display:flex;flex-direction:column;gap:20px}
   .prompt-variable-empty{
-    padding:22px;border:2px dashed var(--line);border-radius:15px;
-    background:var(--panel-2);text-align:center;color:var(--muted)
+    padding:34px 22px;border:2px dashed var(--line);border-radius:17px;
+    background:var(--panel-2);text-align:center;color:var(--muted);font-size:15px;line-height:1.55
   }
   .prompt-variable-row{
-    border:1px solid color-mix(in srgb,var(--primary) 28%,var(--line));
-    border-left:5px solid var(--primary);border-radius:16px;
-    background:color-mix(in srgb,var(--primary) 4%,var(--panel));overflow:hidden
+    --variable-accent:#2563eb;
+    border:2px solid color-mix(in srgb,var(--variable-accent) 38%,var(--line));
+    border-top:8px solid var(--variable-accent);border-radius:18px;
+    background:linear-gradient(145deg,
+      color-mix(in srgb,var(--variable-accent) 9%,var(--panel)) 0%,
+      var(--panel) 70%);
+    overflow:hidden;box-shadow:0 10px 26px color-mix(in srgb,var(--variable-accent) 12%,transparent)
   }
   .prompt-variable-row-head{
-    display:flex;align-items:center;gap:9px;padding:11px 13px;
-    background:color-mix(in srgb,var(--primary) 10%,var(--panel));border-bottom:1px solid var(--line)
+    display:flex;align-items:center;gap:10px;padding:14px 17px;
+    background:color-mix(in srgb,var(--variable-accent) 13%,var(--panel));
+    border-bottom:1px solid color-mix(in srgb,var(--variable-accent) 25%,var(--line))
   }
-  .prompt-variable-row-head .variable-number{min-width:96px}
+  .prompt-variable-row-head .variable-number{
+    min-width:104px;background:var(--variable-accent);color:#fff
+  }
   .prompt-variable-row-head .variable-live-token{
     font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    color:var(--primary-2);font-weight:850;font-size:14px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    color:color-mix(in srgb,var(--variable-accent) 78%,var(--text));
+    font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
   }
   .prompt-variable-row-head .spacer{flex:1}
+  .variable-in-prompt-status{
+    font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;
+    color:var(--muted);background:var(--panel);border:1px solid var(--line)
+  }
+  .variable-in-prompt-status.present{
+    color:var(--success);border-color:color-mix(in srgb,var(--success) 45%,var(--line));
+    background:color-mix(in srgb,var(--success) 10%,var(--panel))
+  }
   .prompt-variable-row-body{
-    display:grid;grid-template-columns:minmax(220px,.7fr) minmax(360px,1.8fr);gap:14px;padding:15px
+    display:flex;flex-direction:column;gap:17px;padding:19px
+  }
+  .variable-step{
+    padding:15px;border:1px solid color-mix(in srgb,var(--variable-accent) 22%,var(--line));
+    border-radius:14px;background:var(--panel)
+  }
+  .variable-step-title{
+    display:flex;align-items:center;gap:9px;margin-bottom:9px;
+    color:var(--text);font-size:15px;font-weight:850
+  }
+  .variable-step-number{
+    width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+    background:var(--variable-accent);color:#fff;font-size:13px;font-weight:900
   }
   .prompt-variable-row .variable-name-input{
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:750
+    height:50px;font-size:17px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800
   }
-  .prompt-variable-row .variable-text-input{min-height:130px;background:var(--panel);font-size:16px}
-  .variable-row-help{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.45}
+  .prompt-variable-row .variable-text-input{
+    min-height:170px;background:var(--panel-2);font-size:17px;line-height:1.55;border-width:2px
+  }
+  .variable-row-help{margin-top:7px;color:var(--muted);font-size:12px;line-height:1.45}
+  .variable-row-actions{
+    display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+    padding-top:2px
+  }
+  .variable-row-actions .insert-variable-token{
+    background:var(--variable-accent);border-color:var(--variable-accent);color:#fff
+  }
+  .simple-variable-bottom{
+    display:flex;justify-content:center;margin:17px 0 4px
+  }
+  .simple-variable-bottom .btn{min-width:240px}
   .copy-mode-box{margin-top:18px;border:1px solid var(--line);border-radius:15px;padding:15px;background:var(--panel-2)}
   .copy-mode-box h3{margin:0 0 12px;font-size:19px}
   .copy-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -518,7 +562,7 @@
   </div>
   <div class="editor-tabs" role="tablist" aria-label="Modalità editor">
     <button class="editor-tab-btn active" id="promptTabBtn" data-editor-tab="prompt" role="tab" aria-selected="true">Prompt e dettagli</button>
-    <button class="editor-tab-btn" id="variablesTabBtn" data-editor-tab="variables" role="tab" aria-selected="false">Variabili e copia</button>
+    <button class="editor-tab-btn" id="variablesTabBtn" data-editor-tab="variables" role="tab" aria-selected="false">Variabili</button>
   </div>
   <div class="editor-body">
     <section class="editor-tab-panel active" id="editorTabPrompt" data-editor-panel="prompt">
@@ -566,16 +610,6 @@
           <input type="text" id="promptTags" placeholder="seo, wordpress, audit">
         </div>
         <div class="field full">
-          <div class="prompt-variable-header">
-            <div>
-              <label>Variabili del prompt</label>
-              <div class="hint">Ogni variabile è mostrata in una riga separata. Modifica il nome e inserisci direttamente il testo da usare.</div>
-            </div>
-            <button class="btn primary small" type="button" id="addVariableBtn">＋ Aggiungi variabile</button>
-          </div>
-          <div class="prompt-variable-list" id="promptVariableList"></div>
-        </div>
-        <div class="field full">
           <label for="promptNotes">Note interne</label>
           <textarea id="promptNotes" placeholder="Istruzioni, contesto o modifiche da ricordare"></textarea>
         </div>
@@ -587,11 +621,17 @@
     </section>
 
     <section class="editor-tab-panel" id="editorTabVariables" data-editor-panel="variables">
-      <div class="variables-intro">
-        <h3>Compila le variabili</h3>
-        <p>Inserisci il testo da sostituire ai segnaposto del tipo {{variabile}}. Ogni variabile viene mostrata in un blocco numerato, separato visivamente dalla successiva.</p>
+      <div class="prompt-variable-header">
+        <div>
+          <h3>Variabili del prompt</h3>
+          <p>Ogni variabile è racchiusa in un box separato. Inserisci prima il nome e poi il testo che deve sostituirla.</p>
+        </div>
+        <button class="btn primary" type="button" id="addVariableBtn">＋ Nuova variabile</button>
       </div>
-      <div class="variable-fields" id="variableValuesFields"></div>
+      <div class="prompt-variable-list" id="promptVariableList"></div>
+      <div class="simple-variable-bottom">
+        <button class="btn" type="button" id="addVariableBottomBtn">＋ Aggiungi un’altra variabile</button>
+      </div>
       <div class="copy-mode-box">
         <h3>Come vuoi copiare il prompt?</h3>
         <div class="copy-options">
@@ -614,7 +654,7 @@
   </div>
   <div class="editor-footer">
     <button class="btn primary" id="copyFromEditorBtn">Copia con la modalità scelta</button>
-    <button class="btn" id="openVariablesTabBtn">Variabili e modalità di copia</button>
+    <button class="btn" id="openVariablesTabBtn">Apri variabili</button>
     <button class="btn" id="duplicateFromEditorBtn">Duplica</button>
     <button class="btn danger" id="trashFromEditorBtn">Cestina</button>
     <span class="spacer"></span>
@@ -773,6 +813,10 @@
     "#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2",
     "#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c",
     "#0369a1","#be123c","#15803d","#a16207"
+  ];
+  const VARIABLE_BOX_PALETTE=[
+    "#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2",
+    "#ca8a04","#dc2626","#4f46e5","#0d9488"
   ];
   function stableColorIndex(value){
     let hash=0;for(const ch of String(value||""))hash=((hash<<5)-hash)+ch.charCodeAt(0);
@@ -1268,23 +1312,29 @@
   }
   function variableManagerRowMarkup(variable,index){
     const name=sanitizeVariableName(variable.name);
-    return `<div class="prompt-variable-row" data-row-id="${esc(variable.id)}" data-original-name="${esc(name)}">
+    const accent=VARIABLE_BOX_PALETTE[index%VARIABLE_BOX_PALETTE.length];
+    const present=name && new RegExp(`{{\s*${escapeRegExp(name)}\s*}}`).test($("promptContent").value);
+    return `<div class="prompt-variable-row" style="--variable-accent:${accent}" data-row-id="${esc(variable.id)}" data-original-name="${esc(name)}">
       <div class="prompt-variable-row-head">
         <span class="variable-number">Variabile ${index+1}</span>
-        <span class="variable-live-token">${name?`{{${esc(name)}}}`:"Nome non inserito"}</span>
+        <span class="variable-live-token">${name?`{{${esc(name)}}}`:"Inserisci il nome"}</span>
         <span class="spacer"></span>
-        <button class="btn small insert-variable-token" type="button" title="Inserisci il segnaposto nel prompt">Inserisci nel prompt</button>
-        <button class="btn small danger remove-variable-row" type="button" title="Rimuovi variabile">Elimina</button>
+        <span class="variable-in-prompt-status ${present?"present":""}">${present?"Presente nel prompt":"Non ancora inserita"}</span>
+        <button class="btn small danger remove-variable-row" type="button" title="Elimina questa variabile">Elimina</button>
       </div>
       <div class="prompt-variable-row-body">
-        <div class="field">
-          <label>Nome della variabile</label>
-          <input type="text" class="variable-name-input" value="${esc(name)}" placeholder="es. nome_cliente">
-          <div class="variable-row-help">Il segnaposto sarà <strong>{{nome_variabile}}</strong>.</div>
+        <div class="variable-step">
+          <div class="variable-step-title"><span class="variable-step-number">1</span>Nome della variabile</div>
+          <input type="text" class="variable-name-input" value="${esc(name)}" placeholder="Esempio: nome_cliente">
+          <div class="variable-row-help">Scrivi soltanto il nome. L’app creerà automaticamente il segnaposto <strong>{{nome_variabile}}</strong>.</div>
         </div>
-        <div class="field">
-          <label>Testo da inserire nella variabile</label>
-          <textarea class="variable-text-input" placeholder="Inserisci il testo per questa variabile, anche su più righe">${esc(variable.value||"")}</textarea>
+        <div class="variable-step">
+          <div class="variable-step-title"><span class="variable-step-number">2</span>Testo da inserire</div>
+          <textarea class="variable-text-input" placeholder="Inserisci qui il testo che sostituirà questa variabile, anche su più righe">${esc(variable.value||"")}</textarea>
+        </div>
+        <div class="variable-row-actions">
+          <button class="btn primary insert-variable-token" type="button">Inserisci questa variabile nel prompt</button>
+          <span class="hint">Il segnaposto verrà inserito nel punto selezionato del testo.</span>
         </div>
       </div>
     </div>`;
@@ -1293,17 +1343,28 @@
     const list=$("promptVariableList");if(!list)return;
     list.innerHTML=state.editorVariables.length
       ?state.editorVariables.map(variableManagerRowMarkup).join("")
-      :`<div class="prompt-variable-empty">Nessuna variabile. Premi “Aggiungi variabile” oppure inserisci un segnaposto come {{nome_cliente}} nel testo del prompt.</div>`;
+      :`<div class="prompt-variable-empty">Non hai ancora creato variabili. Premi “Nuova variabile”: comparirà un box separato in cui inserire nome e testo.</div>`;
     $$("#promptVariableList .prompt-variable-row").forEach(row=>{
       const id=row.dataset.rowId;
       const nameInput=row.querySelector(".variable-name-input");
       const valueInput=row.querySelector(".variable-text-input");
       const token=row.querySelector(".variable-live-token");
+      const status=row.querySelector(".variable-in-prompt-status");
+      const insertButton=row.querySelector(".insert-variable-token");
+      const refreshVariableStatus=()=>{
+        const variable=state.editorVariables.find(item=>item.id===id);
+        const currentName=sanitizeVariableName(variable?.name);
+        const present=currentName && new RegExp(`{{\\s*${escapeRegExp(currentName)}\\s*}}`).test($("promptContent").value);
+        status.textContent=present?"Presente nel prompt":"Non ancora inserita";
+        status.classList.toggle("present",Boolean(present));
+        insertButton.textContent=currentName?`Inserisci {{${currentName}}} nel prompt`:"Inserisci questa variabile nel prompt";
+      };
       nameInput.addEventListener("input",()=>{
         const variable=state.editorVariables.find(item=>item.id===id);if(!variable)return;
         const oldName=variable.name;
         variable.name=sanitizeVariableName(nameInput.value);
-        token.textContent=variable.name?`{{${variable.name}}}`:"Nome non inserito";
+        token.textContent=variable.name?`{{${variable.name}}}`:"Inserisci il nome";
+        refreshVariableStatus();
         if(oldName&&oldName!==variable.name&&state.editorVariableValues[oldName]!==undefined){
           delete state.editorVariableValues[oldName];
         }
@@ -1332,9 +1393,6 @@
         const variable=state.editorVariables.find(item=>item.id===id);if(!variable)return;
         variable.value=valueInput.value;
         if(variable.name)state.editorVariableValues[variable.name]=variable.value;
-        const copyField=[...document.querySelectorAll("#variableValuesFields .editor-variable-value")]
-          .find(field=>field.dataset.var===variable.name);
-        if(copyField&&copyField!==valueInput)copyField.value=variable.value;
         markDirty();updateEditorCopyPreview();
       });
       row.querySelector(".insert-variable-token").addEventListener("click",()=>{
@@ -1346,8 +1404,9 @@
         const end=textarea.selectionEnd??start;
         textarea.value=textarea.value.slice(0,start)+placeholder+textarea.value.slice(end);
         textarea.focus();textarea.setSelectionRange(start+placeholder.length,start+placeholder.length);
-        updateCounts();markDirty();updateEditorCopyPreview();
+        updateCounts();markDirty();updateEditorCopyPreview();refreshVariableStatus();
       });
+      refreshVariableStatus();
       row.querySelector(".remove-variable-row").addEventListener("click",()=>{
         const variable=state.editorVariables.find(item=>item.id===id);
         const name=sanitizeVariableName(variable?.name);
@@ -1363,8 +1422,10 @@
       });
     });
     if(focusLast){
+      const rows=$$("#promptVariableList .prompt-variable-row");
+      rows.at(-1)?.scrollIntoView({behavior:"smooth",block:"center"});
       const inputs=$$("#promptVariableList .variable-name-input");
-      inputs.at(-1)?.focus();
+      setTimeout(()=>inputs.at(-1)?.focus(),180);
     }
   }
   function addEditorVariable(){
@@ -1388,38 +1449,16 @@
   }
   function collectVariableValues(){
     syncVariableManagerFromDOM();
-    $$("#variableValuesFields .editor-variable-value").forEach(el=>{
-      const name=sanitizeVariableName(el.dataset.var);
-      const variable=state.editorVariables.find(item=>item.name===name);
-      if(variable)variable.value=el.value;
-    });
     state.editorVariableValues=Object.fromEntries(
-      state.editorVariables.filter(variable=>variable.name).map(variable=>[variable.name,variable.value||""])
+      state.editorVariables
+        .filter(variable=>sanitizeVariableName(variable.name))
+        .map(variable=>[sanitizeVariableName(variable.name),variable.value||""])
     );
     return {...state.editorVariableValues};
   }
   function renderVariableValueFields(){
-    syncVariableManagerFromDOM();
     const added=addDetectedVariablesFromContent(false);
-    if(added)renderPromptVariableList();
-    const names=getEditorVariableNames();
-    const values=collectVariableValues();
-    $("variableValuesFields").innerHTML=names.length
-      ?variableFieldsMarkup(names,values,"editor-variable-value")
-      :`<div class="hint" style="padding:18px">Aggiungi una variabile nella scheda “Prompt e dettagli” oppure scrivi {{nome_variabile}} nel prompt.</div>`;
-    $$("#variableValuesFields .editor-variable-value").forEach(el=>el.addEventListener("input",()=>{
-      const name=sanitizeVariableName(el.dataset.var);
-      const variable=state.editorVariables.find(item=>item.name===name);
-      if(variable)variable.value=el.value;
-      state.editorVariableValues[name]=el.value;
-      if(variable){
-        const row=[...document.querySelectorAll("#promptVariableList .prompt-variable-row")]
-          .find(item=>item.dataset.rowId===variable.id);
-        const managerField=row?.querySelector(".variable-text-input");
-        if(managerField)managerField.value=el.value;
-      }
-      markDirty();updateEditorCopyPreview();
-    }));
+    if(added || !$("promptVariableList").children.length)renderPromptVariableList();
     updateEditorCopyPreview();
   }
   function compilePromptText(content,values={}){
@@ -1937,6 +1976,7 @@
       }
     }));
     $("addVariableBtn").onclick=addEditorVariable;
+    $("addVariableBottomBtn").onclick=addEditorVariable;
     ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).addEventListener("change",markDirty));
     $("savePromptBtn").onclick=saveEditor;
     $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
