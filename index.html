@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="light dark" />
-<title>Prompt Studio v5 — Organizer standalone</title>
+<title>Prompt Studio v7 — Organizer standalone</title>
 <style>
   :root{
     --bg:#f4f7fb;
@@ -274,82 +274,81 @@
   }
   .variable-separator span{padding:8px 0;white-space:nowrap}
   .prompt-variable-header{
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
-    margin-bottom:16px;padding:17px 18px;border:1px solid var(--line);
-    border-radius:16px;background:var(--panel-2)
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+    margin-bottom:13px;padding:18px 20px;border:1px solid color-mix(in srgb,var(--primary) 28%,var(--line));
+    border-radius:17px;background:linear-gradient(135deg,var(--primary-soft),var(--panel-2))
   }
-  .prompt-variable-header h3{margin:0 0 5px;font-size:21px}
-  .prompt-variable-header p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+  .prompt-variable-header h3{margin:0 0 7px;font-size:22px}
+  .prompt-variable-header p{margin:0;color:var(--muted);font-size:14px;line-height:1.55;max-width:850px}
+  .detected-variable-summary{
+    display:none;margin:0 0 17px;padding:11px 14px;border-radius:12px;
+    color:var(--success);background:color-mix(in srgb,var(--success) 10%,var(--panel));
+    border:1px solid color-mix(in srgb,var(--success) 34%,var(--line));
+    font-size:14px;font-weight:800
+  }
+  .detected-variable-summary.show{display:block}
   .prompt-variable-list{display:flex;flex-direction:column;gap:20px}
   .prompt-variable-empty{
-    padding:34px 22px;border:2px dashed var(--line);border-radius:17px;
-    background:var(--panel-2);text-align:center;color:var(--muted);font-size:15px;line-height:1.55
+    padding:38px 24px;border:2px dashed var(--line);border-radius:18px;
+    background:var(--panel-2);text-align:center;color:var(--muted);font-size:15px;line-height:1.65
+  }
+  .prompt-variable-empty code{
+    display:inline-block;margin:3px;padding:3px 7px;border-radius:7px;
+    background:var(--primary-soft);color:var(--primary-2);font-weight:800
   }
   .prompt-variable-row{
     --variable-accent:#2563eb;
-    border:2px solid color-mix(in srgb,var(--variable-accent) 38%,var(--line));
-    border-top:8px solid var(--variable-accent);border-radius:18px;
+    border:2px solid color-mix(in srgb,var(--variable-accent) 40%,var(--line));
+    border-left:9px solid var(--variable-accent);border-radius:19px;
     background:linear-gradient(145deg,
-      color-mix(in srgb,var(--variable-accent) 9%,var(--panel)) 0%,
-      var(--panel) 70%);
-    overflow:hidden;box-shadow:0 10px 26px color-mix(in srgb,var(--variable-accent) 12%,transparent)
+      color-mix(in srgb,var(--variable-accent) 10%,var(--panel)) 0%,
+      var(--panel) 68%);
+    overflow:hidden;box-shadow:0 12px 28px color-mix(in srgb,var(--variable-accent) 13%,transparent)
   }
   .prompt-variable-row-head{
-    display:flex;align-items:center;gap:10px;padding:14px 17px;
-    background:color-mix(in srgb,var(--variable-accent) 13%,var(--panel));
-    border-bottom:1px solid color-mix(in srgb,var(--variable-accent) 25%,var(--line))
+    display:flex;align-items:center;gap:11px;padding:14px 18px;
+    background:color-mix(in srgb,var(--variable-accent) 14%,var(--panel));
+    border-bottom:1px solid color-mix(in srgb,var(--variable-accent) 28%,var(--line))
   }
   .prompt-variable-row-head .variable-number{
     min-width:104px;background:var(--variable-accent);color:#fff
   }
   .prompt-variable-row-head .variable-live-token{
     font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    color:color-mix(in srgb,var(--variable-accent) 78%,var(--text));
-    font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    color:color-mix(in srgb,var(--variable-accent) 80%,var(--text));
+    font-weight:900;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
   }
   .prompt-variable-row-head .spacer{flex:1}
-  .variable-in-prompt-status{
-    font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;
-    color:var(--muted);background:var(--panel);border:1px solid var(--line)
+  .variable-detected-badge{
+    font-size:12px;font-weight:900;padding:5px 9px;border-radius:999px;
+    color:var(--success);background:color-mix(in srgb,var(--success) 10%,var(--panel));
+    border:1px solid color-mix(in srgb,var(--success) 38%,var(--line))
   }
-  .variable-in-prompt-status.present{
-    color:var(--success);border-color:color-mix(in srgb,var(--success) 45%,var(--line));
-    background:color-mix(in srgb,var(--success) 10%,var(--panel))
+  .prompt-variable-row-body{padding:21px}
+  .variable-auto-title{
+    margin:0 0 7px;color:var(--text);font-size:21px;font-weight:900;
+    line-height:1.25
   }
-  .prompt-variable-row-body{
-    display:flex;flex-direction:column;gap:17px;padding:19px
+  .variable-auto-help{
+    margin:0 0 13px;color:var(--muted);font-size:14px;line-height:1.55
   }
-  .variable-step{
-    padding:15px;border:1px solid color-mix(in srgb,var(--variable-accent) 22%,var(--line));
-    border-radius:14px;background:var(--panel)
-  }
-  .variable-step-title{
-    display:flex;align-items:center;gap:9px;margin-bottom:9px;
-    color:var(--text);font-size:15px;font-weight:850
-  }
-  .variable-step-number{
-    width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
-    background:var(--variable-accent);color:#fff;font-size:13px;font-weight:900
-  }
-  .prompt-variable-row .variable-name-input{
-    height:50px;font-size:17px;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800
+  .variable-auto-help code{
+    padding:3px 7px;border-radius:7px;background:var(--primary-soft);
+    color:var(--primary-2);font-weight:850
   }
   .prompt-variable-row .variable-text-input{
-    min-height:170px;background:var(--panel-2);font-size:17px;line-height:1.55;border-width:2px
+    min-height:155px;background:var(--panel-2);font-size:17px;line-height:1.6;
+    border:2px solid color-mix(in srgb,var(--variable-accent) 27%,var(--line))
   }
-  .variable-row-help{margin-top:7px;color:var(--muted);font-size:12px;line-height:1.45}
-  .variable-row-actions{
-    display:flex;align-items:center;gap:9px;flex-wrap:wrap;
-    padding-top:2px
+  .prompt-variable-row .variable-text-input:focus{
+    border-color:var(--variable-accent);
+    box-shadow:0 0 0 4px color-mix(in srgb,var(--variable-accent) 17%,transparent)
   }
-  .variable-row-actions .insert-variable-token{
-    background:var(--variable-accent);border-color:var(--variable-accent);color:#fff
+  .variable-source-label{
+    display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--muted);
+    font-size:12px;line-height:1.45
   }
-  .simple-variable-bottom{
-    display:flex;justify-content:center;margin:17px 0 4px
-  }
-  .simple-variable-bottom .btn{min-width:240px}
+  .variable-source-label strong{color:var(--text)}
   .copy-mode-box{margin-top:18px;border:1px solid var(--line);border-radius:15px;padding:15px;background:var(--panel-2)}
   .copy-mode-box h3{margin:0 0 12px;font-size:19px}
   .copy-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -623,21 +622,19 @@
     <section class="editor-tab-panel" id="editorTabVariables" data-editor-panel="variables">
       <div class="prompt-variable-header">
         <div>
-          <h3>Variabili del prompt</h3>
-          <p>Ogni variabile è racchiusa in un box separato. Inserisci prima il nome e poi il testo che deve sostituirla.</p>
+          <h3>Variabili rilevate automaticamente</h3>
+          <p>L’app cerca nel prompt segnaposto come <strong>[DOMINIO_SITO]</strong>, <strong>[LINGUA]</strong>, <strong>[PAESE_O_MERCATO]</strong> e <strong>{{nome_cliente}}</strong>, quindi crea un campo per ognuno.</p>
         </div>
-        <button class="btn primary" type="button" id="addVariableBtn">＋ Nuova variabile</button>
+        <button class="btn" type="button" id="detectVariablesBtn">↻ Rileva di nuovo</button>
       </div>
+      <div class="detected-variable-summary" id="detectedVariableSummary"></div>
       <div class="prompt-variable-list" id="promptVariableList"></div>
-      <div class="simple-variable-bottom">
-        <button class="btn" type="button" id="addVariableBottomBtn">＋ Aggiungi un’altra variabile</button>
-      </div>
       <div class="copy-mode-box">
         <h3>Come vuoi copiare il prompt?</h3>
         <div class="copy-options">
           <label class="copy-option">
             <input type="radio" name="editorCopyMode" value="template">
-            <span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto, per esempio {{nome_cliente}}. Copia il modello non compilato.</small></span>
+            <span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto, per esempio [DOMINIO_SITO] o {{nome_cliente}}. Copia il modello non compilato.</small></span>
           </label>
           <label class="copy-option">
             <input type="radio" name="editorCopyMode" value="compiled" checked>
@@ -1193,7 +1190,7 @@
     $("suggestionBox").classList.remove("show");
     const preferredMode=localStorage.getItem("ps_copy_mode")||"compiled";
     const copyRadio=document.querySelector(`input[name="editorCopyMode"][value="${preferredMode}"]`);if(copyRadio)copyRadio.checked=true;
-    setEditorTab("prompt");
+    setEditorTab(p&&state.editorVariables.length?"variables":"prompt");
     updateCounts();
     $("editor").classList.add("open");
     $("editorBackdrop").classList.add("open");
@@ -1258,214 +1255,237 @@
   }
 
   function sanitizeVariableName(value){
-    return String(value||"").replace(/{{|}}/g,"").trim().replace(/\s+/g,"_");
+    return String(value||"")
+      .replace(/{{|}}|\[|\]/g,"")
+      .trim()
+      .replace(/\s+/g,"_");
   }
   function escapeRegExp(value){
     return String(value||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
   }
+  function humanizeVariableName(value){
+    let label=String(value||"")
+      .replace(/{{|}}|\[|\]/g,"")
+      .replace(/_/g," ")
+      .replace(/\s+/g," ")
+      .trim()
+      .toLowerCase();
+    if(/^dominio sito$/.test(label))label="dominio";
+    return label||"valore";
+  }
+  function cleanContextLabel(value){
+    const label=String(value||"")
+      .replace(/[*_`#>]/g,"")
+      .replace(/^[\s\-–—•\d.)]+/,"")
+      .replace(/[:：\-–—]\s*$/,"")
+      .replace(/\s+/g," ")
+      .trim();
+    if(!label || label.length>70)return "";
+    return label.toLowerCase();
+  }
+  function extractVariableDefinitions(content){
+    const text=String(content||"");
+    const regex=/{{\s*([^{}]+?)\s*}}|\[\s*([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ0-9_\/\- ]{0,80})\s*\]/g;
+    const definitions=[];
+    const seen=new Map();
+    let match;
+    while((match=regex.exec(text))){
+      const sourceName=match[1]??match[2];
+      const name=sanitizeVariableName(sourceName);
+      if(!name)continue;
+
+      const lineStart=text.lastIndexOf("\n",match.index)+1;
+      const beforeOnLine=text.slice(lineStart,match.index).trim();
+      const contextLabel=cleanContextLabel(beforeOnLine);
+      const fallbackLabel=humanizeVariableName(name);
+      const label=contextLabel||fallbackLabel;
+      const raw=match[0];
+      const definition={
+        name,
+        raw,
+        syntax:match[1]!==undefined?"curly":"square",
+        label,
+        contextLabel,
+        index:match.index
+      };
+
+      const normalized=name.toLowerCase();
+      if(!seen.has(normalized)){
+        seen.set(normalized,definitions.length);
+        definitions.push(definition);
+      }else{
+        const existing=definitions[seen.get(normalized)];
+        if(!existing.contextLabel && contextLabel){
+          existing.label=contextLabel;
+          existing.contextLabel=contextLabel;
+        }
+      }
+    }
+    return definitions;
+  }
+  function variableValueByName(values,name){
+    if(Object.prototype.hasOwnProperty.call(values,name))return values[name];
+    const key=Object.keys(values||{}).find(item=>item.toLowerCase()===String(name).toLowerCase());
+    return key?values[key]:"";
+  }
   function variablesFoundInContent(){
-    return [...$("promptContent").value.matchAll(/{{\s*([^{}]+?)\s*}}/g)]
-      .map(match=>sanitizeVariableName(match[1])).filter(Boolean);
+    return extractVariableDefinitions($("promptContent").value).map(item=>item.name);
   }
   function initializeEditorVariables(prompt){
-    const declared=Array.isArray(prompt?.variables)?prompt.variables:[];
-    const found=[...String(prompt?.content||"").matchAll(/{{\s*([^{}]+?)\s*}}/g)]
-      .map(match=>sanitizeVariableName(match[1])).filter(Boolean);
-    const names=[...new Set([...declared.map(sanitizeVariableName),...found].filter(Boolean))];
     const values={...(prompt?.variableValues||{})};
-    state.editorVariables=names.map(name=>({id:uid("editor_var"),name,value:String(values[name]??"")}));
-    state.editorVariableValues=Object.fromEntries(state.editorVariables.map(variable=>[variable.name,variable.value]));
-    if(!state.editorVariables.length){
-      state.editorVariables=[{id:uid("editor_var"),name:"",value:""}];
-    }
-  }
-  function syncVariableManagerFromDOM(){
-    const rows=$$("#promptVariableList .prompt-variable-row");
-    if(!rows.length)return;
-    state.editorVariables=rows.map(row=>({
-      id:row.dataset.rowId||uid("editor_var"),
-      name:sanitizeVariableName(row.querySelector(".variable-name-input")?.value||""),
-      value:row.querySelector(".variable-text-input")?.value||""
+    const detected=extractVariableDefinitions(prompt?.content||"");
+    const detectedNames=new Set(detected.map(item=>item.name.toLowerCase()));
+    const legacy=(Array.isArray(prompt?.variables)?prompt.variables:[])
+      .map(sanitizeVariableName)
+      .filter(Boolean)
+      .filter(name=>!detectedNames.has(name.toLowerCase()))
+      .map(name=>({
+        name,
+        raw:`{{${name}}}`,
+        syntax:"curly",
+        label:humanizeVariableName(name),
+        contextLabel:"",
+        index:Number.MAX_SAFE_INTEGER
+      }));
+
+    state.editorVariables=[...detected,...legacy].map(definition=>({
+      ...definition,
+      id:uid("editor_var"),
+      value:String(variableValueByName(values,definition.name)??"")
     }));
     state.editorVariableValues=Object.fromEntries(
-      state.editorVariables.filter(variable=>variable.name).map(variable=>[variable.name,variable.value])
+      state.editorVariables.map(variable=>[variable.name,variable.value])
+    );
+  }
+  function syncVariableManagerFromDOM(){
+    $$("#promptVariableList .variable-text-input").forEach(input=>{
+      const variable=state.editorVariables.find(item=>item.name===input.dataset.var);
+      if(variable)variable.value=input.value;
+    });
+    state.editorVariableValues=Object.fromEntries(
+      state.editorVariables.map(variable=>[variable.name,variable.value||""])
     );
   }
   function getEditorVariableNames(){
     syncVariableManagerFromDOM();
-    const declared=state.editorVariables.map(variable=>sanitizeVariableName(variable.name)).filter(Boolean);
-    return [...new Set([...declared,...variablesFoundInContent()])];
+    return [...new Set(state.editorVariables.map(variable=>variable.name).filter(Boolean))];
   }
   function addDetectedVariablesFromContent(render=true){
     syncVariableManagerFromDOM();
-    const current=new Set(state.editorVariables.map(variable=>variable.name).filter(Boolean));
-    let added=false;
-    variablesFoundInContent().forEach(name=>{
-      if(current.has(name))return;
-      const reusableBlank=state.editorVariables.find(variable=>!variable.name&&!variable.value);
-      if(reusableBlank)reusableBlank.name=name;
-      else state.editorVariables.push({id:uid("editor_var"),name,value:""});
-      current.add(name);added=true;
+    const previous=state.editorVariables;
+    const oldByName=new Map(previous.map(variable=>[variable.name.toLowerCase(),variable]));
+    const detected=extractVariableDefinitions($("promptContent").value);
+
+    state.editorVariables=detected.map(definition=>{
+      const old=oldByName.get(definition.name.toLowerCase());
+      return {
+        ...definition,
+        id:old?.id||uid("editor_var"),
+        value:String(old?.value??variableValueByName(state.editorVariableValues,definition.name)??"")
+      };
     });
-    if(added&&render)renderPromptVariableList();
-    return added;
+    state.editorVariableValues=Object.fromEntries(
+      state.editorVariables.map(variable=>[variable.name,variable.value||""])
+    );
+
+    const previousSignature=previous.map(v=>`${v.name}|${v.raw}|${v.label}`).join("§");
+    const nextSignature=state.editorVariables.map(v=>`${v.name}|${v.raw}|${v.label}`).join("§");
+    const changed=previousSignature!==nextSignature;
+    if(render)renderPromptVariableList();
+    return changed;
   }
   function variableManagerRowMarkup(variable,index){
-    const name=sanitizeVariableName(variable.name);
     const accent=VARIABLE_BOX_PALETTE[index%VARIABLE_BOX_PALETTE.length];
-    const present=name && new RegExp(`{{\s*${escapeRegExp(name)}\s*}}`).test($("promptContent").value);
-    return `<div class="prompt-variable-row" style="--variable-accent:${accent}" data-row-id="${esc(variable.id)}" data-original-name="${esc(name)}">
+    const friendly=variable.label||humanizeVariableName(variable.name);
+    return `<div class="prompt-variable-row" style="--variable-accent:${accent}" data-var="${esc(variable.name)}">
       <div class="prompt-variable-row-head">
         <span class="variable-number">Variabile ${index+1}</span>
-        <span class="variable-live-token">${name?`{{${esc(name)}}}`:"Inserisci il nome"}</span>
+        <span class="variable-live-token">${esc(variable.raw||`{{${variable.name}}}`)}</span>
         <span class="spacer"></span>
-        <span class="variable-in-prompt-status ${present?"present":""}">${present?"Presente nel prompt":"Non ancora inserita"}</span>
-        <button class="btn small danger remove-variable-row" type="button" title="Elimina questa variabile">Elimina</button>
+        <span class="variable-detected-badge">Rilevata nel prompt</span>
       </div>
       <div class="prompt-variable-row-body">
-        <div class="variable-step">
-          <div class="variable-step-title"><span class="variable-step-number">1</span>Nome della variabile</div>
-          <input type="text" class="variable-name-input" value="${esc(name)}" placeholder="Esempio: nome_cliente">
-          <div class="variable-row-help">Scrivi soltanto il nome. L’app creerà automaticamente il segnaposto <strong>{{nome_variabile}}</strong>.</div>
-        </div>
-        <div class="variable-step">
-          <div class="variable-step-title"><span class="variable-step-number">2</span>Testo da inserire</div>
-          <textarea class="variable-text-input" placeholder="Inserisci qui il testo che sostituirà questa variabile, anche su più righe">${esc(variable.value||"")}</textarea>
-        </div>
-        <div class="variable-row-actions">
-          <button class="btn primary insert-variable-token" type="button">Inserisci questa variabile nel prompt</button>
-          <span class="hint">Il segnaposto verrà inserito nel punto selezionato del testo.</span>
-        </div>
+        <h4 class="variable-auto-title">Inserisci variabile ${esc(friendly)}</h4>
+        <p class="variable-auto-help">Il testo inserito qui sostituirà automaticamente <code>${esc(variable.raw||variable.name)}</code> quando copi il prompt senza variabili.</p>
+        <textarea class="variable-text-input" data-var="${esc(variable.name)}" placeholder="Inserisci ${esc(friendly)}…">${esc(variable.value||"")}</textarea>
+        ${variable.contextLabel?`<div class="variable-source-label">Etichetta riconosciuta nel prompt: <strong>${esc(variable.contextLabel)}</strong></div>`:""}
       </div>
     </div>`;
   }
-  function renderPromptVariableList(focusLast=false){
+  function updateVariableCounters(){
+    const count=state.editorVariables.length;
+    $("variablesTabBtn").textContent=count?`Variabili (${count})`:"Variabili";
+    $("openVariablesTabBtn").textContent=count?`Compila ${count} variabil${count===1?"e":"i"}`:"Variabili";
+    const summary=$("detectedVariableSummary");
+    if(summary){
+      summary.textContent=count
+        ?`${count} variabil${count===1?"e rilevata":"i rilevate"} automaticamente nel testo del prompt.`
+        :"";
+      summary.classList.toggle("show",count>0);
+    }
+  }
+  function renderPromptVariableList(){
     const list=$("promptVariableList");if(!list)return;
     list.innerHTML=state.editorVariables.length
       ?state.editorVariables.map(variableManagerRowMarkup).join("")
-      :`<div class="prompt-variable-empty">Non hai ancora creato variabili. Premi “Nuova variabile”: comparirà un box separato in cui inserire nome e testo.</div>`;
-    $$("#promptVariableList .prompt-variable-row").forEach(row=>{
-      const id=row.dataset.rowId;
-      const nameInput=row.querySelector(".variable-name-input");
-      const valueInput=row.querySelector(".variable-text-input");
-      const token=row.querySelector(".variable-live-token");
-      const status=row.querySelector(".variable-in-prompt-status");
-      const insertButton=row.querySelector(".insert-variable-token");
-      const refreshVariableStatus=()=>{
-        const variable=state.editorVariables.find(item=>item.id===id);
-        const currentName=sanitizeVariableName(variable?.name);
-        const present=currentName && new RegExp(`{{\\s*${escapeRegExp(currentName)}\\s*}}`).test($("promptContent").value);
-        status.textContent=present?"Presente nel prompt":"Non ancora inserita";
-        status.classList.toggle("present",Boolean(present));
-        insertButton.textContent=currentName?`Inserisci {{${currentName}}} nel prompt`:"Inserisci questa variabile nel prompt";
-      };
-      nameInput.addEventListener("input",()=>{
-        const variable=state.editorVariables.find(item=>item.id===id);if(!variable)return;
-        const oldName=variable.name;
-        variable.name=sanitizeVariableName(nameInput.value);
-        token.textContent=variable.name?`{{${variable.name}}}`:"Inserisci il nome";
-        refreshVariableStatus();
-        if(oldName&&oldName!==variable.name&&state.editorVariableValues[oldName]!==undefined){
-          delete state.editorVariableValues[oldName];
-        }
-        if(variable.name)state.editorVariableValues[variable.name]=variable.value||"";
-        markDirty();updateEditorCopyPreview();
-      });
-      nameInput.addEventListener("blur",()=>{
-        const oldName=sanitizeVariableName(row.dataset.originalName);
-        const newName=sanitizeVariableName(nameInput.value);
-        nameInput.value=newName;
-        const variable=state.editorVariables.find(item=>item.id===id);
-        if(variable)variable.name=newName;
-        if(oldName&&newName&&oldName!==newName){
-          const pattern=new RegExp(`{{\\s*${escapeRegExp(oldName)}\\s*}}`,"g");
-          $("promptContent").value=$("promptContent").value.replace(pattern,`{{${newName}}}`);
-          row.dataset.originalName=newName;
-          updateCounts();markDirty();
-        }
-        const names=state.editorVariables.map(item=>sanitizeVariableName(item.name)).filter(Boolean);
-        if(newName&&names.filter(name=>name===newName).length>1){
-          toast(`La variabile “${newName}” è già presente.`);
-        }
-        renderVariableValueFields();
-      });
-      valueInput.addEventListener("input",()=>{
-        const variable=state.editorVariables.find(item=>item.id===id);if(!variable)return;
-        variable.value=valueInput.value;
-        if(variable.name)state.editorVariableValues[variable.name]=variable.value;
-        markDirty();updateEditorCopyPreview();
-      });
-      row.querySelector(".insert-variable-token").addEventListener("click",()=>{
-        const variable=state.editorVariables.find(item=>item.id===id);
-        const name=sanitizeVariableName(variable?.name);
-        if(!name){toast("Inserisci prima il nome della variabile.");nameInput.focus();return}
-        const textarea=$("promptContent"),placeholder=`{{${name}}}`;
-        const start=textarea.selectionStart??textarea.value.length;
-        const end=textarea.selectionEnd??start;
-        textarea.value=textarea.value.slice(0,start)+placeholder+textarea.value.slice(end);
-        textarea.focus();textarea.setSelectionRange(start+placeholder.length,start+placeholder.length);
-        updateCounts();markDirty();updateEditorCopyPreview();refreshVariableStatus();
-      });
-      refreshVariableStatus();
-      row.querySelector(".remove-variable-row").addEventListener("click",()=>{
-        const variable=state.editorVariables.find(item=>item.id===id);
-        const name=sanitizeVariableName(variable?.name);
-        state.editorVariables=state.editorVariables.filter(item=>item.id!==id);
-        if(name){
-          const pattern=new RegExp(`{{\\s*${escapeRegExp(name)}\\s*}}`,"g");
-          $("promptContent").value=$("promptContent").value.replace(pattern,"");
-          delete state.editorVariableValues[name];
-          updateCounts();
-        }
-        renderPromptVariableList();renderVariableValueFields();markDirty();
-        toast(name?`Variabile “${name}” rimossa anche dal testo del prompt.`:"Variabile rimossa.");
+      :`<div class="prompt-variable-empty">
+          <strong>Nessuna variabile individuata nel prompt.</strong><br>
+          Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[PAESE_O_MERCATO]</code> oppure <code>{{nome_cliente}}</code>.
+          L’app creerà automaticamente un campo per ognuno.
+        </div>`;
+    $$("#promptVariableList .variable-text-input").forEach(input=>{
+      input.addEventListener("input",()=>{
+        const variable=state.editorVariables.find(item=>item.name===input.dataset.var);
+        if(variable)variable.value=input.value;
+        state.editorVariableValues[input.dataset.var]=input.value;
+        markDirty();
+        updateEditorCopyPreview();
       });
     });
-    if(focusLast){
-      const rows=$$("#promptVariableList .prompt-variable-row");
-      rows.at(-1)?.scrollIntoView({behavior:"smooth",block:"center"});
-      const inputs=$$("#promptVariableList .variable-name-input");
-      setTimeout(()=>inputs.at(-1)?.focus(),180);
-    }
+    updateVariableCounters();
   }
-  function addEditorVariable(){
-    syncVariableManagerFromDOM();
-    state.editorVariables.push({id:uid("editor_var"),name:"",value:""});
-    renderPromptVariableList(true);markDirty();
-  }
-  function variableFieldMarkup(name,value,index,inputClass){
+  function variableFieldMarkup(definition,value,index,inputClass){
+    const item=typeof definition==="string"
+      ?{name:definition,raw:`{{${definition}}}`,label:humanizeVariableName(definition)}
+      :definition;
+    const friendly=item.label||humanizeVariableName(item.name);
     return `<div class="variable-value-box">
       <div class="variable-value-head">
         <span class="variable-number">Variabile ${index+1}</span>
-        <code class="variable-token">{{${esc(name)}}}</code>
+        <code class="variable-token">${esc(item.raw||item.name)}</code>
       </div>
-      <label>Testo da inserire al posto di <strong>{{${esc(name)}}}</strong></label>
-      <textarea class="${inputClass}" data-var="${esc(name)}" placeholder="Inserisci il testo per questa variabile, anche su più righe">${esc(value||"")}</textarea>
+      <label>Inserisci variabile <strong>${esc(friendly)}</strong></label>
+      <textarea class="${inputClass}" data-var="${esc(item.name)}" placeholder="Inserisci ${esc(friendly)}…">${esc(value||"")}</textarea>
     </div>`;
   }
-  function variableFieldsMarkup(names,values,inputClass){
-    return names.map((name,index)=>variableFieldMarkup(name,values[name],index,inputClass))
-      .join(`<div class="variable-separator"><span>Variabile successiva</span></div>`);
+  function variableFieldsMarkup(definitions,values,inputClass){
+    return definitions.map((definition,index)=>{
+      const name=typeof definition==="string"?definition:definition.name;
+      return variableFieldMarkup(definition,variableValueByName(values,name),index,inputClass);
+    }).join(`<div class="variable-separator"><span>Variabile successiva</span></div>`);
   }
   function collectVariableValues(){
     syncVariableManagerFromDOM();
     state.editorVariableValues=Object.fromEntries(
-      state.editorVariables
-        .filter(variable=>sanitizeVariableName(variable.name))
-        .map(variable=>[sanitizeVariableName(variable.name),variable.value||""])
+      state.editorVariables.map(variable=>[variable.name,variable.value||""])
     );
     return {...state.editorVariableValues};
   }
   function renderVariableValueFields(){
-    const added=addDetectedVariablesFromContent(false);
-    if(added || !$("promptVariableList").children.length)renderPromptVariableList();
+    const changed=addDetectedVariablesFromContent(false);
+    if(changed || !$("promptVariableList").children.length)renderPromptVariableList();
+    else updateVariableCounters();
     updateEditorCopyPreview();
   }
   function compilePromptText(content,values={}){
-    return String(content||"").replace(/{{\s*([^{}]+?)\s*}}/g,(match,name)=>{
-      const value=values[String(name).trim()];
-      return value===undefined||value===""?match:value;
-    });
+    return String(content||"").replace(
+      /{{\s*([^{}]+?)\s*}}|\[\s*([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ0-9_\/\- ]{0,80})\s*\]/g,
+      (match,curlyName,squareName)=>{
+        const name=sanitizeVariableName(curlyName??squareName);
+        const value=variableValueByName(values,name);
+        return value===undefined||value===null||value===""?match:value;
+      }
+    );
   }
   function getEditorCopyMode(){
     return document.querySelector('input[name="editorCopyMode"]:checked')?.value||"compiled";
@@ -1496,24 +1516,32 @@
     await navigator.clipboard.writeText(result);
     toast(mode==="template"?"Prompt copiato con i segnaposto delle variabili.":"Prompt copiato senza variabili: i valori sono stati inseriti.");
   }
+  function promptVariableDefinitions(p){
+    const detected=extractVariableDefinitions(p?.content||"");
+    const detectedNames=new Set(detected.map(item=>item.name.toLowerCase()));
+    const legacy=(Array.isArray(p?.variables)?p.variables:[])
+      .map(sanitizeVariableName)
+      .filter(Boolean)
+      .filter(name=>!detectedNames.has(name.toLowerCase()))
+      .map(name=>({name,raw:`{{${name}}}`,label:humanizeVariableName(name),contextLabel:"",syntax:"curly"}));
+    return [...detected,...legacy];
+  }
   function promptVariableNames(p){
-    const declared=Array.isArray(p.variables)?p.variables:[];
-    const found=[...String(p.content||"").matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(m=>m[1].trim());
-    return [...new Set([...declared,...found])];
+    return promptVariableDefinitions(p).map(item=>item.name);
   }
   function openPromptCopyModal(p){
-    const vars=promptVariableNames(p),saved={...(p.variableValues||{})};
+    const definitions=promptVariableDefinitions(p),vars=definitions.map(item=>item.name),saved={...(p.variableValues||{})};
     $("genericModal").querySelector(".modal").classList.add("copy-wide");
     $("genericTitle").textContent="Modalità di copia";
     $("genericBody").innerHTML=`
       <div class="copy-mode-box" style="margin-top:0">
         <h3>Come vuoi copiare il prompt?</h3>
         <div class="copy-options">
-          <label class="copy-option"><input type="radio" name="quickCopyMode" value="template"><span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto come {{variabile}}.</small></span></label>
+          <label class="copy-option"><input type="radio" name="quickCopyMode" value="template"><span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto come [DOMINIO_SITO] o {{variabile}}.</small></span></label>
           <label class="copy-option"><input type="radio" name="quickCopyMode" value="compiled" checked><span><strong>Senza variabili nel testo</strong><small>Sostituisce i segnaposto con i valori inseriti.</small></span></label>
         </div>
       </div>
-      ${vars.length?`<div class="variables-intro" style="margin-top:14px"><h3>Valori delle variabili</h3><p>Ogni variabile è separata e numerata per evitare errori durante la compilazione. I valori servono scegliendo “Senza variabili nel testo”.</p></div><div class="variable-fields" id="quickCopyFields">${variableFieldsMarkup(vars,saved,"quick-copy-value")}</div>`:""}
+      ${vars.length?`<div class="variables-intro" style="margin-top:14px"><h3>Valori delle variabili</h3><p>Ogni variabile è separata e numerata per evitare errori durante la compilazione. I valori servono scegliendo “Senza variabili nel testo”.</p></div><div class="variable-fields" id="quickCopyFields">${variableFieldsMarkup(definitions,saved,"quick-copy-value")}</div>`:""}
       <div class="field" style="margin-top:14px"><label>Anteprima</label><textarea id="quickCopyPreview" class="compiled-preview" readonly></textarea></div>`;
     $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="quickCopyConfirm">Copia ora</button>`;
     openModal("genericModal");bindModalClose();
@@ -1820,11 +1848,12 @@
 
   function compileVariables(){
     const content=$("promptContent").value;
-    const vars=getEditorVariableNames();
+    addDetectedVariablesFromContent(false);
+    const definitions=[...state.editorVariables],vars=definitions.map(item=>item.name);
     if(!vars.length){toast("Non sono state trovate variabili nel prompt.");return}
     const saved=collectVariableValues();
     $("genericTitle").textContent="Anteprima e compilazione variabili";
-    $("genericBody").innerHTML=`<div class="variables-intro"><h3>Compilazione guidata</h3><p>Inserisci il testo nel campo corrispondente. Ogni variabile è numerata e separata dalla successiva.</p></div><div class="variable-fields" id="popupVariableFields">${variableFieldsMarkup(vars,saved,"variable-value")}</div><div class="field" style="margin-top:14px"><label>Anteprima del prompt compilato</label><textarea id="compiledPreview" class="compiled-preview" readonly></textarea></div>`;
+    $("genericBody").innerHTML=`<div class="variables-intro"><h3>Compilazione guidata</h3><p>Inserisci il testo nel campo corrispondente. Ogni variabile è numerata e separata dalla successiva.</p></div><div class="variable-fields" id="popupVariableFields">${variableFieldsMarkup(definitions,saved,"variable-value")}</div><div class="field" style="margin-top:14px"><label>Anteprima del prompt compilato</label><textarea id="compiledPreview" class="compiled-preview" readonly></textarea></div>`;
     $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn" id="applyVariableValues">Salva valori</button><button class="btn primary" id="compileConfirm">Salva e copia</button>`;
     openModal("genericModal");bindModalClose();
     const refresh=()=>{
@@ -1970,13 +1999,19 @@
       if(id==="promptContent"){
         clearTimeout(state.variableTimer);state.variableTimer=setTimeout(()=>{
           const added=addDetectedVariablesFromContent(true);
-          if(added)toast("Nuova variabile rilevata nel testo del prompt.");
+          if(added)toast(`${state.editorVariables.length} variabili rilevate automaticamente nel prompt.`);
           renderVariableValueFields();updateEditorCopyPreview();
         },220);
       }
     }));
-    $("addVariableBtn").onclick=addEditorVariable;
-    $("addVariableBottomBtn").onclick=addEditorVariable;
+    $("detectVariablesBtn").onclick=()=>{
+      addDetectedVariablesFromContent(true);
+      updateEditorCopyPreview();
+      const count=state.editorVariables.length;
+      toast(count
+        ?`${count} variabil${count===1?"e rilevata":"i rilevate"} nel prompt.`
+        :"Nessuna variabile rilevata. Usa un formato come [DOMINIO_SITO].");
+    };
     ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).addEventListener("change",markDirty));
     $("savePromptBtn").onclick=saveEditor;
     $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
