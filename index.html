@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v12 — Standalone</title>
+<title>Prompt Studio v13 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -112,6 +112,22 @@ button:disabled{cursor:not-allowed;opacity:.55}
   display:flex;flex-direction:column;transition:.18s;box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 10%,transparent)
 }
 .card:hover{transform:translateY(-2px);box-shadow:0 16px 35px color-mix(in srgb,var(--accent) 20%,transparent);border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.card.just-saved{
+  animation:savedPulse 1.8s ease;
+  outline:4px solid color-mix(in srgb,var(--success) 38%,transparent)
+}
+@keyframes savedPulse{
+  0%{transform:scale(.985);box-shadow:0 0 0 0 color-mix(in srgb,var(--success) 35%,transparent)}
+  45%{transform:scale(1.012);box-shadow:0 0 0 12px transparent}
+  100%{transform:scale(1);box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 10%,transparent)}
+}
+.save-status{
+  display:none;padding:7px 10px;border-radius:9px;
+  background:color-mix(in srgb,var(--success) 11%,var(--panel));
+  border:1px solid color-mix(in srgb,var(--success) 35%,var(--line));
+  color:var(--success);font-size:12px;font-weight:850
+}
+.save-status.show{display:inline-flex}
 .cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(190px,1fr) minmax(280px,2fr) auto;gap:11px;align-items:center}
 .card-check{position:absolute;left:12px;top:12px}
 .cards.list .card-check{position:static}
@@ -410,6 +426,7 @@ textarea{resize:vertical;line-height:1.55}
       </section>
     </div>
     <div class="editor-footer">
+      <span class="save-status" id="saveStatus">Salvataggio in corso…</span>
       <button class="btn success copy-compiled" id="copyCompiledBtn">Copia Prompt</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="copyToCategoryBtn">Copia e assegna</button>
@@ -479,6 +496,7 @@ const state={
   view:localStorage.getItem("ps_view")||"grid",
   editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""},
   searchTimer:null,detectTimer:null,
+  lastSavedId:null,
   recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}")
 };
 const $=id=>document.getElementById(id);
@@ -506,6 +524,7 @@ function openDatabase(){
 }
 function store(name,mode="readonly"){return state.db.transaction(name,mode).objectStore(name)}
 function getAll(name){return new Promise((resolve,reject)=>{const request=store(name).getAll();request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error)})}
+function getOne(name,id){return new Promise((resolve,reject)=>{const request=store(name).get(id);request.onsuccess=()=>resolve(request.result||null);request.onerror=()=>reject(request.error)})}
 function put(name,value){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").put(value);request.onsuccess=()=>resolve(value);request.onerror=()=>reject(request.error)})}
 function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
 async function loadData(){
@@ -719,7 +738,7 @@ function cardHtml(prompt){
   const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
   const variableCount=extractVariables(prompt.content).length;
   const attachmentCount=promptAttachmentCount(prompt);
-  return `<article class="card" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
+  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
     <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">★</span>':""}</div>
     <div class="excerpt">${esc(prompt.content||"Nessun contenuto")}</div>
@@ -746,6 +765,17 @@ function renderCards(){
   $("viewSubtitle").textContent=state.query?`${items.length} risultati per “${state.query}”`:`${subtitle} · ${items.length} elementi`;
   bindCardEvents();
   updateBulkbar();
+
+  if(state.lastSavedId){
+    const savedCard=$(`#cards .card[data-id="${CSS.escape(state.lastSavedId)}"]`);
+    if(savedCard){
+      setTimeout(()=>savedCard.scrollIntoView({behavior:"smooth",block:"center"}),120);
+      setTimeout(()=>{
+        savedCard.classList.remove("just-saved");
+        state.lastSavedId=null;
+      },1900);
+    }
+  }
 }
 function render(){renderSidebar();renderStats();renderCards()}
 function bindCardEvents(){
@@ -1017,23 +1047,64 @@ function fillSubcategories(selected=""){
 }
 function openEditor(id=null,preferredTab=null){
   const prompt=id?state.prompts.find(item=>item.id===id):null;
-  state.editor={id:prompt?.id||null,dirty:false,variables:[],values:{...(prompt?.variableValues||{})},files:{...(prompt?.variableFiles||{})},toolUrl:prompt?.toolUrl||""};
+
+  let initialPrompt=prompt;
+  if(!prompt){
+    initialPrompt={
+      categoryId:null,
+      subcategoryId:null,
+      clientId:null,
+      status:"draft",
+      tags:[],
+      notes:"",
+      toolUrl:"",
+      favorite:false,
+      variableValues:{},
+      variableFiles:{}
+    };
+
+    if(state.filter.type==="category"&&state.filter.id){
+      const selectedCategory=catById(state.filter.id);
+      if(selectedCategory?.parentId){
+        initialPrompt.categoryId=selectedCategory.parentId;
+        initialPrompt.subcategoryId=selectedCategory.id;
+      }else if(selectedCategory){
+        initialPrompt.categoryId=selectedCategory.id;
+      }
+    }
+
+    if(state.filter.type==="client"&&state.filter.id){
+      initialPrompt.clientId=state.filter.id;
+    }
+  }
+
+  state.editor={
+    id:prompt?.id||null,
+    dirty:false,
+    variables:[],
+    values:{...(initialPrompt?.variableValues||{})},
+    files:{...(initialPrompt?.variableFiles||{})},
+    toolUrl:initialPrompt?.toolUrl||""
+  };
+
   $("editorTitle").textContent=prompt?"Modifica prompt":"Nuovo prompt";
   $("promptTitle").value=prompt?.title||"";
   $("promptContent").value=prompt?.content||"";
-  $("promptStatus").value=prompt?.status||"draft";
-  $("promptTags").value=(prompt?.tags||[]).join(", ");
-  $("promptNotes").value=prompt?.notes||"";
-  $("promptToolUrl").value=prompt?.toolUrl||"";
-  $("promptFavorite").checked=!!prompt?.favorite;
+  $("promptStatus").value=initialPrompt?.status||"draft";
+  $("promptTags").value=(initialPrompt?.tags||[]).join(", ");
+  $("promptNotes").value=initialPrompt?.notes||"";
+  $("promptToolUrl").value=initialPrompt?.toolUrl||"";
+  $("promptFavorite").checked=!!initialPrompt?.favorite;
   $("duplicateBtn").classList.toggle("hidden",!prompt);
   $("trashBtn").classList.toggle("hidden",!prompt);
-  fillEditorSelects(prompt);
+
+  fillEditorSelects(initialPrompt);
   refreshVariables(false);
   renderVariables();
   updateCounts();
   setEditorTab(preferredTab||(state.editor.variables.length?"variables":"prompt"));
   $("editorBackdrop").classList.add("show");
+
   setTimeout(()=>{if(!prompt)$("promptTitle").focus()},120);
 }
 function setEditorTab(name){
@@ -1058,12 +1129,21 @@ function updateCounts(){
 function editorPayload(){
   refreshVariables(false);
   const existing=state.editor.id?state.prompts.find(item=>item.id===state.editor.id):null;
+
+  const selectedCategoryId=$("promptCategory").value||null;
+  const selectedSubcategoryId=$("promptSubcategory").value||null;
+  const selectedSubcategory=catById(selectedSubcategoryId);
+
+  const validSubcategoryId=selectedSubcategory?.parentId===selectedCategoryId
+    ? selectedSubcategoryId
+    : null;
+
   return {
     id:existing?.id||uid("prompt"),
     title:$("promptTitle").value.trim(),
     content:$("promptContent").value.trim(),
-    categoryId:$("promptCategory").value||null,
-    subcategoryId:$("promptSubcategory").value||null,
+    categoryId:selectedCategoryId,
+    subcategoryId:validSubcategoryId,
     clientId:$("promptClient").value||null,
     status:$("promptStatus").value,
     tags:$("promptTags").value.split(",").map(item=>item.trim()).filter(Boolean),
@@ -1079,12 +1159,87 @@ function editorPayload(){
     deletedAt:existing?.deletedAt||null
   };
 }
+function navigateToSavedPrompt(prompt){
+  state.lastSavedId=prompt.id;
+
+  if(prompt.subcategoryId){
+    setFilter("category",prompt.subcategoryId);
+    return;
+  }
+
+  if(prompt.categoryId){
+    setFilter("category",prompt.categoryId);
+    return;
+  }
+
+  if(prompt.clientId){
+    setFilter("client",prompt.clientId);
+    return;
+  }
+
+  setFilter("all");
+}
+
 async function savePrompt(){
-  const payload=editorPayload();
-  if(!payload.title){toast("Inserisci il titolo del prompt.");setEditorTab("prompt");$("promptTitle").focus();return}
-  if(!payload.content){toast("Inserisci il testo del prompt.");setEditorTab("prompt");$("promptContent").focus();return}
-  await put("prompts",payload);await loadData();
-  state.editor.id=payload.id;state.editor.dirty=false;render();toast("Prompt salvato.");
+  const saveButton=$("savePromptBtn");
+  const saveStatus=$("saveStatus");
+
+  try{
+    const payload=editorPayload();
+
+    if(!payload.title){
+      toast("Inserisci il titolo del prompt.");
+      setEditorTab("prompt");
+      $("promptTitle").focus();
+      return;
+    }
+
+    if(!payload.content){
+      toast("Inserisci il testo del prompt.");
+      setEditorTab("prompt");
+      $("promptContent").focus();
+      return;
+    }
+
+    saveButton.disabled=true;
+    saveButton.textContent="Salvataggio…";
+    saveStatus.classList.add("show");
+
+    await put("prompts",payload);
+
+    const stored=await getOne("prompts",payload.id);
+    if(!stored){
+      throw new Error("Il database non ha restituito il prompt appena salvato.");
+    }
+
+    if(
+      stored.categoryId!==payload.categoryId ||
+      stored.subcategoryId!==payload.subcategoryId ||
+      stored.clientId!==payload.clientId
+    ){
+      throw new Error("Categoria, sottocategoria o cliente non sono stati salvati correttamente.");
+    }
+
+    await loadData();
+
+    state.editor.id=payload.id;
+    state.editor.dirty=false;
+
+    const categoryName=payload.subcategoryId
+      ? `${catById(payload.categoryId)?.name||""} / ${catById(payload.subcategoryId)?.name||""}`
+      : (catById(payload.categoryId)?.name||"Senza categoria");
+
+    closeEditor(true);
+    navigateToSavedPrompt(payload);
+    toast(`Prompt salvato correttamente in “${categoryName}”.`);
+  }catch(error){
+    console.error(error);
+    toast(`Errore nel salvataggio: ${error.message}`);
+  }finally{
+    saveButton.disabled=false;
+    saveButton.textContent="Salva prompt";
+    saveStatus.classList.remove("show");
+  }
 }
 async function persistEditorVariables(){
   if(!state.editor.id)return;
@@ -1320,7 +1475,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:12,
+    version:13,
     exportedAt:now(),
     prompt:payload
   };
@@ -1339,7 +1494,7 @@ function downloadEmbeddedFile(file){
 function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
   return {
-    app:"Prompt Studio Standalone",version:10,exportedAt:now(),
+    app:"Prompt Studio Standalone",version:13,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,
     prompts:state.prompts,categories:state.categories,clients:state.clients
   };
@@ -1427,7 +1582,10 @@ function bindEvents(){
   $$(".editor-tab").forEach(button=>button.onclick=()=>setEditorTab(button.dataset.tab));
   $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
   $("editorBackdrop").onclick=event=>{if(event.target===$("editorBackdrop"))closeEditor()};
-  $("promptCategory").onchange=()=>{fillSubcategories();markDirty()};
+  $("promptCategory").onchange=()=>{
+    fillSubcategories("");
+    markDirty();
+  };
   ["promptTitle","promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
   $("openToolBtn").onclick=()=>{
     let url=$("promptToolUrl").value.trim();
