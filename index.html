@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="light dark" />
-<title>Prompt Studio v2 — Organizer standalone</title>
+<title>Prompt Studio v4 — Organizer standalone</title>
 <style>
   :root{
     --bg:#f4f7fb;
@@ -17,6 +17,13 @@
     --primary:#2563eb;
     --primary-2:#1d4ed8;
     --primary-soft:#dbeafe;
+    --sidebar-bg:#172642;
+    --sidebar-bg-2:#0f1b32;
+    --sidebar-text:#f4f7ff;
+    --sidebar-muted:#aebdd5;
+    --sidebar-line:#304566;
+    --sidebar-hover:rgba(255,255,255,.08);
+    --sidebar-active:rgba(96,165,250,.24);
     --success:#15803d;
     --warning:#b45309;
     --danger:#dc2626;
@@ -37,6 +44,13 @@
     --primary:#60a5fa;
     --primary-2:#93c5fd;
     --primary-soft:#1e3a5f;
+    --sidebar-bg:#0a1323;
+    --sidebar-bg-2:#07101d;
+    --sidebar-text:#f1f6ff;
+    --sidebar-muted:#9eb0ca;
+    --sidebar-line:#223554;
+    --sidebar-hover:rgba(255,255,255,.07);
+    --sidebar-active:rgba(96,165,250,.22);
     --success:#4ade80;
     --warning:#fbbf24;
     --danger:#f87171;
@@ -78,8 +92,10 @@
   .btn.small{min-height:32px;padding:5px 9px;border-radius:9px;font-size:13px}
   .icon-btn{width:40px;padding:0}
   .sidebar{
-    grid-row:2;background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:12px 10px 18px;
-    min-width:220px;max-width:520px
+    grid-row:2;
+    background:linear-gradient(180deg,var(--sidebar-bg) 0%,var(--sidebar-bg-2) 100%);
+    color:var(--sidebar-text);border-right:1px solid var(--sidebar-line);overflow:auto;padding:14px 10px 20px;
+    min-width:220px;max-width:520px;box-shadow:inset -1px 0 rgba(255,255,255,.03)
   }
   .sidebar-resizer{
     position:fixed;z-index:76;top:72px;bottom:0;left:calc(var(--sidebar) - 4px);width:8px;
@@ -103,6 +119,23 @@
   .tree-toggle{width:18px;flex:0 0 18px;color:var(--muted);font-size:12px}
   .tree-dot{width:9px;height:9px;border-radius:999px;flex:0 0 9px;background:var(--dot,var(--primary))}
   .tree-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sidebar .side-title{color:var(--sidebar-muted)}
+  .sidebar .side-link,.sidebar .tree-row{color:var(--sidebar-text)}
+  .sidebar .side-link:hover,.sidebar .tree-row:hover{background:var(--sidebar-hover)}
+  .sidebar .side-link.active,.sidebar .tree-row.active{
+    background:var(--sidebar-active);color:#fff;box-shadow:inset 3px 0 #60a5fa
+  }
+  .sidebar .count{
+    color:var(--sidebar-text);background:rgba(255,255,255,.08);
+    border-color:rgba(255,255,255,.12)
+  }
+  .sidebar .tree-toggle{color:var(--sidebar-muted);background:transparent;border:0}
+  .sidebar .btn{
+    color:var(--sidebar-text);background:rgba(255,255,255,.07);
+    border-color:rgba(255,255,255,.14)
+  }
+  .sidebar .btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24)}
+  .sidebar .hint{color:var(--sidebar-muted)}
   .main{grid-row:2;overflow:hidden;display:flex;flex-direction:column;min-width:0}
   .main-head{
     padding:16px 18px 12px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line);
@@ -122,11 +155,29 @@
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
   .cards.list{display:flex;flex-direction:column}
   .card{
-    position:relative;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;
-    min-height:190px;display:flex;flex-direction:column;transition:.18s;box-shadow:0 2px 8px rgba(15,23,42,.03)
+    --card-accent:#64748b;
+    position:relative;
+    background:
+      linear-gradient(135deg,
+        color-mix(in srgb,var(--card-accent) 13%,var(--panel)) 0%,
+        color-mix(in srgb,var(--card-accent) 6%,var(--panel)) 72%,
+        var(--panel) 100%);
+    border:1px solid color-mix(in srgb,var(--card-accent) 34%,var(--line));
+    border-left:6px solid var(--card-accent);border-radius:15px;padding:14px;
+    min-height:190px;display:flex;flex-direction:column;transition:.18s;
+    box-shadow:0 3px 12px color-mix(in srgb,var(--card-accent) 10%,transparent)
   }
-  .card:nth-child(even){background:color-mix(in srgb,var(--panel) 88%, var(--primary-soft))}
-  .card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--primary) 45%, var(--line));box-shadow:var(--shadow)}
+  .card:hover{
+    transform:translateY(-2px);
+    border-color:color-mix(in srgb,var(--card-accent) 62%,var(--line));
+    box-shadow:0 16px 34px color-mix(in srgb,var(--card-accent) 20%,transparent)
+  }
+  .card .subcategory-chip{
+    color:color-mix(in srgb,var(--card-accent) 74%,var(--text));
+    background:color-mix(in srgb,var(--card-accent) 17%,var(--panel));
+    border-color:color-mix(in srgb,var(--card-accent) 42%,var(--line));
+    font-weight:800
+  }
   .card.dragging{opacity:.45;transform:scale(.98)}
   .tree-row.drop-target{outline:2px dashed var(--primary);background:var(--primary-soft)}
   .cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(180px,1.1fr) minmax(260px,2fr) auto;align-items:center;gap:10px}
@@ -185,10 +236,43 @@
   .variables-intro{padding:16px 18px;border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));background:var(--primary-soft);border-radius:14px;margin-bottom:16px}
   .variables-intro h3{margin:0 0 6px;font-size:20px}
   .variables-intro p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
-  .variable-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .variable-value-box{border:1px solid var(--line);border-radius:14px;padding:13px;background:var(--panel-2)}
-  .variable-value-box label{display:block;color:var(--text);font-size:15px}
-  .variable-value-box textarea{min-height:110px;margin-top:8px;background:var(--panel);font-size:15px}
+  .variable-fields{
+    display:flex;flex-direction:column;gap:0;border:1px solid var(--line);
+    border-radius:17px;overflow:hidden;background:var(--panel);box-shadow:0 8px 24px rgba(15,23,42,.05)
+  }
+  .variable-value-box{
+    border:0;border-radius:0;padding:18px 20px;background:var(--panel);
+    position:relative
+  }
+  .variable-value-box:nth-of-type(odd){
+    background:color-mix(in srgb,var(--primary) 3%,var(--panel))
+  }
+  .variable-value-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .variable-number{
+    display:inline-flex;align-items:center;justify-content:center;min-width:98px;
+    padding:5px 9px;border-radius:999px;background:var(--primary);color:#fff;
+    font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase
+  }
+  .variable-token{
+    display:inline-flex;padding:5px 9px;border-radius:8px;
+    color:var(--primary-2);background:var(--primary-soft);
+    border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));
+    font-size:15px;font-weight:800
+  }
+  .variable-value-box label{display:block;color:var(--text);font-size:15px;margin-bottom:8px}
+  .variable-value-box textarea{
+    min-height:135px;margin-top:0;background:var(--panel-2);font-size:16px;
+    border-width:2px
+  }
+  .variable-separator{
+    display:flex;align-items:center;gap:12px;padding:0 18px;
+    background:var(--bg);color:var(--muted);font-size:11px;font-weight:900;
+    letter-spacing:.08em;text-transform:uppercase
+  }
+  .variable-separator::before,.variable-separator::after{
+    content:"";height:1px;background:var(--line);flex:1
+  }
+  .variable-separator span{padding:8px 0;white-space:nowrap}
   .copy-mode-box{margin-top:18px;border:1px solid var(--line);border-radius:15px;padding:15px;background:var(--panel-2)}
   .copy-mode-box h3{margin:0 0 12px;font-size:19px}
   .copy-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -227,6 +311,10 @@
   .manage-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);padding:8px;border-radius:10px}
   .manage-row .grow{flex:1;min-width:0}
   .manage-row small{color:var(--muted)}
+  .category-color{
+    width:38px;height:34px;padding:2px;border:1px solid var(--line);
+    border-radius:9px;background:var(--panel);cursor:pointer
+  }
   .inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
   .rule-form{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:7px;margin-bottom:12px}
   .rule-row{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px;border-bottom:1px solid var(--line)}
@@ -280,7 +368,7 @@
     .editor.open{transform:translateY(0)}
     .editor.full{width:100%!important;height:100%!important;border-radius:0}
     .editor-grid{grid-template-columns:1fr}
-    .variable-fields,.copy-options{grid-template-columns:1fr}
+    .copy-options{grid-template-columns:1fr}
     .popup-resize-hint{display:none}
     .editor-tabs{padding-left:10px;padding-right:10px;overflow:auto}
     .editor-tab-btn{white-space:nowrap}
@@ -461,7 +549,7 @@
     <section class="editor-tab-panel" id="editorTabVariables" data-editor-panel="variables">
       <div class="variables-intro">
         <h3>Compila le variabili</h3>
-        <p>Inserisci qui i valori da sostituire ai segnaposto del tipo {{variabile}}. Questa modalità è separata dalla modifica del prompt.</p>
+        <p>Inserisci il testo da sostituire ai segnaposto del tipo {{variabile}}. Ogni variabile viene mostrata in un blocco numerato, separato visivamente dalla successiva.</p>
       </div>
       <div class="variable-fields" id="variableValuesFields"></div>
       <div class="copy-mode-box">
@@ -640,6 +728,32 @@
   const clientById = id => state.clients.find(c=>c.id===id);
   const activePrompts = () => state.prompts.filter(p=>!p.deletedAt);
   const livePrompts = () => state.prompts.filter(p=>!p.deletedAt && p.status!=="archived");
+  const SUBCATEGORY_PALETTE=[
+    "#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2",
+    "#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c",
+    "#0369a1","#be123c","#15803d","#a16207"
+  ];
+  function stableColorIndex(value){
+    let hash=0;for(const ch of String(value||""))hash=((hash<<5)-hash)+ch.charCodeAt(0);
+    return Math.abs(hash);
+  }
+  function displayCategoryColor(category){
+    if(!category)return "#64748b";
+    if(category.colorManual&&category.color)return category.color;
+    if(category.parentId){
+      const children=state.categories.filter(c=>c.parentId).sort((a,b)=>a.name.localeCompare(b.name,"it"));
+      const index=children.findIndex(c=>c.id===category.id);
+      return SUBCATEGORY_PALETTE[(index>=0?index:stableColorIndex(category.id))%SUBCATEGORY_PALETTE.length];
+    }
+    return category.color||SUBCATEGORY_PALETTE[stableColorIndex(category.id)%SUBCATEGORY_PALETTE.length];
+  }
+  function promptCardColor(prompt){
+    return displayCategoryColor(catById(prompt.subcategoryId)||catById(prompt.categoryId));
+  }
+  function nextCategoryColor(parentId){
+    const count=state.categories.filter(c=>Boolean(c.parentId)===Boolean(parentId)).length;
+    return SUBCATEGORY_PALETTE[count%SUBCATEGORY_PALETTE.length];
+  }
 
   function openDB(){
     return new Promise((resolve,reject)=>{
@@ -796,7 +910,7 @@
       <div>
         <div class="tree-row ${state.currentFilter.type==="category"&&state.currentFilter.id===cat.id?"active":""}" style="--depth:${depth}" data-category="${esc(cat.id)}">
           ${children.length?`<button class="tree-toggle" data-toggle-cat="${esc(cat.id)}">${collapsed?"▶":"▼"}</button>`:`<span class="tree-toggle"></span>`}
-          <span class="tree-dot" style="--dot:${esc(cat.color||"#2563eb")}"></span>
+          <span class="tree-dot" style="--dot:${esc(displayCategoryColor(cat))}"></span>
           <span class="tree-label">${esc(cat.name)}</span><span class="count">${counts[cat.id]||0}</span>
         </div>
         ${!collapsed?children.map(ch=>renderCatNode(ch,depth+1,counts)).join(""):""}
@@ -903,10 +1017,12 @@
     updateBulkbar();
   }
   function cardHTML(p){
-    const cat=catById(p.subcategoryId)||catById(p.categoryId);
+    const subcategory=catById(p.subcategoryId);
+    const cat=subcategory||catById(p.categoryId);
+    const cardColor=promptCardColor(p);
     const client=clientById(p.clientId);
     const statusLabels={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
-    return `<article class="card" data-id="${esc(p.id)}" draggable="true" role="button" tabindex="0" title="Clicca per aprire il prompt">
+    return `<article class="card" style="--card-accent:${esc(cardColor)}" data-id="${esc(p.id)}" draggable="true" role="button" tabindex="0" title="Clicca per aprire il prompt">
       <input class="card-check" type="checkbox" ${state.selected.has(p.id)?"checked":""} aria-label="Seleziona prompt">
       <div class="card-top">
         <div class="card-title">${esc(p.title||"Senza titolo")}</div>
@@ -914,7 +1030,7 @@
       </div>
       <div class="excerpt">${esc(p.content||"Nessun contenuto")}</div>
       <div class="meta">
-        ${cat?`<span class="chip">${esc(cat.name)}</span>`:"<span class='chip'>Senza categoria</span>"}
+        ${cat?`<span class="chip subcategory-chip">${esc(cat.name)}</span>`:"<span class='chip'>Senza categoria</span>"}
         ${client?`<span class="chip">${esc(client.name)}</span>`:""}
         <span class="chip">${esc(statusLabels[p.status]||p.status)}</span>
         <span class="chip">${fmtDate(p.updatedAt)}</span>
@@ -1061,6 +1177,20 @@
     const found=[...$("promptContent").value.matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(m=>m[1].trim());
     return [...new Set([...declared,...found])];
   }
+  function variableFieldMarkup(name,value,index,inputClass){
+    return `<div class="variable-value-box">
+      <div class="variable-value-head">
+        <span class="variable-number">Variabile ${index+1}</span>
+        <code class="variable-token">{{${esc(name)}}}</code>
+      </div>
+      <label>Testo da inserire al posto di <strong>{{${esc(name)}}}</strong></label>
+      <textarea class="${inputClass}" data-var="${esc(name)}" placeholder="Inserisci il testo per questa variabile, anche su più righe">${esc(value||"")}</textarea>
+    </div>`;
+  }
+  function variableFieldsMarkup(names,values,inputClass){
+    return names.map((name,index)=>variableFieldMarkup(name,values[name],index,inputClass))
+      .join(`<div class="variable-separator"><span>Variabile successiva</span></div>`);
+  }
   function collectVariableValues(){
     const values={...state.editorVariableValues};
     $$("#variableValuesFields .editor-variable-value").forEach(el=>values[el.dataset.var]=el.value);
@@ -1071,7 +1201,7 @@
     const current=collectVariableValues();
     const names=getEditorVariableNames();
     state.editorVariableValues=Object.fromEntries(names.map(name=>[name,current[name]??""]));
-    $("variableValuesFields").innerHTML=names.length?names.map(name=>`<div class="variable-value-box"><label>${esc(name)}</label><textarea class="editor-variable-value" data-var="${esc(name)}" placeholder="Inserisci testo, anche su più righe">${esc(state.editorVariableValues[name]||"")}</textarea></div>`).join(""):`<div class="hint">Aggiungi una variabile nell'elenco oppure scrivi {{nome_variabile}} nel prompt.</div>`;
+    $("variableValuesFields").innerHTML=names.length?variableFieldsMarkup(names,state.editorVariableValues,"editor-variable-value"):`<div class="hint" style="padding:18px">Aggiungi una variabile nell'elenco oppure scrivi {{nome_variabile}} nel prompt.</div>`;
     $$("#variableValuesFields .editor-variable-value").forEach(el=>el.addEventListener("input",()=>{
       state.editorVariableValues[el.dataset.var]=el.value;markDirty();updateEditorCopyPreview();
     }));
@@ -1129,7 +1259,7 @@
           <label class="copy-option"><input type="radio" name="quickCopyMode" value="compiled" checked><span><strong>Senza variabili nel testo</strong><small>Sostituisce i segnaposto con i valori inseriti.</small></span></label>
         </div>
       </div>
-      ${vars.length?`<div class="variables-intro" style="margin-top:14px"><h3>Valori delle variabili</h3><p>Servono solo scegliendo “Senza variabili nel testo”.</p></div><div class="variable-fields" id="quickCopyFields">${vars.map(v=>`<div class="variable-value-box"><label>${esc(v)}</label><textarea class="quick-copy-value" data-var="${esc(v)}" placeholder="Inserisci il valore">${esc(saved[v]||"")}</textarea></div>`).join("")}</div>`:""}
+      ${vars.length?`<div class="variables-intro" style="margin-top:14px"><h3>Valori delle variabili</h3><p>Ogni variabile è separata e numerata per evitare errori durante la compilazione. I valori servono scegliendo “Senza variabili nel testo”.</p></div><div class="variable-fields" id="quickCopyFields">${variableFieldsMarkup(vars,saved,"quick-copy-value")}</div>`:""}
       <div class="field" style="margin-top:14px"><label>Anteprima</label><textarea id="quickCopyPreview" class="compiled-preview" readonly></textarea></div>`;
     $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="quickCopyConfirm">Copia ora</button>`;
     openModal("genericModal");bindModalClose();
@@ -1216,8 +1346,9 @@
     $("manageCategories").innerHTML=state.categories.map(c=>{
       const parent=catById(c.parentId);
       return `<div class="manage-row">
-        <span class="tree-dot" style="--dot:${esc(c.color||"#2563eb")}"></span>
+        <span class="tree-dot" style="--dot:${esc(displayCategoryColor(c))}"></span>
         <div class="grow"><strong>${esc(c.name)}</strong>${parent?`<br><small>Sotto: ${esc(parent.name)}</small>`:""}</div>
+        <input type="color" class="category-color" data-id="${esc(c.id)}" value="${esc(displayCategoryColor(c))}" title="Scegli il colore">
         <button class="btn small rename-category" data-id="${esc(c.id)}">Rinomina</button>
         <button class="btn small danger delete-category" data-id="${esc(c.id)}">Elimina</button>
       </div>`;
@@ -1229,6 +1360,11 @@
     </div>`).join("");
     fillRuleSelects();
     renderRules();
+    $$(".category-color").forEach(input=>input.onchange=async()=>{
+      const category=catById(input.dataset.id);if(!category)return;
+      category.color=input.value;category.colorManual=true;
+      await put("categories",category);await loadState();renderAll();renderManage();toast("Colore della categoria aggiornato.");
+    });
     $$(".rename-category").forEach(b=>b.onclick=()=>renameEntity("categories",b.dataset.id));
     $$(".delete-category").forEach(b=>b.onclick=()=>deleteCategory(b.dataset.id));
     $$(".rename-client").forEach(b=>b.onclick=()=>renameEntity("clients",b.dataset.id));
@@ -1434,7 +1570,7 @@
     if(!vars.length){toast("Non sono state trovate variabili nel prompt.");return}
     const saved=collectVariableValues();
     $("genericTitle").textContent="Anteprima e compilazione variabili";
-    $("genericBody").innerHTML=`<div class="variable-fields" id="popupVariableFields">${vars.map(v=>`<div class="variable-value-box"><label>${esc(v)}</label><textarea class="variable-value" data-var="${esc(v)}" placeholder="Inserisci testo, anche su più righe">${esc(saved[v]||"")}</textarea></div>`).join("")}</div><div class="field" style="margin-top:14px"><label>Anteprima del prompt compilato</label><textarea id="compiledPreview" class="compiled-preview" readonly></textarea></div>`;
+    $("genericBody").innerHTML=`<div class="variables-intro"><h3>Compilazione guidata</h3><p>Inserisci il testo nel campo corrispondente. Ogni variabile è numerata e separata dalla successiva.</p></div><div class="variable-fields" id="popupVariableFields">${variableFieldsMarkup(vars,saved,"variable-value")}</div><div class="field" style="margin-top:14px"><label>Anteprima del prompt compilato</label><textarea id="compiledPreview" class="compiled-preview" readonly></textarea></div>`;
     $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn" id="applyVariableValues">Salva valori</button><button class="btn primary" id="compileConfirm">Salva e copia</button>`;
     openModal("genericModal");bindModalClose();
     const refresh=()=>{
@@ -1601,7 +1737,8 @@
     $("trashFromEditorBtn").onclick=()=>state.editingId&&trashPrompt(state.editingId);
     $("addCategoryBtn").onclick=async()=>{
       const name=$("newCategoryName").value.trim();if(!name)return;
-      await put("categories",{id:uid("cat"),name,parentId:$("newCategoryParent").value||null,color:"#2563eb",order:state.categories.length,createdAt:nowISO()});
+      const parentId=$("newCategoryParent").value||null;
+      await put("categories",{id:uid("cat"),name,parentId,color:nextCategoryColor(parentId),colorManual:false,order:state.categories.length,createdAt:nowISO()});
       $("newCategoryName").value="";await loadState();renderAll();renderManage();
     };
     $("addClientBtn").onclick=async()=>{
