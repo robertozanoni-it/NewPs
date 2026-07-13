@@ -1,481 +1,260 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="color-scheme" content="light dark" />
-<title>Prompt Studio v7 — Organizer standalone</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Prompt Studio v8 — Standalone</title>
 <style>
-  :root{
-    --bg:#f4f7fb;
-    --panel:#ffffff;
-    --panel-2:#f8fafc;
-    --panel-3:#eef4ff;
-    --text:#172033;
-    --muted:#667085;
-    --line:#dbe3ef;
-    --primary:#2563eb;
-    --primary-2:#1d4ed8;
-    --primary-soft:#dbeafe;
-    --sidebar-bg:#172642;
-    --sidebar-bg-2:#0f1b32;
-    --sidebar-text:#f4f7ff;
-    --sidebar-muted:#aebdd5;
-    --sidebar-line:#304566;
-    --sidebar-hover:rgba(255,255,255,.08);
-    --sidebar-active:rgba(96,165,250,.24);
-    --success:#15803d;
-    --warning:#b45309;
-    --danger:#dc2626;
-    --shadow:0 12px 32px rgba(15,23,42,.10);
-    --radius:16px;
-    --sidebar:270px;
-    --editor:1240px;
-    --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  }
-  body.dark{
-    --bg:#0d1423;
-    --panel:#121b2d;
-    --panel-2:#172238;
-    --panel-3:#1e2d49;
-    --text:#edf3ff;
-    --muted:#9cabc2;
-    --line:#273854;
-    --primary:#60a5fa;
-    --primary-2:#93c5fd;
-    --primary-soft:#1e3a5f;
-    --sidebar-bg:#0a1323;
-    --sidebar-bg-2:#07101d;
-    --sidebar-text:#f1f6ff;
-    --sidebar-muted:#9eb0ca;
-    --sidebar-line:#223554;
-    --sidebar-hover:rgba(255,255,255,.07);
-    --sidebar-active:rgba(96,165,250,.22);
-    --success:#4ade80;
-    --warning:#fbbf24;
-    --danger:#f87171;
-    --shadow:0 14px 40px rgba(0,0,0,.32);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:var(--font);background:var(--bg);color:var(--text)}
-  button,input,select,textarea{font:inherit}
-  button{cursor:pointer}
-  .app{height:100%;display:grid;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:72px 1fr;overflow:hidden}
-  .topbar{
-    grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:12px 18px;
-    background:var(--panel);border-bottom:1px solid var(--line);z-index:20
-  }
-  .brand{display:flex;align-items:center;gap:10px;min-width:240px}
-  .logo{
-    width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#7c3aed);
-    display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(37,99,235,.25)
-  }
-  .brand h1{font-size:17px;line-height:1;margin:0}
-  .brand small{display:block;color:var(--muted);margin-top:4px}
-  .search-wrap{position:relative;flex:1;max-width:760px}
-  .search{
-    width:100%;height:46px;border:1px solid var(--line);border-radius:14px;padding:0 44px 0 42px;
-    background:var(--panel-2);color:var(--text);outline:none;transition:.2s
-  }
-  .search:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 20%, transparent);background:var(--panel)}
-  .search-icon{position:absolute;left:14px;top:13px;color:var(--muted)}
-  .search-clear{position:absolute;right:11px;top:9px;border:0;background:transparent;color:var(--muted);font-size:20px}
-  .top-actions{display:flex;gap:8px;margin-left:auto}
-  .btn{
-    border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;
-    min-height:40px;padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:650
-  }
-  .btn:hover{border-color:var(--primary);background:var(--panel-3)}
-  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-  .btn.primary:hover{background:var(--primary-2)}
-  .btn.danger{color:var(--danger)}
-  .btn.small{min-height:32px;padding:5px 9px;border-radius:9px;font-size:13px}
-  .icon-btn{width:40px;padding:0}
-  .sidebar{
-    grid-row:2;
-    background:linear-gradient(180deg,var(--sidebar-bg) 0%,var(--sidebar-bg-2) 100%);
-    color:var(--sidebar-text);border-right:1px solid var(--sidebar-line);overflow:auto;padding:14px 10px 20px;
-    min-width:220px;max-width:520px;box-shadow:inset -1px 0 rgba(255,255,255,.03)
-  }
-  .sidebar-resizer{
-    position:fixed;z-index:76;top:72px;bottom:0;left:calc(var(--sidebar) - 4px);width:8px;
-    cursor:col-resize;background:transparent;touch-action:none
-  }
-  .sidebar-resizer::after{
-    content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;background:transparent;transition:.15s
-  }
-  .sidebar-resizer:hover::after,.sidebar-resizer.resizing::after{background:var(--primary)}
-  body.resizing-sidebar{cursor:col-resize;user-select:none}
-  .side-section{margin-bottom:18px}
-  .side-title{display:flex;align-items:center;justify-content:space-between;padding:0 8px 6px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-  .side-link,.tree-row{
-    width:100%;border:0;background:transparent;color:var(--text);display:flex;align-items:center;gap:9px;
-    min-height:38px;padding:7px 9px;border-radius:10px;text-align:left
-  }
-  .side-link:hover,.tree-row:hover{background:var(--panel-2)}
-  .side-link.active,.tree-row.active{background:var(--primary-soft);color:var(--primary-2);font-weight:750}
-  .count{margin-left:auto;color:var(--muted);font-size:12px;background:var(--panel-2);border:1px solid var(--line);padding:1px 7px;border-radius:999px}
-  .tree-row{padding-left:calc(9px + var(--depth,0) * 16px)}
-  .tree-toggle{width:18px;flex:0 0 18px;color:var(--muted);font-size:12px}
-  .tree-dot{width:9px;height:9px;border-radius:999px;flex:0 0 9px;background:var(--dot,var(--primary))}
-  .tree-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sidebar .side-title{color:var(--sidebar-muted)}
-  .sidebar .side-link,.sidebar .tree-row{color:var(--sidebar-text)}
-  .sidebar .side-link:hover,.sidebar .tree-row:hover{background:var(--sidebar-hover)}
-  .sidebar .side-link.active,.sidebar .tree-row.active{
-    background:var(--sidebar-active);color:#fff;box-shadow:inset 3px 0 #60a5fa
-  }
-  .sidebar .count{
-    color:var(--sidebar-text);background:rgba(255,255,255,.08);
-    border-color:rgba(255,255,255,.12)
-  }
-  .sidebar .tree-toggle{color:var(--sidebar-muted);background:transparent;border:0}
-  .sidebar .btn{
-    color:var(--sidebar-text);background:rgba(255,255,255,.07);
-    border-color:rgba(255,255,255,.14)
-  }
-  .sidebar .btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24)}
-  .sidebar .hint{color:var(--sidebar-muted)}
-  .main{grid-row:2;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-  .main-head{
-    padding:16px 18px 12px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line);
-    background:color-mix(in srgb,var(--bg) 88%, transparent);backdrop-filter:blur(10px)
-  }
-  .main-title{min-width:0}
-  .main-title h2{margin:0;font-size:21px}
-  .main-title p{margin:5px 0 0;color:var(--muted);font-size:13px}
-  .toolbar{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-  .toolbar select{height:38px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;padding:0 34px 0 10px}
-  .bulkbar{
-    display:none;align-items:center;gap:8px;padding:9px 18px;background:var(--primary-soft);border-bottom:1px solid var(--line)
-  }
-  .bulkbar.show{display:flex}
-  .bulkbar strong{margin-right:8px}
-  .content{overflow:auto;padding:16px 18px 80px}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-  .cards.list{display:flex;flex-direction:column}
-  .card{
-    --card-accent:#64748b;
-    position:relative;
-    background:
-      linear-gradient(135deg,
-        color-mix(in srgb,var(--card-accent) 13%,var(--panel)) 0%,
-        color-mix(in srgb,var(--card-accent) 6%,var(--panel)) 72%,
-        var(--panel) 100%);
-    border:1px solid color-mix(in srgb,var(--card-accent) 34%,var(--line));
-    border-left:6px solid var(--card-accent);border-radius:15px;padding:14px;
-    min-height:190px;display:flex;flex-direction:column;transition:.18s;
-    box-shadow:0 3px 12px color-mix(in srgb,var(--card-accent) 10%,transparent)
-  }
-  .card:hover{
-    transform:translateY(-2px);
-    border-color:color-mix(in srgb,var(--card-accent) 62%,var(--line));
-    box-shadow:0 16px 34px color-mix(in srgb,var(--card-accent) 20%,transparent)
-  }
-  .card .subcategory-chip{
-    color:color-mix(in srgb,var(--card-accent) 74%,var(--text));
-    background:color-mix(in srgb,var(--card-accent) 17%,var(--panel));
-    border-color:color-mix(in srgb,var(--card-accent) 42%,var(--line));
-    font-weight:800
-  }
-  .card.dragging{opacity:.45;transform:scale(.98)}
-  .tree-row.drop-target{outline:2px dashed var(--primary);background:var(--primary-soft)}
-  .cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(180px,1.1fr) minmax(260px,2fr) auto;align-items:center;gap:10px}
-  .card-check{position:absolute;top:12px;left:12px}
-  .cards.list .card-check{position:static}
-  .card-top{padding-left:26px;display:flex;align-items:flex-start;gap:8px}
-  .cards.list .card-top{padding-left:0}
-  .card-title{font-weight:800;line-height:1.25;margin-right:auto;overflow-wrap:anywhere}
-  .star{color:#f59e0b;font-size:17px}
-  .excerpt{color:var(--muted);font-size:13px;line-height:1.48;margin:10px 0;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
-  .cards.list .excerpt{margin:0;-webkit-line-clamp:2}
-  .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
-  .chip{font-size:11px;padding:4px 7px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
-  .card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
-  .cards.list .meta{display:none}
-  .cards.list .card-actions{margin:0;padding:0;border:0;justify-content:flex-end}
-  .empty{padding:70px 20px;text-align:center;color:var(--muted)}
-  .empty .big{font-size:48px;margin-bottom:10px}
-  .load-more{display:block;margin:18px auto 0}
-  .editor-backdrop{
-    position:fixed;z-index:88;inset:0;background:rgba(2,6,23,.58);backdrop-filter:blur(3px);
-    opacity:0;pointer-events:none;transition:opacity .2s
-  }
-  .editor-backdrop.open{opacity:1;pointer-events:auto}
-  .editor{
-    position:fixed;z-index:90;left:50%;top:50%;width:min(var(--editor),calc(100vw - 40px));height:min(92vh,1040px);
-    min-width:min(980px,calc(100vw - 24px));min-height:620px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);
-    background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 28px 90px rgba(2,6,23,.40);
-    transform:translate(-50%,-47%) scale(.97);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;
-    display:flex;flex-direction:column;resize:both;overflow:hidden;font-size:16px
-  }
-  .editor.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
-  .editor.full{width:calc(100vw - 28px)!important;height:calc(100vh - 28px)!important;min-width:0;min-height:0;resize:none}
-  .popup-resize-hint{font-size:13px;color:var(--muted);margin-left:auto;white-space:nowrap}
-  .editor-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-  .editor-head strong{margin-right:auto;font-size:21px;line-height:1.2}
-  .editor-tabs{display:flex;gap:8px;padding:12px 20px 0;background:var(--panel);border-bottom:1px solid var(--line)}
-  .editor-tab-btn{border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-weight:800;font-size:15px;padding:11px 14px 12px}
-  .editor-tab-btn:hover{color:var(--text);background:var(--panel-2);border-radius:10px 10px 0 0}
-  .editor-tab-btn.active{color:var(--primary-2);border-bottom-color:var(--primary);background:var(--primary-soft);border-radius:10px 10px 0 0}
-  .editor-body{padding:20px 22px;overflow:auto}
-  .editor-tab-panel{display:none}
-  .editor-tab-panel.active{display:block}
-  .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .field{display:flex;flex-direction:column;gap:8px}
-  .field.full{grid-column:1/-1}
-  label{font-size:14px;color:var(--muted);font-weight:800}
-  input[type="text"],select,textarea{
-    width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);color:var(--text);padding:12px 13px;outline:none;font-size:16px
-  }
-  input[type="text"]:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%, transparent)}
-  textarea{resize:vertical;min-height:110px;line-height:1.62}
-  #promptContent{min-height:390px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1.65}
-  .editor-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1px}
-  .editor-toolbar .btn{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
-  .variables-intro{padding:16px 18px;border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));background:var(--primary-soft);border-radius:14px;margin-bottom:16px}
-  .variables-intro h3{margin:0 0 6px;font-size:20px}
-  .variables-intro p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
-  .variable-fields{
-    display:flex;flex-direction:column;gap:0;border:1px solid var(--line);
-    border-radius:17px;overflow:hidden;background:var(--panel);box-shadow:0 8px 24px rgba(15,23,42,.05)
-  }
-  .variable-value-box{
-    border:0;border-radius:0;padding:18px 20px;background:var(--panel);
-    position:relative
-  }
-  .variable-value-box:nth-of-type(odd){
-    background:color-mix(in srgb,var(--primary) 3%,var(--panel))
-  }
-  .variable-value-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
-  .variable-number{
-    display:inline-flex;align-items:center;justify-content:center;min-width:98px;
-    padding:5px 9px;border-radius:999px;background:var(--primary);color:#fff;
-    font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase
-  }
-  .variable-token{
-    display:inline-flex;padding:5px 9px;border-radius:8px;
-    color:var(--primary-2);background:var(--primary-soft);
-    border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));
-    font-size:15px;font-weight:800
-  }
-  .variable-value-box label{display:block;color:var(--text);font-size:15px;margin-bottom:8px}
-  .variable-value-box textarea{
-    min-height:135px;margin-top:0;background:var(--panel-2);font-size:16px;
-    border-width:2px
-  }
-  .variable-separator{
-    display:flex;align-items:center;gap:12px;padding:0 18px;
-    background:var(--bg);color:var(--muted);font-size:11px;font-weight:900;
-    letter-spacing:.08em;text-transform:uppercase
-  }
-  .variable-separator::before,.variable-separator::after{
-    content:"";height:1px;background:var(--line);flex:1
-  }
-  .variable-separator span{padding:8px 0;white-space:nowrap}
-  .prompt-variable-header{
-    display:flex;align-items:center;justify-content:space-between;gap:18px;
-    margin-bottom:13px;padding:18px 20px;border:1px solid color-mix(in srgb,var(--primary) 28%,var(--line));
-    border-radius:17px;background:linear-gradient(135deg,var(--primary-soft),var(--panel-2))
-  }
-  .prompt-variable-header h3{margin:0 0 7px;font-size:22px}
-  .prompt-variable-header p{margin:0;color:var(--muted);font-size:14px;line-height:1.55;max-width:850px}
-  .detected-variable-summary{
-    display:none;margin:0 0 17px;padding:11px 14px;border-radius:12px;
-    color:var(--success);background:color-mix(in srgb,var(--success) 10%,var(--panel));
-    border:1px solid color-mix(in srgb,var(--success) 34%,var(--line));
-    font-size:14px;font-weight:800
-  }
-  .detected-variable-summary.show{display:block}
-  .prompt-variable-list{display:flex;flex-direction:column;gap:20px}
-  .prompt-variable-empty{
-    padding:38px 24px;border:2px dashed var(--line);border-radius:18px;
-    background:var(--panel-2);text-align:center;color:var(--muted);font-size:15px;line-height:1.65
-  }
-  .prompt-variable-empty code{
-    display:inline-block;margin:3px;padding:3px 7px;border-radius:7px;
-    background:var(--primary-soft);color:var(--primary-2);font-weight:800
-  }
-  .prompt-variable-row{
-    --variable-accent:#2563eb;
-    border:2px solid color-mix(in srgb,var(--variable-accent) 40%,var(--line));
-    border-left:9px solid var(--variable-accent);border-radius:19px;
-    background:linear-gradient(145deg,
-      color-mix(in srgb,var(--variable-accent) 10%,var(--panel)) 0%,
-      var(--panel) 68%);
-    overflow:hidden;box-shadow:0 12px 28px color-mix(in srgb,var(--variable-accent) 13%,transparent)
-  }
-  .prompt-variable-row-head{
-    display:flex;align-items:center;gap:11px;padding:14px 18px;
-    background:color-mix(in srgb,var(--variable-accent) 14%,var(--panel));
-    border-bottom:1px solid color-mix(in srgb,var(--variable-accent) 28%,var(--line))
-  }
-  .prompt-variable-row-head .variable-number{
-    min-width:104px;background:var(--variable-accent);color:#fff
-  }
-  .prompt-variable-row-head .variable-live-token{
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    color:color-mix(in srgb,var(--variable-accent) 80%,var(--text));
-    font-weight:900;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
-  }
-  .prompt-variable-row-head .spacer{flex:1}
-  .variable-detected-badge{
-    font-size:12px;font-weight:900;padding:5px 9px;border-radius:999px;
-    color:var(--success);background:color-mix(in srgb,var(--success) 10%,var(--panel));
-    border:1px solid color-mix(in srgb,var(--success) 38%,var(--line))
-  }
-  .prompt-variable-row-body{padding:21px}
-  .variable-auto-title{
-    margin:0 0 7px;color:var(--text);font-size:21px;font-weight:900;
-    line-height:1.25
-  }
-  .variable-auto-help{
-    margin:0 0 13px;color:var(--muted);font-size:14px;line-height:1.55
-  }
-  .variable-auto-help code{
-    padding:3px 7px;border-radius:7px;background:var(--primary-soft);
-    color:var(--primary-2);font-weight:850
-  }
-  .prompt-variable-row .variable-text-input{
-    min-height:155px;background:var(--panel-2);font-size:17px;line-height:1.6;
-    border:2px solid color-mix(in srgb,var(--variable-accent) 27%,var(--line))
-  }
-  .prompt-variable-row .variable-text-input:focus{
-    border-color:var(--variable-accent);
-    box-shadow:0 0 0 4px color-mix(in srgb,var(--variable-accent) 17%,transparent)
-  }
-  .variable-source-label{
-    display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--muted);
-    font-size:12px;line-height:1.45
-  }
-  .variable-source-label strong{color:var(--text)}
-  .copy-mode-box{margin-top:18px;border:1px solid var(--line);border-radius:15px;padding:15px;background:var(--panel-2)}
-  .copy-mode-box h3{margin:0 0 12px;font-size:19px}
-  .copy-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .copy-option{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);border-radius:13px;padding:13px;background:var(--panel);cursor:pointer}
-  .copy-option:hover{border-color:var(--primary)}
-  .copy-option:has(input:checked){border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 16%,transparent);background:var(--primary-soft)}
-  .copy-option input{margin-top:3px;accent-color:var(--primary)}
-  .copy-option strong{display:block;font-size:15px;color:var(--text);margin-bottom:4px}
-  .copy-option small{display:block;color:var(--muted);font-size:13px;line-height:1.45}
-  .copy-preview-wrap{margin-top:16px}
-  .compiled-preview{min-height:250px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;line-height:1.6;background:var(--panel)}
-  .editor-footer{margin-top:auto;padding:15px 20px;border-top:1px solid var(--line);display:flex;gap:9px;flex-wrap:wrap;background:var(--panel)}
-  .editor-footer .btn{font-size:15px;min-height:43px}
-  .editor-footer .spacer{flex:1}
-  .suggestion{
-    display:none;margin:10px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--primary) 35%, var(--line));
-    background:var(--primary-soft);border-radius:12px;font-size:13px
-  }
-  .suggestion.show{display:block}
-  .modal-backdrop{
-    position:fixed;z-index:100;inset:0;background:rgba(2,6,23,.55);display:none;align-items:center;justify-content:center;padding:20px
-  }
-  .modal-backdrop.show{display:flex}
-  .modal{width:min(920px,96vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column}
-  .modal.small{width:min(560px,96vw)}
-  .modal.copy-wide{width:min(980px,96vw)}
-  .modal-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-  .modal-head h3{margin:0;font-size:18px}
-  .modal-head .spacer{flex:1}
-  .modal-body{padding:17px;overflow:auto}
-  .modal-foot{padding:12px 17px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
-  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .panel-box{border:1px solid var(--line);border-radius:14px;padding:13px;background:var(--panel-2)}
-  .panel-box h4{margin:0 0 10px}
-  .manage-list{display:flex;flex-direction:column;gap:7px}
-  .manage-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);padding:8px;border-radius:10px}
-  .manage-row .grow{flex:1;min-width:0}
-  .manage-row small{color:var(--muted)}
-  .category-color{
-    width:38px;height:34px;padding:2px;border:1px solid var(--line);
-    border-radius:9px;background:var(--panel);cursor:pointer
-  }
-  .inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
-  .rule-form{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:7px;margin-bottom:12px}
-  .rule-row{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px;border-bottom:1px solid var(--line)}
-  .duplicate-row{border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;background:var(--panel-2)}
-  .duplicate-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .dup-card{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--panel)}
-  .dup-card strong{display:block;margin-bottom:6px}
-  .dup-card p{color:var(--muted);font-size:12px;margin:0;white-space:pre-wrap}
-  .score{font-size:12px;font-weight:800;color:var(--warning);margin-bottom:8px}
-  .toast-wrap{position:fixed;z-index:200;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px}
-  .toast{min-width:260px;max-width:420px;background:var(--text);color:var(--panel);border-radius:12px;padding:11px 13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
-  .toast button{margin-left:auto;border:0;background:transparent;color:inherit;text-decoration:underline}
-  .kbd{font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 5px;color:var(--muted);background:var(--panel-2)}
-  .mobile-menu{display:none}
-  .overlay{display:none}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-  .stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px}
-  .stat strong{font-size:22px;display:block}
-  .stat span{color:var(--muted);font-size:12px}
-  .hint{font-size:12px;color:var(--muted);line-height:1.5}
-  .hidden{display:none!important}
-  @media(max-width:980px){
-    .app{grid-template-columns:1fr}
-    .brand{min-width:auto}
-    .brand small{display:none}
-    .sidebar{position:fixed;z-index:80;top:72px;bottom:0;left:0;width:min(300px,88vw)!important;min-width:0;max-width:none;transform:translateX(-102%);transition:.22s;box-shadow:var(--shadow)}
-    .sidebar.open{transform:translateX(0)}
-    .sidebar-resizer{display:none}
-    .mobile-menu{display:inline-flex}
-    .overlay.show{display:block;position:fixed;z-index:70;inset:72px 0 0;background:rgba(2,6,23,.45)}
-    .top-actions .optional{display:none}
-    .cards{grid-template-columns:1fr}
-    .settings-grid{grid-template-columns:1fr}
-    .stats{grid-template-columns:1fr 1fr}
-  }
-  @media(max-width:1100px) and (min-width:651px){
-    .editor{width:calc(100vw - 24px)!important;min-width:0}
-  }
-  @media(max-width:650px){
-    .topbar{padding:10px;height:66px}
-    .app{grid-template-rows:66px 1fr}
-    .sidebar{top:66px}
-    .brand h1{display:none}
-    .search{height:42px}
-    .main-head{padding:12px}
-    .toolbar select,.toolbar .view-toggle{display:none}
-    .content{padding:12px 12px 70px}
-    .cards.list .card{display:flex}
-    .cards.list .excerpt{margin:8px 0}
-    .editor{left:0;top:0;width:100vw!important;height:100vh!important;min-width:0;min-height:0;max-width:none;max-height:none;border-radius:0;transform:translateY(20px);resize:none}
-    .editor.open{transform:translateY(0)}
-    .editor.full{width:100%!important;height:100%!important;border-radius:0}
-    .editor-grid{grid-template-columns:1fr}
-    .copy-options{grid-template-columns:1fr}
-    .prompt-variable-header{align-items:stretch;flex-direction:column}
-    .prompt-variable-row-body{grid-template-columns:1fr}
-    .popup-resize-hint{display:none}
-    .editor-tabs{padding-left:10px;padding-right:10px;overflow:auto}
-    .editor-tab-btn{white-space:nowrap}
-    .editor-body{padding:15px}
-    #promptContent{font-size:15px;min-height:330px}
-    .field.full{grid-column:auto}
-    .rule-form,.rule-row,.inline-form{grid-template-columns:1fr}
-    .duplicate-grid{grid-template-columns:1fr}
-    .stats{grid-template-columns:1fr}
-  }
+:root{
+  --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
+  --text:#172033;--muted:#667085;--line:#d9e2ef;
+  --primary:#2563eb;--primary-2:#1d4ed8;--primary-soft:#dbeafe;
+  --success:#15803d;--warning:#b45309;--danger:#dc2626;
+  --sidebar:#14233d;--sidebar-2:#0d192c;--sidebar-text:#f6f8ff;--sidebar-muted:#aebbd0;
+  --shadow:0 18px 50px rgba(15,23,42,.15);--radius:16px;
+  --sidebar-width:292px;--font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body.dark{
+  --bg:#0b1220;--panel:#111b2d;--panel-2:#172238;--panel-3:#1e2d49;
+  --text:#edf3ff;--muted:#9fb0c7;--line:#293a55;
+  --primary:#60a5fa;--primary-2:#93c5fd;--primary-soft:#1d3a60;
+  --success:#4ade80;--warning:#fbbf24;--danger:#f87171;
+  --sidebar:#07111f;--sidebar-2:#040b15;--shadow:0 18px 55px rgba(0,0,0,.42);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:var(--font);background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.55}
+.app{
+  height:100%;display:grid;
+  grid-template-columns:var(--sidebar-width) 6px minmax(0,1fr);
+  grid-template-rows:70px minmax(0,1fr);overflow:hidden
+}
+.topbar{
+  grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:11px 16px;
+  background:var(--panel);border-bottom:1px solid var(--line);z-index:30
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:235px}
+.logo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;color:#fff;font-weight:900;background:linear-gradient(135deg,#2563eb,#7c3aed);box-shadow:0 8px 24px rgba(37,99,235,.25)}
+.brand h1{font-size:17px;margin:0;line-height:1.1}
+.brand small{display:block;margin-top:4px;color:var(--muted)}
+.search-wrap{position:relative;flex:1;max-width:760px}
+.search-wrap span{position:absolute;left:14px;top:12px;color:var(--muted)}
+.search{
+  width:100%;height:45px;border:1px solid var(--line);border-radius:14px;
+  background:var(--panel-2);color:var(--text);padding:0 42px;outline:none
+}
+.search:focus,input:focus,select:focus,textarea:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)
+}
+.search-clear{position:absolute;right:10px;top:8px;border:0;background:transparent;color:var(--muted);font-size:22px}
+.top-actions{display:flex;gap:8px;margin-left:auto}
+.btn{
+  min-height:39px;border:1px solid var(--line);border-radius:11px;background:var(--panel);
+  color:var(--text);padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;
+  gap:7px;font-weight:750
+}
+.btn:hover{border-color:var(--primary);background:var(--panel-3)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-2)}
+.btn.success{background:var(--success);border-color:var(--success);color:#fff}
+.btn.danger{color:var(--danger)}
+.btn.small{min-height:32px;padding:5px 9px;border-radius:9px;font-size:13px}
+.btn.icon{width:40px;padding:0}
+.mobile-menu{display:none}
+
+.sidebar{
+  grid-column:1;grid-row:2;overflow:auto;padding:14px 10px 22px;
+  color:var(--sidebar-text);background:linear-gradient(180deg,var(--sidebar),var(--sidebar-2));
+  border-right:1px solid rgba(255,255,255,.08)
+}
+.resizer{
+  grid-column:2;grid-row:2;background:transparent;cursor:col-resize;position:relative;z-index:20
+}
+.resizer::after{content:"";position:absolute;left:2px;top:0;bottom:0;width:2px;background:var(--line);opacity:.65}
+.resizer:hover::after,.resizer.dragging::after{background:var(--primary);opacity:1;width:3px}
+.side-section{margin-bottom:19px}
+.side-title{display:flex;align-items:center;justify-content:space-between;padding:0 8px 7px;color:var(--sidebar-muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.side-link,.tree-row{
+  width:100%;min-height:38px;border:0;border-radius:10px;background:transparent;color:var(--sidebar-text);
+  padding:7px 9px;display:flex;align-items:center;gap:9px;text-align:left
+}
+.side-link:hover,.tree-row:hover{background:rgba(255,255,255,.08)}
+.side-link.active,.tree-row.active{background:rgba(96,165,250,.24);box-shadow:inset 3px 0 #60a5fa;color:#fff;font-weight:850}
+.count{margin-left:auto;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);font-size:12px}
+.tree-row{padding-left:calc(9px + var(--depth,0) * 16px)}
+.tree-dot{width:10px;height:10px;border-radius:50%;background:var(--dot,#60a5fa);flex:0 0 10px}
+.tree-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:#fff}
+.sidebar .btn:hover{background:rgba(255,255,255,.14)}
+
+.main{grid-column:3;grid-row:2;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.main-head{display:flex;align-items:flex-start;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.main-title h2{margin:0;font-size:22px}
+.main-title p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.toolbar{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.toolbar select{height:39px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:0 34px 0 10px}
+.bulkbar{display:none;align-items:center;gap:8px;padding:9px 18px;background:var(--primary-soft);border-bottom:1px solid var(--line)}
+.bulkbar.show{display:flex}
+.content{overflow:auto;padding:16px 18px 80px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.stat strong{display:block;font-size:22px}
+.stat span{font-size:12px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
+.cards.list{display:flex;flex-direction:column}
+.card{
+  --accent:#64748b;position:relative;min-height:195px;padding:14px;border-radius:16px;
+  border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));border-left:6px solid var(--accent);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--panel)),var(--panel) 76%);
+  display:flex;flex-direction:column;transition:.18s;box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 10%,transparent)
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 16px 35px color-mix(in srgb,var(--accent) 20%,transparent);border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(190px,1fr) minmax(280px,2fr) auto;gap:11px;align-items:center}
+.card-check{position:absolute;left:12px;top:12px}
+.cards.list .card-check{position:static}
+.card-top{padding-left:26px;display:flex;gap:8px;align-items:flex-start}
+.cards.list .card-top{padding-left:0}
+.card-title{font-weight:900;line-height:1.25;margin-right:auto;overflow-wrap:anywhere}
+.star{color:#f59e0b;font-size:18px}
+.excerpt{color:var(--muted);font-size:13px;line-height:1.5;margin:11px 0;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.cards.list .excerpt{margin:0;-webkit-line-clamp:2}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.chip{font-size:11px;padding:4px 7px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
+.chip.accent{font-weight:850;color:color-mix(in srgb,var(--accent) 75%,var(--text));background:color-mix(in srgb,var(--accent) 15%,var(--panel));border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.cards.list .meta{display:none}
+.cards.list .card-actions{margin:0;padding:0;border:0}
+.empty{padding:70px 20px;text-align:center;color:var(--muted)}
+.empty .big{font-size:48px}
+.hidden{display:none!important}
+
+.editor-backdrop,.modal-backdrop{
+  position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.62);display:none;align-items:center;justify-content:center;padding:20px
+}
+.editor-backdrop.show,.modal-backdrop.show{display:flex}
+.editor-modal{
+  width:min(1280px,96vw);height:min(900px,94vh);min-width:760px;min-height:600px;
+  resize:both;overflow:hidden;background:var(--panel);border:1px solid var(--line);
+  border-radius:20px;box-shadow:var(--shadow);display:flex;flex-direction:column
+}
+.editor-head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.editor-head strong{font-size:18px;margin-right:8px}
+.editor-tabs{display:flex;gap:6px}
+.editor-tab{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);color:var(--text);padding:8px 12px;font-weight:800}
+.editor-tab.active{background:var(--primary-soft);color:var(--primary-2);border-color:color-mix(in srgb,var(--primary) 42%,var(--line))}
+.spacer{flex:1}
+.editor-body{overflow:auto;padding:19px}
+.editor-panel{display:none}
+.editor-panel.active{display:block}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;color:var(--muted);font-weight:800}
+input[type=text],select,textarea{
+  width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);color:var(--text);padding:11px 12px;outline:none
+}
+textarea{resize:vertical;line-height:1.55}
+#promptTitle{font-size:17px;font-weight:800}
+#promptContent{min-height:390px;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.hint{font-size:12px;color:var(--muted);line-height:1.5}
+.editor-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 15px;border-top:1px solid var(--line);background:var(--panel)}
+.editor-footer .btn.copy-compiled{font-size:15px;padding-inline:17px}
+
+.variables-header{
+  display:flex;align-items:flex-start;gap:18px;justify-content:space-between;padding:18px 20px;margin-bottom:14px;
+  border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));border-radius:17px;
+  background:linear-gradient(135deg,var(--primary-soft),var(--panel-2))
+}
+.variables-header h3{margin:0 0 6px;font-size:22px}
+.variables-header p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+.variable-summary{display:none;margin-bottom:16px;padding:11px 14px;border-radius:12px;color:var(--success);font-weight:850;background:color-mix(in srgb,var(--success) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--success) 35%,var(--line))}
+.variable-summary.show{display:block}
+.variable-list{display:flex;flex-direction:column;gap:18px}
+.variable-card{
+  --var-accent:#2563eb;border:2px solid color-mix(in srgb,var(--var-accent) 38%,var(--line));
+  border-left:9px solid var(--var-accent);border-radius:18px;overflow:hidden;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--var-accent) 9%,var(--panel)),var(--panel) 70%);
+  box-shadow:0 12px 28px color-mix(in srgb,var(--var-accent) 12%,transparent)
+}
+.variable-card-head{
+  display:flex;align-items:center;gap:10px;padding:13px 17px;background:color-mix(in srgb,var(--var-accent) 13%,var(--panel));
+  border-bottom:1px solid color-mix(in srgb,var(--var-accent) 25%,var(--line))
+}
+.variable-number{padding:5px 9px;border-radius:999px;background:var(--var-accent);color:#fff;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.variable-token{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;font-weight:900;color:color-mix(in srgb,var(--var-accent) 78%,var(--text))}
+.variable-badge{margin-left:auto;padding:4px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:11px;color:var(--muted);font-weight:850}
+.variable-card-body{padding:19px}
+.variable-card h4{margin:0 0 7px;font-size:20px}
+.variable-help{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.variable-input{min-height:140px;font-size:16px;border-width:2px}
+.variable-input.missing{border-color:var(--danger);box-shadow:0 0 0 3px color-mix(in srgb,var(--danger) 15%,transparent)}
+.file-panel{margin-top:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);overflow:hidden}
+.file-panel summary{padding:10px 12px;cursor:pointer;font-weight:850;color:var(--text)}
+.file-zone{padding:13px;border-top:1px solid var(--line)}
+.file-drop{
+  padding:16px;border:2px dashed color-mix(in srgb,var(--var-accent) 45%,var(--line));border-radius:12px;text-align:center;
+  background:var(--panel);color:var(--muted);transition:.15s
+}
+.file-drop.drag{background:color-mix(in srgb,var(--var-accent) 12%,var(--panel));border-color:var(--var-accent)}
+.file-drop input{display:none}
+.file-status{margin-top:9px;font-size:12px;color:var(--muted);line-height:1.45}
+.preview-box{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+.preview-box h3{margin:0 0 10px;font-size:18px}
+#compiledPreview{min-height:260px;background:var(--panel);font-size:15px}
+.variable-empty{padding:38px 22px;border:2px dashed var(--line);border-radius:18px;text-align:center;color:var(--muted);background:var(--panel-2);line-height:1.65}
+.variable-empty code{padding:3px 7px;border-radius:7px;background:var(--primary-soft);color:var(--primary-2);font-weight:850}
+
+.modal{width:min(900px,96vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:19px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.modal.small{width:min(580px,96vw)}
+.modal-head{display:flex;align-items:center;gap:10px;padding:15px 17px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0}
+.modal-body{padding:17px;overflow:auto}
+.modal-foot{padding:12px 17px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel-box{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
+.panel-box h4{margin:0 0 10px}
+.manage-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}
+.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.manage-row .grow{flex:1;min-width:0}
+.color-input{width:38px;height:34px;padding:2px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
+.toast-wrap{position:fixed;right:18px;bottom:18px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{min-width:280px;max-width:470px;padding:12px 14px;border-radius:12px;background:var(--text);color:var(--panel);box-shadow:var(--shadow)}
+
+@media(max-width:980px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:0;top:70px;bottom:0;width:min(320px,88vw);z-index:90;transform:translateX(-103%);transition:.2s;box-shadow:var(--shadow)}
+  .sidebar.open{transform:translateX(0)}
+  .resizer{display:none}.main{grid-column:1}.mobile-menu{display:inline-flex}.brand{min-width:auto}.brand small{display:none}
+  .top-actions .optional{display:none}.cards{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}
+  .editor-modal{min-width:0;width:98vw;height:96vh;resize:none}.manage-grid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .topbar{padding:9px}.brand h1{display:none}.main-head{padding:12px}.content{padding:12px 12px 70px}
+  .toolbar select,.view-toggle{display:none}.editor-backdrop{padding:0}.editor-modal{width:100vw;height:100vh;border-radius:0}
+  .editor-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.editor-head{flex-wrap:wrap}.editor-tabs{order:3;width:100%}
+  .editor-tab{flex:1}.stats{grid-template-columns:1fr}.cards.list .card{display:flex}.cards.list .excerpt{margin:9px 0}
+  .variables-header{flex-direction:column}.inline-form{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <button class="btn icon-btn mobile-menu" id="mobileMenuBtn" title="Apri menu">☰</button>
-    <div class="brand">
-      <div class="logo">P</div>
-      <div><h1>Prompt Studio</h1><small>Standalone v5</small></div>
-    </div>
+    <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Organizer standalone</small></div></div>
     <div class="search-wrap">
-      <span class="search-icon">⌕</span>
-      <input id="globalSearch" class="search" type="search" placeholder="Cerca in titolo, testo, categoria, cliente, tag…  ⌘K" autocomplete="off">
-      <button id="clearSearch" class="search-clear" title="Svuota ricerca">×</button>
+      <span>⌕</span>
+      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
+      <button class="search-clear" id="clearSearch">×</button>
     </div>
     <div class="top-actions">
       <button class="btn optional" id="importBtn">Importa</button>
       <button class="btn optional" id="exportBtn">Esporta</button>
-      <button class="btn icon-btn optional" id="themeBtn" title="Cambia tema">◐</button>
+      <button class="btn icon optional" id="themeBtn" title="Tema">◐</button>
       <button class="btn primary" id="newPromptBtn">＋ Nuovo prompt</button>
     </div>
   </header>
@@ -485,53 +264,41 @@
       <div class="side-title">Libreria</div>
       <button class="side-link active" data-filter="all"><span>▦</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
       <button class="side-link" data-filter="favorites"><span>★</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
-      <button class="side-link" data-filter="recent"><span>◷</span><span>Modificati di recente</span><span class="count" id="countRecent">0</span></button>
+      <button class="side-link" data-filter="recent"><span>◷</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
       <button class="side-link" data-filter="uncategorized"><span>◇</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
       <button class="side-link" data-filter="archived"><span>▣</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
       <button class="side-link" data-filter="trash"><span>⌫</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
     </section>
-
     <section class="side-section">
-      <div class="side-title"><span>Categorie</span><button class="btn small" id="manageBtn" title="Gestisci categorie, clienti e regole">Gestisci</button></div>
+      <div class="side-title"><span>Categorie</span><button class="btn small" id="manageBtn">Gestisci</button></div>
       <div id="categoryTree"></div>
     </section>
-
     <section class="side-section">
       <div class="side-title">Clienti e progetti</div>
       <div id="clientList"></div>
     </section>
-
     <section class="side-section">
-      <button class="side-link" id="duplicatesBtn"><span>≈</span><span>Possibili duplicati</span><span class="count" id="countDuplicates">—</span></button>
       <button class="side-link" id="backupBtn"><span>⇩</span><span>Crea backup</span></button>
-      <button class="side-link" id="settingsBtn"><span>⚙</span><span>Strumenti e impostazioni</span></button>
     </section>
   </aside>
-  <div class="sidebar-resizer" id="sidebarResizer" title="Trascina per allargare o restringere la sidebar. Doppio clic per ripristinare."></div>
-  <div class="overlay" id="overlay"></div>
+
+  <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
 
   <main class="main">
     <div class="main-head">
-      <div class="main-title">
-        <h2 id="viewTitle">Tutti i prompt</h2>
-        <p id="viewSubtitle">La tua libreria completa.</p>
-      </div>
+      <div class="main-title"><h2 id="viewTitle">Tutti i prompt</h2><p id="viewSubtitle"></p></div>
       <div class="toolbar">
         <button class="btn small" id="selectAllBtn">Seleziona tutti</button>
-        <select id="sortSelect" aria-label="Ordinamento">
+        <select id="sortSelect">
           <option value="updated_desc">Modificati di recente</option>
           <option value="title_asc">Titolo A–Z</option>
           <option value="title_desc">Titolo Z–A</option>
           <option value="created_desc">Creati di recente</option>
           <option value="usage_desc">Più utilizzati</option>
         </select>
-        <div class="view-toggle">
-          <button class="btn small" id="gridBtn" title="Vista griglia">▦</button>
-          <button class="btn small" id="listBtn" title="Vista elenco">☷</button>
-        </div>
+        <div class="view-toggle"><button class="btn small" id="gridBtn">▦</button><button class="btn small" id="listBtn">☷</button></div>
       </div>
     </div>
-
     <div class="bulkbar" id="bulkbar">
       <strong><span id="selectedCount">0</span> selezionati</strong>
       <button class="btn small" id="bulkMoveBtn">Sposta</button>
@@ -540,139 +307,78 @@
       <button class="btn small danger" id="bulkTrashBtn">Cestina</button>
       <button class="btn small" id="clearSelectionBtn">Annulla</button>
     </div>
-
-    <div class="content" id="content">
-      <div class="stats" id="dashboardStats"></div>
+    <div class="content">
+      <div class="stats" id="stats"></div>
       <div class="cards" id="cards"></div>
-      <button class="btn load-more hidden" id="loadMoreBtn">Mostra altri prompt</button>
     </div>
   </main>
 </div>
 
-<div class="editor-backdrop" id="editorBackdrop"></div>
-<aside class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorHeading">
-  <div class="editor-head">
-    <strong id="editorHeading">Nuovo prompt</strong>
-    <button class="btn small" id="suggestBtn">Suggerisci categoria</button>
-    <button class="btn small" id="versionsBtn">Versioni</button>
-    <span class="popup-resize-hint">Ridimensionabile ↘</span>
-    <button class="btn icon-btn small" id="fullscreenEditorBtn" title="Schermo intero">⛶</button>
-    <button class="btn icon-btn small" id="closeEditorBtn" title="Chiudi">×</button>
-  </div>
-  <div class="editor-tabs" role="tablist" aria-label="Modalità editor">
-    <button class="editor-tab-btn active" id="promptTabBtn" data-editor-tab="prompt" role="tab" aria-selected="true">Prompt e dettagli</button>
-    <button class="editor-tab-btn" id="variablesTabBtn" data-editor-tab="variables" role="tab" aria-selected="false">Variabili</button>
-  </div>
-  <div class="editor-body">
-    <section class="editor-tab-panel active" id="editorTabPrompt" data-editor-panel="prompt">
-      <div class="editor-grid">
-        <div class="field full">
-          <label for="promptTitle">Titolo</label>
-          <input type="text" id="promptTitle" placeholder="Titolo chiaro e descrittivo">
-        </div>
-        <div class="field full">
-          <label for="promptContent">Testo del prompt</label>
-          <div class="editor-toolbar" aria-label="Formattazione Markdown">
-            <button class="btn small md-btn" data-before="**" data-after="**" title="Grassetto"><b>B</b></button>
-            <button class="btn small md-btn" data-before="_" data-after="_" title="Corsivo"><i>I</i></button>
-            <button class="btn small md-btn" data-before="## " data-after="" title="Titolo">H2</button>
-            <button class="btn small md-btn" data-before="- " data-after="" title="Elenco">•</button>
-            <button class="btn small md-btn" data-before="`" data-after="`" title="Codice">&lt;/&gt;</button>
+<div class="editor-backdrop" id="editorBackdrop">
+  <section class="editor-modal" id="editorModal">
+    <div class="editor-head">
+      <strong id="editorTitle">Nuovo prompt</strong>
+      <div class="editor-tabs">
+        <button class="editor-tab active" data-tab="prompt">Prompt e dettagli</button>
+        <button class="editor-tab" data-tab="variables" id="variablesTab">Variabili</button>
+      </div>
+      <span class="spacer"></span>
+      <button class="btn icon small" id="closeEditorBtn">×</button>
+    </div>
+    <div class="editor-body">
+      <section class="editor-panel active" data-panel="prompt">
+        <div class="editor-grid">
+          <div class="field full"><label>Titolo</label><input id="promptTitle" type="text" placeholder="Titolo chiaro e descrittivo"></div>
+          <div class="field full">
+            <label>Testo del prompt</label>
+            <textarea id="promptContent" placeholder="Scrivi o incolla il prompt…"></textarea>
+            <div class="hint"><span id="wordCount">0 parole</span> · <span id="charCount">0 caratteri</span> · le variabili vengono rilevate automaticamente</div>
           </div>
-          <textarea id="promptContent" placeholder="Scrivi o incolla qui il prompt…"></textarea>
-          <div class="hint"><span id="wordCount">0 parole</span> · <span id="charCount">0 caratteri</span> · autosalvataggio bozza attivo</div>
+          <div class="field"><label>Categoria</label><select id="promptCategory"></select></div>
+          <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
+          <div class="field"><label>Cliente o progetto</label><select id="promptClient"></select></div>
+          <div class="field"><label>Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
+          <div class="field full"><label>Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
+          <div class="field full"><label>Note interne</label><textarea id="promptNotes" placeholder="Note, istruzioni o contesto"></textarea></div>
+          <div class="field full"><label><input id="promptFavorite" type="checkbox"> Aggiungi ai preferiti</label></div>
         </div>
-        <div class="field">
-          <label for="promptCategory">Categoria</label>
-          <select id="promptCategory"></select>
-        </div>
-        <div class="field">
-          <label for="promptSubcategory">Sottocategoria</label>
-          <select id="promptSubcategory"></select>
-        </div>
-        <div class="field">
-          <label for="promptClient">Cliente / progetto</label>
-          <select id="promptClient"></select>
-        </div>
-        <div class="field">
-          <label for="promptStatus">Stato</label>
-          <select id="promptStatus">
-            <option value="draft">Bozza</option>
-            <option value="review">Da verificare</option>
-            <option value="approved">Approvato</option>
-            <option value="obsolete">Obsoleto</option>
-            <option value="archived">Archiviato</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label for="promptTags">Tag, separati da virgola</label>
-          <input type="text" id="promptTags" placeholder="seo, wordpress, audit">
-        </div>
-        <div class="field full">
-          <label for="promptNotes">Note interne</label>
-          <textarea id="promptNotes" placeholder="Istruzioni, contesto o modifiche da ricordare"></textarea>
-        </div>
-        <div class="field full">
-          <label><input type="checkbox" id="promptFavorite"> Aggiungi ai preferiti</label>
-        </div>
-      </div>
-      <div class="suggestion" id="suggestionBox"></div>
-    </section>
+      </section>
 
-    <section class="editor-tab-panel" id="editorTabVariables" data-editor-panel="variables">
-      <div class="prompt-variable-header">
-        <div>
-          <h3>Variabili rilevate automaticamente</h3>
-          <p>L’app cerca nel prompt segnaposto come <strong>[DOMINIO_SITO]</strong>, <strong>[LINGUA]</strong>, <strong>[PAESE_O_MERCATO]</strong> e <strong>{{nome_cliente}}</strong>, quindi crea un campo per ognuno.</p>
+      <section class="editor-panel" data-panel="variables">
+        <div class="variables-header">
+          <div><h3>Compila le variabili rilevate</h3><p>L’app riconosce automaticamente segnaposto come <strong>[DOMINIO_SITO]</strong>, <strong>[LINGUA]</strong>, <strong>[PAESE_O_MERCATO]</strong> e <strong>{{nome_cliente}}</strong>. Ogni variabile ha un campo distinto.</p></div>
+          <button class="btn" id="detectVariablesBtn">↻ Rileva di nuovo</button>
         </div>
-        <button class="btn" type="button" id="detectVariablesBtn">↻ Rileva di nuovo</button>
-      </div>
-      <div class="detected-variable-summary" id="detectedVariableSummary"></div>
-      <div class="prompt-variable-list" id="promptVariableList"></div>
-      <div class="copy-mode-box">
-        <h3>Come vuoi copiare il prompt?</h3>
-        <div class="copy-options">
-          <label class="copy-option">
-            <input type="radio" name="editorCopyMode" value="template">
-            <span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto, per esempio [DOMINIO_SITO] o {{nome_cliente}}. Copia il modello non compilato.</small></span>
-          </label>
-          <label class="copy-option">
-            <input type="radio" name="editorCopyMode" value="compiled" checked>
-            <span><strong>Senza variabili nel testo</strong><small>Sostituisce ogni segnaposto con il valore inserito sopra. Copia il prompt pronto da usare.</small></span>
-          </label>
+        <div class="variable-summary" id="variableSummary"></div>
+        <div class="variable-list" id="variableList"></div>
+        <div class="preview-box">
+          <h3>Anteprima del prompt con le variabili inserite</h3>
+          <textarea id="compiledPreview" readonly></textarea>
         </div>
-        <div class="copy-preview-wrap field">
-          <label for="editorCopyPreview">Anteprima di ciò che verrà copiato</label>
-          <textarea id="editorCopyPreview" class="compiled-preview" readonly></textarea>
-        </div>
-        <button class="btn primary" id="copyVariableModeBtn" style="margin-top:12px">Copia con la modalità scelta</button>
-      </div>
-    </section>
-  </div>
-  <div class="editor-footer">
-    <button class="btn primary" id="copyFromEditorBtn">Copia con la modalità scelta</button>
-    <button class="btn" id="openVariablesTabBtn">Apri variabili</button>
-    <button class="btn" id="duplicateFromEditorBtn">Duplica</button>
-    <button class="btn danger" id="trashFromEditorBtn">Cestina</button>
-    <span class="spacer"></span>
-    <button class="btn" id="cancelEditorBtn">Chiudi</button>
-    <button class="btn primary" id="savePromptBtn">Salva prompt</button>
-  </div>
-</aside>
+      </section>
+    </div>
+    <div class="editor-footer">
+      <button class="btn" id="copyTemplateBtn">Copia modello con segnaposto</button>
+      <button class="btn success copy-compiled" id="copyCompiledBtn">Copia prompt con variabili inserite</button>
+      <button class="btn" id="duplicateBtn">Duplica</button>
+      <button class="btn danger" id="trashBtn">Cestina</button>
+      <span class="spacer"></span>
+      <button class="btn" id="cancelEditorBtn">Chiudi</button>
+      <button class="btn primary" id="savePromptBtn">Salva prompt</button>
+    </div>
+  </section>
+</div>
 
 <div class="modal-backdrop" id="manageModal">
   <div class="modal">
-    <div class="modal-head">
-      <h3>Gestione struttura</h3><span class="spacer"></span>
-      <button class="btn small" data-close-modal="manageModal">×</button>
-    </div>
+    <div class="modal-head"><h3>Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">×</button></div>
     <div class="modal-body">
-      <div class="settings-grid">
+      <div class="manage-grid">
         <div class="panel-box">
           <h4>Categorie e sottocategorie</h4>
           <div class="manage-list" id="manageCategories"></div>
           <div class="inline-form">
-            <input type="text" id="newCategoryName" placeholder="Nome categoria">
+            <input id="newCategoryName" type="text" placeholder="Nome categoria">
             <select id="newCategoryParent"><option value="">Categoria principale</option></select>
             <button class="btn primary small" id="addCategoryBtn">Aggiungi</button>
           </div>
@@ -681,1395 +387,750 @@
           <h4>Clienti e progetti</h4>
           <div class="manage-list" id="manageClients"></div>
           <div class="inline-form" style="grid-template-columns:1fr auto">
-            <input type="text" id="newClientName" placeholder="Nome cliente o progetto">
+            <input id="newClientName" type="text" placeholder="Nome cliente o progetto">
             <button class="btn primary small" id="addClientBtn">Aggiungi</button>
           </div>
         </div>
       </div>
-      <div class="panel-box" style="margin-top:16px">
-        <h4>Regole di categorizzazione</h4>
-        <p class="hint">Quando titolo o testo contiene una parola o frase, l'app propone categoria e cliente indicati.</p>
-        <div class="rule-form">
-          <input type="text" id="ruleKeyword" placeholder="Parola o frase">
-          <select id="ruleCategory"></select>
-          <select id="ruleClient"></select>
-          <button class="btn primary small" id="addRuleBtn">Aggiungi</button>
-        </div>
-        <div id="rulesList"></div>
-      </div>
     </div>
   </div>
 </div>
 
-<div class="modal-backdrop" id="genericModal">
+<div class="modal-backdrop" id="choiceModal">
   <div class="modal small">
-    <div class="modal-head">
-      <h3 id="genericTitle">Operazione</h3><span class="spacer"></span>
-      <button class="btn small" data-close-modal="genericModal">×</button>
-    </div>
-    <div class="modal-body" id="genericBody"></div>
-    <div class="modal-foot" id="genericFoot"></div>
+    <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal">×</button></div>
+    <div class="modal-body" id="choiceBody"></div>
+    <div class="modal-foot" id="choiceFoot"></div>
   </div>
 </div>
 
-<div class="modal-backdrop" id="duplicatesModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Possibili duplicati</h3><span class="spacer"></span>
-      <button class="btn small" data-close-modal="duplicatesModal">×</button>
-    </div>
-    <div class="modal-body" id="duplicatesBody"></div>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="settingsModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Strumenti e impostazioni</h3><span class="spacer"></span>
-      <button class="btn small" data-close-modal="settingsModal">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="settings-grid">
-        <div class="panel-box">
-          <h4>Archivio dati</h4>
-          <p class="hint">I dati sono salvati nel browser tramite IndexedDB. Il backup JSON è consigliato periodicamente.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="settingsExportBtn">Esporta JSON</button>
-            <button class="btn" id="settingsImportBtn">Importa JSON</button>
-            <button class="btn" id="settingsBackupBtn">Crea backup</button>
-          </div>
-        </div>
-        <div class="panel-box">
-          <h4>Comportamento</h4>
-          <label><input type="checkbox" id="autosaveSetting" checked> Salva automaticamente la bozza dell'editor</label><br><br>
-          <label><input type="checkbox" id="confirmDeleteSetting" checked> Chiedi conferma prima dell'eliminazione definitiva</label>
-        </div>
-        <div class="panel-box">
-          <h4>Scorciatoie</h4>
-          <p class="hint"><span class="kbd">⌘/Ctrl K</span> ricerca · <span class="kbd">⌘/Ctrl N</span> nuovo · <span class="kbd">⌘/Ctrl S</span> salva · <span class="kbd">Esc</span> chiudi editor</p>
-        </div>
-        <div class="panel-box">
-          <h4>Manutenzione</h4>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="recountDuplicatesBtn">Ricalcola duplicati</button>
-            <button class="btn danger" id="emptyTrashBtn">Svuota cestino</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<input type="file" id="fileInput" accept=".json,application/json" hidden>
+<input type="file" id="importInput" accept=".json,application/json" hidden>
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
 (() => {
-  "use strict";
+"use strict";
 
-  const DB_NAME = "PromptStudioStandalone";
-  const DB_VERSION = 2;
-  const STORE_NAMES = ["prompts","categories","clients","settings","backups","versions"];
-  const state = {
-    db:null,
-    prompts:[],
-    categories:[],
-    clients:[],
-    rules:[],
-    currentFilter:{type:"all",id:null},
-    query:"",
-    selected:new Set(),
-    editingId:null,
-    editorDirty:false,
-    editorVariableValues:{},
-    editorVariables:[],
-    variableTimer:null,
-    renderLimit:80,
-    viewMode:localStorage.getItem("ps_view") || "grid",
-    sort:localStorage.getItem("ps_sort") || "updated_desc",
-    collapsed:new Set(JSON.parse(localStorage.getItem("ps_collapsed") || "[]")),
-    duplicatePairs:[],
-    draftTimer:null,
-    lastUndo:null,
-    settings:{autosave:true,confirmDelete:true}
+/* ---------- Configurazione e stato ---------- */
+const DB_NAME="PromptStudioStandalone";
+const DB_VERSION=3;
+const STORES=["prompts","categories","clients","settings","backups","versions"];
+const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
+const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
+const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
+const state={
+  db:null,prompts:[],categories:[],clients:[],
+  filter:{type:"all",id:null},query:"",selected:new Set(),
+  sort:localStorage.getItem("ps_sort")||"updated_desc",
+  view:localStorage.getItem("ps_view")||"grid",
+  editor:{id:null,dirty:false,variables:[],values:{},files:{}},
+  searchTimer:null,detectTimer:null
+};
+const $=id=>document.getElementById(id);
+const $$=selector=>[...document.querySelectorAll(selector)];
+const uid=prefix=>`${prefix}_${crypto.randomUUID?.()||Date.now()+"_"+Math.random().toString(16).slice(2)}`;
+const now=()=>new Date().toISOString();
+const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]));
+const normalize=value=>String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+const catById=id=>state.categories.find(item=>item.id===id);
+const clientById=id=>state.clients.find(item=>item.id===id);
+const livePrompts=()=>state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
+const activePrompts=()=>state.prompts.filter(item=>!item.deletedAt);
+
+/* ---------- Database ---------- */
+function openDatabase(){
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open(DB_NAME,DB_VERSION);
+    request.onupgradeneeded=()=>{
+      const db=request.result;
+      STORES.forEach(name=>{if(!db.objectStoreNames.contains(name))db.createObjectStore(name,{keyPath:"id"})});
+    };
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+  });
+}
+function store(name,mode="readonly"){return state.db.transaction(name,mode).objectStore(name)}
+function getAll(name){return new Promise((resolve,reject)=>{const request=store(name).getAll();request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error)})}
+function put(name,value){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").put(value);request.onsuccess=()=>resolve(value);request.onerror=()=>reject(request.error)})}
+function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
+async function loadData(){
+  [state.prompts,state.categories,state.clients]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients")]);
+  state.categories.sort((a,b)=>(a.order??999)-(b.order??999)||a.name.localeCompare(b.name,"it"));
+  state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
+}
+async function seedData(){
+  if(!state.categories.length){
+    const seeds=[
+      ["SEO",null],["Audit SEO","SEO"],["Contenuti SEO","SEO"],["Local SEO","SEO"],["SEO tecnica","SEO"],
+      ["WordPress",null],["Social media",null],["Immagini",null],["Copywriting",null],["Sviluppo web",null]
+    ];
+    const roots={};
+    for(let index=0;index<seeds.length;index++){
+      const [name,parentName]=seeds[index];
+      const id=uid("cat");
+      const parentId=parentName?roots[parentName]:null;
+      if(!parentName)roots[name]=id;
+      await put("categories",{id,name,parentId,color:CATEGORY_COLORS[index%CATEGORY_COLORS.length],order:index,createdAt:now()});
+    }
+  }
+  if(!state.clients.length){
+    for(const name of ["Roberto Zanoni","Studio Dentistico Zirafa","Yoga Buena Onda","Pilates Buena Onda","Trova Esperti Digitali"]){
+      await put("clients",{id:uid("client"),name,createdAt:now()});
+    }
+  }
+  if(!state.prompts.length){
+    await put("prompts",{
+      id:uid("prompt"),title:"Esempio di prompt con variabili",
+      content:"DOMINIO: [DOMINIO_SITO]\n\nLINGUA PRINCIPALE: [LINGUA]\n\nPAESE/MERCATO: [PAESE_O_MERCATO]\n\nAnalizza il sito indicato e crea un piano d'azione.",
+      categoryId:null,subcategoryId:null,clientId:null,status:"draft",tags:["esempio"],notes:"",
+      favorite:true,usageCount:0,version:1,variableValues:{},variableFiles:{},
+      createdAt:now(),updatedAt:now(),deletedAt:null
+    });
+  }
+  await loadData();
+}
+
+/* ---------- Utilità UI ---------- */
+function toast(message){
+  const node=document.createElement("div");
+  node.className="toast";node.textContent=message;$("toastWrap").appendChild(node);
+  setTimeout(()=>node.remove(),4200);
+}
+function formatDate(value){return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value))}
+function formatBytes(bytes){
+  if(!Number.isFinite(bytes))return "";
+  const units=["B","KB","MB","GB"];let size=bytes,index=0;
+  while(size>=1024&&index<units.length-1){size/=1024;index++}
+  return `${size.toFixed(index?1:0)} ${units[index]}`;
+}
+function categoryColor(category){
+  if(!category)return "#64748b";
+  if(category.color)return category.color;
+  return CATEGORY_COLORS[Math.abs([...category.id].reduce((sum,char)=>sum+char.charCodeAt(0),0))%CATEGORY_COLORS.length];
+}
+function copyText(text){
+  if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(text);
+  return new Promise((resolve,reject)=>{
+    const area=document.createElement("textarea");
+    area.value=text;area.style.position="fixed";area.style.left="-9999px";document.body.appendChild(area);
+    area.focus();area.select();
+    try{document.execCommand("copy")?resolve():reject(new Error("Copia non riuscita"))}catch(error){reject(error)}
+    area.remove();
+  });
+}
+function setTheme(initial=false){
+  if(initial){
+    const saved=localStorage.getItem("ps_theme");
+    document.body.classList.toggle("dark",saved?saved==="dark":matchMedia("(prefers-color-scheme:dark)").matches);
+  }else{
+    document.body.classList.toggle("dark");
+    localStorage.setItem("ps_theme",document.body.classList.contains("dark")?"dark":"light");
+  }
+}
+function openModal(id){$(id).classList.add("show")}
+function closeModal(id){$(id).classList.remove("show")}
+function confirmAction(title,message,onConfirm){
+  $("choiceTitle").textContent=title;
+  $("choiceBody").innerHTML=`<p>${esc(message)}</p>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Annulla</button><button class="btn danger" id="choiceConfirm">Conferma</button>`;
+  bindModalClose();
+  $("choiceConfirm").onclick=()=>{closeModal("choiceModal");onConfirm()};
+  openModal("choiceModal");
+}
+function choiceAction(title,label,options,onConfirm){
+  $("choiceTitle").textContent=title;
+  $("choiceBody").innerHTML=`<div class="field"><label>${esc(label)}</label><select id="choiceSelect">${options}</select></div>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Annulla</button><button class="btn primary" id="choiceConfirm">Applica</button>`;
+  bindModalClose();
+  $("choiceConfirm").onclick=()=>{const value=$("choiceSelect").value;closeModal("choiceModal");onConfirm(value)};
+  openModal("choiceModal");
+}
+function bindModalClose(){$$("[data-close]").forEach(button=>button.onclick=()=>closeModal(button.dataset.close))}
+
+/* ---------- Ricerca e filtri ---------- */
+function setFilter(type,id=null){
+  state.filter={type,id};state.selected.clear();
+  $$(".side-link[data-filter]").forEach(button=>button.classList.toggle("active",button.dataset.filter===type));
+  render();
+  $("sidebar").classList.remove("open");
+}
+function filteredPrompts(){
+  const filter=state.filter;
+  let items=[...state.prompts];
+  if(filter.type==="trash")items=items.filter(item=>item.deletedAt);
+  else if(filter.type==="archived")items=items.filter(item=>!item.deletedAt&&item.status==="archived");
+  else items=items.filter(item=>!item.deletedAt&&item.status!=="archived");
+  if(filter.type==="favorites")items=items.filter(item=>item.favorite);
+  if(filter.type==="recent"){const limit=Date.now()-7*864e5;items=items.filter(item=>new Date(item.updatedAt).getTime()>=limit)}
+  if(filter.type==="uncategorized")items=items.filter(item=>!item.categoryId&&!item.subcategoryId);
+  if(filter.type==="category"){
+    const childIds=state.categories.filter(cat=>cat.parentId===filter.id).map(cat=>cat.id);
+    items=items.filter(item=>item.categoryId===filter.id||item.subcategoryId===filter.id||childIds.includes(item.subcategoryId));
+  }
+  if(filter.type==="client")items=items.filter(item=>item.clientId===filter.id);
+  const query=normalize(state.query);
+  if(query){
+    const words=query.split(" ").filter(Boolean);
+    items=items.filter(item=>{
+      const text=normalize([item.title,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name].join(" "));
+      return words.every(word=>text.includes(word));
+    });
+  }
+  return items.sort((a,b)=>{
+    if(state.sort==="title_asc")return a.title.localeCompare(b.title,"it");
+    if(state.sort==="title_desc")return b.title.localeCompare(a.title,"it");
+    if(state.sort==="created_desc")return new Date(b.createdAt)-new Date(a.createdAt);
+    if(state.sort==="usage_desc")return (b.usageCount||0)-(a.usageCount||0);
+    return new Date(b.updatedAt)-new Date(a.updatedAt);
+  });
+}
+function filterInfo(){
+  const {type,id}=state.filter;
+  if(type==="all")return ["Tutti i prompt","La tua libreria completa"];
+  if(type==="favorites")return ["Preferiti","I prompt che utilizzi più spesso"];
+  if(type==="recent")return ["Recenti","Modificati negli ultimi sette giorni"];
+  if(type==="uncategorized")return ["Senza categoria","Prompt ancora da organizzare"];
+  if(type==="archived")return ["Archivio","Prompt esclusi dalla libreria attiva"];
+  if(type==="trash")return ["Cestino","Prompt eliminati e recuperabili"];
+  if(type==="category")return [catById(id)?.name||"Categoria","Prompt della categoria selezionata"];
+  if(type==="client")return [clientById(id)?.name||"Cliente","Prompt assegnati al cliente o progetto"];
+  return ["Prompt",""];
+}
+
+/* ---------- Rendering ---------- */
+function renderSidebar(){
+  const live=livePrompts(),active=activePrompts();
+  $("countAll").textContent=live.length;
+  $("countFavorites").textContent=live.filter(item=>item.favorite).length;
+  $("countRecent").textContent=live.filter(item=>Date.now()-new Date(item.updatedAt).getTime()<=7*864e5).length;
+  $("countUncategorized").textContent=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
+  $("countArchived").textContent=active.filter(item=>item.status==="archived").length;
+  $("countTrash").textContent=state.prompts.filter(item=>item.deletedAt).length;
+
+  const counts={};
+  live.forEach(item=>{
+    if(item.categoryId)counts[item.categoryId]=(counts[item.categoryId]||0)+1;
+    if(item.subcategoryId)counts[item.subcategoryId]=(counts[item.subcategoryId]||0)+1;
+  });
+  const node=(category,depth=0)=>{
+    const children=state.categories.filter(item=>item.parentId===category.id);
+    return `<button class="tree-row ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth}" data-category="${esc(category.id)}">
+      <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span>
+    </button>${children.map(child=>node(child,depth+1)).join("")}`;
+  };
+  $("categoryTree").innerHTML=state.categories.filter(item=>!item.parentId).map(item=>node(item)).join("");
+  $("clientList").innerHTML=state.clients.map(client=>{
+    const count=live.filter(item=>item.clientId===client.id).length;
+    return `<button class="tree-row ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span></button>`;
+  }).join("");
+  $$("[data-category]").forEach(button=>button.onclick=()=>setFilter("category",button.dataset.category));
+  $$("[data-client]").forEach(button=>button.onclick=()=>setFilter("client",button.dataset.client));
+}
+function renderStats(){
+  const visible=state.filter.type==="all"&&!state.query;
+  $("stats").classList.toggle("hidden",!visible);
+  if(!visible)return;
+  const live=livePrompts();
+  $("stats").innerHTML=`
+    <div class="stat"><strong>${live.length}</strong><span>Prompt attivi</span></div>
+    <div class="stat"><strong>${state.categories.length}</strong><span>Categorie e sottocategorie</span></div>
+    <div class="stat"><strong>${live.filter(item=>!item.categoryId&&!item.subcategoryId).length}</strong><span>Da categorizzare</span></div>
+    <div class="stat"><strong>${live.filter(item=>item.favorite).length}</strong><span>Preferiti</span></div>`;
+}
+function cardHtml(prompt){
+  const category=catById(prompt.subcategoryId)||catById(prompt.categoryId);
+  const client=clientById(prompt.clientId);
+  const accent=categoryColor(category);
+  const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
+  const variableCount=extractVariables(prompt.content).length;
+  return `<article class="card" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
+    <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
+    <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">★</span>':""}</div>
+    <div class="excerpt">${esc(prompt.content||"Nessun contenuto")}</div>
+    <div class="meta">
+      ${category?`<span class="chip accent">${esc(category.name)}</span>`:'<span class="chip">Senza categoria</span>'}
+      ${client?`<span class="chip">${esc(client.name)}</span>`:""}
+      ${variableCount?`<span class="chip">${variableCount} variabil${variableCount===1?"e":"i"}</span>`:""}
+      <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
+    </div>
+    <div class="card-actions">
+      <button class="btn small edit-card">Apri</button>
+      <button class="btn small copy-card">Copia</button>
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':'<button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>'}
+    </div>
+  </article>`;
+}
+function renderCards(){
+  const items=filteredPrompts();
+  $("cards").className=`cards ${state.view==="list"?"list":""}`;
+  $("cards").innerHTML=items.length?items.map(cardHtml).join(""):`<div class="empty"><div class="big">⌕</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
+  const [title,subtitle]=filterInfo();
+  $("viewTitle").textContent=title;
+  $("viewSubtitle").textContent=state.query?`${items.length} risultati per “${state.query}”`:`${subtitle} · ${items.length} elementi`;
+  bindCardEvents();
+  updateBulkbar();
+}
+function render(){renderSidebar();renderStats();renderCards()}
+function bindCardEvents(){
+  $$("#cards .card").forEach(card=>{
+    const id=card.dataset.id;
+    card.onclick=event=>{
+      if(event.target.closest("button,input"))return;
+      openEditor(id);
+    };
+    card.onkeydown=event=>{if(event.key==="Enter")openEditor(id)};
+    card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
+    card.querySelector(".edit-card").onclick=()=>openEditor(id);
+    card.querySelector(".copy-card").onclick=()=>quickCopy(id);
+    card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
+    card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
+    card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
+    card.querySelector(".delete-card")?.addEventListener("click",()=>deletePrompt(id));
+  });
+}
+function updateBulkbar(){
+  $("selectedCount").textContent=state.selected.size;
+  $("bulkbar").classList.toggle("show",state.selected.size>0);
+}
+
+/* ---------- Motore delle variabili ---------- */
+function variableRegex(){
+  return /{{\s*([^{}]+?)\s*}}|\[\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*\]/g;
+}
+function variableName(value){return String(value||"").replace(/{{|}}|\[|\]/g,"").trim().replace(/\s+/g,"_")}
+function humanize(value){
+  let text=String(value||"").replace(/{{|}}|\[|\]/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
+  if(text==="dominio sito")text="dominio";
+  return text||"valore";
+}
+function contextLabel(content,index){
+  const start=content.lastIndexOf("\n",index)+1;
+  return content.slice(start,index).replace(/[*_`#>]/g,"").replace(/^[\s\-–—•\d.)]+/,"").replace(/[:：\-–—]\s*$/,"").replace(/\s+/g," ").trim().toLowerCase();
+}
+function isFileVariable(definition){
+  const text=normalize(`${definition.name} ${definition.label}`);
+  return /\b(file|allegato|documento|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|dataset|sitemap|report|zip)\b/.test(text);
+}
+function extractVariables(content){
+  const text=String(content||""),definitions=[],seen=new Set(),regex=variableRegex();
+  let match;
+  while((match=regex.exec(text))){
+    const name=variableName(match[1]??match[2]);
+    const key=name.toLowerCase();
+    if(!name||seen.has(key))continue;
+    seen.add(key);
+    const context=contextLabel(text,match.index);
+    const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":"square"};
+    definition.fileLike=isFileVariable(definition);
+    definitions.push(definition);
+  }
+  return definitions;
+}
+function valueFor(values,name){
+  if(Object.prototype.hasOwnProperty.call(values,name))return values[name];
+  const key=Object.keys(values||{}).find(item=>item.toLowerCase()===name.toLowerCase());
+  return key?values[key]:"";
+}
+function compilePrompt(content,values){
+  return String(content||"").replace(variableRegex(),(match,curly,square)=>{
+    const name=variableName(curly??square),value=valueFor(values,name);
+    return String(value??"").trim()?value:match;
+  });
+}
+function refreshVariables(renderNow=true){
+  syncVariableInputs();
+  const oldValues={...state.editor.values};
+  const oldFiles={...state.editor.files};
+  state.editor.variables=extractVariables($("promptContent").value);
+  state.editor.values=Object.fromEntries(state.editor.variables.map(def=>[def.name,valueFor(oldValues,def.name)||""]));
+  state.editor.files=Object.fromEntries(state.editor.variables.map(def=>[def.name,oldFiles[def.name]||null]));
+  if(renderNow)renderVariables();
+}
+function syncVariableInputs(){
+  $$("#variableList .variable-input").forEach(input=>state.editor.values[input.dataset.var]=input.value);
+}
+function variableCardHtml(def,index){
+  const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length];
+  const value=valueFor(state.editor.values,def.name);
+  const file=state.editor.files[def.name];
+  const open=def.fileLike||file?"open":"";
+  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.textExtracted?" · contenuto testuale inserito":" · nome e dati del file inseriti"}`:"Nessun file selezionato.";
+  return `<article class="variable-card" style="--var-accent:${accent}" data-var="${esc(def.name)}">
+    <div class="variable-card-head"><span class="variable-number">Variabile ${index+1}</span><span class="variable-token">${esc(def.raw)}</span><span class="variable-badge">${def.fileLike?"Può richiedere un file":"Rilevata nel prompt"}</span></div>
+    <div class="variable-card-body">
+      <h4>Inserisci variabile ${esc(def.label||humanize(def.name))}</h4>
+      <p class="variable-help">Questo valore sostituirà <strong>${esc(def.raw)}</strong> nel prompt copiato.</p>
+      <textarea class="variable-input" data-var="${esc(def.name)}" placeholder="Inserisci ${esc(def.label||humanize(def.name))}…">${esc(value)}</textarea>
+      <details class="file-panel" ${open}>
+        <summary>Carica un file per questa variabile</summary>
+        <div class="file-zone">
+          <div class="file-drop" data-var="${esc(def.name)}">
+            <input class="variable-file" data-var="${esc(def.name)}" type="file">
+            <strong>Trascina il file qui oppure scegli dal computer</strong><br>
+            <button class="btn small choose-file" type="button">Scegli file</button>
+            <div class="file-status">${esc(fileText)}</div>
+          </div>
+          <div class="hint" style="margin-top:8px">Per TXT, CSV, JSON, HTML e altri file testuali viene inserito il contenuto. Per PDF, DOCX, immagini, ZIP e file binari vengono inseriti nome, tipo e dimensione: il file dovrà poi essere allegato manualmente dove usi il prompt.</div>
+        </div>
+      </details>
+    </div>
+  </article>`;
+}
+function renderVariables(){
+  const definitions=state.editor.variables;
+  $("variablesTab").textContent=definitions.length?`Variabili (${definitions.length})`:"Variabili";
+  $("variableSummary").textContent=definitions.length?`${definitions.length} variabil${definitions.length===1?"e rilevata":"i rilevate"} automaticamente nel prompt.`:"";
+  $("variableSummary").classList.toggle("show",definitions.length>0);
+  $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
+  $$("#variableList .variable-input").forEach(input=>input.addEventListener("input",()=>{
+    state.editor.values[input.dataset.var]=input.value;markDirty();updateCompiledPreview();
+  }));
+  $$("#variableList .choose-file").forEach(button=>button.onclick=()=>button.closest(".file-drop").querySelector(".variable-file").click());
+  $$("#variableList .variable-file").forEach(input=>input.onchange=()=>input.files[0]&&processVariableFile(input.dataset.var,input.files[0]));
+  $$("#variableList .file-drop").forEach(zone=>{
+    zone.ondragover=event=>{event.preventDefault();zone.classList.add("drag")};
+    zone.ondragleave=()=>zone.classList.remove("drag");
+    zone.ondrop=event=>{event.preventDefault();zone.classList.remove("drag");const file=event.dataTransfer.files[0];if(file)processVariableFile(zone.dataset.var,file)};
+  });
+  updateCompiledPreview();
+}
+async function processVariableFile(name,file){
+  const extension=file.name.split(".").pop()?.toLowerCase()||"";
+  const textLike=file.type.startsWith("text/")||TEXT_FILE_EXTENSIONS.has(extension);
+  const metadata=`[File selezionato: ${file.name} | Tipo: ${file.type||"non specificato"} | Dimensione: ${formatBytes(file.size)}]`;
+  let value=metadata,textExtracted=false;
+  if(textLike&&file.size<=2*1024*1024){
+    try{value=await file.text();textExtracted=true}catch(_){value=metadata}
+  }else if(textLike&&file.size>2*1024*1024){
+    value=`${metadata}\n[Il contenuto non è stato incorporato perché supera 2 MB.]`;
+  }
+  state.editor.values[name]=value;
+  state.editor.files[name]={name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,textExtracted};
+  const input=$(`#variableList .variable-input[data-var="${CSS.escape(name)}"]`);
+  if(input)input.value=value;
+  markDirty();renderVariables();toast(textExtracted?"Contenuto del file inserito nella variabile.":"File registrato nella variabile.");
+}
+function collectVariableValues(){
+  syncVariableInputs();
+  return Object.fromEntries(state.editor.variables.map(def=>[def.name,state.editor.values[def.name]||""]));
+}
+function updateCompiledPreview(){
+  $("compiledPreview").value=compilePrompt($("promptContent").value,collectVariableValues());
+}
+function missingVariables(){
+  const values=collectVariableValues();
+  return state.editor.variables.filter(def=>!String(values[def.name]||"").trim());
+}
+function highlightMissing(definitions){
+  setEditorTab("variables");
+  $$("#variableList .variable-input").forEach(input=>input.classList.remove("missing"));
+  definitions.forEach(def=>$(`#variableList .variable-input[data-var="${CSS.escape(def.name)}"]`)?.classList.add("missing"));
+  const first=definitions[0]&&$(`#variableList .variable-input[data-var="${CSS.escape(definitions[0].name)}"]`);
+  first?.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>first?.focus(),250);
+}
+
+/* ---------- Editor ---------- */
+function fillEditorSelects(prompt){
+  const roots=state.categories.filter(item=>!item.parentId);
+  $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptClient").innerHTML='<option value="">Nessun cliente</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptCategory").value=prompt?.categoryId||"";
+  fillSubcategories(prompt?.subcategoryId||"");
+  $("promptClient").value=prompt?.clientId||"";
+}
+function fillSubcategories(selected=""){
+  const parent=$("promptCategory").value;
+  const children=state.categories.filter(item=>item.parentId===parent);
+  $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptSubcategory").value=selected;
+}
+function openEditor(id=null,preferredTab=null){
+  const prompt=id?state.prompts.find(item=>item.id===id):null;
+  state.editor={id:prompt?.id||null,dirty:false,variables:[],values:{...(prompt?.variableValues||{})},files:{...(prompt?.variableFiles||{})}};
+  $("editorTitle").textContent=prompt?"Modifica prompt":"Nuovo prompt";
+  $("promptTitle").value=prompt?.title||"";
+  $("promptContent").value=prompt?.content||"";
+  $("promptStatus").value=prompt?.status||"draft";
+  $("promptTags").value=(prompt?.tags||[]).join(", ");
+  $("promptNotes").value=prompt?.notes||"";
+  $("promptFavorite").checked=!!prompt?.favorite;
+  $("duplicateBtn").classList.toggle("hidden",!prompt);
+  $("trashBtn").classList.toggle("hidden",!prompt);
+  fillEditorSelects(prompt);
+  refreshVariables(false);
+  renderVariables();
+  updateCounts();
+  setEditorTab(preferredTab||(state.editor.variables.length?"variables":"prompt"));
+  $("editorBackdrop").classList.add("show");
+  setTimeout(()=>{if(!prompt)$("promptTitle").focus()},120);
+}
+function setEditorTab(name){
+  $$(".editor-tab").forEach(button=>button.classList.toggle("active",button.dataset.tab===name));
+  $$(".editor-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.panel===name));
+  if(name==="variables"){refreshVariables(false);renderVariables()}
+}
+function closeEditor(force=false){
+  if(state.editor.dirty&&!force){
+    confirmAction("Modifiche non salvate","Chiudere il prompt senza salvare le modifiche?",()=>closeEditor(true));
+    return;
+  }
+  $("editorBackdrop").classList.remove("show");
+  state.editor={id:null,dirty:false,variables:[],values:{},files:{}};
+}
+function markDirty(){state.editor.dirty=true}
+function updateCounts(){
+  const text=$("promptContent").value;
+  $("charCount").textContent=`${text.length} caratteri`;
+  $("wordCount").textContent=`${text.trim()?text.trim().split(/\s+/).length:0} parole`;
+}
+function editorPayload(){
+  refreshVariables(false);
+  const existing=state.editor.id?state.prompts.find(item=>item.id===state.editor.id):null;
+  return {
+    id:existing?.id||uid("prompt"),
+    title:$("promptTitle").value.trim(),
+    content:$("promptContent").value.trim(),
+    categoryId:$("promptCategory").value||null,
+    subcategoryId:$("promptSubcategory").value||null,
+    clientId:$("promptClient").value||null,
+    status:$("promptStatus").value,
+    tags:$("promptTags").value.split(",").map(item=>item.trim()).filter(Boolean),
+    notes:$("promptNotes").value.trim(),
+    favorite:$("promptFavorite").checked,
+    usageCount:existing?.usageCount||0,
+    version:(existing?.version||0)+1,
+    variableValues:collectVariableValues(),
+    variableFiles:{...state.editor.files},
+    createdAt:existing?.createdAt||now(),
+    updatedAt:now(),
+    deletedAt:existing?.deletedAt||null
+  };
+}
+async function savePrompt(){
+  const payload=editorPayload();
+  if(!payload.title){toast("Inserisci il titolo del prompt.");setEditorTab("prompt");$("promptTitle").focus();return}
+  if(!payload.content){toast("Inserisci il testo del prompt.");setEditorTab("prompt");$("promptContent").focus();return}
+  await put("prompts",payload);await loadData();
+  state.editor.id=payload.id;state.editor.dirty=false;render();toast("Prompt salvato.");
+}
+async function persistEditorVariables(){
+  if(!state.editor.id)return;
+  const prompt=state.prompts.find(item=>item.id===state.editor.id);if(!prompt)return;
+  prompt.variableValues=collectVariableValues();prompt.variableFiles={...state.editor.files};prompt.updatedAt=now();
+  await put("prompts",prompt);await loadData();render();
+}
+async function copyTemplate(){
+  const text=$("promptContent").value;
+  if(!text.trim()){toast("Il prompt è vuoto.");return}
+  await copyText(text);toast("Modello copiato con i segnaposto.");
+}
+async function copyCompiled(){
+  refreshVariables(false);renderVariables();
+  const missing=missingVariables();
+  if(missing.length){
+    highlightMissing(missing);
+    toast(`Compila prima: ${missing.map(def=>def.label||humanize(def.name)).join(", ")}.`);
+    return;
+  }
+  const result=compilePrompt($("promptContent").value,collectVariableValues());
+  await copyText(result);
+  await persistEditorVariables();
+  toast("Prompt copiato con tutte le variabili inserite.");
+}
+
+/* ---------- Azioni sui prompt ---------- */
+async function quickCopy(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  const definitions=extractVariables(prompt.content);
+  if(definitions.length){openEditor(id,"variables");toast("Compila le variabili e usa “Copia prompt con variabili inserite”.");return}
+  await copyText(prompt.content);prompt.usageCount=(prompt.usageCount||0)+1;await put("prompts",prompt);toast("Prompt copiato.");
+}
+async function duplicatePrompt(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  const copy={...prompt,id:uid("prompt"),title:`${prompt.title} — copia`,favorite:false,usageCount:0,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
+  await put("prompts",copy);await loadData();render();toast("Prompt duplicato.");
+}
+async function trashPrompt(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  prompt.deletedAt=now();prompt.updatedAt=now();await put("prompts",prompt);await loadData();render();
+  if(state.editor.id===id)closeEditor(true);toast("Prompt spostato nel cestino.");
+}
+async function restorePrompt(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  prompt.deletedAt=null;prompt.updatedAt=now();await put("prompts",prompt);await loadData();render();toast("Prompt ripristinato.");
+}
+function deletePrompt(id){
+  confirmAction("Eliminazione definitiva","Questa operazione non può essere annullata.",async()=>{await remove("prompts",id);await loadData();render();toast("Prompt eliminato definitivamente.")});
+}
+async function bulkUpdate(patch){
+  const ids=[...state.selected];
+  for(const id of ids){
+    const prompt=state.prompts.find(item=>item.id===id);if(!prompt)continue;
+    Object.assign(prompt,patch,{updatedAt:now()});await put("prompts",prompt);
+  }
+  state.selected.clear();await loadData();render();toast(`${ids.length} prompt aggiornati.`);
+}
+
+/* ---------- Gestione categorie e clienti ---------- */
+function renderManage(){
+  const roots=state.categories.filter(item=>!item.parentId);
+  $("newCategoryParent").innerHTML='<option value="">Categoria principale</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("manageCategories").innerHTML=state.categories.map(category=>`
+    <div class="manage-row">
+      <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
+      <div class="grow"><strong>${esc(category.name)}</strong>${category.parentId?`<div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")}</div>`:""}</div>
+      <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}">
+      <button class="btn small rename-category" data-id="${esc(category.id)}">Rinomina</button>
+      <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
+    </div>`).join("");
+  $("manageClients").innerHTML=state.clients.map(client=>`
+    <div class="manage-row"><div class="grow"><strong>${esc(client.name)}</strong></div><button class="btn small rename-client" data-id="${esc(client.id)}">Rinomina</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
+  $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
+  $$(".rename-category").forEach(button=>button.onclick=()=>renameEntity("categories",button.dataset.id));
+  $$(".rename-client").forEach(button=>button.onclick=()=>renameEntity("clients",button.dataset.id));
+  $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
+  $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
+}
+async function renameEntity(type,id){
+  const collection=type==="categories"?state.categories:state.clients;
+  const item=collection.find(entry=>entry.id===id);if(!item)return;
+  const name=prompt("Nuovo nome:",item.name)?.trim();if(!name||name===item.name)return;
+  item.name=name;await put(type,item);await loadData();render();renderManage();
+}
+function deleteCategory(id){
+  const children=state.categories.filter(item=>item.parentId===id);
+  const affected=state.prompts.filter(prompt=>prompt.categoryId===id||prompt.subcategoryId===id||children.some(child=>prompt.subcategoryId===child.id));
+  confirmAction("Elimina categoria",`${affected.length} prompt verranno spostati in “Senza categoria”.`,async()=>{
+    for(const prompt of affected){if(prompt.categoryId===id)prompt.categoryId=null;if(prompt.subcategoryId===id||children.some(child=>prompt.subcategoryId===child.id))prompt.subcategoryId=null;await put("prompts",prompt)}
+    for(const child of children)await remove("categories",child.id);
+    await remove("categories",id);await loadData();render();renderManage();toast("Categoria eliminata.");
+  });
+}
+function deleteClient(id){
+  const affected=state.prompts.filter(prompt=>prompt.clientId===id);
+  confirmAction("Elimina cliente",`${affected.length} prompt perderanno l’assegnazione al cliente.`,async()=>{
+    for(const prompt of affected){prompt.clientId=null;await put("prompts",prompt)}
+    await remove("clients",id);await loadData();render();renderManage();toast("Cliente eliminato.");
+  });
+}
+
+/* ---------- Importazione, esportazione e backup ---------- */
+function snapshot(){return {app:"Prompt Studio Standalone",version:8,exportedAt:now(),prompts:state.prompts,categories:state.categories,clients:state.clients}}
+function downloadJson(data,filename){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+}
+function exportData(){downloadJson(snapshot(),`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);toast("Backup JSON esportato.")}
+async function createBackup(){
+  const data=snapshot();await put("backups",{id:uid("backup"),createdAt:now(),data});
+  downloadJson(data,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Backup creato.");
+}
+async function importData(file){
+  try{
+    const data=JSON.parse(await file.text());
+    if(!Array.isArray(data.prompts)||!Array.isArray(data.categories)||!Array.isArray(data.clients))throw new Error("Formato non riconosciuto");
+    choiceAction("Importa archivio","Modalità",'<option value="merge">Unisci con i dati esistenti</option><option value="replace">Sostituisci l’archivio attuale</option>',async mode=>{
+      if(mode==="replace"){
+        for(const name of ["prompts","categories","clients"]){for(const item of await getAll(name))await remove(name,item.id)}
+      }
+      for(const item of data.categories)await put("categories",item);
+      for(const item of data.clients)await put("clients",item);
+      for(const item of data.prompts)await put("prompts",item);
+      await loadData();render();toast("Importazione completata.");
+    });
+  }catch(error){toast(`Importazione non riuscita: ${error.message}`)}
+}
+
+/* ---------- Eventi ---------- */
+function bindEvents(){
+  $$(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
+  $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderCards()},160)};
+  $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderCards()};
+  $("newPromptBtn").onclick=()=>openEditor();
+  $("themeBtn").onclick=()=>setTheme();
+  $("mobileMenuBtn").onclick=()=>$("sidebar").classList.add("open");
+  $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
+  $("backupBtn").onclick=createBackup;
+  $("exportBtn").onclick=exportData;
+  $("importBtn").onclick=()=>$("importInput").click();
+  $("importInput").onchange=event=>{const file=event.target.files[0];if(file)importData(file);event.target.value=""};
+  $("sortSelect").value=state.sort;
+  $("sortSelect").onchange=event=>{state.sort=event.target.value;localStorage.setItem("ps_sort",state.sort);renderCards()};
+  $("gridBtn").onclick=()=>{state.view="grid";localStorage.setItem("ps_view","grid");renderCards()};
+  $("listBtn").onclick=()=>{state.view="list";localStorage.setItem("ps_view","list");renderCards()};
+  $("selectAllBtn").onclick=()=>{filteredPrompts().forEach(prompt=>state.selected.add(prompt.id));renderCards()};
+  $("clearSelectionBtn").onclick=()=>{state.selected.clear();renderCards()};
+  $("bulkMoveBtn").onclick=()=>choiceAction("Sposta prompt","Categoria",'<option value="">Senza categoria</option>'+state.categories.map(cat=>`<option value="${esc(cat.id)}">${esc(cat.name)}</option>`).join(""),value=>{
+    const category=catById(value);bulkUpdate(category?.parentId?{categoryId:category.parentId,subcategoryId:category.id}:{categoryId:value||null,subcategoryId:null});
+  });
+  $("bulkClientBtn").onclick=()=>choiceAction("Assegna cliente","Cliente",'<option value="">Nessun cliente</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)}</option>`).join(""),value=>bulkUpdate({clientId:value||null}));
+  $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
+  $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:now()});
+
+  $$(".editor-tab").forEach(button=>button.onclick=()=>setEditorTab(button.dataset.tab));
+  $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
+  $("editorBackdrop").onclick=event=>{if(event.target===$("editorBackdrop"))closeEditor()};
+  $("promptCategory").onchange=()=>{fillSubcategories();markDirty()};
+  ["promptTitle","promptTags","promptNotes"].forEach(id=>$(id).oninput=markDirty);
+  ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
+  $("promptContent").oninput=()=>{
+    markDirty();updateCounts();clearTimeout(state.detectTimer);
+    state.detectTimer=setTimeout(()=>{refreshVariables(true)},260);
+  };
+  $("detectVariablesBtn").onclick=()=>{refreshVariables(true);toast(`${state.editor.variables.length} variabili rilevate.`)};
+  $("copyTemplateBtn").onclick=()=>copyTemplate().catch(()=>toast("Impossibile copiare negli appunti."));
+  $("copyCompiledBtn").onclick=()=>copyCompiled().catch(()=>toast("Impossibile copiare negli appunti."));
+  $("savePromptBtn").onclick=savePrompt;
+  $("duplicateBtn").onclick=()=>state.editor.id&&duplicatePrompt(state.editor.id);
+  $("trashBtn").onclick=()=>state.editor.id&&trashPrompt(state.editor.id);
+
+  $("addCategoryBtn").onclick=async()=>{
+    const name=$("newCategoryName").value.trim(),parentId=$("newCategoryParent").value||null;if(!name)return;
+    await put("categories",{id:uid("cat"),name,parentId,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
+    $("newCategoryName").value="";await loadData();render();renderManage();
+  };
+  $("addClientBtn").onclick=async()=>{
+    const name=$("newClientName").value.trim();if(!name)return;
+    await put("clients",{id:uid("client"),name,createdAt:now()});$("newClientName").value="";await loadData();render();renderManage();
   };
 
-  const $ = id => document.getElementById(id);
-  const $$ = sel => [...document.querySelectorAll(sel)];
-  const nowISO = () => new Date().toISOString();
-  const uid = prefix => `${prefix}_${crypto.randomUUID ? crypto.randomUUID() : Date.now()+"_"+Math.random().toString(16).slice(2)}`;
-  const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-  const normalize = s => String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
-  const tokens = s => [...new Set(normalize(s).split(" ").filter(w => w.length>2))];
-  const fmtDate = iso => new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(iso));
-  const catById = id => state.categories.find(c=>c.id===id);
-  const clientById = id => state.clients.find(c=>c.id===id);
-  const activePrompts = () => state.prompts.filter(p=>!p.deletedAt);
-  const livePrompts = () => state.prompts.filter(p=>!p.deletedAt && p.status!=="archived");
-  const SUBCATEGORY_PALETTE=[
-    "#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2",
-    "#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c",
-    "#0369a1","#be123c","#15803d","#a16207"
-  ];
-  const VARIABLE_BOX_PALETTE=[
-    "#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2",
-    "#ca8a04","#dc2626","#4f46e5","#0d9488"
-  ];
-  function stableColorIndex(value){
-    let hash=0;for(const ch of String(value||""))hash=((hash<<5)-hash)+ch.charCodeAt(0);
-    return Math.abs(hash);
-  }
-  function displayCategoryColor(category){
-    if(!category)return "#64748b";
-    if(category.colorManual&&category.color)return category.color;
-    if(category.parentId){
-      const children=state.categories.filter(c=>c.parentId).sort((a,b)=>a.name.localeCompare(b.name,"it"));
-      const index=children.findIndex(c=>c.id===category.id);
-      return SUBCATEGORY_PALETTE[(index>=0?index:stableColorIndex(category.id))%SUBCATEGORY_PALETTE.length];
-    }
-    return category.color||SUBCATEGORY_PALETTE[stableColorIndex(category.id)%SUBCATEGORY_PALETTE.length];
-  }
-  function promptCardColor(prompt){
-    return displayCategoryColor(catById(prompt.subcategoryId)||catById(prompt.categoryId));
-  }
-  function nextCategoryColor(parentId){
-    const count=state.categories.filter(c=>Boolean(c.parentId)===Boolean(parentId)).length;
-    return SUBCATEGORY_PALETTE[count%SUBCATEGORY_PALETTE.length];
-  }
-
-  function openDB(){
-    return new Promise((resolve,reject)=>{
-      const req=indexedDB.open(DB_NAME,DB_VERSION);
-      req.onupgradeneeded=()=>{
-        const db=req.result;
-        STORE_NAMES.forEach(name=>{
-          if(!db.objectStoreNames.contains(name)) db.createObjectStore(name,{keyPath:"id"});
-        });
-      };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-    });
-  }
-  function tx(store,mode="readonly"){return state.db.transaction(store,mode).objectStore(store)}
-  function getAll(store){
-    return new Promise((resolve,reject)=>{
-      const req=tx(store).getAll(); req.onsuccess=()=>resolve(req.result||[]); req.onerror=()=>reject(req.error);
-    });
-  }
-  function put(store,obj){
-    return new Promise((resolve,reject)=>{
-      const req=tx(store,"readwrite").put(obj); req.onsuccess=()=>resolve(obj); req.onerror=()=>reject(req.error);
-    });
-  }
-  function del(store,id){
-    return new Promise((resolve,reject)=>{
-      const req=tx(store,"readwrite").delete(id); req.onsuccess=()=>resolve(); req.onerror=()=>reject(req.error);
-    });
-  }
-  async function loadState(){
-    const [prompts,categories,clients,settings]=await Promise.all([
-      getAll("prompts"),getAll("categories"),getAll("clients"),getAll("settings")
-    ]);
-    state.prompts=prompts;
-    state.categories=categories.sort((a,b)=>(a.order??999)-(b.order??999)||a.name.localeCompare(b.name,"it"));
-    state.clients=clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
-    const rulesRecord=settings.find(s=>s.id==="rules");
-    const prefsRecord=settings.find(s=>s.id==="prefs");
-    state.rules=rulesRecord?.value || [];
-    state.settings={...state.settings,...(prefsRecord?.value||{})};
-  }
-  async function seed(){
-    if(state.categories.length===0){
-      const defaults=[
-        ["cat_seo","SEO",null,"#2563eb"],["cat_audit","Audit SEO","cat_seo","#60a5fa"],
-        ["cat_content","Contenuti SEO","cat_seo","#60a5fa"],["cat_local","Local SEO","cat_seo","#60a5fa"],
-        ["cat_technical","SEO tecnica","cat_seo","#60a5fa"],["cat_wp","WordPress",null,"#7c3aed"],
-        ["cat_social","Social media",null,"#db2777"],["cat_images","Immagini",null,"#ea580c"],
-        ["cat_copy","Copywriting",null,"#059669"],["cat_dev","Sviluppo web",null,"#0891b2"]
-      ];
-      for(let i=0;i<defaults.length;i++){
-        const [id,name,parentId,color]=defaults[i];
-        await put("categories",{id,name,parentId,color,order:i,createdAt:nowISO()});
-      }
-    }
-    if(state.clients.length===0){
-      const names=["Roberto Zanoni","Studio Dentistico Zirafa","Yoga Buena Onda","Pilates Buena Onda","Trova Esperti Digitali"];
-      for(let i=0;i<names.length;i++) await put("clients",{id:uid("client"),name:names[i],createdAt:nowISO()});
-    }
-    if(state.prompts.length===0){
-      await put("prompts",{
-        id:uid("prompt"),
-        title:"Benvenuto in Prompt Studio",
-        content:"Usa questo spazio per organizzare i tuoi prompt. Puoi creare categorie e sottocategorie, assegnare clienti, cercare nel testo, importare ed esportare backup e individuare possibili duplicati.",
-        categoryId:null,subcategoryId:null,clientId:null,tags:["guida"],variables:[],notes:"",
-        status:"approved",favorite:true,usageCount:0,version:1,createdAt:nowISO(),updatedAt:nowISO(),deletedAt:null
-      });
-    }
-    await loadState();
-  }
-
-  function toast(message,actionLabel=null,action=null){
-    const el=document.createElement("div"); el.className="toast";
-    const span=document.createElement("span"); span.textContent=message; el.appendChild(span);
-    if(actionLabel && action){
-      const b=document.createElement("button"); b.textContent=actionLabel; b.onclick=()=>{action();el.remove()}; el.appendChild(b);
-    }
-    $("toastWrap").appendChild(el);
-    setTimeout(()=>el.remove(),4500);
-  }
-
-  function setTheme(initial=false){
-    const saved=localStorage.getItem("ps_theme");
-    if(initial){
-      const dark=saved ? saved==="dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-      document.body.classList.toggle("dark",dark);
-    }else{
-      document.body.classList.toggle("dark");
-      localStorage.setItem("ps_theme",document.body.classList.contains("dark")?"dark":"light");
-    }
-  }
-
-  function categoryCounts(){
-    const counts={};
-    livePrompts().forEach(p=>{
-      if(p.subcategoryId) counts[p.subcategoryId]=(counts[p.subcategoryId]||0)+1;
-      if(p.categoryId) counts[p.categoryId]=(counts[p.categoryId]||0)+1;
-    });
-    return counts;
-  }
-  function renderSidebar(){
-    const live=livePrompts(), allActive=activePrompts();
-    $("countAll").textContent=live.length;
-    $("countFavorites").textContent=live.filter(p=>p.favorite).length;
-    const seven=Date.now()-7*864e5;
-    $("countRecent").textContent=live.filter(p=>new Date(p.updatedAt).getTime()>=seven).length;
-    $("countUncategorized").textContent=live.filter(p=>!p.categoryId && !p.subcategoryId).length;
-    $("countArchived").textContent=allActive.filter(p=>p.status==="archived").length;
-    $("countTrash").textContent=state.prompts.filter(p=>p.deletedAt).length;
-
-    const counts=categoryCounts();
-    const roots=state.categories.filter(c=>!c.parentId);
-    $("categoryTree").innerHTML=roots.map(c=>renderCatNode(c,0,counts)).join("");
-
-    const clientCounts={};
-    live.forEach(p=>{if(p.clientId) clientCounts[p.clientId]=(clientCounts[p.clientId]||0)+1});
-    $("clientList").innerHTML=state.clients.map(c=>`
-      <button class="tree-row ${state.currentFilter.type==="client"&&state.currentFilter.id===c.id?"active":""}" data-client="${esc(c.id)}">
-        <span class="tree-dot" style="--dot:#64748b"></span>
-        <span class="tree-label">${esc(c.name)}</span><span class="count">${clientCounts[c.id]||0}</span>
-      </button>`).join("") || `<div class="hint" style="padding:8px">Nessun cliente.</div>`;
-
-    $$("#categoryTree [data-category]").forEach(b=>{
-      b.onclick=()=>setFilter("category",b.dataset.category);
-      b.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="move";b.classList.add("drop-target")});
-      b.addEventListener("dragleave",()=>b.classList.remove("drop-target"));
-      b.addEventListener("drop",async e=>{
-        e.preventDefault();b.classList.remove("drop-target");
-        let ids=[];try{ids=JSON.parse(e.dataTransfer.getData("text/plain")||"[]")}catch{}
-        const cat=catById(b.dataset.category);
-        if(!cat||!ids.length)return;
-        for(const id of ids){
-          const p=state.prompts.find(x=>x.id===id);if(!p)continue;
-          if(cat.parentId){p.categoryId=cat.parentId;p.subcategoryId=cat.id}else{p.categoryId=cat.id;p.subcategoryId=null}
-          p.updatedAt=nowISO();await put("prompts",p);
-        }
-        state.selected.clear();await loadState();renderAll();toast(`${ids.length} prompt spostati in ${cat.name}.`);
-      });
-    });
-    $$("#categoryTree [data-toggle-cat]").forEach(b=>b.onclick=e=>{
-      e.stopPropagation();
-      const id=b.dataset.toggleCat;
-      state.collapsed.has(id)?state.collapsed.delete(id):state.collapsed.add(id);
-      localStorage.setItem("ps_collapsed",JSON.stringify([...state.collapsed]));
-      renderSidebar();
-    });
-    $$("#clientList [data-client]").forEach(b=>b.onclick=()=>setFilter("client",b.dataset.client));
-  }
-  function renderCatNode(cat,depth,counts){
-    const children=state.categories.filter(c=>c.parentId===cat.id);
-    const collapsed=state.collapsed.has(cat.id);
-    return `
-      <div>
-        <div class="tree-row ${state.currentFilter.type==="category"&&state.currentFilter.id===cat.id?"active":""}" style="--depth:${depth}" data-category="${esc(cat.id)}">
-          ${children.length?`<button class="tree-toggle" data-toggle-cat="${esc(cat.id)}">${collapsed?"▶":"▼"}</button>`:`<span class="tree-toggle"></span>`}
-          <span class="tree-dot" style="--dot:${esc(displayCategoryColor(cat))}"></span>
-          <span class="tree-label">${esc(cat.name)}</span><span class="count">${counts[cat.id]||0}</span>
-        </div>
-        ${!collapsed?children.map(ch=>renderCatNode(ch,depth+1,counts)).join(""):""}
-      </div>`;
-  }
-
-  function getFilterInfo(){
-    const f=state.currentFilter;
-    if(f.type==="all") return ["Tutti i prompt","La tua libreria completa."];
-    if(f.type==="favorites") return ["Preferiti","I prompt che utilizzi più spesso."];
-    if(f.type==="recent") return ["Modificati di recente","Prompt aggiornati negli ultimi 7 giorni."];
-    if(f.type==="uncategorized") return ["Senza categoria","Prompt da organizzare."];
-    if(f.type==="archived") return ["Archivio","Prompt conservati ma esclusi dalla libreria principale."];
-    if(f.type==="trash") return ["Cestino","Elementi eliminati, recuperabili o cancellabili definitivamente."];
-    if(f.type==="category"){const c=catById(f.id);return [c?.name||"Categoria","Prompt appartenenti alla categoria selezionata."]}
-    if(f.type==="client"){const c=clientById(f.id);return [c?.name||"Cliente","Prompt assegnati al cliente o progetto selezionato."]}
-    return ["Prompt",""];
-  }
-  function setFilter(type,id=null){
-    state.currentFilter={type,id}; state.selected.clear(); state.renderLimit=80;
-    $$(".side-link").forEach(b=>b.classList.toggle("active",b.dataset.filter===type));
-    closeMobileSidebar();
-    renderAll();
-  }
-  function filterPrompts(){
-    const f=state.currentFilter;
-    let arr=[...state.prompts];
-    if(f.type==="trash") arr=arr.filter(p=>p.deletedAt);
-    else if(f.type==="archived") arr=arr.filter(p=>!p.deletedAt && p.status==="archived");
-    else arr=arr.filter(p=>!p.deletedAt && p.status!=="archived");
-
-    if(f.type==="favorites") arr=arr.filter(p=>p.favorite);
-    if(f.type==="recent"){const seven=Date.now()-7*864e5;arr=arr.filter(p=>new Date(p.updatedAt).getTime()>=seven)}
-    if(f.type==="uncategorized") arr=arr.filter(p=>!p.categoryId&&!p.subcategoryId);
-    if(f.type==="category"){
-      const c=catById(f.id);
-      const childIds=state.categories.filter(x=>x.parentId===f.id).map(x=>x.id);
-      arr=arr.filter(p=>p.categoryId===f.id||p.subcategoryId===f.id||(c&&!c.parentId&&childIds.includes(p.subcategoryId)));
-    }
-    if(f.type==="client") arr=arr.filter(p=>p.clientId===f.id);
-
-    const q=normalize(state.query);
-    if(q){
-      const qTokens=q.split(" ").filter(Boolean);
-      arr=arr.map(p=>{
-        const cat=catById(p.categoryId)?.name||"", sub=catById(p.subcategoryId)?.name||"", cli=clientById(p.clientId)?.name||"";
-        const hay=normalize([p.title,p.content,p.notes,(p.tags||[]).join(" "),cat,sub,cli].join(" "));
-        const title=normalize(p.title);
-        let score=0;
-        qTokens.forEach(t=>{
-          if(title.includes(t)) score+=6;
-          if(hay.includes(t)) score+=2;
-        });
-        if(hay.includes(q)) score+=8;
-        return {p,score,match:qTokens.every(t=>hay.includes(t)||fuzzyContains(hay,t))};
-      }).filter(x=>x.match).sort((a,b)=>b.score-a.score).map(x=>x.p);
-    }
-    return sortPrompts(arr);
-  }
-  function fuzzyContains(text,term){
-    if(term.length<4) return text.includes(term);
-    let i=0;
-    for(const ch of text){if(ch===term[i]) i++; if(i===term.length) return true;}
-    return false;
-  }
-  function sortPrompts(arr){
-    const mode=state.sort;
-    return arr.sort((a,b)=>{
-      if(mode==="title_asc") return a.title.localeCompare(b.title,"it");
-      if(mode==="title_desc") return b.title.localeCompare(a.title,"it");
-      if(mode==="created_desc") return new Date(b.createdAt)-new Date(a.createdAt);
-      if(mode==="usage_desc") return (b.usageCount||0)-(a.usageCount||0);
-      return new Date(b.updatedAt)-new Date(a.updatedAt);
-    });
-  }
-
-  function renderStats(filtered){
-    const show=state.currentFilter.type==="all"&&!state.query;
-    $("dashboardStats").classList.toggle("hidden",!show);
-    if(!show) return;
-    const live=livePrompts(), unc=live.filter(p=>!p.categoryId&&!p.subcategoryId).length;
-    const fav=live.filter(p=>p.favorite).length;
-    $("dashboardStats").innerHTML=`
-      <div class="stat"><strong>${live.length}</strong><span>Prompt attivi</span></div>
-      <div class="stat"><strong>${state.categories.length}</strong><span>Categorie e sottocategorie</span></div>
-      <div class="stat"><strong>${unc}</strong><span>Da categorizzare</span></div>
-      <div class="stat"><strong>${fav}</strong><span>Preferiti</span></div>`;
-  }
-  function renderCards(){
-    const filtered=filterPrompts();
-    renderStats(filtered);
-    const visible=filtered.slice(0,state.renderLimit);
-    $("cards").className=`cards ${state.viewMode==="list"?"list":""}`;
-    if(visible.length===0){
-      $("cards").innerHTML=`<div class="empty"><div class="big">⌕</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
-    }else{
-      $("cards").innerHTML=visible.map(cardHTML).join("");
-    }
-    $("loadMoreBtn").classList.toggle("hidden",filtered.length<=state.renderLimit);
-    const [title,sub]=getFilterInfo();
-    $("viewTitle").textContent=title;
-    $("viewSubtitle").textContent=state.query?`${filtered.length} risultati per “${state.query}”`: `${sub} ${filtered.length} elementi.`;
-    bindCardEvents();
-    updateBulkbar();
-  }
-  function cardHTML(p){
-    const subcategory=catById(p.subcategoryId);
-    const cat=subcategory||catById(p.categoryId);
-    const cardColor=promptCardColor(p);
-    const client=clientById(p.clientId);
-    const statusLabels={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
-    return `<article class="card" style="--card-accent:${esc(cardColor)}" data-id="${esc(p.id)}" draggable="true" role="button" tabindex="0" title="Clicca per aprire il prompt">
-      <input class="card-check" type="checkbox" ${state.selected.has(p.id)?"checked":""} aria-label="Seleziona prompt">
-      <div class="card-top">
-        <div class="card-title">${esc(p.title||"Senza titolo")}</div>
-        ${p.favorite?`<span class="star" title="Preferito">★</span>`:""}
-      </div>
-      <div class="excerpt">${esc(p.content||"Nessun contenuto")}</div>
-      <div class="meta">
-        ${cat?`<span class="chip subcategory-chip">${esc(cat.name)}</span>`:"<span class='chip'>Senza categoria</span>"}
-        ${client?`<span class="chip">${esc(client.name)}</span>`:""}
-        <span class="chip">${esc(statusLabels[p.status]||p.status)}</span>
-        <span class="chip">${fmtDate(p.updatedAt)}</span>
-      </div>
-      <div class="card-actions">
-        <button class="btn small open-card">Modifica</button>
-        <button class="btn small copy-card">Copia</button>
-        ${p.deletedAt?`<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>`:
-        `<button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>`}
-      </div>
-    </article>`;
-  }
-  function bindCardEvents(){
-    $$("#cards .card").forEach(card=>{
-      const id=card.dataset.id;
-      card.querySelector(".card-check").onchange=e=>{
-        e.target.checked?state.selected.add(id):state.selected.delete(id); updateBulkbar();
-      };
-      card.querySelector(".open-card").onclick=()=>openEditor(id);
-      card.querySelector(".copy-card").onclick=()=>copyPrompt(id);
-      card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
-      card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
-      card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
-      card.querySelector(".delete-card")?.addEventListener("click",()=>deleteForever(id));
-      card.addEventListener("click",e=>{
-        if(e.target.closest("button,input,select,textarea,a")||card.dataset.justDragged==="1")return;
-        openEditor(id);
-      });
-      card.addEventListener("keydown",e=>{
-        if((e.key==="Enter"||e.key===" ")&&!e.target.closest("button,input")){e.preventDefault();openEditor(id)}
-      });
-      card.addEventListener("dragstart",e=>{
-        if(!state.selected.has(id)){state.selected.clear();state.selected.add(id);updateBulkbar()}
-        card.classList.add("dragging");
-        e.dataTransfer.effectAllowed="move";
-        e.dataTransfer.setData("text/plain",JSON.stringify([...state.selected]));
-      });
-      card.addEventListener("dragend",()=>{
-        card.classList.remove("dragging");card.dataset.justDragged="1";setTimeout(()=>delete card.dataset.justDragged,120);
-      });
-    });
-  }
-  function renderAll(){renderSidebar();renderCards();}
-
-  function fillEditorSelects(){
-    const roots=state.categories.filter(c=>!c.parentId);
-    $("promptCategory").innerHTML=`<option value="">Senza categoria</option>`+roots.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-    $("promptClient").innerHTML=`<option value="">Nessun cliente</option>`+state.clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-    updateSubcategories();
-  }
-  function updateSubcategories(selected=""){
-    const parent=$("promptCategory").value;
-    const children=state.categories.filter(c=>c.parentId===parent);
-    $("promptSubcategory").innerHTML=`<option value="">Nessuna sottocategoria</option>`+children.map(c=>`<option value="${esc(c.id)}" ${c.id===selected?"selected":""}>${esc(c.name)}</option>`).join("");
-  }
-  function openEditor(id=null){
-    state.editingId=id; state.editorDirty=false; fillEditorSelects();
-    const p=id?state.prompts.find(x=>x.id===id):null;
-    $("editorHeading").textContent=p?"Modifica prompt":"Nuovo prompt";
-    $("promptTitle").value=p?.title||"";
-    $("promptContent").value=p?.content||"";
-    $("promptCategory").value=p?.categoryId||"";
-    updateSubcategories(p?.subcategoryId||"");
-    $("promptClient").value=p?.clientId||"";
-    $("promptStatus").value=p?.status||"draft";
-    $("promptTags").value=(p?.tags||[]).join(", ");
-    initializeEditorVariables(p);
-    renderPromptVariableList();
-    renderVariableValueFields();
-    $("promptNotes").value=p?.notes||"";
-    $("promptFavorite").checked=!!p?.favorite;
-    $("trashFromEditorBtn").classList.toggle("hidden",!p);
-    $("duplicateFromEditorBtn").classList.toggle("hidden",!p);
-    $("versionsBtn").classList.toggle("hidden",!p);
-    $("suggestionBox").classList.remove("show");
-    const preferredMode=localStorage.getItem("ps_copy_mode")||"compiled";
-    const copyRadio=document.querySelector(`input[name="editorCopyMode"][value="${preferredMode}"]`);if(copyRadio)copyRadio.checked=true;
-    setEditorTab(p&&state.editorVariables.length?"variables":"prompt");
-    updateCounts();
-    $("editor").classList.add("open");
-    $("editorBackdrop").classList.add("open");
-    document.body.classList.add("prompt-popup-open");
-    setTimeout(()=>$("promptTitle").focus(),120);
-  }
-  function closeEditor(force=false){
-    if(state.editorDirty&&!force){
-      showConfirm("Modifiche non salvate","Chiudere l'editor e perdere le modifiche?",()=>closeEditor(true));
-      return;
-    }
-    $("editor").classList.remove("open","full");
-    $("editorBackdrop").classList.remove("open");
-    document.body.classList.remove("prompt-popup-open");
-    state.editingId=null; state.editorDirty=false;state.editorVariableValues={};state.editorVariables=[];
-  }
-  async function saveEditor(){
-    const title=$("promptTitle").value.trim();
-    const content=$("promptContent").value.trim();
-    if(!title){toast("Inserisci un titolo.");$("promptTitle").focus();return}
-    if(!content){toast("Inserisci il testo del prompt.");$("promptContent").focus();return}
-    const existing=state.editingId?state.prompts.find(p=>p.id===state.editingId):null;
-    if(existing){
-      await put("versions",{id:uid("version"),promptId:existing.id,version:existing.version||1,createdAt:nowISO(),snapshot:{...existing}});
-    }
-    const obj={
-      id:existing?.id||uid("prompt"),
-      title,content,
-      categoryId:$("promptCategory").value||null,
-      subcategoryId:$("promptSubcategory").value||null,
-      clientId:$("promptClient").value||null,
-      status:$("promptStatus").value,
-      tags:$("promptTags").value.split(",").map(x=>x.trim()).filter(Boolean),
-      variables:getEditorVariableNames(),
-      variableValues:collectVariableValues(),
-      notes:$("promptNotes").value.trim(),
-      favorite:$("promptFavorite").checked,
-      usageCount:existing?.usageCount||0,
-      version:(existing?.version||0)+1,
-      createdAt:existing?.createdAt||nowISO(),
-      updatedAt:nowISO(),
-      deletedAt:existing?.deletedAt||null
+  const resizer=$("sidebarResizer");
+  resizer.onmousedown=event=>{
+    event.preventDefault();resizer.classList.add("dragging");
+    const move=moveEvent=>{
+      const width=Math.max(220,Math.min(520,moveEvent.clientX));
+      document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
+      localStorage.setItem("ps_sidebar_width",String(width));
     };
-    await put("prompts",obj);
-    await loadState(); state.editingId=obj.id; state.editorDirty=false;
-    localStorage.removeItem("ps_editor_draft");
-    renderAll(); toast("Prompt salvato.");
-  }
-  function markDirty(){
-    state.editorDirty=true;
-    if(state.settings.autosave){
-      clearTimeout(state.draftTimer);
-      state.draftTimer=setTimeout(()=>localStorage.setItem("ps_editor_draft",JSON.stringify({
-        id:state.editingId,title:$("promptTitle").value,content:$("promptContent").value,at:nowISO()
-      })),600);
+    const up=()=>{resizer.classList.remove("dragging");document.removeEventListener("mousemove",move);document.removeEventListener("mouseup",up)};
+    document.addEventListener("mousemove",move);document.addEventListener("mouseup",up);
+  };
+  resizer.ondblclick=()=>{document.documentElement.style.setProperty("--sidebar-width","292px");localStorage.removeItem("ps_sidebar_width")};
+
+  document.addEventListener("keydown",event=>{
+    const modifier=event.metaKey||event.ctrlKey;
+    if(modifier&&event.key.toLowerCase()==="k"){event.preventDefault();$("globalSearch").focus()}
+    if(modifier&&event.key.toLowerCase()==="n"){event.preventDefault();openEditor()}
+    if(modifier&&event.key.toLowerCase()==="s"&&$("editorBackdrop").classList.contains("show")){event.preventDefault();savePrompt()}
+    if(event.key==="Escape"){
+      const modal=$$(".modal-backdrop.show").at(-1);
+      if(modal)closeModal(modal.id);else if($("editorBackdrop").classList.contains("show"))closeEditor();
     }
-  }
-  function updateCounts(){
-    const text=$("promptContent").value;
-    $("charCount").textContent=`${text.length} caratteri`;
-    $("wordCount").textContent=`${text.trim()?text.trim().split(/\s+/).length:0} parole`;
-  }
-
-  function sanitizeVariableName(value){
-    return String(value||"")
-      .replace(/{{|}}|\[|\]/g,"")
-      .trim()
-      .replace(/\s+/g,"_");
-  }
-  function escapeRegExp(value){
-    return String(value||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-  }
-  function humanizeVariableName(value){
-    let label=String(value||"")
-      .replace(/{{|}}|\[|\]/g,"")
-      .replace(/_/g," ")
-      .replace(/\s+/g," ")
-      .trim()
-      .toLowerCase();
-    if(/^dominio sito$/.test(label))label="dominio";
-    return label||"valore";
-  }
-  function cleanContextLabel(value){
-    const label=String(value||"")
-      .replace(/[*_`#>]/g,"")
-      .replace(/^[\s\-–—•\d.)]+/,"")
-      .replace(/[:：\-–—]\s*$/,"")
-      .replace(/\s+/g," ")
-      .trim();
-    if(!label || label.length>70)return "";
-    return label.toLowerCase();
-  }
-  function extractVariableDefinitions(content){
-    const text=String(content||"");
-    const regex=/{{\s*([^{}]+?)\s*}}|\[\s*([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ0-9_\/\- ]{0,80})\s*\]/g;
-    const definitions=[];
-    const seen=new Map();
-    let match;
-    while((match=regex.exec(text))){
-      const sourceName=match[1]??match[2];
-      const name=sanitizeVariableName(sourceName);
-      if(!name)continue;
-
-      const lineStart=text.lastIndexOf("\n",match.index)+1;
-      const beforeOnLine=text.slice(lineStart,match.index).trim();
-      const contextLabel=cleanContextLabel(beforeOnLine);
-      const fallbackLabel=humanizeVariableName(name);
-      const label=contextLabel||fallbackLabel;
-      const raw=match[0];
-      const definition={
-        name,
-        raw,
-        syntax:match[1]!==undefined?"curly":"square",
-        label,
-        contextLabel,
-        index:match.index
-      };
-
-      const normalized=name.toLowerCase();
-      if(!seen.has(normalized)){
-        seen.set(normalized,definitions.length);
-        definitions.push(definition);
-      }else{
-        const existing=definitions[seen.get(normalized)];
-        if(!existing.contextLabel && contextLabel){
-          existing.label=contextLabel;
-          existing.contextLabel=contextLabel;
-        }
-      }
-    }
-    return definitions;
-  }
-  function variableValueByName(values,name){
-    if(Object.prototype.hasOwnProperty.call(values,name))return values[name];
-    const key=Object.keys(values||{}).find(item=>item.toLowerCase()===String(name).toLowerCase());
-    return key?values[key]:"";
-  }
-  function variablesFoundInContent(){
-    return extractVariableDefinitions($("promptContent").value).map(item=>item.name);
-  }
-  function initializeEditorVariables(prompt){
-    const values={...(prompt?.variableValues||{})};
-    const detected=extractVariableDefinitions(prompt?.content||"");
-    const detectedNames=new Set(detected.map(item=>item.name.toLowerCase()));
-    const legacy=(Array.isArray(prompt?.variables)?prompt.variables:[])
-      .map(sanitizeVariableName)
-      .filter(Boolean)
-      .filter(name=>!detectedNames.has(name.toLowerCase()))
-      .map(name=>({
-        name,
-        raw:`{{${name}}}`,
-        syntax:"curly",
-        label:humanizeVariableName(name),
-        contextLabel:"",
-        index:Number.MAX_SAFE_INTEGER
-      }));
-
-    state.editorVariables=[...detected,...legacy].map(definition=>({
-      ...definition,
-      id:uid("editor_var"),
-      value:String(variableValueByName(values,definition.name)??"")
-    }));
-    state.editorVariableValues=Object.fromEntries(
-      state.editorVariables.map(variable=>[variable.name,variable.value])
-    );
-  }
-  function syncVariableManagerFromDOM(){
-    $$("#promptVariableList .variable-text-input").forEach(input=>{
-      const variable=state.editorVariables.find(item=>item.name===input.dataset.var);
-      if(variable)variable.value=input.value;
-    });
-    state.editorVariableValues=Object.fromEntries(
-      state.editorVariables.map(variable=>[variable.name,variable.value||""])
-    );
-  }
-  function getEditorVariableNames(){
-    syncVariableManagerFromDOM();
-    return [...new Set(state.editorVariables.map(variable=>variable.name).filter(Boolean))];
-  }
-  function addDetectedVariablesFromContent(render=true){
-    syncVariableManagerFromDOM();
-    const previous=state.editorVariables;
-    const oldByName=new Map(previous.map(variable=>[variable.name.toLowerCase(),variable]));
-    const detected=extractVariableDefinitions($("promptContent").value);
-
-    state.editorVariables=detected.map(definition=>{
-      const old=oldByName.get(definition.name.toLowerCase());
-      return {
-        ...definition,
-        id:old?.id||uid("editor_var"),
-        value:String(old?.value??variableValueByName(state.editorVariableValues,definition.name)??"")
-      };
-    });
-    state.editorVariableValues=Object.fromEntries(
-      state.editorVariables.map(variable=>[variable.name,variable.value||""])
-    );
-
-    const previousSignature=previous.map(v=>`${v.name}|${v.raw}|${v.label}`).join("§");
-    const nextSignature=state.editorVariables.map(v=>`${v.name}|${v.raw}|${v.label}`).join("§");
-    const changed=previousSignature!==nextSignature;
-    if(render)renderPromptVariableList();
-    return changed;
-  }
-  function variableManagerRowMarkup(variable,index){
-    const accent=VARIABLE_BOX_PALETTE[index%VARIABLE_BOX_PALETTE.length];
-    const friendly=variable.label||humanizeVariableName(variable.name);
-    return `<div class="prompt-variable-row" style="--variable-accent:${accent}" data-var="${esc(variable.name)}">
-      <div class="prompt-variable-row-head">
-        <span class="variable-number">Variabile ${index+1}</span>
-        <span class="variable-live-token">${esc(variable.raw||`{{${variable.name}}}`)}</span>
-        <span class="spacer"></span>
-        <span class="variable-detected-badge">Rilevata nel prompt</span>
-      </div>
-      <div class="prompt-variable-row-body">
-        <h4 class="variable-auto-title">Inserisci variabile ${esc(friendly)}</h4>
-        <p class="variable-auto-help">Il testo inserito qui sostituirà automaticamente <code>${esc(variable.raw||variable.name)}</code> quando copi il prompt senza variabili.</p>
-        <textarea class="variable-text-input" data-var="${esc(variable.name)}" placeholder="Inserisci ${esc(friendly)}…">${esc(variable.value||"")}</textarea>
-        ${variable.contextLabel?`<div class="variable-source-label">Etichetta riconosciuta nel prompt: <strong>${esc(variable.contextLabel)}</strong></div>`:""}
-      </div>
-    </div>`;
-  }
-  function updateVariableCounters(){
-    const count=state.editorVariables.length;
-    $("variablesTabBtn").textContent=count?`Variabili (${count})`:"Variabili";
-    $("openVariablesTabBtn").textContent=count?`Compila ${count} variabil${count===1?"e":"i"}`:"Variabili";
-    const summary=$("detectedVariableSummary");
-    if(summary){
-      summary.textContent=count
-        ?`${count} variabil${count===1?"e rilevata":"i rilevate"} automaticamente nel testo del prompt.`
-        :"";
-      summary.classList.toggle("show",count>0);
-    }
-  }
-  function renderPromptVariableList(){
-    const list=$("promptVariableList");if(!list)return;
-    list.innerHTML=state.editorVariables.length
-      ?state.editorVariables.map(variableManagerRowMarkup).join("")
-      :`<div class="prompt-variable-empty">
-          <strong>Nessuna variabile individuata nel prompt.</strong><br>
-          Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[PAESE_O_MERCATO]</code> oppure <code>{{nome_cliente}}</code>.
-          L’app creerà automaticamente un campo per ognuno.
-        </div>`;
-    $$("#promptVariableList .variable-text-input").forEach(input=>{
-      input.addEventListener("input",()=>{
-        const variable=state.editorVariables.find(item=>item.name===input.dataset.var);
-        if(variable)variable.value=input.value;
-        state.editorVariableValues[input.dataset.var]=input.value;
-        markDirty();
-        updateEditorCopyPreview();
-      });
-    });
-    updateVariableCounters();
-  }
-  function variableFieldMarkup(definition,value,index,inputClass){
-    const item=typeof definition==="string"
-      ?{name:definition,raw:`{{${definition}}}`,label:humanizeVariableName(definition)}
-      :definition;
-    const friendly=item.label||humanizeVariableName(item.name);
-    return `<div class="variable-value-box">
-      <div class="variable-value-head">
-        <span class="variable-number">Variabile ${index+1}</span>
-        <code class="variable-token">${esc(item.raw||item.name)}</code>
-      </div>
-      <label>Inserisci variabile <strong>${esc(friendly)}</strong></label>
-      <textarea class="${inputClass}" data-var="${esc(item.name)}" placeholder="Inserisci ${esc(friendly)}…">${esc(value||"")}</textarea>
-    </div>`;
-  }
-  function variableFieldsMarkup(definitions,values,inputClass){
-    return definitions.map((definition,index)=>{
-      const name=typeof definition==="string"?definition:definition.name;
-      return variableFieldMarkup(definition,variableValueByName(values,name),index,inputClass);
-    }).join(`<div class="variable-separator"><span>Variabile successiva</span></div>`);
-  }
-  function collectVariableValues(){
-    syncVariableManagerFromDOM();
-    state.editorVariableValues=Object.fromEntries(
-      state.editorVariables.map(variable=>[variable.name,variable.value||""])
-    );
-    return {...state.editorVariableValues};
-  }
-  function renderVariableValueFields(){
-    const changed=addDetectedVariablesFromContent(false);
-    if(changed || !$("promptVariableList").children.length)renderPromptVariableList();
-    else updateVariableCounters();
-    updateEditorCopyPreview();
-  }
-  function compilePromptText(content,values={}){
-    return String(content||"").replace(
-      /{{\s*([^{}]+?)\s*}}|\[\s*([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ0-9_\/\- ]{0,80})\s*\]/g,
-      (match,curlyName,squareName)=>{
-        const name=sanitizeVariableName(curlyName??squareName);
-        const value=variableValueByName(values,name);
-        return value===undefined||value===null||value===""?match:value;
-      }
-    );
-  }
-  function getEditorCopyMode(){
-    return document.querySelector('input[name="editorCopyMode"]:checked')?.value||"compiled";
-  }
-  function setEditorTab(name){
-    $$(".editor-tab-btn").forEach(btn=>{
-      const active=btn.dataset.editorTab===name;btn.classList.toggle("active",active);btn.setAttribute("aria-selected",String(active));
-    });
-    $$(".editor-tab-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.editorPanel===name));
-    if(name==="variables"){renderVariableValueFields();updateEditorCopyPreview()}
-  }
-  function getMissingEditorVariables(){
-    const values=collectVariableValues();
-    return getEditorVariableNames().filter(name=>!String(values[name]??"").trim());
-  }
-  function updateEditorCopyPreview(){
-    const preview=$("editorCopyPreview");if(!preview)return;
-    const content=$("promptContent").value;
-    preview.value=getEditorCopyMode()==="template"?content:compilePromptText(content,collectVariableValues());
-  }
-  async function copyCompiledFromEditor(){
-    const mode=getEditorCopyMode();
-    if(mode==="compiled"){
-      const missing=getMissingEditorVariables();
-      if(missing.length){setEditorTab("variables");toast(`Compila prima: ${missing.join(", ")}.`);return}
-    }
-    const result=mode==="template"?$("promptContent").value:compilePromptText($("promptContent").value,collectVariableValues());
-    await navigator.clipboard.writeText(result);
-    toast(mode==="template"?"Prompt copiato con i segnaposto delle variabili.":"Prompt copiato senza variabili: i valori sono stati inseriti.");
-  }
-  function promptVariableDefinitions(p){
-    const detected=extractVariableDefinitions(p?.content||"");
-    const detectedNames=new Set(detected.map(item=>item.name.toLowerCase()));
-    const legacy=(Array.isArray(p?.variables)?p.variables:[])
-      .map(sanitizeVariableName)
-      .filter(Boolean)
-      .filter(name=>!detectedNames.has(name.toLowerCase()))
-      .map(name=>({name,raw:`{{${name}}}`,label:humanizeVariableName(name),contextLabel:"",syntax:"curly"}));
-    return [...detected,...legacy];
-  }
-  function promptVariableNames(p){
-    return promptVariableDefinitions(p).map(item=>item.name);
-  }
-  function openPromptCopyModal(p){
-    const definitions=promptVariableDefinitions(p),vars=definitions.map(item=>item.name),saved={...(p.variableValues||{})};
-    $("genericModal").querySelector(".modal").classList.add("copy-wide");
-    $("genericTitle").textContent="Modalità di copia";
-    $("genericBody").innerHTML=`
-      <div class="copy-mode-box" style="margin-top:0">
-        <h3>Come vuoi copiare il prompt?</h3>
-        <div class="copy-options">
-          <label class="copy-option"><input type="radio" name="quickCopyMode" value="template"><span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto come [DOMINIO_SITO] o {{variabile}}.</small></span></label>
-          <label class="copy-option"><input type="radio" name="quickCopyMode" value="compiled" checked><span><strong>Senza variabili nel testo</strong><small>Sostituisce i segnaposto con i valori inseriti.</small></span></label>
-        </div>
-      </div>
-      ${vars.length?`<div class="variables-intro" style="margin-top:14px"><h3>Valori delle variabili</h3><p>Ogni variabile è separata e numerata per evitare errori durante la compilazione. I valori servono scegliendo “Senza variabili nel testo”.</p></div><div class="variable-fields" id="quickCopyFields">${variableFieldsMarkup(definitions,saved,"quick-copy-value")}</div>`:""}
-      <div class="field" style="margin-top:14px"><label>Anteprima</label><textarea id="quickCopyPreview" class="compiled-preview" readonly></textarea></div>`;
-    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="quickCopyConfirm">Copia ora</button>`;
-    openModal("genericModal");bindModalClose();
-    const refresh=()=>{
-      const mode=document.querySelector('input[name="quickCopyMode"]:checked')?.value||"compiled";
-      const values={...saved};$$("#quickCopyFields .quick-copy-value").forEach(el=>values[el.dataset.var]=el.value);
-      $("quickCopyPreview").value=mode==="template"?p.content:compilePromptText(p.content,values);
-      return {mode,values};
-    };
-    $$('input[name="quickCopyMode"],#quickCopyFields .quick-copy-value').forEach(el=>el.addEventListener("input",refresh));refresh();
-    $("quickCopyConfirm").onclick=async()=>{
-      const {mode,values}=refresh();
-      const missing=mode==="compiled"?vars.filter(v=>!String(values[v]??"").trim()):[];
-      if(missing.length){toast(`Inserisci: ${missing.join(", ")}.`);return}
-      const result=mode==="template"?p.content:compilePromptText(p.content,values);
-      p.variableValues=values;p.usageCount=(p.usageCount||0)+1;await put("prompts",p);
-      await navigator.clipboard.writeText(result);closeModal("genericModal");
-      toast(mode==="template"?"Copiato con le variabili nel testo.":"Copiato senza variabili nel testo.");
-    };
-  }
-  async function copyPrompt(id){
-    const p=state.prompts.find(x=>x.id===id);if(!p)return;
-    if(promptVariableNames(p).length){openPromptCopyModal(p);return}
-    await navigator.clipboard.writeText(p.content);
-    p.usageCount=(p.usageCount||0)+1;await put("prompts",p);toast("Prompt copiato.");
-  }
-  async function duplicatePrompt(id){
-    const p=state.prompts.find(x=>x.id===id);if(!p)return;
-    const copy={...p,id:uid("prompt"),title:`${p.title} — copia`,favorite:false,usageCount:0,version:1,createdAt:nowISO(),updatedAt:nowISO(),deletedAt:null};
-    await put("prompts",copy);await loadState();renderAll();toast("Prompt duplicato.");
-  }
-  async function trashPrompt(id){
-    const p=state.prompts.find(x=>x.id===id);if(!p)return;
-    const previous={...p};
-    p.deletedAt=nowISO();p.updatedAt=nowISO();await put("prompts",p);await loadState();renderAll();
-    toast("Prompt spostato nel cestino.","Annulla",async()=>{await put("prompts",previous);await loadState();renderAll()});
-    if(state.editingId===id) closeEditor(true);
-  }
-  async function restorePrompt(id){
-    const p=state.prompts.find(x=>x.id===id);if(!p)return;
-    p.deletedAt=null;p.updatedAt=nowISO();await put("prompts",p);await loadState();renderAll();toast("Prompt ripristinato.");
-  }
-  async function deleteForever(id){
-    const run=async()=>{await del("prompts",id);await loadState();renderAll();toast("Prompt eliminato definitivamente.")};
-    state.settings.confirmDelete?showConfirm("Eliminazione definitiva","Questa operazione non può essere annullata.",run):run();
-  }
-
-  function updateBulkbar(){
-    $("selectedCount").textContent=state.selected.size;
-    $("bulkbar").classList.toggle("show",state.selected.size>0);
-  }
-  function openChoiceModal(title,label,options,onConfirm){
-    $("genericTitle").textContent=title;
-    $("genericBody").innerHTML=`<div class="field"><label>${esc(label)}</label><select id="genericChoice">${options}</select></div>`;
-    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="genericConfirm">Applica</button>`;
-    openModal("genericModal");
-    $("genericConfirm").onclick=()=>{onConfirm($("genericChoice").value);closeModal("genericModal")};
-    bindModalClose();
-  }
-  async function bulkUpdate(patch){
-    const ids=[...state.selected];
-    for(const id of ids){
-      const p=state.prompts.find(x=>x.id===id);if(!p)continue;
-      Object.assign(p,patch, {updatedAt:nowISO()}); await put("prompts",p);
-    }
-    state.selected.clear();await loadState();renderAll();toast(`${ids.length} prompt aggiornati.`);
-  }
-
-  function showConfirm(title,message,onYes){
-    $("genericTitle").textContent=title;
-    $("genericBody").innerHTML=`<p>${esc(message)}</p>`;
-    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn danger" id="genericConfirm">Conferma</button>`;
-    openModal("genericModal");$("genericConfirm").onclick=()=>{closeModal("genericModal");onYes()};bindModalClose();
-  }
-  function openModal(id){$(id).classList.add("show")}
-  function closeModal(id){$(id).classList.remove("show");if(id==="genericModal")$(id).querySelector(".modal")?.classList.remove("copy-wide")}
-  function bindModalClose(){
-    $$("[data-close-modal]").forEach(b=>b.onclick=()=>closeModal(b.dataset.closeModal));
-  }
-
-  function renderManage(){
-    const roots=state.categories.filter(c=>!c.parentId);
-    $("newCategoryParent").innerHTML=`<option value="">Categoria principale</option>`+roots.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-    $("manageCategories").innerHTML=state.categories.map(c=>{
-      const parent=catById(c.parentId);
-      return `<div class="manage-row">
-        <span class="tree-dot" style="--dot:${esc(displayCategoryColor(c))}"></span>
-        <div class="grow"><strong>${esc(c.name)}</strong>${parent?`<br><small>Sotto: ${esc(parent.name)}</small>`:""}</div>
-        <input type="color" class="category-color" data-id="${esc(c.id)}" value="${esc(displayCategoryColor(c))}" title="Scegli il colore">
-        <button class="btn small rename-category" data-id="${esc(c.id)}">Rinomina</button>
-        <button class="btn small danger delete-category" data-id="${esc(c.id)}">Elimina</button>
-      </div>`;
-    }).join("");
-    $("manageClients").innerHTML=state.clients.map(c=>`<div class="manage-row">
-      <div class="grow"><strong>${esc(c.name)}</strong></div>
-      <button class="btn small rename-client" data-id="${esc(c.id)}">Rinomina</button>
-      <button class="btn small danger delete-client" data-id="${esc(c.id)}">Elimina</button>
-    </div>`).join("");
-    fillRuleSelects();
-    renderRules();
-    $$(".category-color").forEach(input=>input.onchange=async()=>{
-      const category=catById(input.dataset.id);if(!category)return;
-      category.color=input.value;category.colorManual=true;
-      await put("categories",category);await loadState();renderAll();renderManage();toast("Colore della categoria aggiornato.");
-    });
-    $$(".rename-category").forEach(b=>b.onclick=()=>renameEntity("categories",b.dataset.id));
-    $$(".delete-category").forEach(b=>b.onclick=()=>deleteCategory(b.dataset.id));
-    $$(".rename-client").forEach(b=>b.onclick=()=>renameEntity("clients",b.dataset.id));
-    $$(".delete-client").forEach(b=>b.onclick=()=>deleteClient(b.dataset.id));
-  }
-  function fillRuleSelects(){
-    $("ruleCategory").innerHTML=`<option value="">Nessuna categoria</option>`+state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-    $("ruleClient").innerHTML=`<option value="">Nessun cliente</option>`+state.clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-  }
-  function renderRules(){
-    $("rulesList").innerHTML=state.rules.length?state.rules.map(r=>`
-      <div class="rule-row">
-        <strong>${esc(r.keyword)}</strong>
-        <span>${esc(catById(r.categoryId)?.name||"—")}</span>
-        <span>${esc(clientById(r.clientId)?.name||"—")}</span>
-        <button class="btn small danger delete-rule" data-id="${esc(r.id)}">Elimina</button>
-      </div>`).join(""):`<p class="hint">Nessuna regola configurata.</p>`;
-    $$(".delete-rule").forEach(b=>b.onclick=async()=>{
-      state.rules=state.rules.filter(r=>r.id!==b.dataset.id);await saveRules();renderRules();
-    });
-  }
-  async function saveRules(){await put("settings",{id:"rules",value:state.rules})}
-  async function renameEntity(store,id){
-    const item=(store==="categories"?state.categories:state.clients).find(x=>x.id===id);
-    if(!item)return;
-    const name=prompt("Nuovo nome:",item.name)?.trim();if(!name||name===item.name)return;
-    item.name=name;await put(store,item);await loadState();renderAll();renderManage();
-  }
-  async function deleteCategory(id){
-    const children=state.categories.filter(c=>c.parentId===id);
-    const affected=state.prompts.filter(p=>p.categoryId===id||p.subcategoryId===id||children.some(ch=>p.subcategoryId===ch.id));
-    showConfirm("Elimina categoria",`La categoria contiene o coinvolge ${affected.length} prompt. I prompt verranno spostati in “Senza categoria”.`,async()=>{
-      for(const p of affected){if(p.categoryId===id)p.categoryId=null;if(p.subcategoryId===id||children.some(ch=>p.subcategoryId===ch.id))p.subcategoryId=null;await put("prompts",p)}
-      for(const c of children) await del("categories",c.id);
-      await del("categories",id);await loadState();renderAll();renderManage();toast("Categoria eliminata.");
-    });
-  }
-  async function deleteClient(id){
-    const affected=state.prompts.filter(p=>p.clientId===id);
-    showConfirm("Elimina cliente",`${affected.length} prompt perderanno l'assegnazione al cliente.`,async()=>{
-      for(const p of affected){p.clientId=null;await put("prompts",p)}
-      await del("clients",id);await loadState();renderAll();renderManage();toast("Cliente eliminato.");
-    });
-  }
-
-  function suggestionFor(title,content){
-    const hay=normalize(`${title} ${content}`);
-    const ruleHits=state.rules.filter(r=>hay.includes(normalize(r.keyword)));
-    if(ruleHits.length){
-      const r=ruleHits[0];return {categoryId:r.categoryId||null,clientId:r.clientId||null,confidence:95,reason:`regola “${r.keyword}”`};
-    }
-    const currentTokens=tokens(`${title} ${content}`);
-    let best={score:0,categoryId:null};
-    for(const category of state.categories){
-      const examples=livePrompts().filter(p=>p.categoryId===category.id||p.subcategoryId===category.id);
-      if(!examples.length)continue;
-      const profile=tokens(examples.map(p=>`${p.title} ${p.content}`).join(" "));
-      const overlap=currentTokens.filter(t=>profile.includes(t)).length;
-      const score=overlap/Math.max(1,Math.min(currentTokens.length,20));
-      if(score>best.score)best={score,categoryId:category.id};
-    }
-    return best.score>.08?{categoryId:best.categoryId,clientId:null,confidence:Math.min(88,Math.round(55+best.score*80)),reason:"similarità con prompt già classificati"}:null;
-  }
-  function showSuggestion(){
-    const s=suggestionFor($("promptTitle").value,$("promptContent").value);
-    const box=$("suggestionBox");
-    if(!s){box.innerHTML="Nessun suggerimento abbastanza affidabile. Aggiungi regole o classifica più prompt.";box.classList.add("show");return}
-    const cat=catById(s.categoryId),client=clientById(s.clientId);
-    box.innerHTML=`<strong>Suggerimento (${s.confidence}%):</strong> ${cat?esc(cat.name):"nessuna categoria"}${client?` · ${esc(client.name)}`:""}<br><small>Motivo: ${esc(s.reason)}</small> <button class="btn small" id="applySuggestionBtn" style="margin-left:8px">Applica</button>`;
-    box.classList.add("show");
-    $("applySuggestionBtn").onclick=()=>{
-      if(cat){
-        const root=cat.parentId?cat.parentId:cat.id;
-        $("promptCategory").value=root;updateSubcategories(cat.parentId?cat.id:"");
-      }
-      if(client)$("promptClient").value=client.id;
-      markDirty();toast("Suggerimento applicato.");
-    };
-  }
-
-  function dice(a,b){
-    a=normalize(a);b=normalize(b);
-    if(a===b)return 1;if(a.length<2||b.length<2)return 0;
-    const pairs=new Map();
-    for(let i=0;i<a.length-1;i++){const p=a.slice(i,i+2);pairs.set(p,(pairs.get(p)||0)+1)}
-    let matches=0;
-    for(let i=0;i<b.length-1;i++){const p=b.slice(i,i+2),n=pairs.get(p)||0;if(n){pairs.set(p,n-1);matches++}}
-    return 2*matches/((a.length-1)+(b.length-1));
-  }
-  function computeDuplicates(){
-    const arr=livePrompts(), pairs=[], pairKeys=new Set();
-    const comparePair=(a,b)=>{
-      const key=a.id<b.id?`${a.id}|${b.id}`:`${b.id}|${a.id}`;
-      if(pairKeys.has(key))return;pairKeys.add(key);
-      const titleScore=dice(a.title,b.title);
-      const contentScore=dice(a.content,b.content);
-      const score=.35*titleScore+.65*contentScore;
-      if(score>=.84 || contentScore>=.91) pairs.push({a,b,score});
-    };
-    if(arr.length<=700){
-      for(let i=0;i<arr.length;i++)for(let j=i+1;j<arr.length;j++)comparePair(arr[i],arr[j]);
-    }else{
-      const docFreq=new Map(), promptTokens=new Map(), exact=new Map();
-      for(const p of arr){
-        const ts=tokens(`${p.title} ${p.content.slice(0,1200)}`).slice(0,80);
-        promptTokens.set(p.id,ts);
-        ts.forEach(t=>docFreq.set(t,(docFreq.get(t)||0)+1));
-        const exactKey=normalize(p.content);
-        if(exactKey){if(exact.has(exactKey))comparePair(exact.get(exactKey),p);else exact.set(exactKey,p)}
-      }
-      const index=new Map();
-      for(const p of arr){
-        const rare=(promptTokens.get(p.id)||[]).filter(t=>(docFreq.get(t)||0)<=60).sort((a,b)=>(docFreq.get(a)||0)-(docFreq.get(b)||0)).slice(0,10);
-        const candidates=new Set();
-        rare.forEach(t=>(index.get(t)||[]).forEach(other=>candidates.add(other)));
-        for(const other of candidates)comparePair(other,p);
-        rare.forEach(t=>{if(!index.has(t))index.set(t,[]);index.get(t).push(p)});
-      }
-    }
-    state.duplicatePairs=pairs.sort((x,y)=>y.score-x.score);
-    $("countDuplicates").textContent=pairs.length;
-    return pairs;
-  }
-  function renderDuplicates(){
-    const pairs=computeDuplicates();
-    $("duplicatesBody").innerHTML=pairs.length?pairs.map((x,i)=>`
-      <div class="duplicate-row">
-        <div class="score">Similarità stimata: ${Math.round(x.score*100)}%</div>
-        <div class="duplicate-grid">
-          <div class="dup-card"><strong>${esc(x.a.title)}</strong><p>${esc(x.a.content.slice(0,260))}</p></div>
-          <div class="dup-card"><strong>${esc(x.b.title)}</strong><p>${esc(x.b.content.slice(0,260))}</p></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn small open-dup" data-id="${esc(x.a.id)}">Apri primo</button>
-          <button class="btn small open-dup" data-id="${esc(x.b.id)}">Apri secondo</button>
-          <button class="btn small danger trash-dup" data-id="${esc(x.b.id)}">Cestina secondo</button>
-        </div>
-      </div>`).join(""):`<div class="empty"><div class="big">✓</div><strong>Nessun duplicato evidente</strong><p>Il confronto considera titolo e contenuto.</p></div>`;
-    $$(".open-dup").forEach(b=>b.onclick=()=>{closeModal("duplicatesModal");openEditor(b.dataset.id)});
-    $$(".trash-dup").forEach(b=>b.onclick=async()=>{await trashPrompt(b.dataset.id);renderDuplicates()});
-  }
-
-  async function dataSnapshot(){
-    return {
-      app:"Prompt Studio Standalone",version:2,exportedAt:nowISO(),
-      prompts:state.prompts,categories:state.categories,clients:state.clients,rules:state.rules,
-      preferences:state.settings,versions:await getAll("versions")
-    };
-  }
-  function downloadJSON(data,filename){
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob),a=document.createElement("a");
-    a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-  }
-  async function exportData(){
-    downloadJSON(await dataSnapshot(),`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
-    toast("Backup JSON esportato.");
-  }
-  async function createBackup(){
-    const snap=await dataSnapshot();
-    await put("backups",{id:uid("backup"),createdAt:nowISO(),data:snap});
-    downloadJSON(snap,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
-    toast("Backup locale e file JSON creati.");
-  }
-  async function importData(file){
-    try{
-      const data=JSON.parse(await file.text());
-      if(!Array.isArray(data.prompts)||!Array.isArray(data.categories)||!Array.isArray(data.clients)) throw new Error("Formato non riconosciuto");
-      $("genericTitle").textContent="Importazione archivio";
-      $("genericBody").innerHTML=`
-        <p><strong>${data.prompts.length}</strong> prompt, <strong>${data.categories.length}</strong> categorie e <strong>${data.clients.length}</strong> clienti trovati.</p>
-        <div class="field"><label>Modalità</label><select id="importMode"><option value="merge">Unisci e mantieni i record locali in caso di conflitto</option><option value="replace">Sostituisci l'archivio attuale</option></select></div>`;
-      $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="importConfirm">Importa</button>`;
-      openModal("genericModal");bindModalClose();
-      $("importConfirm").onclick=async()=>{
-        const mode=$("importMode").value;
-        if(mode==="replace"){
-          for(const store of ["prompts","categories","clients","settings","versions"]){
-            const items=await getAll(store);for(const item of items)await del(store,item.id);
-          }
-        }
-        const existing={
-          prompts:new Set((await getAll("prompts")).map(x=>x.id)),
-          categories:new Set((await getAll("categories")).map(x=>x.id)),
-          clients:new Set((await getAll("clients")).map(x=>x.id)),
-          versions:new Set((await getAll("versions")).map(x=>x.id))
-        };
-        let imported=0,skipped=0;
-        for(const c of data.categories){if(mode==="merge"&&existing.categories.has(c.id)){skipped++;continue}await put("categories",c);imported++}
-        for(const c of data.clients){if(mode==="merge"&&existing.clients.has(c.id)){skipped++;continue}await put("clients",c);imported++}
-        for(const p of data.prompts){if(mode==="merge"&&existing.prompts.has(p.id)){skipped++;continue}await put("prompts",p);imported++}
-        for(const v of (data.versions||[])){if(mode==="merge"&&existing.versions.has(v.id)){skipped++;continue}await put("versions",v)}
-        if(data.rules) await put("settings",{id:"rules",value:data.rules});
-        if(data.preferences) await put("settings",{id:"prefs",value:data.preferences});
-        closeModal("genericModal");await loadState();renderAll();toast(`Importazione completata: ${imported} record, ${skipped} conflitti ignorati.`);
-      };
-    }catch(err){toast(`Importazione non riuscita: ${err.message}`)}
-  }
-
-  function compileVariables(){
-    const content=$("promptContent").value;
-    addDetectedVariablesFromContent(false);
-    const definitions=[...state.editorVariables],vars=definitions.map(item=>item.name);
-    if(!vars.length){toast("Non sono state trovate variabili nel prompt.");return}
-    const saved=collectVariableValues();
-    $("genericTitle").textContent="Anteprima e compilazione variabili";
-    $("genericBody").innerHTML=`<div class="variables-intro"><h3>Compilazione guidata</h3><p>Inserisci il testo nel campo corrispondente. Ogni variabile è numerata e separata dalla successiva.</p></div><div class="variable-fields" id="popupVariableFields">${variableFieldsMarkup(definitions,saved,"variable-value")}</div><div class="field" style="margin-top:14px"><label>Anteprima del prompt compilato</label><textarea id="compiledPreview" class="compiled-preview" readonly></textarea></div>`;
-    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn" id="applyVariableValues">Salva valori</button><button class="btn primary" id="compileConfirm">Salva e copia</button>`;
-    openModal("genericModal");bindModalClose();
-    const refresh=()=>{
-      const values={...saved};
-      $$("#popupVariableFields .variable-value").forEach(input=>values[input.dataset.var]=input.value);
-      $("compiledPreview").value=compilePromptText(content,values);
-      return values;
-    };
-    $$("#popupVariableFields .variable-value").forEach(input=>input.addEventListener("input",refresh));
-    refresh();
-    $("applyVariableValues").onclick=()=>{
-      state.editorVariableValues=refresh();renderVariableValueFields();markDirty();closeModal("genericModal");toast("Valori delle variabili salvati nel prompt.");
-    };
-    $("compileConfirm").onclick=async()=>{
-      state.editorVariableValues=refresh();
-      const result=compilePromptText(content,state.editorVariableValues);
-      renderVariableValueFields();markDirty();
-      await navigator.clipboard.writeText(result);closeModal("genericModal");toast("Prompt compilato e copiato.");
-    };
-  }
-
-  async function showVersions(){
-    if(!state.editingId)return;
-    const versions=(await getAll("versions")).filter(v=>v.promptId===state.editingId).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-    $("genericTitle").textContent="Cronologia versioni";
-    $("genericBody").innerHTML=versions.length?versions.map(v=>`<div class="manage-row" style="align-items:flex-start;margin-bottom:8px">
-      <div class="grow"><strong>Versione ${v.version}</strong><br><small>${fmtDate(v.createdAt)}</small><p class="hint">${esc((v.snapshot?.content||"").slice(0,180))}</p></div>
-      <button class="btn small restore-version" data-id="${esc(v.id)}">Ripristina</button>
-    </div>`).join(""):`<p class="hint">Non ci sono ancora versioni precedenti. La cronologia viene creata dal secondo salvataggio.</p>`;
-    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Chiudi</button>`;
-    openModal("genericModal");bindModalClose();
-    $$(".restore-version").forEach(b=>b.onclick=async()=>{
-      const version=versions.find(v=>v.id===b.dataset.id),current=state.prompts.find(p=>p.id===state.editingId);
-      if(!version||!current)return;
-      await put("versions",{id:uid("version"),promptId:current.id,version:current.version||1,createdAt:nowISO(),snapshot:{...current}});
-      const restored={...version.snapshot,id:current.id,version:(current.version||1)+1,updatedAt:nowISO(),deletedAt:null};
-      await put("prompts",restored);closeModal("genericModal");await loadState();openEditor(restored.id);renderAll();toast("Versione ripristinata.");
-    });
-  }
-
-  async function init(){
-    setTheme(true);
-    const savedSidebarWidth=Math.max(220,Math.min(520,Number(localStorage.getItem("ps_sidebar_width"))||270));
-    document.documentElement.style.setProperty("--sidebar",`${savedSidebarWidth}px`);
-    const savedEditorSize=JSON.parse(localStorage.getItem("ps_editor_size_v3")||"null");
-    if(innerWidth>650){
-      const maxWidth=innerWidth-24,minWidth=Math.min(1040,maxWidth),preferredWidth=savedEditorSize?.width||Math.min(1240,maxWidth);
-      $("editor").style.width=`${Math.max(minWidth,Math.min(maxWidth,preferredWidth))}px`;
-      $("editor").style.height=`${Math.max(650,Math.min(innerHeight-24,savedEditorSize?.height||Math.min(920,innerHeight-32)))}px`;
-    }
-    state.db=await openDB();
-    await loadState();
-    await seed();
-    $("sortSelect").value=state.sort;
-    $("autosaveSetting").checked=state.settings.autosave;
-    $("confirmDeleteSetting").checked=state.settings.confirmDelete;
-    applyViewMode();
-    renderAll();
-    computeDuplicates();
-    bindEvents();
-    bindModalClose();
-    const draftRaw=localStorage.getItem("ps_editor_draft");
-    if(draftRaw){
-      try{
-        const draft=JSON.parse(draftRaw);
-        if(draft?.content && Date.now()-new Date(draft.at).getTime()<7*864e5){
-          toast("È disponibile una bozza non salvata.","Ripristina",()=>{
-            openEditor(draft.id&&state.prompts.some(p=>p.id===draft.id)?draft.id:null);
-            $("promptTitle").value=draft.title||$("promptTitle").value;
-            $("promptContent").value=draft.content||"";updateCounts();state.editorDirty=true;
-          });
-        }
-      }catch{}
-    }
-  }
-
-  function applyViewMode(){
-    $("gridBtn").classList.toggle("primary",state.viewMode==="grid");
-    $("listBtn").classList.toggle("primary",state.viewMode==="list");
-    renderCards();
-  }
-  function closeMobileSidebar(){
-    $("sidebar").classList.remove("open");$("overlay").classList.remove("show");
-  }
-  function bindEvents(){
-    let searchTimer;
-    $("globalSearch").addEventListener("input",e=>{
-      clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.query=e.target.value;state.renderLimit=80;renderCards()},180);
-    });
-    $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderCards()};
-    $("newPromptBtn").onclick=()=>openEditor();
-    $("themeBtn").onclick=()=>setTheme(false);
-    $("importBtn").onclick=$("settingsImportBtn").onclick=()=>{$("fileInput").click()};
-    $("exportBtn").onclick=$("settingsExportBtn").onclick=exportData;
-    $("backupBtn").onclick=$("settingsBackupBtn").onclick=createBackup;
-    $("fileInput").onchange=e=>{const f=e.target.files[0];if(f)importData(f);e.target.value=""};
-    $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
-    $("settingsBtn").onclick=()=>openModal("settingsModal");
-    $("duplicatesBtn").onclick=()=>{renderDuplicates();openModal("duplicatesModal")};
-    $("recountDuplicatesBtn").onclick=()=>{computeDuplicates();toast("Analisi duplicati aggiornata.")};
-    $("mobileMenuBtn").onclick=()=>{$("sidebar").classList.add("open");$("overlay").classList.add("show")};
-    $("overlay").onclick=closeMobileSidebar;
-    $("editorBackdrop").onclick=()=>closeEditor();
-    const sidebarResizer=$("sidebarResizer");
-    sidebarResizer.addEventListener("pointerdown",e=>{
-      if(innerWidth<=980)return;
-      e.preventDefault();sidebarResizer.setPointerCapture(e.pointerId);sidebarResizer.classList.add("resizing");document.body.classList.add("resizing-sidebar");
-      const move=ev=>{
-        const width=Math.max(220,Math.min(520,ev.clientX));
-        document.documentElement.style.setProperty("--sidebar",`${width}px`);localStorage.setItem("ps_sidebar_width",String(width));
-      };
-      const up=()=>{sidebarResizer.classList.remove("resizing");document.body.classList.remove("resizing-sidebar");sidebarResizer.removeEventListener("pointermove",move);sidebarResizer.removeEventListener("pointerup",up)};
-      sidebarResizer.addEventListener("pointermove",move);sidebarResizer.addEventListener("pointerup",up);
-    });
-    sidebarResizer.ondblclick=()=>{document.documentElement.style.setProperty("--sidebar","270px");localStorage.setItem("ps_sidebar_width","270")};
-    if("ResizeObserver" in window){
-      let resizeTimer;
-      new ResizeObserver(entries=>{
-        if(!$("editor").classList.contains("open")||$("editor").classList.contains("full")||innerWidth<=650)return;
-        clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{
-          const r=entries[0].contentRect;localStorage.setItem("ps_editor_size_v3",JSON.stringify({width:Math.round(r.width),height:Math.round(r.height)}));
-        },250);
-      }).observe($("editor"));
-    }
-    $$(".side-link[data-filter]").forEach(b=>b.onclick=()=>setFilter(b.dataset.filter));
-    $("sortSelect").onchange=e=>{state.sort=e.target.value;localStorage.setItem("ps_sort",state.sort);renderCards()};
-    $("gridBtn").onclick=()=>{state.viewMode="grid";localStorage.setItem("ps_view","grid");applyViewMode()};
-    $("listBtn").onclick=()=>{state.viewMode="list";localStorage.setItem("ps_view","list");applyViewMode()};
-    $("loadMoreBtn").onclick=()=>{state.renderLimit+=80;renderCards()};
-    $("selectAllBtn").onclick=()=>{filterPrompts().forEach(p=>state.selected.add(p.id));renderCards()};
-    $("clearSelectionBtn").onclick=()=>{state.selected.clear();renderCards()};
-    $("bulkMoveBtn").onclick=()=>openChoiceModal("Sposta i prompt","Categoria di destinazione",
-      `<option value="">Senza categoria</option>`+state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join(""),
-      val=>{const cat=catById(val);bulkUpdate(cat?.parentId?{categoryId:cat.parentId,subcategoryId:cat.id}:{categoryId:val||null,subcategoryId:null})});
-    $("bulkClientBtn").onclick=()=>openChoiceModal("Assegna cliente","Cliente o progetto",
-      `<option value="">Nessun cliente</option>`+state.clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join(""),
-      val=>bulkUpdate({clientId:val||null}));
-    $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
-    $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:nowISO()});
-    $("promptCategory").onchange=()=>{updateSubcategories();markDirty()};
-    ["promptTitle","promptContent","promptTags","promptNotes"].forEach(id=>$(id).addEventListener("input",()=>{
-      markDirty();if(id==="promptContent")updateCounts();
-      if(id==="promptContent"){
-        clearTimeout(state.variableTimer);state.variableTimer=setTimeout(()=>{
-          const added=addDetectedVariablesFromContent(true);
-          if(added)toast(`${state.editorVariables.length} variabili rilevate automaticamente nel prompt.`);
-          renderVariableValueFields();updateEditorCopyPreview();
-        },220);
-      }
-    }));
-    $("detectVariablesBtn").onclick=()=>{
-      addDetectedVariablesFromContent(true);
-      updateEditorCopyPreview();
-      const count=state.editorVariables.length;
-      toast(count
-        ?`${count} variabil${count===1?"e rilevata":"i rilevate"} nel prompt.`
-        :"Nessuna variabile rilevata. Usa un formato come [DOMINIO_SITO].");
-    };
-    ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).addEventListener("change",markDirty));
-    $("savePromptBtn").onclick=saveEditor;
-    $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
-    $("fullscreenEditorBtn").onclick=()=>$("editor").classList.toggle("full");
-    $("suggestBtn").onclick=showSuggestion;
-    $("versionsBtn").onclick=showVersions;
-    $$(".editor-tab-btn").forEach(btn=>btn.onclick=()=>setEditorTab(btn.dataset.editorTab));
-    $("openVariablesTabBtn").onclick=()=>setEditorTab("variables");
-    $$('input[name="editorCopyMode"]').forEach(radio=>radio.onchange=()=>{localStorage.setItem("ps_copy_mode",radio.value);updateEditorCopyPreview()});
-    $$(".md-btn").forEach(btn=>btn.onclick=()=>{
-      const ta=$("promptContent"),start=ta.selectionStart,end=ta.selectionEnd,selected=ta.value.slice(start,end);
-      const before=btn.dataset.before||"",after=btn.dataset.after||"";
-      ta.setRangeText(before+selected+after,start,end,"end");ta.focus();markDirty();updateCounts();
-    });
-    $("copyFromEditorBtn").onclick=copyCompiledFromEditor;
-    $("copyVariableModeBtn").onclick=copyCompiledFromEditor;
-    $("duplicateFromEditorBtn").onclick=()=>state.editingId&&duplicatePrompt(state.editingId);
-    $("trashFromEditorBtn").onclick=()=>state.editingId&&trashPrompt(state.editingId);
-    $("addCategoryBtn").onclick=async()=>{
-      const name=$("newCategoryName").value.trim();if(!name)return;
-      const parentId=$("newCategoryParent").value||null;
-      await put("categories",{id:uid("cat"),name,parentId,color:nextCategoryColor(parentId),colorManual:false,order:state.categories.length,createdAt:nowISO()});
-      $("newCategoryName").value="";await loadState();renderAll();renderManage();
-    };
-    $("addClientBtn").onclick=async()=>{
-      const name=$("newClientName").value.trim();if(!name)return;
-      await put("clients",{id:uid("client"),name,createdAt:nowISO()});$("newClientName").value="";await loadState();renderAll();renderManage();
-    };
-    $("addRuleBtn").onclick=async()=>{
-      const keyword=$("ruleKeyword").value.trim();if(!keyword)return;
-      state.rules.push({id:uid("rule"),keyword,categoryId:$("ruleCategory").value||null,clientId:$("ruleClient").value||null});
-      $("ruleKeyword").value="";await saveRules();renderRules();
-    };
-    $("autosaveSetting").onchange=async e=>{state.settings.autosave=e.target.checked;await put("settings",{id:"prefs",value:state.settings})};
-    $("confirmDeleteSetting").onchange=async e=>{state.settings.confirmDelete=e.target.checked;await put("settings",{id:"prefs",value:state.settings})};
-    $("emptyTrashBtn").onclick=()=>{
-      const trashed=state.prompts.filter(p=>p.deletedAt);
-      if(!trashed.length){toast("Il cestino è già vuoto.");return}
-      showConfirm("Svuota cestino",`Eliminare definitivamente ${trashed.length} prompt?`,async()=>{
-        for(const p of trashed)await del("prompts",p.id);await loadState();renderAll();toast("Cestino svuotato.");
-      });
-    };
-    document.addEventListener("keydown",e=>{
-      const mod=e.metaKey||e.ctrlKey;
-      if(mod&&e.key.toLowerCase()==="k"){e.preventDefault();$("globalSearch").focus()}
-      if(mod&&e.key.toLowerCase()==="n"){e.preventDefault();openEditor()}
-      if(mod&&e.key.toLowerCase()==="s"&&$("editor").classList.contains("open")){e.preventDefault();saveEditor()}
-      if(e.key==="Escape"){
-        const open=$$(".modal-backdrop.show").pop();if(open)closeModal(open.id);else if($("editor").classList.contains("open"))closeEditor();
-      }
-    });
-    window.addEventListener("beforeunload",e=>{if(state.editorDirty){e.preventDefault();e.returnValue=""}});
-  }
-
-  init().catch(err=>{
-    console.error(err);
-    document.body.innerHTML=`<div style="padding:40px;font-family:system-ui"><h1>Errore di inizializzazione</h1><p>${esc(err.message)}</p><p>Apri il file con un browser moderno che supporti IndexedDB.</p></div>`;
   });
+  window.onbeforeunload=event=>{if(state.editor.dirty){event.preventDefault();event.returnValue=""}};
+  bindModalClose();
+}
+
+/* ---------- Avvio ---------- */
+async function init(){
+  setTheme(true);
+  const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
+  state.db=await openDatabase();await loadData();await seedData();bindEvents();render();
+}
+init().catch(error=>{
+  console.error(error);
+  document.body.innerHTML=`<div style="padding:40px;font-family:system-ui"><h1>Errore di inizializzazione</h1><p>${esc(error.message)}</p><p>Apri il file con Chrome o Brave.</p></div>`;
+});
 })();
 </script>
 </body>
