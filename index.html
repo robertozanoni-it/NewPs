@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v16 — Standalone</title>
+<title>Prompt Studio v17 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -305,7 +305,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Organizer standalone</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -435,7 +435,7 @@ textarea{resize:vertical;line-height:1.55}
     </div>
     <div class="editor-footer">
       <span class="save-status" id="saveStatus">Salvataggio in corso…</span>
-      <button class="btn success copy-compiled" id="copyCompiledBtn">Copia Prompt</button>
+      <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia Prompt</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="copyToCategoryBtn">Copia e assegna</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
@@ -488,6 +488,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
+const APP_VERSION="17.0.0";
+console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
 const DB_NAME="PromptStudioStandalone";
@@ -613,14 +615,39 @@ function categoryColor(category){
   if(category.color)return category.color;
   return CATEGORY_COLORS[Math.abs([...category.id].reduce((sum,char)=>sum+char.charCodeAt(0),0))%CATEGORY_COLORS.length];
 }
-function copyText(text){
-  if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(text);
+async function copyText(text){
+  const value=String(text??"");
+
+  if(navigator.clipboard&&window.isSecureContext){
+    try{
+      await navigator.clipboard.writeText(value);
+      return;
+    }catch(error){
+      console.warn("Clipboard API non disponibile, uso il metodo alternativo.",error);
+    }
+  }
+
   return new Promise((resolve,reject)=>{
     const area=document.createElement("textarea");
-    area.value=text;area.style.position="fixed";area.style.left="-9999px";document.body.appendChild(area);
-    area.focus();area.select();
-    try{document.execCommand("copy")?resolve():reject(new Error("Copia non riuscita"))}catch(error){reject(error)}
-    area.remove();
+    area.value=value;
+    area.setAttribute("readonly","");
+    area.style.position="fixed";
+    area.style.top="0";
+    area.style.left="-9999px";
+    area.style.opacity="0";
+    document.body.appendChild(area);
+    area.focus({preventScroll:true});
+    area.select();
+    area.setSelectionRange(0,area.value.length);
+
+    try{
+      const copied=document.execCommand("copy");
+      area.remove();
+      copied?resolve():reject(new Error("Il browser ha bloccato l’accesso agli appunti."));
+    }catch(error){
+      area.remove();
+      reject(error);
+    }
   });
 }
 function setTheme(initial=false){
@@ -1065,28 +1092,8 @@ function collectVariableValues(){
 function updateCompiledPreview(){
   $("compiledPreview").value=compilePrompt($("promptContent").value,collectVariableValues());
 }
-function invalidVariables(){
-  const values=collectVariableValues(),invalid=[];
-  state.editor.variables.forEach(def=>{
-    const error=validateValue(def,values[def.name]);
-    if(error)invalid.push({def,error});
-  });
-  return invalid;
-}
-function highlightInvalid(items){
-  setEditorTab("variables");
-  $$("#variableList .variable-input").forEach(input=>input.classList.remove("missing"));
-  $$("[data-error-for]").forEach(node=>{node.textContent="";node.classList.add("hidden")});
-  items.forEach(({def,error})=>{
-    const input=$(`#variableList .variable-input[data-var="${CSS.escape(def.name)}"]`);
-    const errorNode=$(`[data-error-for="${CSS.escape(def.name)}"]`);
-    input?.classList.add("missing");
-    if(errorNode){errorNode.textContent=error;errorNode.classList.remove("hidden")}
-  });
-  const first=items[0]?.def&&$(`#variableList .variable-input[data-var="${CSS.escape(items[0].def.name)}"]`);
-  first?.scrollIntoView({behavior:"smooth",block:"center"});
-  setTimeout(()=>first?.focus(),250);
-}
+/* La copia del prompt è volutamente permissiva:
+   nessuna variabile vuota o formalmente non valida può bloccarla. */
 
 /* ---------- Editor ---------- *//* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
@@ -1306,40 +1313,54 @@ async function persistEditorVariables(){
   await put("prompts",prompt);await loadData();render();
 }
 async function copyCompiled(){
-  refreshVariables(false);
-  renderVariables();
+  const copyButton=$("copyCompiledBtn");
 
-  const source=$("promptContent").value;
-  if(!source.trim()){
-    toast("Il testo del prompt è vuoto.");
-    setEditorTab("prompt");
-    $("promptContent").focus();
-    return;
-  }
+  try{
+    copyButton.disabled=true;
+    copyButton.textContent="Copia in corso…";
 
-  const values=collectVariableValues();
-  const incomplete=state.editor.variables.filter(def=>!String(values[def.name]??"").trim());
-  const invalid=state.editor.variables.filter(def=>{
-    const value=String(values[def.name]??"").trim();
-    return value&&Boolean(validateValue(def,value));
-  });
+    /* Sincronizza i valori presenti a schermo senza applicare alcuna validazione. */
+    refreshVariables(false);
 
-  Object.entries(values).forEach(([name,value])=>rememberValue(name,value));
+    const source=$("promptContent").value;
+    if(!source.trim()){
+      toast("Il testo del prompt è vuoto.");
+      setEditorTab("prompt");
+      $("promptContent").focus();
+      return;
+    }
 
-  let result=compilePrompt(source,values);
-  const toolUrl=$("promptToolUrl").value.trim();
-  if(toolUrl)result=`TOOL DA USARE: ${toolUrl}\n\n${result}`;
+    const values=collectVariableValues();
+    const incomplete=state.editor.variables.filter(def=>!String(values[def.name]??"").trim());
 
-  await copyText(result);
-  await persistEditorVariables();
+    Object.entries(values).forEach(([name,value])=>rememberValue(name,value));
 
-  if(incomplete.length||invalid.length){
-    const messages=[];
-    if(incomplete.length)messages.push(`${incomplete.length} variabil${incomplete.length===1?"e è rimasta":"i sono rimaste"} come segnaposto`);
-    if(invalid.length)messages.push(`${invalid.length} valor${invalid.length===1?"e non valido è stato copiato":"i non validi sono stati copiati"} comunque`);
-    toast(`Prompt copiato: ${messages.join("; ")}.`);
-  }else{
-    toast("Prompt copiato con tutte le variabili inserite.");
+    let result=compilePrompt(source,values);
+    const toolUrl=$("promptToolUrl").value.trim();
+    if(toolUrl)result=`TOOL DA USARE: ${toolUrl}\n\n${result}`;
+
+    /* Copia sempre: i campi vuoti restano nel testo come [SEGNAPOSTO]. */
+    await copyText(result);
+
+    if(incomplete.length){
+      toast(`Prompt copiato. ${incomplete.length} variabil${incomplete.length===1?"e è rimasta":"i sono rimaste"} come segnaposto.`);
+    }else{
+      toast("Prompt copiato con tutte le variabili inserite.");
+    }
+
+    /* Un eventuale errore di persistenza non deve annullare una copia riuscita. */
+    try{
+      await persistEditorVariables();
+    }catch(error){
+      console.error("Copia riuscita, ma salvataggio dei valori non completato:",error);
+      toast("Il prompt è stato copiato, ma i valori non sono stati salvati nell’archivio.");
+    }
+  }catch(error){
+    console.error("Errore durante la copia:",error);
+    toast(`Impossibile copiare: ${error.message||"errore del browser"}`);
+  }finally{
+    copyButton.disabled=false;
+    copyButton.textContent="Copia Prompt";
   }
 }
 
@@ -1553,7 +1574,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:16,
+    version:17,
     exportedAt:now(),
     prompt:payload
   };
@@ -1572,7 +1593,7 @@ function downloadEmbeddedFile(file){
 function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
   return {
-    app:"Prompt Studio Standalone",version:16,exportedAt:now(),
+    app:"Prompt Studio Standalone",version:17,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,
     prompts:state.prompts,categories:state.categories,clients:state.clients
   };
@@ -1677,7 +1698,7 @@ function bindEvents(){
     state.detectTimer=setTimeout(()=>{refreshVariables(true)},260);
   };
   $("detectVariablesBtn").onclick=()=>{refreshVariables(true);toast(`${state.editor.variables.length} variabili rilevate.`)};
-  $("copyCompiledBtn").onclick=()=>copyCompiled().catch(()=>toast("Impossibile copiare negli appunti."));
+  $("copyCompiledBtn").onclick=copyCompiled;
   $("exportPromptBtn").onclick=exportCurrentPrompt;
   $("copyToCategoryBtn").onclick=()=>{
     if(!state.editor.id){
