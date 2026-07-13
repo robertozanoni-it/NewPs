@@ -1,4 +1,4 @@
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
@@ -117,6 +117,8 @@ html = r'''<!DOCTYPE html>
   }
   .card:nth-child(even){background:color-mix(in srgb,var(--panel) 88%, var(--primary-soft))}
   .card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--primary) 45%, var(--line));box-shadow:var(--shadow)}
+  .card.dragging{opacity:.45;transform:scale(.98)}
+  .tree-row.drop-target{outline:2px dashed var(--primary);background:var(--primary-soft)}
   .cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(180px,1.1fr) minmax(260px,2fr) auto;align-items:center;gap:10px}
   .card-check{position:absolute;top:12px;left:12px}
   .cards.list .card-check{position:static}
@@ -154,6 +156,8 @@ html = r'''<!DOCTYPE html>
   input[type="text"]:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%, transparent)}
   textarea{resize:vertical;min-height:90px;line-height:1.5}
   #promptContent{min-height:330px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+  .editor-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0}
+  .editor-toolbar .btn{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   .editor-footer{margin-top:auto;padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
   .editor-footer .spacer{flex:1}
   .suggestion{
@@ -327,6 +331,7 @@ html = r'''<!DOCTYPE html>
   <div class="editor-head">
     <strong id="editorHeading">Nuovo prompt</strong>
     <button class="btn small" id="suggestBtn">Suggerisci categoria</button>
+    <button class="btn small" id="versionsBtn">Versioni</button>
     <button class="btn icon-btn small" id="fullscreenEditorBtn" title="Schermo intero">⛶</button>
     <button class="btn icon-btn small" id="closeEditorBtn" title="Chiudi">×</button>
   </div>
@@ -338,6 +343,13 @@ html = r'''<!DOCTYPE html>
       </div>
       <div class="field full">
         <label for="promptContent">Testo del prompt</label>
+        <div class="editor-toolbar" aria-label="Formattazione Markdown">
+          <button class="btn small md-btn" data-before="**" data-after="**" title="Grassetto"><b>B</b></button>
+          <button class="btn small md-btn" data-before="_" data-after="_" title="Corsivo"><i>I</i></button>
+          <button class="btn small md-btn" data-before="## " data-after="" title="Titolo">H2</button>
+          <button class="btn small md-btn" data-before="- " data-after="" title="Elenco">•</button>
+          <button class="btn small md-btn" data-before="`" data-after="`" title="Codice">&lt;/&gt;</button>
+        </div>
         <textarea id="promptContent" placeholder="Scrivi o incolla qui il prompt…"></textarea>
         <div class="hint"><span id="wordCount">0 parole</span> · <span id="charCount">0 caratteri</span> · autosalvataggio bozza attivo</div>
       </div>
@@ -383,6 +395,7 @@ html = r'''<!DOCTYPE html>
   </div>
   <div class="editor-footer">
     <button class="btn" id="copyFromEditorBtn">Copia</button>
+    <button class="btn" id="compileVariablesBtn">Compila variabili</button>
     <button class="btn" id="duplicateFromEditorBtn">Duplica</button>
     <button class="btn danger" id="trashFromEditorBtn">Cestina</button>
     <span class="spacer"></span>
@@ -499,8 +512,8 @@ html = r'''<!DOCTYPE html>
   "use strict";
 
   const DB_NAME = "PromptStudioStandalone";
-  const DB_VERSION = 1;
-  const STORE_NAMES = ["prompts","categories","clients","settings","backups"];
+  const DB_VERSION = 2;
+  const STORE_NAMES = ["prompts","categories","clients","settings","backups","versions"];
   const state = {
     db:null,
     prompts:[],
@@ -657,7 +670,23 @@ html = r'''<!DOCTYPE html>
         <span class="tree-label">${esc(c.name)}</span><span class="count">${clientCounts[c.id]||0}</span>
       </button>`).join("") || `<div class="hint" style="padding:8px">Nessun cliente.</div>`;
 
-    $$("#categoryTree [data-category]").forEach(b=>b.onclick=()=>setFilter("category",b.dataset.category));
+    $$("#categoryTree [data-category]").forEach(b=>{
+      b.onclick=()=>setFilter("category",b.dataset.category);
+      b.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="move";b.classList.add("drop-target")});
+      b.addEventListener("dragleave",()=>b.classList.remove("drop-target"));
+      b.addEventListener("drop",async e=>{
+        e.preventDefault();b.classList.remove("drop-target");
+        let ids=[];try{ids=JSON.parse(e.dataTransfer.getData("text/plain")||"[]")}catch{}
+        const cat=catById(b.dataset.category);
+        if(!cat||!ids.length)return;
+        for(const id of ids){
+          const p=state.prompts.find(x=>x.id===id);if(!p)continue;
+          if(cat.parentId){p.categoryId=cat.parentId;p.subcategoryId=cat.id}else{p.categoryId=cat.id;p.subcategoryId=null}
+          p.updatedAt=nowISO();await put("prompts",p);
+        }
+        state.selected.clear();await loadState();renderAll();toast(`${ids.length} prompt spostati in ${cat.name}.`);
+      });
+    });
     $$("#categoryTree [data-toggle-cat]").forEach(b=>b.onclick=e=>{
       e.stopPropagation();
       const id=b.dataset.toggleCat;
@@ -784,7 +813,7 @@ html = r'''<!DOCTYPE html>
     const cat=catById(p.subcategoryId)||catById(p.categoryId);
     const client=clientById(p.clientId);
     const statusLabels={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
-    return `<article class="card" data-id="${esc(p.id)}">
+    return `<article class="card" data-id="${esc(p.id)}" draggable="true">
       <input class="card-check" type="checkbox" ${state.selected.has(p.id)?"checked":""} aria-label="Seleziona prompt">
       <div class="card-top">
         <div class="card-title">${esc(p.title||"Senza titolo")}</div>
@@ -817,6 +846,13 @@ html = r'''<!DOCTYPE html>
       card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
       card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
       card.querySelector(".delete-card")?.addEventListener("click",()=>deleteForever(id));
+      card.addEventListener("dragstart",e=>{
+        if(!state.selected.has(id)){state.selected.clear();state.selected.add(id);updateBulkbar()}
+        card.classList.add("dragging");
+        e.dataTransfer.effectAllowed="move";
+        e.dataTransfer.setData("text/plain",JSON.stringify([...state.selected]));
+      });
+      card.addEventListener("dragend",()=>card.classList.remove("dragging"));
     });
   }
   function renderAll(){renderSidebar();renderCards();}
@@ -848,6 +884,7 @@ html = r'''<!DOCTYPE html>
     $("promptFavorite").checked=!!p?.favorite;
     $("trashFromEditorBtn").classList.toggle("hidden",!p);
     $("duplicateFromEditorBtn").classList.toggle("hidden",!p);
+    $("versionsBtn").classList.toggle("hidden",!p);
     $("suggestionBox").classList.remove("show");
     updateCounts();
     $("editor").classList.add("open");
@@ -867,6 +904,9 @@ html = r'''<!DOCTYPE html>
     if(!title){toast("Inserisci un titolo.");$("promptTitle").focus();return}
     if(!content){toast("Inserisci il testo del prompt.");$("promptContent").focus();return}
     const existing=state.editingId?state.prompts.find(p=>p.id===state.editingId):null;
+    if(existing){
+      await put("versions",{id:uid("version"),promptId:existing.id,version:existing.version||1,createdAt:nowISO(),snapshot:{...existing}});
+    }
     const obj={
       id:existing?.id||uid("prompt"),
       title,content,
@@ -886,6 +926,7 @@ html = r'''<!DOCTYPE html>
     };
     await put("prompts",obj);
     await loadState(); state.editingId=obj.id; state.editorDirty=false;
+    localStorage.removeItem("ps_editor_draft");
     renderAll(); toast("Prompt salvato.");
   }
   function markDirty(){
@@ -1072,13 +1113,33 @@ html = r'''<!DOCTYPE html>
     return 2*matches/((a.length-1)+(b.length-1));
   }
   function computeDuplicates(){
-    const arr=livePrompts(), pairs=[];
-    for(let i=0;i<arr.length;i++){
-      for(let j=i+1;j<arr.length;j++){
-        const titleScore=dice(arr[i].title,arr[j].title);
-        const contentScore=dice(arr[i].content,arr[j].content);
-        const score=.35*titleScore+.65*contentScore;
-        if(score>=.84 || contentScore>=.91) pairs.push({a:arr[i],b:arr[j],score});
+    const arr=livePrompts(), pairs=[], pairKeys=new Set();
+    const comparePair=(a,b)=>{
+      const key=a.id<b.id?`${a.id}|${b.id}`:`${b.id}|${a.id}`;
+      if(pairKeys.has(key))return;pairKeys.add(key);
+      const titleScore=dice(a.title,b.title);
+      const contentScore=dice(a.content,b.content);
+      const score=.35*titleScore+.65*contentScore;
+      if(score>=.84 || contentScore>=.91) pairs.push({a,b,score});
+    };
+    if(arr.length<=700){
+      for(let i=0;i<arr.length;i++)for(let j=i+1;j<arr.length;j++)comparePair(arr[i],arr[j]);
+    }else{
+      const docFreq=new Map(), promptTokens=new Map(), exact=new Map();
+      for(const p of arr){
+        const ts=tokens(`${p.title} ${p.content.slice(0,1200)}`).slice(0,80);
+        promptTokens.set(p.id,ts);
+        ts.forEach(t=>docFreq.set(t,(docFreq.get(t)||0)+1));
+        const exactKey=normalize(p.content);
+        if(exactKey){if(exact.has(exactKey))comparePair(exact.get(exactKey),p);else exact.set(exactKey,p)}
+      }
+      const index=new Map();
+      for(const p of arr){
+        const rare=(promptTokens.get(p.id)||[]).filter(t=>(docFreq.get(t)||0)<=60).sort((a,b)=>(docFreq.get(a)||0)-(docFreq.get(b)||0)).slice(0,10);
+        const candidates=new Set();
+        rare.forEach(t=>(index.get(t)||[]).forEach(other=>candidates.add(other)));
+        for(const other of candidates)comparePair(other,p);
+        rare.forEach(t=>{if(!index.has(t))index.set(t,[]);index.get(t).push(p)});
       }
     }
     state.duplicatePairs=pairs.sort((x,y)=>y.score-x.score);
@@ -1104,10 +1165,11 @@ html = r'''<!DOCTYPE html>
     $$(".trash-dup").forEach(b=>b.onclick=async()=>{await trashPrompt(b.dataset.id);renderDuplicates()});
   }
 
-  function dataSnapshot(){
+  async function dataSnapshot(){
     return {
-      app:"Prompt Studio Standalone",version:1,exportedAt:nowISO(),
-      prompts:state.prompts,categories:state.categories,clients:state.clients,rules:state.rules,preferences:state.settings
+      app:"Prompt Studio Standalone",version:2,exportedAt:nowISO(),
+      prompts:state.prompts,categories:state.categories,clients:state.clients,rules:state.rules,
+      preferences:state.settings,versions:await getAll("versions")
     };
   }
   function downloadJSON(data,filename){
@@ -1115,12 +1177,12 @@ html = r'''<!DOCTYPE html>
     const url=URL.createObjectURL(blob),a=document.createElement("a");
     a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   }
-  function exportData(){
-    downloadJSON(dataSnapshot(),`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
+  async function exportData(){
+    downloadJSON(await dataSnapshot(),`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
     toast("Backup JSON esportato.");
   }
   async function createBackup(){
-    const snap=dataSnapshot();
+    const snap=await dataSnapshot();
     await put("backups",{id:uid("backup"),createdAt:nowISO(),data:snap});
     downloadJSON(snap,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
     toast("Backup locale e file JSON creati.");
@@ -1132,24 +1194,72 @@ html = r'''<!DOCTYPE html>
       $("genericTitle").textContent="Importazione archivio";
       $("genericBody").innerHTML=`
         <p><strong>${data.prompts.length}</strong> prompt, <strong>${data.categories.length}</strong> categorie e <strong>${data.clients.length}</strong> clienti trovati.</p>
-        <div class="field"><label>Modalità</label><select id="importMode"><option value="merge">Unisci senza sovrascrivere gli ID esistenti</option><option value="replace">Sostituisci l'archivio attuale</option></select></div>`;
+        <div class="field"><label>Modalità</label><select id="importMode"><option value="merge">Unisci e mantieni i record locali in caso di conflitto</option><option value="replace">Sostituisci l'archivio attuale</option></select></div>`;
       $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="importConfirm">Importa</button>`;
       openModal("genericModal");bindModalClose();
       $("importConfirm").onclick=async()=>{
         const mode=$("importMode").value;
         if(mode==="replace"){
-          for(const store of ["prompts","categories","clients","settings"]){
+          for(const store of ["prompts","categories","clients","settings","versions"]){
             const items=await getAll(store);for(const item of items)await del(store,item.id);
           }
         }
-        for(const c of data.categories) await put("categories",c);
-        for(const c of data.clients) await put("clients",c);
-        for(const p of data.prompts) await put("prompts",p);
+        const existing={
+          prompts:new Set((await getAll("prompts")).map(x=>x.id)),
+          categories:new Set((await getAll("categories")).map(x=>x.id)),
+          clients:new Set((await getAll("clients")).map(x=>x.id)),
+          versions:new Set((await getAll("versions")).map(x=>x.id))
+        };
+        let imported=0,skipped=0;
+        for(const c of data.categories){if(mode==="merge"&&existing.categories.has(c.id)){skipped++;continue}await put("categories",c);imported++}
+        for(const c of data.clients){if(mode==="merge"&&existing.clients.has(c.id)){skipped++;continue}await put("clients",c);imported++}
+        for(const p of data.prompts){if(mode==="merge"&&existing.prompts.has(p.id)){skipped++;continue}await put("prompts",p);imported++}
+        for(const v of (data.versions||[])){if(mode==="merge"&&existing.versions.has(v.id)){skipped++;continue}await put("versions",v)}
         if(data.rules) await put("settings",{id:"rules",value:data.rules});
         if(data.preferences) await put("settings",{id:"prefs",value:data.preferences});
-        closeModal("genericModal");await loadState();renderAll();toast("Importazione completata.");
+        closeModal("genericModal");await loadState();renderAll();toast(`Importazione completata: ${imported} record, ${skipped} conflitti ignorati.`);
       };
     }catch(err){toast(`Importazione non riuscita: ${err.message}`)}
+  }
+
+  function compileVariables(){
+    const content=$("promptContent").value;
+    const declared=$("promptVariables").value.split(",").map(x=>x.trim()).filter(Boolean);
+    const found=[...content.matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(m=>m[1].trim());
+    const vars=[...new Set([...declared,...found])];
+    if(!vars.length){toast("Non sono state trovate variabili nel prompt.");return}
+    $("genericTitle").textContent="Compila variabili";
+    $("genericBody").innerHTML=vars.map((v,i)=>`<div class="field" style="margin-bottom:10px"><label>${esc(v)}</label><input type="text" class="variable-value" data-var="${esc(v)}" placeholder="Valore per ${esc(v)}"></div>`).join("");
+    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="compileConfirm">Genera e copia</button>`;
+    openModal("genericModal");bindModalClose();
+    $("compileConfirm").onclick=async()=>{
+      let result=content;
+      $$(".variable-value").forEach(input=>{
+        const name=input.dataset.var,value=input.value;
+        const escaped=name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+        result=result.replace(new RegExp(`{{\\s*${escaped}\\s*}}`,"g"),value);
+      });
+      await navigator.clipboard.writeText(result);closeModal("genericModal");toast("Prompt compilato e copiato.");
+    };
+  }
+
+  async function showVersions(){
+    if(!state.editingId)return;
+    const versions=(await getAll("versions")).filter(v=>v.promptId===state.editingId).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    $("genericTitle").textContent="Cronologia versioni";
+    $("genericBody").innerHTML=versions.length?versions.map(v=>`<div class="manage-row" style="align-items:flex-start;margin-bottom:8px">
+      <div class="grow"><strong>Versione ${v.version}</strong><br><small>${fmtDate(v.createdAt)}</small><p class="hint">${esc((v.snapshot?.content||"").slice(0,180))}</p></div>
+      <button class="btn small restore-version" data-id="${esc(v.id)}">Ripristina</button>
+    </div>`).join(""):`<p class="hint">Non ci sono ancora versioni precedenti. La cronologia viene creata dal secondo salvataggio.</p>`;
+    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Chiudi</button>`;
+    openModal("genericModal");bindModalClose();
+    $$(".restore-version").forEach(b=>b.onclick=async()=>{
+      const version=versions.find(v=>v.id===b.dataset.id),current=state.prompts.find(p=>p.id===state.editingId);
+      if(!version||!current)return;
+      await put("versions",{id:uid("version"),promptId:current.id,version:current.version||1,createdAt:nowISO(),snapshot:{...current}});
+      const restored={...version.snapshot,id:current.id,version:(current.version||1)+1,updatedAt:nowISO(),deletedAt:null};
+      await put("prompts",restored);closeModal("genericModal");await loadState();openEditor(restored.id);renderAll();toast("Versione ripristinata.");
+    });
   }
 
   async function init(){
@@ -1165,6 +1275,19 @@ html = r'''<!DOCTYPE html>
     computeDuplicates();
     bindEvents();
     bindModalClose();
+    const draftRaw=localStorage.getItem("ps_editor_draft");
+    if(draftRaw){
+      try{
+        const draft=JSON.parse(draftRaw);
+        if(draft?.content && Date.now()-new Date(draft.at).getTime()<7*864e5){
+          toast("È disponibile una bozza non salvata.","Ripristina",()=>{
+            openEditor(draft.id&&state.prompts.some(p=>p.id===draft.id)?draft.id:null);
+            $("promptTitle").value=draft.title||$("promptTitle").value;
+            $("promptContent").value=draft.content||"";updateCounts();state.editorDirty=true;
+          });
+        }
+      }catch{}
+    }
   }
 
   function applyViewMode(){
@@ -1215,6 +1338,13 @@ html = r'''<!DOCTYPE html>
     $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
     $("fullscreenEditorBtn").onclick=()=>$("editor").classList.toggle("full");
     $("suggestBtn").onclick=showSuggestion;
+    $("versionsBtn").onclick=showVersions;
+    $("compileVariablesBtn").onclick=compileVariables;
+    $$(".md-btn").forEach(btn=>btn.onclick=()=>{
+      const ta=$("promptContent"),start=ta.selectionStart,end=ta.selectionEnd,selected=ta.value.slice(start,end);
+      const before=btn.dataset.before||"",after=btn.dataset.after||"";
+      ta.setRangeText(before+selected+after,start,end,"end");ta.focus();markDirty();updateCounts();
+    });
     $("copyFromEditorBtn").onclick=async()=>{await navigator.clipboard.writeText($("promptContent").value);toast("Testo copiato.")};
     $("duplicateFromEditorBtn").onclick=()=>state.editingId&&duplicatePrompt(state.editingId);
     $("trashFromEditorBtn").onclick=()=>state.editingId&&trashPrompt(state.editingId);
@@ -1261,8 +1391,3 @@ html = r'''<!DOCTYPE html>
 </script>
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/prompt-studio-standalone.html")
-path.write_text(html, encoding="utf-8")
-print(f"Creato: {path} ({path.stat().st_size/1024:.1f} KB)")
