@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v11 — Standalone</title>
+<title>Prompt Studio v12 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -247,6 +247,7 @@ textarea{resize:vertical;line-height:1.55}
 .modal-head{display:flex;align-items:center;gap:10px;padding:15px 17px;border-bottom:1px solid var(--line)}
 .modal-head h3{margin:0}
 .modal-body{padding:17px;overflow:auto}
+.modal-body .field + .field{margin-top:14px}
 .modal-foot{padding:12px 17px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
 .manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .panel-box{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
@@ -411,7 +412,7 @@ textarea{resize:vertical;line-height:1.55}
     <div class="editor-footer">
       <button class="btn success copy-compiled" id="copyCompiledBtn">Copia Prompt</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
-      <button class="btn" id="copyToCategoryBtn">Copia in categoria</button>
+      <button class="btn" id="copyToCategoryBtn">Copia e assegna</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
       <button class="btn danger" id="trashBtn">Cestina</button>
       <span class="spacer"></span>
@@ -732,7 +733,7 @@ function cardHtml(prompt){
     <div class="card-actions">
       <button class="btn small edit-card">Apri</button>
       <button class="btn small copy-card">Copia</button>
-      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':'<button class="btn small copy-category-card">Copia in categoria</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>'}
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':'<button class="btn small copy-category-card">Copia e assegna</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>'}
     </div>
   </article>`;
 }
@@ -1120,35 +1121,92 @@ async function quickCopy(id){
 function categoryDestinationOptions(){
   const roots=state.categories.filter(category=>!category.parentId);
   const options=['<option value="">Senza categoria</option>'];
+
   roots.forEach(root=>{
     options.push(`<option value="${esc(root.id)}">${esc(root.name)}</option>`);
+
     state.categories
       .filter(category=>category.parentId===root.id)
       .sort((a,b)=>a.name.localeCompare(b.name,"it"))
       .forEach(child=>{
-        options.push(`<option value="${esc(child.id)}">↳ ${esc(root.name)} / ${esc(child.name)}</option>`);
+        options.push(
+          `<option value="${esc(child.id)}">↳ ${esc(root.name)} / ${esc(child.name)}</option>`
+        );
       });
   });
+
+  return options.join("");
+}
+function clientDestinationOptions(sourceClientId){
+  const options=[
+    `<option value="__keep__">Mantieni cliente/progetto originale</option>`,
+    `<option value="__none__">Nessun cliente o progetto</option>`
+  ];
+
+  state.clients
+    .slice()
+    .sort((a,b)=>a.name.localeCompare(b.name,"it"))
+    .forEach(client=>{
+      const selected=client.id===sourceClientId?" selected":"";
+      options.push(
+        `<option value="${esc(client.id)}"${selected}>${esc(client.name)}</option>`
+      );
+    });
+
   return options.join("");
 }
 function openCopyToCategory(id){
-  const prompt=state.prompts.find(item=>item.id===id);
-  if(!prompt)return;
+  const source=state.prompts.find(item=>item.id===id);
+  if(!source)return;
 
-  choiceAction(
-    "Copia prompt in una categoria",
-    "Categoria o sottocategoria di destinazione",
-    categoryDestinationOptions(),
-    destinationId=>copyPromptToCategory(id,destinationId)
-  );
+  $("choiceTitle").textContent="Copia prompt e assegna destinazione";
+  $("choiceBody").innerHTML=`
+    <div class="field">
+      <label for="copyDestinationCategory">Categoria o sottocategoria</label>
+      <select id="copyDestinationCategory">${categoryDestinationOptions()}</select>
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <label for="copyDestinationClient">Cliente o progetto</label>
+      <select id="copyDestinationClient">${clientDestinationOptions(source.clientId)}</select>
+    </div>
+
+    <div class="hint" style="margin-top:12px">
+      Verrà creata una nuova copia. Il prompt originale non sarà modificato.
+    </div>
+  `;
+  $("choiceFoot").innerHTML=`
+    <button class="btn" data-close="choiceModal">Annulla</button>
+    <button class="btn primary" id="copyDestinationConfirm">Crea copia</button>
+  `;
+
+  bindModalClose();
+
+  $("copyDestinationConfirm").onclick=()=>{
+    const categoryId=$("copyDestinationCategory").value;
+    const clientChoice=$("copyDestinationClient").value;
+    closeModal("choiceModal");
+    copyPromptToDestination(id,categoryId,clientChoice);
+  };
+
+  openModal("choiceModal");
 }
-async function copyPromptToCategory(id,destinationId){
+async function copyPromptToDestination(id,destinationId,clientChoice){
   const source=state.prompts.find(item=>item.id===id);
   if(!source)return;
 
   const destination=catById(destinationId);
+
+  let targetClientId=source.clientId||null;
+  if(clientChoice==="__none__")targetClientId=null;
+  else if(clientChoice&&clientChoice!=="__keep__")targetClientId=clientChoice;
+
+  const cloned=typeof structuredClone==="function"
+    ? structuredClone(source)
+    : JSON.parse(JSON.stringify(source));
+
   const copy={
-    ...structuredClone(source),
+    ...cloned,
     id:uid("prompt"),
     title:`${source.title} — copia`,
     favorite:false,
@@ -1157,21 +1215,32 @@ async function copyPromptToCategory(id,destinationId){
     createdAt:now(),
     updatedAt:now(),
     deletedAt:null,
-    categoryId:destination?.parentId ? destination.parentId : (destination?.id||null),
-    subcategoryId:destination?.parentId ? destination.id : null
+    clientId:targetClientId,
+    categoryId:destination?.parentId
+      ? destination.parentId
+      : (destination?.id||null),
+    subcategoryId:destination?.parentId
+      ? destination.id
+      : null
   };
 
   await put("prompts",copy);
   await loadData();
   render();
 
-  const destinationName=destination
-    ? (destination.parentId
-        ? `${catById(destination.parentId)?.name||""} / ${destination.name}`
-        : destination.name)
+  const categoryName=destination
+    ? (
+        destination.parentId
+          ? `${catById(destination.parentId)?.name||""} / ${destination.name}`
+          : destination.name
+      )
     : "Senza categoria";
 
-  toast(`Copia creata in “${destinationName}”.`);
+  const clientName=targetClientId
+    ? (clientById(targetClientId)?.name||"Cliente non trovato")
+    : "Nessun cliente o progetto";
+
+  toast(`Copia creata in “${categoryName}” · ${clientName}.`);
 }
 
 async function duplicatePrompt(id){
@@ -1251,7 +1320,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:11,
+    version:12,
     exportedAt:now(),
     prompt:payload
   };
@@ -1376,7 +1445,7 @@ function bindEvents(){
   $("exportPromptBtn").onclick=exportCurrentPrompt;
   $("copyToCategoryBtn").onclick=()=>{
     if(!state.editor.id){
-      toast("Salva prima il prompt, poi potrai copiarlo in una categoria.");
+      toast("Salva prima il prompt, poi potrai copiarlo e assegnarlo.");
       return;
     }
     openCopyToCategory(state.editor.id);
