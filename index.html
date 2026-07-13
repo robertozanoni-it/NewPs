@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v8 — Standalone</title>
+<title>Prompt Studio v9 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -159,6 +159,26 @@ input[type=text],select,textarea{
 textarea{resize:vertical;line-height:1.55}
 #promptTitle{font-size:17px;font-weight:800}
 #promptContent{min-height:390px;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.tool-link-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+.tool-link-row input{min-width:0}
+.variable-highlight-note{
+  margin:0 0 14px;padding:12px 14px;border-radius:12px;background:var(--panel-2);
+  border:1px solid var(--line);color:var(--muted);font-size:13px;line-height:1.55
+}
+.variable-highlight-note strong{color:var(--text)}
+.quick-values{
+  margin:14px 0 0;padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2)
+}
+.quick-values-title{font-weight:850;margin-bottom:8px}
+.quick-values-list{display:flex;gap:7px;flex-wrap:wrap}
+.quick-value-chip{
+  border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);
+  padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer
+}
+.quick-value-chip:hover{border-color:var(--primary);background:var(--primary-soft)}
+.validation-error{color:var(--danger);font-size:12px;font-weight:800;margin-top:7px}
+.file-required-label{color:var(--warning);font-weight:850}
+
 .hint{font-size:12px;color:var(--muted);line-height:1.5}
 .editor-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 15px;border-top:1px solid var(--line);background:var(--panel)}
 .editor-footer .btn.copy-compiled{font-size:15px;padding-inline:17px}
@@ -338,6 +358,14 @@ textarea{resize:vertical;line-height:1.55}
           <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
           <div class="field"><label>Cliente o progetto</label><select id="promptClient"></select></div>
           <div class="field"><label>Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
+          <div class="field full">
+            <label>Link del tool da usare</label>
+            <div class="tool-link-row">
+              <input id="promptToolUrl" type="text" placeholder="https://chatgpt.com/ oppure link del tool">
+              <button class="btn" id="openToolBtn" type="button">Apri tool</button>
+            </div>
+            <div class="hint">Il link viene salvato insieme al prompt e può essere aperto direttamente dall’editor.</div>
+          </div>
           <div class="field full"><label>Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
           <div class="field full"><label>Note interne</label><textarea id="promptNotes" placeholder="Note, istruzioni o contesto"></textarea></div>
           <div class="field full"><label><input id="promptFavorite" type="checkbox"> Aggiungi ai preferiti</label></div>
@@ -346,9 +374,10 @@ textarea{resize:vertical;line-height:1.55}
 
       <section class="editor-panel" data-panel="variables">
         <div class="variables-header">
-          <div><h3>Compila le variabili rilevate</h3><p>L’app riconosce automaticamente segnaposto come <strong>[DOMINIO_SITO]</strong>, <strong>[LINGUA]</strong>, <strong>[PAESE_O_MERCATO]</strong> e <strong>{{nome_cliente}}</strong>. Ogni variabile ha un campo distinto.</p></div>
-          <button class="btn" id="detectVariablesBtn">↻ Rileva di nuovo</button>
+          <div><h3>Compila il prompt</h3><p>L’app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
+          <button class="btn" id="detectVariablesBtn">↻ Aggiorna campi</button>
         </div>
+        <div class="variable-highlight-note"><strong>Come funziona:</strong> compila i campi qui sotto. Il pulsante <strong>Copia Prompt</strong> sostituisce automaticamente tutte le variabili con i valori inseriti.</div>
         <div class="variable-summary" id="variableSummary"></div>
         <div class="variable-list" id="variableList"></div>
         <div class="preview-box">
@@ -358,8 +387,7 @@ textarea{resize:vertical;line-height:1.55}
       </section>
     </div>
     <div class="editor-footer">
-      <button class="btn" id="copyTemplateBtn">Copia modello con segnaposto</button>
-      <button class="btn success copy-compiled" id="copyCompiledBtn">Copia prompt con variabili inserite</button>
+      <button class="btn success copy-compiled" id="copyCompiledBtn">Copia Prompt</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
       <button class="btn danger" id="trashBtn">Cestina</button>
       <span class="spacer"></span>
@@ -423,8 +451,9 @@ const state={
   filter:{type:"all",id:null},query:"",selected:new Set(),
   sort:localStorage.getItem("ps_sort")||"updated_desc",
   view:localStorage.getItem("ps_view")||"grid",
-  editor:{id:null,dirty:false,variables:[],values:{},files:{}},
-  searchTimer:null,detectTimer:null
+  editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""},
+  searchTimer:null,detectTimer:null,
+  recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}")
 };
 const $=id=>document.getElementById(id);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -695,13 +724,30 @@ function updateBulkbar(){
 
 /* ---------- Motore delle variabili ---------- */
 function variableRegex(){
-  return /{{\s*([^{}]+?)\s*}}|\[\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*\]/g;
+  return /{{\s*([^{}]+?)\s*}}|\[\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*\]|%\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*%|<\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*>/g;
 }
-function variableName(value){return String(value||"").replace(/{{|}}|\[|\]/g,"").trim().replace(/\s+/g,"_")}
+function variableName(value){return String(value||"").replace(/{{|}}|\[|\]|%|<|>/g,"").trim().replace(/\s+/g,"_")}
 function humanize(value){
-  let text=String(value||"").replace(/{{|}}|\[|\]/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
-  if(text==="dominio sito")text="dominio";
-  return text||"valore";
+  let text=String(value||"").replace(/{{|}}|\[|\]|%|<|>/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
+  const map={
+    "dominio sito":"dominio del sito","lingua":"lingua principale","paese o mercato":"paese o mercato",
+    "keyword":"keyword","keyword principale":"keyword principale","url":"URL","url pagina":"URL della pagina",
+    "nome cliente":"nome cliente","cliente":"nome cliente","target":"pubblico target","tono di voce":"tono di voce",
+    "file":"file da usare","file da analizzare":"file da analizzare","documento":"documento","pdf":"PDF",
+    "immagine":"immagine","screenshot":"screenshot","excel":"file Excel","csv":"file CSV"
+  };
+  return map[text]||text||"valore";
+}
+function variableIcon(definition){
+  const text=normalize(`${definition.name} ${definition.label}`);
+  if(/dominio|url|sito/.test(text))return "🌐";
+  if(/lingua|paese|mercato|localita/.test(text))return "🌍";
+  if(/keyword|query|serp/.test(text))return "🔎";
+  if(/cliente|persona|nome/.test(text))return "👤";
+  if(/file|pdf|documento|csv|excel|xlsx|xls|docx|doc|zip|allegato/.test(text))return "📄";
+  if(/immagine|foto|screenshot|image/.test(text))return "🖼️";
+  if(/email|mail/.test(text))return "✉️";
+  return "✏️";
 }
 function contextLabel(content,index){
   const start=content.lastIndexOf("\n",index)+1;
@@ -709,19 +755,27 @@ function contextLabel(content,index){
 }
 function isFileVariable(definition){
   const text=normalize(`${definition.name} ${definition.label}`);
-  return /\b(file|allegato|documento|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|dataset|sitemap|report|zip)\b/.test(text);
+  return /\b(file|allegato|documento|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|dataset|sitemap|report|zip|screenshot)\b/.test(text);
+}
+function expectedInputType(definition){
+  const text=normalize(`${definition.name} ${definition.label}`);
+  if(/url|dominio|sito|link/.test(text))return "url";
+  if(/email|mail/.test(text))return "email";
+  return "text";
 }
 function extractVariables(content){
   const text=String(content||""),definitions=[],seen=new Set(),regex=variableRegex();
   let match;
   while((match=regex.exec(text))){
-    const name=variableName(match[1]??match[2]);
-    const key=name.toLowerCase();
+    const rawName=match[1]??match[2]??match[3]??match[4];
+    const name=variableName(rawName),key=name.toLowerCase();
     if(!name||seen.has(key))continue;
     seen.add(key);
     const context=contextLabel(text,match.index);
-    const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":"square"};
+    const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":"angle"};
     definition.fileLike=isFileVariable(definition);
+    definition.inputType=expectedInputType(definition);
+    definition.icon=variableIcon(definition);
     definitions.push(definition);
   }
   return definitions;
@@ -732,10 +786,27 @@ function valueFor(values,name){
   return key?values[key]:"";
 }
 function compilePrompt(content,values){
-  return String(content||"").replace(variableRegex(),(match,curly,square)=>{
-    const name=variableName(curly??square),value=valueFor(values,name);
+  return String(content||"").replace(variableRegex(),(match,curly,square,percent,angle)=>{
+    const name=variableName(curly??square??percent??angle),value=valueFor(values,name);
     return String(value??"").trim()?value:match;
   });
+}
+function rememberValue(name,value){
+  const clean=String(value||"").trim();
+  if(!clean||clean.length>500)return;
+  const list=state.recentValues[name]||[];
+  state.recentValues[name]=[clean,...list.filter(item=>item!==clean)].slice(0,5);
+  localStorage.setItem("ps_recent_values",JSON.stringify(state.recentValues));
+}
+function validateValue(def,value){
+  const clean=String(value||"").trim();
+  if(!clean)return "Campo obbligatorio";
+  if(def.inputType==="url"){
+    const normalized=/^https?:\/\//i.test(clean)?clean:`https://${clean}`;
+    try{new URL(normalized)}catch{return "Inserisci un URL o dominio valido"}
+  }
+  if(def.inputType==="email"&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean))return "Inserisci un indirizzo email valido";
+  return "";
 }
 function refreshVariables(renderNow=true){
   syncVariableInputs();
@@ -753,16 +824,21 @@ function variableCardHtml(def,index){
   const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length];
   const value=valueFor(state.editor.values,def.name);
   const file=state.editor.files[def.name];
-  const open=def.fileLike||file?"open":"";
-  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.textExtracted?" · contenuto testuale inserito":" · nome e dati del file inseriti"}`:"Nessun file selezionato.";
+  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.textExtracted?" · contenuto importato":" · file associato"}`:"Nessun file selezionato.";
+  const recent=(state.recentValues[def.name]||[]).slice(0,5);
   return `<article class="variable-card" style="--var-accent:${accent}" data-var="${esc(def.name)}">
-    <div class="variable-card-head"><span class="variable-number">Variabile ${index+1}</span><span class="variable-token">${esc(def.raw)}</span><span class="variable-badge">${def.fileLike?"Può richiedere un file":"Rilevata nel prompt"}</span></div>
+    <div class="variable-card-head">
+      <span class="variable-number">${def.icon} Campo ${index+1}</span>
+      <span class="variable-token">${esc(def.raw)}</span>
+      <span class="variable-badge">${def.fileLike?"File o testo":"Campo rilevato"}</span>
+    </div>
     <div class="variable-card-body">
-      <h4>Inserisci variabile ${esc(def.label||humanize(def.name))}</h4>
-      <p class="variable-help">Questo valore sostituirà <strong>${esc(def.raw)}</strong> nel prompt copiato.</p>
-      <textarea class="variable-input" data-var="${esc(def.name)}" placeholder="Inserisci ${esc(def.label||humanize(def.name))}…">${esc(value)}</textarea>
-      <details class="file-panel" ${open}>
-        <summary>Carica un file per questa variabile</summary>
+      <h4>Inserisci ${esc(def.label||humanize(def.name))}</h4>
+      <p class="variable-help">Questo valore sostituirà automaticamente <strong>${esc(def.raw)}</strong> nel prompt finale.</p>
+      <textarea class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="Inserisci ${esc(def.label||humanize(def.name))}…">${esc(value)}</textarea>
+      <div class="validation-error hidden" data-error-for="${esc(def.name)}"></div>
+      ${recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"…":item)}</button>`).join("")}</div></div>`:""}
+      ${def.fileLike?`<div class="file-panel" open>
         <div class="file-zone">
           <div class="file-drop" data-var="${esc(def.name)}">
             <input class="variable-file" data-var="${esc(def.name)}" type="file">
@@ -770,9 +846,9 @@ function variableCardHtml(def,index){
             <button class="btn small choose-file" type="button">Scegli file</button>
             <div class="file-status">${esc(fileText)}</div>
           </div>
-          <div class="hint" style="margin-top:8px">Per TXT, CSV, JSON, HTML e altri file testuali viene inserito il contenuto. Per PDF, DOCX, immagini, ZIP e file binari vengono inseriti nome, tipo e dimensione: il file dovrà poi essere allegato manualmente dove usi il prompt.</div>
+          <div class="hint" style="margin-top:8px">Per file testuali viene importato il contenuto. Per PDF, DOCX, XLSX, immagini e ZIP viene inserito un riferimento al file selezionato.</div>
         </div>
-      </details>
+      </div>`:""}
     </div>
   </article>`;
 }
@@ -783,8 +859,16 @@ function renderVariables(){
   $("variableSummary").classList.toggle("show",definitions.length>0);
   $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
   $$("#variableList .variable-input").forEach(input=>input.addEventListener("input",()=>{
-    state.editor.values[input.dataset.var]=input.value;markDirty();updateCompiledPreview();
+    state.editor.values[input.dataset.var]=input.value;
+    const error=$(`[data-error-for="${CSS.escape(input.dataset.var)}"]`);
+    if(error){error.textContent="";error.classList.add("hidden")}
+    input.classList.remove("missing");
+    markDirty();updateCompiledPreview();
   }));
+  $$("#variableList .quick-value-chip").forEach(button=>button.onclick=()=>{
+    const input=$(`#variableList .variable-input[data-var="${CSS.escape(button.dataset.var)}"]`);
+    if(input){input.value=button.dataset.value;input.dispatchEvent(new Event("input",{bubbles:true}));input.focus()}
+  });
   $$("#variableList .choose-file").forEach(button=>button.onclick=()=>button.closest(".file-drop").querySelector(".variable-file").click());
   $$("#variableList .variable-file").forEach(input=>input.onchange=()=>input.files[0]&&processVariableFile(input.dataset.var,input.files[0]));
   $$("#variableList .file-drop").forEach(zone=>{
@@ -817,19 +901,30 @@ function collectVariableValues(){
 function updateCompiledPreview(){
   $("compiledPreview").value=compilePrompt($("promptContent").value,collectVariableValues());
 }
-function missingVariables(){
-  const values=collectVariableValues();
-  return state.editor.variables.filter(def=>!String(values[def.name]||"").trim());
+function invalidVariables(){
+  const values=collectVariableValues(),invalid=[];
+  state.editor.variables.forEach(def=>{
+    const error=validateValue(def,values[def.name]);
+    if(error)invalid.push({def,error});
+  });
+  return invalid;
 }
-function highlightMissing(definitions){
+function highlightInvalid(items){
   setEditorTab("variables");
   $$("#variableList .variable-input").forEach(input=>input.classList.remove("missing"));
-  definitions.forEach(def=>$(`#variableList .variable-input[data-var="${CSS.escape(def.name)}"]`)?.classList.add("missing"));
-  const first=definitions[0]&&$(`#variableList .variable-input[data-var="${CSS.escape(definitions[0].name)}"]`);
-  first?.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>first?.focus(),250);
+  $$("[data-error-for]").forEach(node=>{node.textContent="";node.classList.add("hidden")});
+  items.forEach(({def,error})=>{
+    const input=$(`#variableList .variable-input[data-var="${CSS.escape(def.name)}"]`);
+    const errorNode=$(`[data-error-for="${CSS.escape(def.name)}"]`);
+    input?.classList.add("missing");
+    if(errorNode){errorNode.textContent=error;errorNode.classList.remove("hidden")}
+  });
+  const first=items[0]?.def&&$(`#variableList .variable-input[data-var="${CSS.escape(items[0].def.name)}"]`);
+  first?.scrollIntoView({behavior:"smooth",block:"center"});
+  setTimeout(()=>first?.focus(),250);
 }
 
-/* ---------- Editor ---------- */
+/* ---------- Editor ---------- *//* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
   const roots=state.categories.filter(item=>!item.parentId);
   $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
@@ -846,13 +941,14 @@ function fillSubcategories(selected=""){
 }
 function openEditor(id=null,preferredTab=null){
   const prompt=id?state.prompts.find(item=>item.id===id):null;
-  state.editor={id:prompt?.id||null,dirty:false,variables:[],values:{...(prompt?.variableValues||{})},files:{...(prompt?.variableFiles||{})}};
+  state.editor={id:prompt?.id||null,dirty:false,variables:[],values:{...(prompt?.variableValues||{})},files:{...(prompt?.variableFiles||{})},toolUrl:prompt?.toolUrl||""};
   $("editorTitle").textContent=prompt?"Modifica prompt":"Nuovo prompt";
   $("promptTitle").value=prompt?.title||"";
   $("promptContent").value=prompt?.content||"";
   $("promptStatus").value=prompt?.status||"draft";
   $("promptTags").value=(prompt?.tags||[]).join(", ");
   $("promptNotes").value=prompt?.notes||"";
+  $("promptToolUrl").value=prompt?.toolUrl||"";
   $("promptFavorite").checked=!!prompt?.favorite;
   $("duplicateBtn").classList.toggle("hidden",!prompt);
   $("trashBtn").classList.toggle("hidden",!prompt);
@@ -875,7 +971,7 @@ function closeEditor(force=false){
     return;
   }
   $("editorBackdrop").classList.remove("show");
-  state.editor={id:null,dirty:false,variables:[],values:{},files:{}};
+  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""};
 }
 function markDirty(){state.editor.dirty=true}
 function updateCounts(){
@@ -896,6 +992,7 @@ function editorPayload(){
     status:$("promptStatus").value,
     tags:$("promptTags").value.split(",").map(item=>item.trim()).filter(Boolean),
     notes:$("promptNotes").value.trim(),
+    toolUrl:$("promptToolUrl").value.trim(),
     favorite:$("promptFavorite").checked,
     usageCount:existing?.usageCount||0,
     version:(existing?.version||0)+1,
@@ -916,33 +1013,32 @@ async function savePrompt(){
 async function persistEditorVariables(){
   if(!state.editor.id)return;
   const prompt=state.prompts.find(item=>item.id===state.editor.id);if(!prompt)return;
-  prompt.variableValues=collectVariableValues();prompt.variableFiles={...state.editor.files};prompt.updatedAt=now();
+  prompt.variableValues=collectVariableValues();prompt.variableFiles={...state.editor.files};prompt.toolUrl=$("promptToolUrl").value.trim();prompt.updatedAt=now();
   await put("prompts",prompt);await loadData();render();
-}
-async function copyTemplate(){
-  const text=$("promptContent").value;
-  if(!text.trim()){toast("Il prompt è vuoto.");return}
-  await copyText(text);toast("Modello copiato con i segnaposto.");
 }
 async function copyCompiled(){
   refreshVariables(false);renderVariables();
-  const missing=missingVariables();
-  if(missing.length){
-    highlightMissing(missing);
-    toast(`Compila prima: ${missing.map(def=>def.label||humanize(def.name)).join(", ")}.`);
+  const invalid=invalidVariables();
+  if(invalid.length){
+    highlightInvalid(invalid);
+    toast(`Completa correttamente ${invalid.length} camp${invalid.length===1?"o":"i"} prima di copiare.`);
     return;
   }
-  const result=compilePrompt($("promptContent").value,collectVariableValues());
+  const values=collectVariableValues();
+  Object.entries(values).forEach(([name,value])=>rememberValue(name,value));
+  let result=compilePrompt($("promptContent").value,values);
+  const toolUrl=$("promptToolUrl").value.trim();
+  if(toolUrl)result=`TOOL DA USARE: ${toolUrl}\n\n${result}`;
   await copyText(result);
   await persistEditorVariables();
   toast("Prompt copiato con tutte le variabili inserite.");
 }
 
-/* ---------- Azioni sui prompt ---------- */
+/* ---------- Azioni sui prompt ---------- *//* ---------- Azioni sui prompt ---------- */
 async function quickCopy(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
   const definitions=extractVariables(prompt.content);
-  if(definitions.length){openEditor(id,"variables");toast("Compila le variabili e usa “Copia prompt con variabili inserite”.");return}
+  if(definitions.length){openEditor(id,"variables");toast("Compila i campi e usa il pulsante “Copia Prompt”.");return}
   await copyText(prompt.content);prompt.usageCount=(prompt.usageCount||0)+1;await put("prompts",prompt);toast("Prompt copiato.");
 }
 async function duplicatePrompt(id){
@@ -1015,7 +1111,7 @@ function deleteClient(id){
 }
 
 /* ---------- Importazione, esportazione e backup ---------- */
-function snapshot(){return {app:"Prompt Studio Standalone",version:8,exportedAt:now(),prompts:state.prompts,categories:state.categories,clients:state.clients}}
+function snapshot(){return {app:"Prompt Studio Standalone",version:9,exportedAt:now(),prompts:state.prompts,categories:state.categories,clients:state.clients}}
 function downloadJson(data,filename){
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
   link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
@@ -1071,14 +1167,19 @@ function bindEvents(){
   $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
   $("editorBackdrop").onclick=event=>{if(event.target===$("editorBackdrop"))closeEditor()};
   $("promptCategory").onchange=()=>{fillSubcategories();markDirty()};
-  ["promptTitle","promptTags","promptNotes"].forEach(id=>$(id).oninput=markDirty);
+  ["promptTitle","promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
+  $("openToolBtn").onclick=()=>{
+    let url=$("promptToolUrl").value.trim();
+    if(!url){toast("Inserisci prima il link del tool.");$("promptToolUrl").focus();return}
+    if(!/^https?:\/\//i.test(url))url=`https://${url}`;
+    try{new URL(url);window.open(url,"_blank","noopener")}catch{toast("Il link del tool non è valido.")}
+  };
   ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
   $("promptContent").oninput=()=>{
     markDirty();updateCounts();clearTimeout(state.detectTimer);
     state.detectTimer=setTimeout(()=>{refreshVariables(true)},260);
   };
   $("detectVariablesBtn").onclick=()=>{refreshVariables(true);toast(`${state.editor.variables.length} variabili rilevate.`)};
-  $("copyTemplateBtn").onclick=()=>copyTemplate().catch(()=>toast("Impossibile copiare negli appunti."));
   $("copyCompiledBtn").onclick=()=>copyCompiled().catch(()=>toast("Impossibile copiare negli appunti."));
   $("savePromptBtn").onclick=savePrompt;
   $("duplicateBtn").onclick=()=>state.editor.id&&duplicatePrompt(state.editor.id);
