@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v13 — Standalone</title>
+<title>Prompt Studio v14 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -499,7 +499,10 @@ const state={
   lastSavedId:null,
   recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}")
 };
-const $=id=>document.getElementById(id);
+const $=value=>{
+  const key=String(value||"");
+  return /^[#.[>:]/.test(key)?document.querySelector(key):document.getElementById(key);
+};
 const $$=selector=>[...document.querySelectorAll(selector)];
 const uid=prefix=>`${prefix}_${crypto.randomUUID?.()||Date.now()+"_"+Math.random().toString(16).slice(2)}`;
 const now=()=>new Date().toISOString();
@@ -803,7 +806,8 @@ function updateBulkbar(){
 
 /* ---------- Motore delle variabili ---------- */
 function variableRegex(){
-  return /{{\s*([^{}]+?)\s*}}|\[\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*\]|%\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*%|<\s*([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9_\/\- ]{1,79})\s*>/g;
+  // Supporta anche segnaposto descrittivi come [ALLEGA FILE, SE DISPONIBILE].
+  return /{{\s*([^{}\n]{1,120}?)\s*}}|\[\s*([^\]\n]{2,120}?)\s*\]|%\s*([^%\n]{2,120}?)\s*%|<\s*([^<>\n]{2,120}?)\s*>/g;
 }
 function variableName(value){return String(value||"").replace(/{{|}}|\[|\]|%|<|>/g,"").trim().replace(/\s+/g,"_")}
 function humanize(value){
@@ -833,8 +837,12 @@ function contextLabel(content,index){
   return content.slice(start,index).replace(/[*_`#>]/g,"").replace(/^[\s\-–—•\d.)]+/,"").replace(/[:：\-–—]\s*$/,"").replace(/\s+/g," ").trim().toLowerCase();
 }
 function isFileVariable(definition){
-  const text=normalize(`${definition.name} ${definition.label}`);
-  return /\b(file|allegato|documento|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|dataset|sitemap|report|zip|screenshot)\b/.test(text);
+  const text=normalize(`${definition.name} ${definition.label} ${definition.raw}`);
+  return /\b(file|allega|allegato|allegati|documento|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|caricamento|dataset|sitemap|report|zip|screenshot|esportazione)\b/.test(text);
+}
+function isOptionalVariable(definition){
+  const text=normalize(`${definition.name} ${definition.label} ${definition.raw}`);
+  return /\b(opzionale|facoltativo|se disponibile|se presente|se noto|se noti|eventuale|eventuali)\b/.test(text);
 }
 function expectedInputType(definition){
   const text=normalize(`${definition.name} ${definition.label}`);
@@ -853,6 +861,7 @@ function extractVariables(content){
     const context=contextLabel(text,match.index);
     const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":"angle"};
     definition.fileLike=isFileVariable(definition);
+    definition.optional=isOptionalVariable(definition);
     definition.inputType=expectedInputType(definition);
     definition.icon=variableIcon(definition);
     definitions.push(definition);
@@ -879,7 +888,7 @@ function rememberValue(name,value){
 }
 function validateValue(def,value){
   const clean=String(value||"").trim();
-  if(!clean)return "Campo obbligatorio";
+  if(!clean)return def.optional?"":"Campo obbligatorio";
   if(def.inputType==="url"){
     const normalized=/^https?:\/\//i.test(clean)?clean:`https://${clean}`;
     try{new URL(normalized)}catch{return "Inserisci un URL o dominio valido"}
@@ -909,7 +918,7 @@ function variableCardHtml(def,index){
     <div class="variable-card-head">
       <span class="variable-number">${def.icon} Campo ${index+1}</span>
       <span class="variable-token">${esc(def.raw)}</span>
-      <span class="variable-badge">${def.fileLike?"File o testo":"Campo rilevato"}</span>
+      <span class="variable-badge">${def.optional?"Opzionale · ":""}${def.fileLike?"File o testo":"Campo rilevato"}</span>
     </div>
     <div class="variable-card-body">
       <h4>Inserisci ${esc(def.label||humanize(def.name))}</h4>
@@ -924,6 +933,7 @@ function variableCardHtml(def,index){
             <strong>Trascina il file qui oppure scegli dal computer</strong><br>
             <button class="btn small choose-file" type="button">Scegli file</button>
             ${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica file</button>`:""}
+            ${file?`<button class="btn small danger remove-file" type="button" data-var="${esc(def.name)}">Rimuovi file</button>`:""}
             <div class="file-status">${esc(fileText)}</div>
           </div>
           <div class="hint" style="margin-top:8px">Per file testuali viene importato il contenuto. Per PDF, DOCX, XLSX, immagini e ZIP viene inserito un riferimento al file selezionato.</div>
@@ -952,6 +962,7 @@ function renderVariables(){
   $$("#variableList .choose-file").forEach(button=>button.onclick=()=>button.closest(".file-drop").querySelector(".variable-file").click());
   $$("#variableList .variable-file").forEach(input=>input.onchange=()=>input.files[0]&&processVariableFile(input.dataset.var,input.files[0]));
   $$("#variableList .download-file").forEach(button=>button.onclick=()=>downloadEmbeddedFile(state.editor.files[button.dataset.var]));
+  $$("#variableList .remove-file").forEach(button=>button.onclick=()=>removeVariableFile(button.dataset.var));
   $$("#variableList .file-drop").forEach(zone=>{
     zone.ondragover=event=>{event.preventDefault();zone.classList.add("drag")};
     zone.ondragleave=()=>zone.classList.remove("drag");
@@ -1000,6 +1011,15 @@ async function processVariableFile(name,file){
     ?(textExtracted?"File e contenuto inseriti; il file sarà incluso nel backup.":"File incluso nel backup.")
     :"File associato senza contenuto incorporato.");
 }
+
+function removeVariableFile(name){
+  state.editor.files[name]=null;
+  state.editor.values[name]="";
+  markDirty();
+  renderVariables();
+  toast("File rimosso dal prompt.");
+}
+
 function collectVariableValues(){
   syncVariableInputs();
   return Object.fromEntries(state.editor.variables.map(def=>[def.name,state.editor.values[def.name]||""]));
@@ -1206,7 +1226,7 @@ async function savePrompt(){
     saveStatus.classList.add("show");
 
     await put("prompts",payload);
-
+    // Verifica reale della persistenza prima di chiudere l’editor.
     const stored=await getOne("prompts",payload.id);
     if(!stored){
       throw new Error("Il database non ha restituito il prompt appena salvato.");
@@ -1475,7 +1495,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:13,
+    version:14,
     exportedAt:now(),
     prompt:payload
   };
@@ -1494,7 +1514,7 @@ function downloadEmbeddedFile(file){
 function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
   return {
-    app:"Prompt Studio Standalone",version:13,exportedAt:now(),
+    app:"Prompt Studio Standalone",version:14,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,
     prompts:state.prompts,categories:state.categories,clients:state.clients
   };
