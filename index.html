@@ -1,0 +1,1268 @@
+html = r'''<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
+<title>Prompt Studio — Organizer standalone</title>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --panel:#ffffff;
+    --panel-2:#f8fafc;
+    --panel-3:#eef4ff;
+    --text:#172033;
+    --muted:#667085;
+    --line:#dbe3ef;
+    --primary:#2563eb;
+    --primary-2:#1d4ed8;
+    --primary-soft:#dbeafe;
+    --success:#15803d;
+    --warning:#b45309;
+    --danger:#dc2626;
+    --shadow:0 12px 32px rgba(15,23,42,.10);
+    --radius:16px;
+    --sidebar:270px;
+    --editor:500px;
+    --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  body.dark{
+    --bg:#0d1423;
+    --panel:#121b2d;
+    --panel-2:#172238;
+    --panel-3:#1e2d49;
+    --text:#edf3ff;
+    --muted:#9cabc2;
+    --line:#273854;
+    --primary:#60a5fa;
+    --primary-2:#93c5fd;
+    --primary-soft:#1e3a5f;
+    --success:#4ade80;
+    --warning:#fbbf24;
+    --danger:#f87171;
+    --shadow:0 14px 40px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:var(--font);background:var(--bg);color:var(--text)}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  .app{height:100%;display:grid;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:72px 1fr;overflow:hidden}
+  .topbar{
+    grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:12px 18px;
+    background:var(--panel);border-bottom:1px solid var(--line);z-index:20
+  }
+  .brand{display:flex;align-items:center;gap:10px;min-width:240px}
+  .logo{
+    width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#7c3aed);
+    display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(37,99,235,.25)
+  }
+  .brand h1{font-size:17px;line-height:1;margin:0}
+  .brand small{display:block;color:var(--muted);margin-top:4px}
+  .search-wrap{position:relative;flex:1;max-width:760px}
+  .search{
+    width:100%;height:46px;border:1px solid var(--line);border-radius:14px;padding:0 44px 0 42px;
+    background:var(--panel-2);color:var(--text);outline:none;transition:.2s
+  }
+  .search:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 20%, transparent);background:var(--panel)}
+  .search-icon{position:absolute;left:14px;top:13px;color:var(--muted)}
+  .search-clear{position:absolute;right:11px;top:9px;border:0;background:transparent;color:var(--muted);font-size:20px}
+  .top-actions{display:flex;gap:8px;margin-left:auto}
+  .btn{
+    border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;
+    min-height:40px;padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:650
+  }
+  .btn:hover{border-color:var(--primary);background:var(--panel-3)}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-2)}
+  .btn.danger{color:var(--danger)}
+  .btn.small{min-height:32px;padding:5px 9px;border-radius:9px;font-size:13px}
+  .icon-btn{width:40px;padding:0}
+  .sidebar{
+    grid-row:2;background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:12px 10px 18px
+  }
+  .side-section{margin-bottom:18px}
+  .side-title{display:flex;align-items:center;justify-content:space-between;padding:0 8px 6px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .side-link,.tree-row{
+    width:100%;border:0;background:transparent;color:var(--text);display:flex;align-items:center;gap:9px;
+    min-height:38px;padding:7px 9px;border-radius:10px;text-align:left
+  }
+  .side-link:hover,.tree-row:hover{background:var(--panel-2)}
+  .side-link.active,.tree-row.active{background:var(--primary-soft);color:var(--primary-2);font-weight:750}
+  .count{margin-left:auto;color:var(--muted);font-size:12px;background:var(--panel-2);border:1px solid var(--line);padding:1px 7px;border-radius:999px}
+  .tree-row{padding-left:calc(9px + var(--depth,0) * 16px)}
+  .tree-toggle{width:18px;flex:0 0 18px;color:var(--muted);font-size:12px}
+  .tree-dot{width:9px;height:9px;border-radius:999px;flex:0 0 9px;background:var(--dot,var(--primary))}
+  .tree-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .main{grid-row:2;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+  .main-head{
+    padding:16px 18px 12px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line);
+    background:color-mix(in srgb,var(--bg) 88%, transparent);backdrop-filter:blur(10px)
+  }
+  .main-title{min-width:0}
+  .main-title h2{margin:0;font-size:21px}
+  .main-title p{margin:5px 0 0;color:var(--muted);font-size:13px}
+  .toolbar{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .toolbar select{height:38px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;padding:0 34px 0 10px}
+  .bulkbar{
+    display:none;align-items:center;gap:8px;padding:9px 18px;background:var(--primary-soft);border-bottom:1px solid var(--line)
+  }
+  .bulkbar.show{display:flex}
+  .bulkbar strong{margin-right:8px}
+  .content{overflow:auto;padding:16px 18px 80px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .cards.list{display:flex;flex-direction:column}
+  .card{
+    position:relative;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;
+    min-height:190px;display:flex;flex-direction:column;transition:.18s;box-shadow:0 2px 8px rgba(15,23,42,.03)
+  }
+  .card:nth-child(even){background:color-mix(in srgb,var(--panel) 88%, var(--primary-soft))}
+  .card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--primary) 45%, var(--line));box-shadow:var(--shadow)}
+  .cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(180px,1.1fr) minmax(260px,2fr) auto;align-items:center;gap:10px}
+  .card-check{position:absolute;top:12px;left:12px}
+  .cards.list .card-check{position:static}
+  .card-top{padding-left:26px;display:flex;align-items:flex-start;gap:8px}
+  .cards.list .card-top{padding-left:0}
+  .card-title{font-weight:800;line-height:1.25;margin-right:auto;overflow-wrap:anywhere}
+  .star{color:#f59e0b;font-size:17px}
+  .excerpt{color:var(--muted);font-size:13px;line-height:1.48;margin:10px 0;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+  .cards.list .excerpt{margin:0;-webkit-line-clamp:2}
+  .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+  .chip{font-size:11px;padding:4px 7px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
+  .card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+  .cards.list .meta{display:none}
+  .cards.list .card-actions{margin:0;padding:0;border:0;justify-content:flex-end}
+  .empty{padding:70px 20px;text-align:center;color:var(--muted)}
+  .empty .big{font-size:48px;margin-bottom:10px}
+  .load-more{display:block;margin:18px auto 0}
+  .editor{
+    position:fixed;z-index:60;right:0;top:72px;bottom:0;width:min(var(--editor),100vw);
+    background:var(--panel);border-left:1px solid var(--line);box-shadow:-12px 0 35px rgba(15,23,42,.14);
+    transform:translateX(102%);transition:.25s;display:flex;flex-direction:column
+  }
+  .editor.open{transform:translateX(0)}
+  .editor.full{width:calc(100vw - 40px);top:20px;bottom:20px;right:20px;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .editor-head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .editor-head strong{margin-right:auto}
+  .editor-body{padding:16px;overflow:auto}
+  .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1/-1}
+  label{font-size:12px;color:var(--muted);font-weight:750}
+  input[type="text"],select,textarea{
+    width:100%;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:10px 11px;outline:none
+  }
+  input[type="text"]:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%, transparent)}
+  textarea{resize:vertical;min-height:90px;line-height:1.5}
+  #promptContent{min-height:330px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+  .editor-footer{margin-top:auto;padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+  .editor-footer .spacer{flex:1}
+  .suggestion{
+    display:none;margin:10px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--primary) 35%, var(--line));
+    background:var(--primary-soft);border-radius:12px;font-size:13px
+  }
+  .suggestion.show{display:block}
+  .modal-backdrop{
+    position:fixed;z-index:100;inset:0;background:rgba(2,6,23,.55);display:none;align-items:center;justify-content:center;padding:20px
+  }
+  .modal-backdrop.show{display:flex}
+  .modal{width:min(920px,96vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .modal.small{width:min(560px,96vw)}
+  .modal-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .modal-head h3{margin:0;font-size:18px}
+  .modal-head .spacer{flex:1}
+  .modal-body{padding:17px;overflow:auto}
+  .modal-foot{padding:12px 17px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .panel-box{border:1px solid var(--line);border-radius:14px;padding:13px;background:var(--panel-2)}
+  .panel-box h4{margin:0 0 10px}
+  .manage-list{display:flex;flex-direction:column;gap:7px}
+  .manage-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);padding:8px;border-radius:10px}
+  .manage-row .grow{flex:1;min-width:0}
+  .manage-row small{color:var(--muted)}
+  .inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
+  .rule-form{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:7px;margin-bottom:12px}
+  .rule-row{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px;border-bottom:1px solid var(--line)}
+  .duplicate-row{border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;background:var(--panel-2)}
+  .duplicate-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .dup-card{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--panel)}
+  .dup-card strong{display:block;margin-bottom:6px}
+  .dup-card p{color:var(--muted);font-size:12px;margin:0;white-space:pre-wrap}
+  .score{font-size:12px;font-weight:800;color:var(--warning);margin-bottom:8px}
+  .toast-wrap{position:fixed;z-index:200;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px}
+  .toast{min-width:260px;max-width:420px;background:var(--text);color:var(--panel);border-radius:12px;padding:11px 13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
+  .toast button{margin-left:auto;border:0;background:transparent;color:inherit;text-decoration:underline}
+  .kbd{font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 5px;color:var(--muted);background:var(--panel-2)}
+  .mobile-menu{display:none}
+  .overlay{display:none}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px}
+  .stat strong{font-size:22px;display:block}
+  .stat span{color:var(--muted);font-size:12px}
+  .hint{font-size:12px;color:var(--muted);line-height:1.5}
+  .hidden{display:none!important}
+  @media(max-width:980px){
+    .app{grid-template-columns:1fr}
+    .brand{min-width:auto}
+    .brand small{display:none}
+    .sidebar{position:fixed;z-index:80;top:72px;bottom:0;left:0;width:min(300px,88vw);transform:translateX(-102%);transition:.22s;box-shadow:var(--shadow)}
+    .sidebar.open{transform:translateX(0)}
+    .mobile-menu{display:inline-flex}
+    .overlay.show{display:block;position:fixed;z-index:70;inset:72px 0 0;background:rgba(2,6,23,.45)}
+    .top-actions .optional{display:none}
+    .cards{grid-template-columns:1fr}
+    .settings-grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:650px){
+    .topbar{padding:10px;height:66px}
+    .app{grid-template-rows:66px 1fr}
+    .sidebar{top:66px}
+    .brand h1{display:none}
+    .search{height:42px}
+    .main-head{padding:12px}
+    .toolbar select,.toolbar .view-toggle{display:none}
+    .content{padding:12px 12px 70px}
+    .cards.list .card{display:flex}
+    .cards.list .excerpt{margin:8px 0}
+    .editor{top:0;width:100vw}
+    .editor.full{inset:0;width:100%;border-radius:0}
+    .editor-grid{grid-template-columns:1fr}
+    .field.full{grid-column:auto}
+    .rule-form,.rule-row,.inline-form{grid-template-columns:1fr}
+    .duplicate-grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button class="btn icon-btn mobile-menu" id="mobileMenuBtn" title="Apri menu">☰</button>
+    <div class="brand">
+      <div class="logo">P</div>
+      <div><h1>Prompt Studio</h1><small>Organizer standalone</small></div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input id="globalSearch" class="search" type="search" placeholder="Cerca in titolo, testo, categoria, cliente, tag…  ⌘K" autocomplete="off">
+      <button id="clearSearch" class="search-clear" title="Svuota ricerca">×</button>
+    </div>
+    <div class="top-actions">
+      <button class="btn optional" id="importBtn">Importa</button>
+      <button class="btn optional" id="exportBtn">Esporta</button>
+      <button class="btn icon-btn optional" id="themeBtn" title="Cambia tema">◐</button>
+      <button class="btn primary" id="newPromptBtn">＋ Nuovo prompt</button>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <section class="side-section">
+      <div class="side-title">Libreria</div>
+      <button class="side-link active" data-filter="all"><span>▦</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
+      <button class="side-link" data-filter="favorites"><span>★</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
+      <button class="side-link" data-filter="recent"><span>◷</span><span>Modificati di recente</span><span class="count" id="countRecent">0</span></button>
+      <button class="side-link" data-filter="uncategorized"><span>◇</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
+      <button class="side-link" data-filter="archived"><span>▣</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
+      <button class="side-link" data-filter="trash"><span>⌫</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
+    </section>
+
+    <section class="side-section">
+      <div class="side-title"><span>Categorie</span><button class="btn small" id="manageBtn" title="Gestisci categorie, clienti e regole">Gestisci</button></div>
+      <div id="categoryTree"></div>
+    </section>
+
+    <section class="side-section">
+      <div class="side-title">Clienti e progetti</div>
+      <div id="clientList"></div>
+    </section>
+
+    <section class="side-section">
+      <button class="side-link" id="duplicatesBtn"><span>≈</span><span>Possibili duplicati</span><span class="count" id="countDuplicates">—</span></button>
+      <button class="side-link" id="backupBtn"><span>⇩</span><span>Crea backup</span></button>
+      <button class="side-link" id="settingsBtn"><span>⚙</span><span>Strumenti e impostazioni</span></button>
+    </section>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main">
+    <div class="main-head">
+      <div class="main-title">
+        <h2 id="viewTitle">Tutti i prompt</h2>
+        <p id="viewSubtitle">La tua libreria completa.</p>
+      </div>
+      <div class="toolbar">
+        <button class="btn small" id="selectAllBtn">Seleziona tutti</button>
+        <select id="sortSelect" aria-label="Ordinamento">
+          <option value="updated_desc">Modificati di recente</option>
+          <option value="title_asc">Titolo A–Z</option>
+          <option value="title_desc">Titolo Z–A</option>
+          <option value="created_desc">Creati di recente</option>
+          <option value="usage_desc">Più utilizzati</option>
+        </select>
+        <div class="view-toggle">
+          <button class="btn small" id="gridBtn" title="Vista griglia">▦</button>
+          <button class="btn small" id="listBtn" title="Vista elenco">☷</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bulkbar" id="bulkbar">
+      <strong><span id="selectedCount">0</span> selezionati</strong>
+      <button class="btn small" id="bulkMoveBtn">Sposta</button>
+      <button class="btn small" id="bulkClientBtn">Assegna cliente</button>
+      <button class="btn small" id="bulkArchiveBtn">Archivia</button>
+      <button class="btn small danger" id="bulkTrashBtn">Cestina</button>
+      <button class="btn small" id="clearSelectionBtn">Annulla</button>
+    </div>
+
+    <div class="content" id="content">
+      <div class="stats" id="dashboardStats"></div>
+      <div class="cards" id="cards"></div>
+      <button class="btn load-more hidden" id="loadMoreBtn">Mostra altri prompt</button>
+    </div>
+  </main>
+</div>
+
+<aside class="editor" id="editor">
+  <div class="editor-head">
+    <strong id="editorHeading">Nuovo prompt</strong>
+    <button class="btn small" id="suggestBtn">Suggerisci categoria</button>
+    <button class="btn icon-btn small" id="fullscreenEditorBtn" title="Schermo intero">⛶</button>
+    <button class="btn icon-btn small" id="closeEditorBtn" title="Chiudi">×</button>
+  </div>
+  <div class="editor-body">
+    <div class="editor-grid">
+      <div class="field full">
+        <label for="promptTitle">Titolo</label>
+        <input type="text" id="promptTitle" placeholder="Titolo chiaro e descrittivo">
+      </div>
+      <div class="field full">
+        <label for="promptContent">Testo del prompt</label>
+        <textarea id="promptContent" placeholder="Scrivi o incolla qui il prompt…"></textarea>
+        <div class="hint"><span id="wordCount">0 parole</span> · <span id="charCount">0 caratteri</span> · autosalvataggio bozza attivo</div>
+      </div>
+      <div class="field">
+        <label for="promptCategory">Categoria</label>
+        <select id="promptCategory"></select>
+      </div>
+      <div class="field">
+        <label for="promptSubcategory">Sottocategoria</label>
+        <select id="promptSubcategory"></select>
+      </div>
+      <div class="field">
+        <label for="promptClient">Cliente / progetto</label>
+        <select id="promptClient"></select>
+      </div>
+      <div class="field">
+        <label for="promptStatus">Stato</label>
+        <select id="promptStatus">
+          <option value="draft">Bozza</option>
+          <option value="review">Da verificare</option>
+          <option value="approved">Approvato</option>
+          <option value="obsolete">Obsoleto</option>
+          <option value="archived">Archiviato</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label for="promptTags">Tag, separati da virgola</label>
+        <input type="text" id="promptTags" placeholder="seo, wordpress, audit">
+      </div>
+      <div class="field full">
+        <label for="promptVariables">Variabili, separate da virgola</label>
+        <input type="text" id="promptVariables" placeholder="nome_cliente, sito_web, keyword">
+      </div>
+      <div class="field full">
+        <label for="promptNotes">Note interne</label>
+        <textarea id="promptNotes" placeholder="Istruzioni, contesto o modifiche da ricordare"></textarea>
+      </div>
+      <div class="field full">
+        <label><input type="checkbox" id="promptFavorite"> Aggiungi ai preferiti</label>
+      </div>
+    </div>
+    <div class="suggestion" id="suggestionBox"></div>
+  </div>
+  <div class="editor-footer">
+    <button class="btn" id="copyFromEditorBtn">Copia</button>
+    <button class="btn" id="duplicateFromEditorBtn">Duplica</button>
+    <button class="btn danger" id="trashFromEditorBtn">Cestina</button>
+    <span class="spacer"></span>
+    <button class="btn" id="cancelEditorBtn">Chiudi</button>
+    <button class="btn primary" id="savePromptBtn">Salva prompt</button>
+  </div>
+</aside>
+
+<div class="modal-backdrop" id="manageModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Gestione struttura</h3><span class="spacer"></span>
+      <button class="btn small" data-close-modal="manageModal">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-grid">
+        <div class="panel-box">
+          <h4>Categorie e sottocategorie</h4>
+          <div class="manage-list" id="manageCategories"></div>
+          <div class="inline-form">
+            <input type="text" id="newCategoryName" placeholder="Nome categoria">
+            <select id="newCategoryParent"><option value="">Categoria principale</option></select>
+            <button class="btn primary small" id="addCategoryBtn">Aggiungi</button>
+          </div>
+        </div>
+        <div class="panel-box">
+          <h4>Clienti e progetti</h4>
+          <div class="manage-list" id="manageClients"></div>
+          <div class="inline-form" style="grid-template-columns:1fr auto">
+            <input type="text" id="newClientName" placeholder="Nome cliente o progetto">
+            <button class="btn primary small" id="addClientBtn">Aggiungi</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-box" style="margin-top:16px">
+        <h4>Regole di categorizzazione</h4>
+        <p class="hint">Quando titolo o testo contiene una parola o frase, l'app propone categoria e cliente indicati.</p>
+        <div class="rule-form">
+          <input type="text" id="ruleKeyword" placeholder="Parola o frase">
+          <select id="ruleCategory"></select>
+          <select id="ruleClient"></select>
+          <button class="btn primary small" id="addRuleBtn">Aggiungi</button>
+        </div>
+        <div id="rulesList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="genericModal">
+  <div class="modal small">
+    <div class="modal-head">
+      <h3 id="genericTitle">Operazione</h3><span class="spacer"></span>
+      <button class="btn small" data-close-modal="genericModal">×</button>
+    </div>
+    <div class="modal-body" id="genericBody"></div>
+    <div class="modal-foot" id="genericFoot"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="duplicatesModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Possibili duplicati</h3><span class="spacer"></span>
+      <button class="btn small" data-close-modal="duplicatesModal">×</button>
+    </div>
+    <div class="modal-body" id="duplicatesBody"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Strumenti e impostazioni</h3><span class="spacer"></span>
+      <button class="btn small" data-close-modal="settingsModal">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-grid">
+        <div class="panel-box">
+          <h4>Archivio dati</h4>
+          <p class="hint">I dati sono salvati nel browser tramite IndexedDB. Il backup JSON è consigliato periodicamente.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="settingsExportBtn">Esporta JSON</button>
+            <button class="btn" id="settingsImportBtn">Importa JSON</button>
+            <button class="btn" id="settingsBackupBtn">Crea backup</button>
+          </div>
+        </div>
+        <div class="panel-box">
+          <h4>Comportamento</h4>
+          <label><input type="checkbox" id="autosaveSetting" checked> Salva automaticamente la bozza dell'editor</label><br><br>
+          <label><input type="checkbox" id="confirmDeleteSetting" checked> Chiedi conferma prima dell'eliminazione definitiva</label>
+        </div>
+        <div class="panel-box">
+          <h4>Scorciatoie</h4>
+          <p class="hint"><span class="kbd">⌘/Ctrl K</span> ricerca · <span class="kbd">⌘/Ctrl N</span> nuovo · <span class="kbd">⌘/Ctrl S</span> salva · <span class="kbd">Esc</span> chiudi editor</p>
+        </div>
+        <div class="panel-box">
+          <h4>Manutenzione</h4>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="recountDuplicatesBtn">Ricalcola duplicati</button>
+            <button class="btn danger" id="emptyTrashBtn">Svuota cestino</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const DB_NAME = "PromptStudioStandalone";
+  const DB_VERSION = 1;
+  const STORE_NAMES = ["prompts","categories","clients","settings","backups"];
+  const state = {
+    db:null,
+    prompts:[],
+    categories:[],
+    clients:[],
+    rules:[],
+    currentFilter:{type:"all",id:null},
+    query:"",
+    selected:new Set(),
+    editingId:null,
+    editorDirty:false,
+    renderLimit:80,
+    viewMode:localStorage.getItem("ps_view") || "grid",
+    sort:localStorage.getItem("ps_sort") || "updated_desc",
+    collapsed:new Set(JSON.parse(localStorage.getItem("ps_collapsed") || "[]")),
+    duplicatePairs:[],
+    draftTimer:null,
+    lastUndo:null,
+    settings:{autosave:true,confirmDelete:true}
+  };
+
+  const $ = id => document.getElementById(id);
+  const $$ = sel => [...document.querySelectorAll(sel)];
+  const nowISO = () => new Date().toISOString();
+  const uid = prefix => `${prefix}_${crypto.randomUUID ? crypto.randomUUID() : Date.now()+"_"+Math.random().toString(16).slice(2)}`;
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  const normalize = s => String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  const tokens = s => [...new Set(normalize(s).split(" ").filter(w => w.length>2))];
+  const fmtDate = iso => new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(iso));
+  const catById = id => state.categories.find(c=>c.id===id);
+  const clientById = id => state.clients.find(c=>c.id===id);
+  const activePrompts = () => state.prompts.filter(p=>!p.deletedAt);
+  const livePrompts = () => state.prompts.filter(p=>!p.deletedAt && p.status!=="archived");
+
+  function openDB(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open(DB_NAME,DB_VERSION);
+      req.onupgradeneeded=()=>{
+        const db=req.result;
+        STORE_NAMES.forEach(name=>{
+          if(!db.objectStoreNames.contains(name)) db.createObjectStore(name,{keyPath:"id"});
+        });
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+  function tx(store,mode="readonly"){return state.db.transaction(store,mode).objectStore(store)}
+  function getAll(store){
+    return new Promise((resolve,reject)=>{
+      const req=tx(store).getAll(); req.onsuccess=()=>resolve(req.result||[]); req.onerror=()=>reject(req.error);
+    });
+  }
+  function put(store,obj){
+    return new Promise((resolve,reject)=>{
+      const req=tx(store,"readwrite").put(obj); req.onsuccess=()=>resolve(obj); req.onerror=()=>reject(req.error);
+    });
+  }
+  function del(store,id){
+    return new Promise((resolve,reject)=>{
+      const req=tx(store,"readwrite").delete(id); req.onsuccess=()=>resolve(); req.onerror=()=>reject(req.error);
+    });
+  }
+  async function loadState(){
+    const [prompts,categories,clients,settings]=await Promise.all([
+      getAll("prompts"),getAll("categories"),getAll("clients"),getAll("settings")
+    ]);
+    state.prompts=prompts;
+    state.categories=categories.sort((a,b)=>(a.order??999)-(b.order??999)||a.name.localeCompare(b.name,"it"));
+    state.clients=clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
+    const rulesRecord=settings.find(s=>s.id==="rules");
+    const prefsRecord=settings.find(s=>s.id==="prefs");
+    state.rules=rulesRecord?.value || [];
+    state.settings={...state.settings,...(prefsRecord?.value||{})};
+  }
+  async function seed(){
+    if(state.categories.length===0){
+      const defaults=[
+        ["cat_seo","SEO",null,"#2563eb"],["cat_audit","Audit SEO","cat_seo","#60a5fa"],
+        ["cat_content","Contenuti SEO","cat_seo","#60a5fa"],["cat_local","Local SEO","cat_seo","#60a5fa"],
+        ["cat_technical","SEO tecnica","cat_seo","#60a5fa"],["cat_wp","WordPress",null,"#7c3aed"],
+        ["cat_social","Social media",null,"#db2777"],["cat_images","Immagini",null,"#ea580c"],
+        ["cat_copy","Copywriting",null,"#059669"],["cat_dev","Sviluppo web",null,"#0891b2"]
+      ];
+      for(let i=0;i<defaults.length;i++){
+        const [id,name,parentId,color]=defaults[i];
+        await put("categories",{id,name,parentId,color,order:i,createdAt:nowISO()});
+      }
+    }
+    if(state.clients.length===0){
+      const names=["Roberto Zanoni","Studio Dentistico Zirafa","Yoga Buena Onda","Pilates Buena Onda","Trova Esperti Digitali"];
+      for(let i=0;i<names.length;i++) await put("clients",{id:uid("client"),name:names[i],createdAt:nowISO()});
+    }
+    if(state.prompts.length===0){
+      await put("prompts",{
+        id:uid("prompt"),
+        title:"Benvenuto in Prompt Studio",
+        content:"Usa questo spazio per organizzare i tuoi prompt. Puoi creare categorie e sottocategorie, assegnare clienti, cercare nel testo, importare ed esportare backup e individuare possibili duplicati.",
+        categoryId:null,subcategoryId:null,clientId:null,tags:["guida"],variables:[],notes:"",
+        status:"approved",favorite:true,usageCount:0,version:1,createdAt:nowISO(),updatedAt:nowISO(),deletedAt:null
+      });
+    }
+    await loadState();
+  }
+
+  function toast(message,actionLabel=null,action=null){
+    const el=document.createElement("div"); el.className="toast";
+    const span=document.createElement("span"); span.textContent=message; el.appendChild(span);
+    if(actionLabel && action){
+      const b=document.createElement("button"); b.textContent=actionLabel; b.onclick=()=>{action();el.remove()}; el.appendChild(b);
+    }
+    $("toastWrap").appendChild(el);
+    setTimeout(()=>el.remove(),4500);
+  }
+
+  function setTheme(initial=false){
+    const saved=localStorage.getItem("ps_theme");
+    if(initial){
+      const dark=saved ? saved==="dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      document.body.classList.toggle("dark",dark);
+    }else{
+      document.body.classList.toggle("dark");
+      localStorage.setItem("ps_theme",document.body.classList.contains("dark")?"dark":"light");
+    }
+  }
+
+  function categoryCounts(){
+    const counts={};
+    livePrompts().forEach(p=>{
+      if(p.subcategoryId) counts[p.subcategoryId]=(counts[p.subcategoryId]||0)+1;
+      if(p.categoryId) counts[p.categoryId]=(counts[p.categoryId]||0)+1;
+    });
+    return counts;
+  }
+  function renderSidebar(){
+    const live=livePrompts(), allActive=activePrompts();
+    $("countAll").textContent=live.length;
+    $("countFavorites").textContent=live.filter(p=>p.favorite).length;
+    const seven=Date.now()-7*864e5;
+    $("countRecent").textContent=live.filter(p=>new Date(p.updatedAt).getTime()>=seven).length;
+    $("countUncategorized").textContent=live.filter(p=>!p.categoryId && !p.subcategoryId).length;
+    $("countArchived").textContent=allActive.filter(p=>p.status==="archived").length;
+    $("countTrash").textContent=state.prompts.filter(p=>p.deletedAt).length;
+
+    const counts=categoryCounts();
+    const roots=state.categories.filter(c=>!c.parentId);
+    $("categoryTree").innerHTML=roots.map(c=>renderCatNode(c,0,counts)).join("");
+
+    const clientCounts={};
+    live.forEach(p=>{if(p.clientId) clientCounts[p.clientId]=(clientCounts[p.clientId]||0)+1});
+    $("clientList").innerHTML=state.clients.map(c=>`
+      <button class="tree-row ${state.currentFilter.type==="client"&&state.currentFilter.id===c.id?"active":""}" data-client="${esc(c.id)}">
+        <span class="tree-dot" style="--dot:#64748b"></span>
+        <span class="tree-label">${esc(c.name)}</span><span class="count">${clientCounts[c.id]||0}</span>
+      </button>`).join("") || `<div class="hint" style="padding:8px">Nessun cliente.</div>`;
+
+    $$("#categoryTree [data-category]").forEach(b=>b.onclick=()=>setFilter("category",b.dataset.category));
+    $$("#categoryTree [data-toggle-cat]").forEach(b=>b.onclick=e=>{
+      e.stopPropagation();
+      const id=b.dataset.toggleCat;
+      state.collapsed.has(id)?state.collapsed.delete(id):state.collapsed.add(id);
+      localStorage.setItem("ps_collapsed",JSON.stringify([...state.collapsed]));
+      renderSidebar();
+    });
+    $$("#clientList [data-client]").forEach(b=>b.onclick=()=>setFilter("client",b.dataset.client));
+  }
+  function renderCatNode(cat,depth,counts){
+    const children=state.categories.filter(c=>c.parentId===cat.id);
+    const collapsed=state.collapsed.has(cat.id);
+    return `
+      <div>
+        <div class="tree-row ${state.currentFilter.type==="category"&&state.currentFilter.id===cat.id?"active":""}" style="--depth:${depth}" data-category="${esc(cat.id)}">
+          ${children.length?`<button class="tree-toggle" data-toggle-cat="${esc(cat.id)}">${collapsed?"▶":"▼"}</button>`:`<span class="tree-toggle"></span>`}
+          <span class="tree-dot" style="--dot:${esc(cat.color||"#2563eb")}"></span>
+          <span class="tree-label">${esc(cat.name)}</span><span class="count">${counts[cat.id]||0}</span>
+        </div>
+        ${!collapsed?children.map(ch=>renderCatNode(ch,depth+1,counts)).join(""):""}
+      </div>`;
+  }
+
+  function getFilterInfo(){
+    const f=state.currentFilter;
+    if(f.type==="all") return ["Tutti i prompt","La tua libreria completa."];
+    if(f.type==="favorites") return ["Preferiti","I prompt che utilizzi più spesso."];
+    if(f.type==="recent") return ["Modificati di recente","Prompt aggiornati negli ultimi 7 giorni."];
+    if(f.type==="uncategorized") return ["Senza categoria","Prompt da organizzare."];
+    if(f.type==="archived") return ["Archivio","Prompt conservati ma esclusi dalla libreria principale."];
+    if(f.type==="trash") return ["Cestino","Elementi eliminati, recuperabili o cancellabili definitivamente."];
+    if(f.type==="category"){const c=catById(f.id);return [c?.name||"Categoria","Prompt appartenenti alla categoria selezionata."]}
+    if(f.type==="client"){const c=clientById(f.id);return [c?.name||"Cliente","Prompt assegnati al cliente o progetto selezionato."]}
+    return ["Prompt",""];
+  }
+  function setFilter(type,id=null){
+    state.currentFilter={type,id}; state.selected.clear(); state.renderLimit=80;
+    $$(".side-link").forEach(b=>b.classList.toggle("active",b.dataset.filter===type));
+    closeMobileSidebar();
+    renderAll();
+  }
+  function filterPrompts(){
+    const f=state.currentFilter;
+    let arr=[...state.prompts];
+    if(f.type==="trash") arr=arr.filter(p=>p.deletedAt);
+    else if(f.type==="archived") arr=arr.filter(p=>!p.deletedAt && p.status==="archived");
+    else arr=arr.filter(p=>!p.deletedAt && p.status!=="archived");
+
+    if(f.type==="favorites") arr=arr.filter(p=>p.favorite);
+    if(f.type==="recent"){const seven=Date.now()-7*864e5;arr=arr.filter(p=>new Date(p.updatedAt).getTime()>=seven)}
+    if(f.type==="uncategorized") arr=arr.filter(p=>!p.categoryId&&!p.subcategoryId);
+    if(f.type==="category"){
+      const c=catById(f.id);
+      const childIds=state.categories.filter(x=>x.parentId===f.id).map(x=>x.id);
+      arr=arr.filter(p=>p.categoryId===f.id||p.subcategoryId===f.id||(c&&!c.parentId&&childIds.includes(p.subcategoryId)));
+    }
+    if(f.type==="client") arr=arr.filter(p=>p.clientId===f.id);
+
+    const q=normalize(state.query);
+    if(q){
+      const qTokens=q.split(" ").filter(Boolean);
+      arr=arr.map(p=>{
+        const cat=catById(p.categoryId)?.name||"", sub=catById(p.subcategoryId)?.name||"", cli=clientById(p.clientId)?.name||"";
+        const hay=normalize([p.title,p.content,p.notes,(p.tags||[]).join(" "),cat,sub,cli].join(" "));
+        const title=normalize(p.title);
+        let score=0;
+        qTokens.forEach(t=>{
+          if(title.includes(t)) score+=6;
+          if(hay.includes(t)) score+=2;
+        });
+        if(hay.includes(q)) score+=8;
+        return {p,score,match:qTokens.every(t=>hay.includes(t)||fuzzyContains(hay,t))};
+      }).filter(x=>x.match).sort((a,b)=>b.score-a.score).map(x=>x.p);
+    }
+    return sortPrompts(arr);
+  }
+  function fuzzyContains(text,term){
+    if(term.length<4) return text.includes(term);
+    let i=0;
+    for(const ch of text){if(ch===term[i]) i++; if(i===term.length) return true;}
+    return false;
+  }
+  function sortPrompts(arr){
+    const mode=state.sort;
+    return arr.sort((a,b)=>{
+      if(mode==="title_asc") return a.title.localeCompare(b.title,"it");
+      if(mode==="title_desc") return b.title.localeCompare(a.title,"it");
+      if(mode==="created_desc") return new Date(b.createdAt)-new Date(a.createdAt);
+      if(mode==="usage_desc") return (b.usageCount||0)-(a.usageCount||0);
+      return new Date(b.updatedAt)-new Date(a.updatedAt);
+    });
+  }
+
+  function renderStats(filtered){
+    const show=state.currentFilter.type==="all"&&!state.query;
+    $("dashboardStats").classList.toggle("hidden",!show);
+    if(!show) return;
+    const live=livePrompts(), unc=live.filter(p=>!p.categoryId&&!p.subcategoryId).length;
+    const fav=live.filter(p=>p.favorite).length;
+    $("dashboardStats").innerHTML=`
+      <div class="stat"><strong>${live.length}</strong><span>Prompt attivi</span></div>
+      <div class="stat"><strong>${state.categories.length}</strong><span>Categorie e sottocategorie</span></div>
+      <div class="stat"><strong>${unc}</strong><span>Da categorizzare</span></div>
+      <div class="stat"><strong>${fav}</strong><span>Preferiti</span></div>`;
+  }
+  function renderCards(){
+    const filtered=filterPrompts();
+    renderStats(filtered);
+    const visible=filtered.slice(0,state.renderLimit);
+    $("cards").className=`cards ${state.viewMode==="list"?"list":""}`;
+    if(visible.length===0){
+      $("cards").innerHTML=`<div class="empty"><div class="big">⌕</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
+    }else{
+      $("cards").innerHTML=visible.map(cardHTML).join("");
+    }
+    $("loadMoreBtn").classList.toggle("hidden",filtered.length<=state.renderLimit);
+    const [title,sub]=getFilterInfo();
+    $("viewTitle").textContent=title;
+    $("viewSubtitle").textContent=state.query?`${filtered.length} risultati per “${state.query}”`: `${sub} ${filtered.length} elementi.`;
+    bindCardEvents();
+    updateBulkbar();
+  }
+  function cardHTML(p){
+    const cat=catById(p.subcategoryId)||catById(p.categoryId);
+    const client=clientById(p.clientId);
+    const statusLabels={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
+    return `<article class="card" data-id="${esc(p.id)}">
+      <input class="card-check" type="checkbox" ${state.selected.has(p.id)?"checked":""} aria-label="Seleziona prompt">
+      <div class="card-top">
+        <div class="card-title">${esc(p.title||"Senza titolo")}</div>
+        ${p.favorite?`<span class="star" title="Preferito">★</span>`:""}
+      </div>
+      <div class="excerpt">${esc(p.content||"Nessun contenuto")}</div>
+      <div class="meta">
+        ${cat?`<span class="chip">${esc(cat.name)}</span>`:"<span class='chip'>Senza categoria</span>"}
+        ${client?`<span class="chip">${esc(client.name)}</span>`:""}
+        <span class="chip">${esc(statusLabels[p.status]||p.status)}</span>
+        <span class="chip">${fmtDate(p.updatedAt)}</span>
+      </div>
+      <div class="card-actions">
+        <button class="btn small open-card">Modifica</button>
+        <button class="btn small copy-card">Copia</button>
+        ${p.deletedAt?`<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>`:
+        `<button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>`}
+      </div>
+    </article>`;
+  }
+  function bindCardEvents(){
+    $$("#cards .card").forEach(card=>{
+      const id=card.dataset.id;
+      card.querySelector(".card-check").onchange=e=>{
+        e.target.checked?state.selected.add(id):state.selected.delete(id); updateBulkbar();
+      };
+      card.querySelector(".open-card").onclick=()=>openEditor(id);
+      card.querySelector(".copy-card").onclick=()=>copyPrompt(id);
+      card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
+      card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
+      card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
+      card.querySelector(".delete-card")?.addEventListener("click",()=>deleteForever(id));
+    });
+  }
+  function renderAll(){renderSidebar();renderCards();}
+
+  function fillEditorSelects(){
+    const roots=state.categories.filter(c=>!c.parentId);
+    $("promptCategory").innerHTML=`<option value="">Senza categoria</option>`+roots.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    $("promptClient").innerHTML=`<option value="">Nessun cliente</option>`+state.clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    updateSubcategories();
+  }
+  function updateSubcategories(selected=""){
+    const parent=$("promptCategory").value;
+    const children=state.categories.filter(c=>c.parentId===parent);
+    $("promptSubcategory").innerHTML=`<option value="">Nessuna sottocategoria</option>`+children.map(c=>`<option value="${esc(c.id)}" ${c.id===selected?"selected":""}>${esc(c.name)}</option>`).join("");
+  }
+  function openEditor(id=null){
+    state.editingId=id; state.editorDirty=false; fillEditorSelects();
+    const p=id?state.prompts.find(x=>x.id===id):null;
+    $("editorHeading").textContent=p?"Modifica prompt":"Nuovo prompt";
+    $("promptTitle").value=p?.title||"";
+    $("promptContent").value=p?.content||"";
+    $("promptCategory").value=p?.categoryId||"";
+    updateSubcategories(p?.subcategoryId||"");
+    $("promptClient").value=p?.clientId||"";
+    $("promptStatus").value=p?.status||"draft";
+    $("promptTags").value=(p?.tags||[]).join(", ");
+    $("promptVariables").value=(p?.variables||[]).join(", ");
+    $("promptNotes").value=p?.notes||"";
+    $("promptFavorite").checked=!!p?.favorite;
+    $("trashFromEditorBtn").classList.toggle("hidden",!p);
+    $("duplicateFromEditorBtn").classList.toggle("hidden",!p);
+    $("suggestionBox").classList.remove("show");
+    updateCounts();
+    $("editor").classList.add("open");
+    setTimeout(()=>$("promptTitle").focus(),120);
+  }
+  function closeEditor(force=false){
+    if(state.editorDirty&&!force){
+      showConfirm("Modifiche non salvate","Chiudere l'editor e perdere le modifiche?",()=>closeEditor(true));
+      return;
+    }
+    $("editor").classList.remove("open","full");
+    state.editingId=null; state.editorDirty=false;
+  }
+  async function saveEditor(){
+    const title=$("promptTitle").value.trim();
+    const content=$("promptContent").value.trim();
+    if(!title){toast("Inserisci un titolo.");$("promptTitle").focus();return}
+    if(!content){toast("Inserisci il testo del prompt.");$("promptContent").focus();return}
+    const existing=state.editingId?state.prompts.find(p=>p.id===state.editingId):null;
+    const obj={
+      id:existing?.id||uid("prompt"),
+      title,content,
+      categoryId:$("promptCategory").value||null,
+      subcategoryId:$("promptSubcategory").value||null,
+      clientId:$("promptClient").value||null,
+      status:$("promptStatus").value,
+      tags:$("promptTags").value.split(",").map(x=>x.trim()).filter(Boolean),
+      variables:$("promptVariables").value.split(",").map(x=>x.trim()).filter(Boolean),
+      notes:$("promptNotes").value.trim(),
+      favorite:$("promptFavorite").checked,
+      usageCount:existing?.usageCount||0,
+      version:(existing?.version||0)+1,
+      createdAt:existing?.createdAt||nowISO(),
+      updatedAt:nowISO(),
+      deletedAt:existing?.deletedAt||null
+    };
+    await put("prompts",obj);
+    await loadState(); state.editingId=obj.id; state.editorDirty=false;
+    renderAll(); toast("Prompt salvato.");
+  }
+  function markDirty(){
+    state.editorDirty=true;
+    if(state.settings.autosave){
+      clearTimeout(state.draftTimer);
+      state.draftTimer=setTimeout(()=>localStorage.setItem("ps_editor_draft",JSON.stringify({
+        id:state.editingId,title:$("promptTitle").value,content:$("promptContent").value,at:nowISO()
+      })),600);
+    }
+  }
+  function updateCounts(){
+    const text=$("promptContent").value;
+    $("charCount").textContent=`${text.length} caratteri`;
+    $("wordCount").textContent=`${text.trim()?text.trim().split(/\s+/).length:0} parole`;
+  }
+
+  async function copyPrompt(id){
+    const p=state.prompts.find(x=>x.id===id); if(!p)return;
+    await navigator.clipboard.writeText(p.content);
+    p.usageCount=(p.usageCount||0)+1;p.updatedAt=p.updatedAt||nowISO();await put("prompts",p);
+    toast("Prompt copiato negli appunti.");
+  }
+  async function duplicatePrompt(id){
+    const p=state.prompts.find(x=>x.id===id);if(!p)return;
+    const copy={...p,id:uid("prompt"),title:`${p.title} — copia`,favorite:false,usageCount:0,version:1,createdAt:nowISO(),updatedAt:nowISO(),deletedAt:null};
+    await put("prompts",copy);await loadState();renderAll();toast("Prompt duplicato.");
+  }
+  async function trashPrompt(id){
+    const p=state.prompts.find(x=>x.id===id);if(!p)return;
+    const previous={...p};
+    p.deletedAt=nowISO();p.updatedAt=nowISO();await put("prompts",p);await loadState();renderAll();
+    toast("Prompt spostato nel cestino.","Annulla",async()=>{await put("prompts",previous);await loadState();renderAll()});
+    if(state.editingId===id) closeEditor(true);
+  }
+  async function restorePrompt(id){
+    const p=state.prompts.find(x=>x.id===id);if(!p)return;
+    p.deletedAt=null;p.updatedAt=nowISO();await put("prompts",p);await loadState();renderAll();toast("Prompt ripristinato.");
+  }
+  async function deleteForever(id){
+    const run=async()=>{await del("prompts",id);await loadState();renderAll();toast("Prompt eliminato definitivamente.")};
+    state.settings.confirmDelete?showConfirm("Eliminazione definitiva","Questa operazione non può essere annullata.",run):run();
+  }
+
+  function updateBulkbar(){
+    $("selectedCount").textContent=state.selected.size;
+    $("bulkbar").classList.toggle("show",state.selected.size>0);
+  }
+  function openChoiceModal(title,label,options,onConfirm){
+    $("genericTitle").textContent=title;
+    $("genericBody").innerHTML=`<div class="field"><label>${esc(label)}</label><select id="genericChoice">${options}</select></div>`;
+    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="genericConfirm">Applica</button>`;
+    openModal("genericModal");
+    $("genericConfirm").onclick=()=>{onConfirm($("genericChoice").value);closeModal("genericModal")};
+    bindModalClose();
+  }
+  async function bulkUpdate(patch){
+    const ids=[...state.selected];
+    for(const id of ids){
+      const p=state.prompts.find(x=>x.id===id);if(!p)continue;
+      Object.assign(p,patch, {updatedAt:nowISO()}); await put("prompts",p);
+    }
+    state.selected.clear();await loadState();renderAll();toast(`${ids.length} prompt aggiornati.`);
+  }
+
+  function showConfirm(title,message,onYes){
+    $("genericTitle").textContent=title;
+    $("genericBody").innerHTML=`<p>${esc(message)}</p>`;
+    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn danger" id="genericConfirm">Conferma</button>`;
+    openModal("genericModal");$("genericConfirm").onclick=()=>{closeModal("genericModal");onYes()};bindModalClose();
+  }
+  function openModal(id){$(id).classList.add("show")}
+  function closeModal(id){$(id).classList.remove("show")}
+  function bindModalClose(){
+    $$("[data-close-modal]").forEach(b=>b.onclick=()=>closeModal(b.dataset.closeModal));
+  }
+
+  function renderManage(){
+    const roots=state.categories.filter(c=>!c.parentId);
+    $("newCategoryParent").innerHTML=`<option value="">Categoria principale</option>`+roots.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    $("manageCategories").innerHTML=state.categories.map(c=>{
+      const parent=catById(c.parentId);
+      return `<div class="manage-row">
+        <span class="tree-dot" style="--dot:${esc(c.color||"#2563eb")}"></span>
+        <div class="grow"><strong>${esc(c.name)}</strong>${parent?`<br><small>Sotto: ${esc(parent.name)}</small>`:""}</div>
+        <button class="btn small rename-category" data-id="${esc(c.id)}">Rinomina</button>
+        <button class="btn small danger delete-category" data-id="${esc(c.id)}">Elimina</button>
+      </div>`;
+    }).join("");
+    $("manageClients").innerHTML=state.clients.map(c=>`<div class="manage-row">
+      <div class="grow"><strong>${esc(c.name)}</strong></div>
+      <button class="btn small rename-client" data-id="${esc(c.id)}">Rinomina</button>
+      <button class="btn small danger delete-client" data-id="${esc(c.id)}">Elimina</button>
+    </div>`).join("");
+    fillRuleSelects();
+    renderRules();
+    $$(".rename-category").forEach(b=>b.onclick=()=>renameEntity("categories",b.dataset.id));
+    $$(".delete-category").forEach(b=>b.onclick=()=>deleteCategory(b.dataset.id));
+    $$(".rename-client").forEach(b=>b.onclick=()=>renameEntity("clients",b.dataset.id));
+    $$(".delete-client").forEach(b=>b.onclick=()=>deleteClient(b.dataset.id));
+  }
+  function fillRuleSelects(){
+    $("ruleCategory").innerHTML=`<option value="">Nessuna categoria</option>`+state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    $("ruleClient").innerHTML=`<option value="">Nessun cliente</option>`+state.clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+  }
+  function renderRules(){
+    $("rulesList").innerHTML=state.rules.length?state.rules.map(r=>`
+      <div class="rule-row">
+        <strong>${esc(r.keyword)}</strong>
+        <span>${esc(catById(r.categoryId)?.name||"—")}</span>
+        <span>${esc(clientById(r.clientId)?.name||"—")}</span>
+        <button class="btn small danger delete-rule" data-id="${esc(r.id)}">Elimina</button>
+      </div>`).join(""):`<p class="hint">Nessuna regola configurata.</p>`;
+    $$(".delete-rule").forEach(b=>b.onclick=async()=>{
+      state.rules=state.rules.filter(r=>r.id!==b.dataset.id);await saveRules();renderRules();
+    });
+  }
+  async function saveRules(){await put("settings",{id:"rules",value:state.rules})}
+  async function renameEntity(store,id){
+    const item=(store==="categories"?state.categories:state.clients).find(x=>x.id===id);
+    if(!item)return;
+    const name=prompt("Nuovo nome:",item.name)?.trim();if(!name||name===item.name)return;
+    item.name=name;await put(store,item);await loadState();renderAll();renderManage();
+  }
+  async function deleteCategory(id){
+    const children=state.categories.filter(c=>c.parentId===id);
+    const affected=state.prompts.filter(p=>p.categoryId===id||p.subcategoryId===id||children.some(ch=>p.subcategoryId===ch.id));
+    showConfirm("Elimina categoria",`La categoria contiene o coinvolge ${affected.length} prompt. I prompt verranno spostati in “Senza categoria”.`,async()=>{
+      for(const p of affected){if(p.categoryId===id)p.categoryId=null;if(p.subcategoryId===id||children.some(ch=>p.subcategoryId===ch.id))p.subcategoryId=null;await put("prompts",p)}
+      for(const c of children) await del("categories",c.id);
+      await del("categories",id);await loadState();renderAll();renderManage();toast("Categoria eliminata.");
+    });
+  }
+  async function deleteClient(id){
+    const affected=state.prompts.filter(p=>p.clientId===id);
+    showConfirm("Elimina cliente",`${affected.length} prompt perderanno l'assegnazione al cliente.`,async()=>{
+      for(const p of affected){p.clientId=null;await put("prompts",p)}
+      await del("clients",id);await loadState();renderAll();renderManage();toast("Cliente eliminato.");
+    });
+  }
+
+  function suggestionFor(title,content){
+    const hay=normalize(`${title} ${content}`);
+    const ruleHits=state.rules.filter(r=>hay.includes(normalize(r.keyword)));
+    if(ruleHits.length){
+      const r=ruleHits[0];return {categoryId:r.categoryId||null,clientId:r.clientId||null,confidence:95,reason:`regola “${r.keyword}”`};
+    }
+    const currentTokens=tokens(`${title} ${content}`);
+    let best={score:0,categoryId:null};
+    for(const category of state.categories){
+      const examples=livePrompts().filter(p=>p.categoryId===category.id||p.subcategoryId===category.id);
+      if(!examples.length)continue;
+      const profile=tokens(examples.map(p=>`${p.title} ${p.content}`).join(" "));
+      const overlap=currentTokens.filter(t=>profile.includes(t)).length;
+      const score=overlap/Math.max(1,Math.min(currentTokens.length,20));
+      if(score>best.score)best={score,categoryId:category.id};
+    }
+    return best.score>.08?{categoryId:best.categoryId,clientId:null,confidence:Math.min(88,Math.round(55+best.score*80)),reason:"similarità con prompt già classificati"}:null;
+  }
+  function showSuggestion(){
+    const s=suggestionFor($("promptTitle").value,$("promptContent").value);
+    const box=$("suggestionBox");
+    if(!s){box.innerHTML="Nessun suggerimento abbastanza affidabile. Aggiungi regole o classifica più prompt.";box.classList.add("show");return}
+    const cat=catById(s.categoryId),client=clientById(s.clientId);
+    box.innerHTML=`<strong>Suggerimento (${s.confidence}%):</strong> ${cat?esc(cat.name):"nessuna categoria"}${client?` · ${esc(client.name)}`:""}<br><small>Motivo: ${esc(s.reason)}</small> <button class="btn small" id="applySuggestionBtn" style="margin-left:8px">Applica</button>`;
+    box.classList.add("show");
+    $("applySuggestionBtn").onclick=()=>{
+      if(cat){
+        const root=cat.parentId?cat.parentId:cat.id;
+        $("promptCategory").value=root;updateSubcategories(cat.parentId?cat.id:"");
+      }
+      if(client)$("promptClient").value=client.id;
+      markDirty();toast("Suggerimento applicato.");
+    };
+  }
+
+  function dice(a,b){
+    a=normalize(a);b=normalize(b);
+    if(a===b)return 1;if(a.length<2||b.length<2)return 0;
+    const pairs=new Map();
+    for(let i=0;i<a.length-1;i++){const p=a.slice(i,i+2);pairs.set(p,(pairs.get(p)||0)+1)}
+    let matches=0;
+    for(let i=0;i<b.length-1;i++){const p=b.slice(i,i+2),n=pairs.get(p)||0;if(n){pairs.set(p,n-1);matches++}}
+    return 2*matches/((a.length-1)+(b.length-1));
+  }
+  function computeDuplicates(){
+    const arr=livePrompts(), pairs=[];
+    for(let i=0;i<arr.length;i++){
+      for(let j=i+1;j<arr.length;j++){
+        const titleScore=dice(arr[i].title,arr[j].title);
+        const contentScore=dice(arr[i].content,arr[j].content);
+        const score=.35*titleScore+.65*contentScore;
+        if(score>=.84 || contentScore>=.91) pairs.push({a:arr[i],b:arr[j],score});
+      }
+    }
+    state.duplicatePairs=pairs.sort((x,y)=>y.score-x.score);
+    $("countDuplicates").textContent=pairs.length;
+    return pairs;
+  }
+  function renderDuplicates(){
+    const pairs=computeDuplicates();
+    $("duplicatesBody").innerHTML=pairs.length?pairs.map((x,i)=>`
+      <div class="duplicate-row">
+        <div class="score">Similarità stimata: ${Math.round(x.score*100)}%</div>
+        <div class="duplicate-grid">
+          <div class="dup-card"><strong>${esc(x.a.title)}</strong><p>${esc(x.a.content.slice(0,260))}</p></div>
+          <div class="dup-card"><strong>${esc(x.b.title)}</strong><p>${esc(x.b.content.slice(0,260))}</p></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn small open-dup" data-id="${esc(x.a.id)}">Apri primo</button>
+          <button class="btn small open-dup" data-id="${esc(x.b.id)}">Apri secondo</button>
+          <button class="btn small danger trash-dup" data-id="${esc(x.b.id)}">Cestina secondo</button>
+        </div>
+      </div>`).join(""):`<div class="empty"><div class="big">✓</div><strong>Nessun duplicato evidente</strong><p>Il confronto considera titolo e contenuto.</p></div>`;
+    $$(".open-dup").forEach(b=>b.onclick=()=>{closeModal("duplicatesModal");openEditor(b.dataset.id)});
+    $$(".trash-dup").forEach(b=>b.onclick=async()=>{await trashPrompt(b.dataset.id);renderDuplicates()});
+  }
+
+  function dataSnapshot(){
+    return {
+      app:"Prompt Studio Standalone",version:1,exportedAt:nowISO(),
+      prompts:state.prompts,categories:state.categories,clients:state.clients,rules:state.rules,preferences:state.settings
+    };
+  }
+  function downloadJSON(data,filename){
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+  function exportData(){
+    downloadJSON(dataSnapshot(),`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
+    toast("Backup JSON esportato.");
+  }
+  async function createBackup(){
+    const snap=dataSnapshot();
+    await put("backups",{id:uid("backup"),createdAt:nowISO(),data:snap});
+    downloadJSON(snap,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
+    toast("Backup locale e file JSON creati.");
+  }
+  async function importData(file){
+    try{
+      const data=JSON.parse(await file.text());
+      if(!Array.isArray(data.prompts)||!Array.isArray(data.categories)||!Array.isArray(data.clients)) throw new Error("Formato non riconosciuto");
+      $("genericTitle").textContent="Importazione archivio";
+      $("genericBody").innerHTML=`
+        <p><strong>${data.prompts.length}</strong> prompt, <strong>${data.categories.length}</strong> categorie e <strong>${data.clients.length}</strong> clienti trovati.</p>
+        <div class="field"><label>Modalità</label><select id="importMode"><option value="merge">Unisci senza sovrascrivere gli ID esistenti</option><option value="replace">Sostituisci l'archivio attuale</option></select></div>`;
+      $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="importConfirm">Importa</button>`;
+      openModal("genericModal");bindModalClose();
+      $("importConfirm").onclick=async()=>{
+        const mode=$("importMode").value;
+        if(mode==="replace"){
+          for(const store of ["prompts","categories","clients","settings"]){
+            const items=await getAll(store);for(const item of items)await del(store,item.id);
+          }
+        }
+        for(const c of data.categories) await put("categories",c);
+        for(const c of data.clients) await put("clients",c);
+        for(const p of data.prompts) await put("prompts",p);
+        if(data.rules) await put("settings",{id:"rules",value:data.rules});
+        if(data.preferences) await put("settings",{id:"prefs",value:data.preferences});
+        closeModal("genericModal");await loadState();renderAll();toast("Importazione completata.");
+      };
+    }catch(err){toast(`Importazione non riuscita: ${err.message}`)}
+  }
+
+  async function init(){
+    setTheme(true);
+    state.db=await openDB();
+    await loadState();
+    await seed();
+    $("sortSelect").value=state.sort;
+    $("autosaveSetting").checked=state.settings.autosave;
+    $("confirmDeleteSetting").checked=state.settings.confirmDelete;
+    applyViewMode();
+    renderAll();
+    computeDuplicates();
+    bindEvents();
+    bindModalClose();
+  }
+
+  function applyViewMode(){
+    $("gridBtn").classList.toggle("primary",state.viewMode==="grid");
+    $("listBtn").classList.toggle("primary",state.viewMode==="list");
+    renderCards();
+  }
+  function closeMobileSidebar(){
+    $("sidebar").classList.remove("open");$("overlay").classList.remove("show");
+  }
+  function bindEvents(){
+    let searchTimer;
+    $("globalSearch").addEventListener("input",e=>{
+      clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.query=e.target.value;state.renderLimit=80;renderCards()},180);
+    });
+    $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderCards()};
+    $("newPromptBtn").onclick=()=>openEditor();
+    $("themeBtn").onclick=()=>setTheme(false);
+    $("importBtn").onclick=$("settingsImportBtn").onclick=()=>{$("fileInput").click()};
+    $("exportBtn").onclick=$("settingsExportBtn").onclick=exportData;
+    $("backupBtn").onclick=$("settingsBackupBtn").onclick=createBackup;
+    $("fileInput").onchange=e=>{const f=e.target.files[0];if(f)importData(f);e.target.value=""};
+    $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
+    $("settingsBtn").onclick=()=>openModal("settingsModal");
+    $("duplicatesBtn").onclick=()=>{renderDuplicates();openModal("duplicatesModal")};
+    $("recountDuplicatesBtn").onclick=()=>{computeDuplicates();toast("Analisi duplicati aggiornata.")};
+    $("mobileMenuBtn").onclick=()=>{$("sidebar").classList.add("open");$("overlay").classList.add("show")};
+    $("overlay").onclick=closeMobileSidebar;
+    $$(".side-link[data-filter]").forEach(b=>b.onclick=()=>setFilter(b.dataset.filter));
+    $("sortSelect").onchange=e=>{state.sort=e.target.value;localStorage.setItem("ps_sort",state.sort);renderCards()};
+    $("gridBtn").onclick=()=>{state.viewMode="grid";localStorage.setItem("ps_view","grid");applyViewMode()};
+    $("listBtn").onclick=()=>{state.viewMode="list";localStorage.setItem("ps_view","list");applyViewMode()};
+    $("loadMoreBtn").onclick=()=>{state.renderLimit+=80;renderCards()};
+    $("selectAllBtn").onclick=()=>{filterPrompts().forEach(p=>state.selected.add(p.id));renderCards()};
+    $("clearSelectionBtn").onclick=()=>{state.selected.clear();renderCards()};
+    $("bulkMoveBtn").onclick=()=>openChoiceModal("Sposta i prompt","Categoria di destinazione",
+      `<option value="">Senza categoria</option>`+state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join(""),
+      val=>{const cat=catById(val);bulkUpdate(cat?.parentId?{categoryId:cat.parentId,subcategoryId:cat.id}:{categoryId:val||null,subcategoryId:null})});
+    $("bulkClientBtn").onclick=()=>openChoiceModal("Assegna cliente","Cliente o progetto",
+      `<option value="">Nessun cliente</option>`+state.clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join(""),
+      val=>bulkUpdate({clientId:val||null}));
+    $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
+    $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:nowISO()});
+    $("promptCategory").onchange=()=>{updateSubcategories();markDirty()};
+    ["promptTitle","promptContent","promptTags","promptVariables","promptNotes"].forEach(id=>$(id).addEventListener("input",()=>{markDirty();if(id==="promptContent")updateCounts()}));
+    ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).addEventListener("change",markDirty));
+    $("savePromptBtn").onclick=saveEditor;
+    $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
+    $("fullscreenEditorBtn").onclick=()=>$("editor").classList.toggle("full");
+    $("suggestBtn").onclick=showSuggestion;
+    $("copyFromEditorBtn").onclick=async()=>{await navigator.clipboard.writeText($("promptContent").value);toast("Testo copiato.")};
+    $("duplicateFromEditorBtn").onclick=()=>state.editingId&&duplicatePrompt(state.editingId);
+    $("trashFromEditorBtn").onclick=()=>state.editingId&&trashPrompt(state.editingId);
+    $("addCategoryBtn").onclick=async()=>{
+      const name=$("newCategoryName").value.trim();if(!name)return;
+      await put("categories",{id:uid("cat"),name,parentId:$("newCategoryParent").value||null,color:"#2563eb",order:state.categories.length,createdAt:nowISO()});
+      $("newCategoryName").value="";await loadState();renderAll();renderManage();
+    };
+    $("addClientBtn").onclick=async()=>{
+      const name=$("newClientName").value.trim();if(!name)return;
+      await put("clients",{id:uid("client"),name,createdAt:nowISO()});$("newClientName").value="";await loadState();renderAll();renderManage();
+    };
+    $("addRuleBtn").onclick=async()=>{
+      const keyword=$("ruleKeyword").value.trim();if(!keyword)return;
+      state.rules.push({id:uid("rule"),keyword,categoryId:$("ruleCategory").value||null,clientId:$("ruleClient").value||null});
+      $("ruleKeyword").value="";await saveRules();renderRules();
+    };
+    $("autosaveSetting").onchange=async e=>{state.settings.autosave=e.target.checked;await put("settings",{id:"prefs",value:state.settings})};
+    $("confirmDeleteSetting").onchange=async e=>{state.settings.confirmDelete=e.target.checked;await put("settings",{id:"prefs",value:state.settings})};
+    $("emptyTrashBtn").onclick=()=>{
+      const trashed=state.prompts.filter(p=>p.deletedAt);
+      if(!trashed.length){toast("Il cestino è già vuoto.");return}
+      showConfirm("Svuota cestino",`Eliminare definitivamente ${trashed.length} prompt?`,async()=>{
+        for(const p of trashed)await del("prompts",p.id);await loadState();renderAll();toast("Cestino svuotato.");
+      });
+    };
+    document.addEventListener("keydown",e=>{
+      const mod=e.metaKey||e.ctrlKey;
+      if(mod&&e.key.toLowerCase()==="k"){e.preventDefault();$("globalSearch").focus()}
+      if(mod&&e.key.toLowerCase()==="n"){e.preventDefault();openEditor()}
+      if(mod&&e.key.toLowerCase()==="s"&&$("editor").classList.contains("open")){e.preventDefault();saveEditor()}
+      if(e.key==="Escape"){
+        const open=$$(".modal-backdrop.show").pop();if(open)closeModal(open.id);else if($("editor").classList.contains("open"))closeEditor();
+      }
+    });
+    window.addEventListener("beforeunload",e=>{if(state.editorDirty){e.preventDefault();e.returnValue=""}});
+  }
+
+  init().catch(err=>{
+    console.error(err);
+    document.body.innerHTML=`<div style="padding:40px;font-family:system-ui"><h1>Errore di inizializzazione</h1><p>${esc(err.message)}</p><p>Apri il file con un browser moderno che supporti IndexedDB.</p></div>`;
+  });
+})();
+</script>
+</body>
+</html>
+'''
+
+path = Path("/mnt/data/prompt-studio-standalone.html")
+path.write_text(html, encoding="utf-8")
+print(f"Creato: {path} ({path.stat().st_size/1024:.1f} KB)")
