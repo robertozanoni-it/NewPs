@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v14 — Standalone</title>
+<title>Prompt Studio v15 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -251,7 +251,15 @@ textarea{resize:vertical;line-height:1.55}
 }
 .file-drop.drag{background:color-mix(in srgb,var(--var-accent) 12%,var(--panel));border-color:var(--var-accent)}
 .file-drop input{display:none}
+.file-panel-primary{margin:0 0 14px;border-width:2px}
+.file-panel-primary .file-zone{padding:14px}
+.file-drop-icon{width:44px;height:44px;margin:0 auto 8px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--var-accent) 16%,var(--panel));color:var(--var-accent);font-size:25px;font-weight:900}
+.file-drop-help{margin:5px 0 12px;font-size:13px;color:var(--muted)}
+.file-actions{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-bottom:9px}
 .file-status{margin-top:9px;font-size:12px;color:var(--muted);line-height:1.45}
+.file-status.has-file{display:inline-flex;padding:7px 10px;border-radius:9px;background:color-mix(in srgb,var(--success) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--success) 35%,var(--line));color:var(--success);font-weight:800}
+.manual-file-value{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.manual-file-value label{display:block;margin-bottom:8px}
 .preview-box{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
 .preview-box h3{margin:0 0 10px;font-size:18px}
 #compiledPreview{min-height:260px;background:var(--panel);font-size:15px}
@@ -821,15 +829,21 @@ function humanize(value){
   };
   return map[text]||text||"valore";
 }
+function variableSearchText(definition){
+  return normalize(`${definition.name||""} ${definition.label||""} ${definition.raw||""}`)
+    .replace(/[_\/\\.\-]+/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
 function variableIcon(definition){
-  const text=normalize(`${definition.name} ${definition.label}`);
-  if(/dominio|url|sito/.test(text))return "🌐";
-  if(/lingua|paese|mercato|localita/.test(text))return "🌍";
-  if(/keyword|query|serp/.test(text))return "🔎";
-  if(/cliente|persona|nome/.test(text))return "👤";
-  if(/file|pdf|documento|csv|excel|xlsx|xls|docx|doc|zip|allegato/.test(text))return "📄";
-  if(/immagine|foto|screenshot|image/.test(text))return "🖼️";
-  if(/email|mail/.test(text))return "✉️";
+  const text=variableSearchText(definition);
+  if(/\b(immagine|image|foto|screenshot)\b/.test(text))return "🖼️";
+  if(isFileVariable(definition))return "📄";
+  if(/\b(dominio|url|sito|link)\b/.test(text))return "🌐";
+  if(/\b(lingua|paese|mercato|localita)\b/.test(text))return "🌍";
+  if(/\b(keyword|query|serp)\b/.test(text))return "🔎";
+  if(/\b(cliente|persona|nome)\b/.test(text))return "👤";
+  if(/\b(email|mail)\b/.test(text))return "✉️";
   return "✏️";
 }
 function contextLabel(content,index){
@@ -837,17 +851,28 @@ function contextLabel(content,index){
   return content.slice(start,index).replace(/[*_`#>]/g,"").replace(/^[\s\-–—•\d.)]+/,"").replace(/[:：\-–—]\s*$/,"").replace(/\s+/g," ").trim().toLowerCase();
 }
 function isFileVariable(definition){
-  const text=normalize(`${definition.name} ${definition.label} ${definition.raw}`);
-  return /\b(file|allega|allegato|allegati|documento|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|caricamento|dataset|sitemap|report|zip|screenshot|esportazione)\b/.test(text);
+  const text=variableSearchText(definition);
+  const name=String(definition.name||"").trim();
+
+  // I segnaposto tecnici usano spesso underscore, per esempio
+  // [FILE_GSC_QUERY_URL]. L'underscore è un carattere di parola e rendeva
+  // inefficace il vecchio controllo con \b, quindi il selettore file non appariva.
+  if(/^(file|files|upload|allega|allegato|attachment)(?:_|-|\s|$)/i.test(name))return true;
+  if(/(?:^|_|-)(file|files|upload|allegato|attachment)(?:_|-|$)/i.test(name))return true;
+
+  return /\b(file|files|allega|allegare|allegato|allegati|attachment|documento|documenti|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|caricare|caricamento|dataset|sitemap|report|zip|screenshot|esportazione|export)\b/.test(text);
 }
 function isOptionalVariable(definition){
-  const text=normalize(`${definition.name} ${definition.label} ${definition.raw}`);
+  const text=variableSearchText(definition);
   return /\b(opzionale|facoltativo|se disponibile|se presente|se noto|se noti|eventuale|eventuali)\b/.test(text);
 }
 function expectedInputType(definition){
-  const text=normalize(`${definition.name} ${definition.label}`);
-  if(/url|dominio|sito|link/.test(text))return "url";
-  if(/email|mail/.test(text))return "email";
+  // Un campo file può contenere anche "URL" nel nome, ma dopo il caricamento
+  // il valore è un riferimento al file e non deve essere validato come URL.
+  if(definition.fileLike)return "text";
+  const text=variableSearchText(definition);
+  if(/\b(url|dominio|sito|link)\b/.test(text))return "url";
+  if(/\b(email|mail)\b/.test(text))return "email";
   return "text";
 }
 function extractVariables(content){
@@ -912,33 +937,42 @@ function variableCardHtml(def,index){
   const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length];
   const value=valueFor(state.editor.values,def.name);
   const file=state.editor.files[def.name];
-  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.base64?" · incluso nel backup":" · non incorporato"}${file.textExtracted?" · contenuto importato":""}`:"Nessun file selezionato.";
+  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.base64?" · salvato nell’app":" · non incorporato"}${file.textExtracted?" · testo importato":""}`:"Nessun file selezionato.";
   const recent=(state.recentValues[def.name]||[]).slice(0,5);
+  const textInput=`<textarea class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="${def.fileLike?"Oppure inserisci un URL, un percorso o una nota manuale…":`Inserisci ${esc(def.label||humanize(def.name))}…`}">${esc(value)}</textarea>
+      <div class="validation-error hidden" data-error-for="${esc(def.name)}"></div>`;
+  const quickValues=recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"…":item)}</button>`).join("")}</div></div>`:"";
+  const filePanel=def.fileLike?`<div class="file-panel file-panel-primary">
+        <div class="file-zone">
+          <div class="file-drop" data-var="${esc(def.name)}">
+            <input class="variable-file" data-var="${esc(def.name)}" type="file">
+            <div class="file-drop-icon">⇧</div>
+            <strong>${file?"File caricato":"Carica il file dal computer"}</strong>
+            <div class="file-drop-help">Trascinalo in quest’area oppure usa il pulsante.</div>
+            <div class="file-actions">
+              <button class="btn primary choose-file" type="button">${file?"Sostituisci file":"Scegli file"}</button>
+              ${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica</button>`:""}
+              ${file?`<button class="btn small danger remove-file" type="button" data-var="${esc(def.name)}">Rimuovi</button>`:""}
+            </div>
+            <div class="file-status ${file?"has-file":""}">${esc(fileText)}</div>
+          </div>
+          <div class="hint" style="margin-top:8px">Sono supportati CSV, XLSX, ZIP, PDF, DOCX, TXT, JSON, immagini e altri formati. I file fino a 20 MB vengono conservati nel prompt e nel backup.</div>
+        </div>
+      </div>`:"";
   return `<article class="variable-card" style="--var-accent:${accent}" data-var="${esc(def.name)}">
     <div class="variable-card-head">
       <span class="variable-number">${def.icon} Campo ${index+1}</span>
       <span class="variable-token">${esc(def.raw)}</span>
-      <span class="variable-badge">${def.optional?"Opzionale · ":""}${def.fileLike?"File o testo":"Campo rilevato"}</span>
+      <span class="variable-badge">${def.optional?"Opzionale · ":""}${def.fileLike?"Caricamento file":"Campo testo"}</span>
     </div>
     <div class="variable-card-body">
-      <h4>Inserisci ${esc(def.label||humanize(def.name))}</h4>
-      <p class="variable-help">Questo valore sostituirà automaticamente <strong>${esc(def.raw)}</strong> nel prompt finale.</p>
-      <textarea class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="Inserisci ${esc(def.label||humanize(def.name))}…">${esc(value)}</textarea>
-      <div class="validation-error hidden" data-error-for="${esc(def.name)}"></div>
-      ${recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"…":item)}</button>`).join("")}</div></div>`:""}
-      ${def.fileLike?`<div class="file-panel" open>
-        <div class="file-zone">
-          <div class="file-drop" data-var="${esc(def.name)}">
-            <input class="variable-file" data-var="${esc(def.name)}" type="file">
-            <strong>Trascina il file qui oppure scegli dal computer</strong><br>
-            <button class="btn small choose-file" type="button">Scegli file</button>
-            ${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica file</button>`:""}
-            ${file?`<button class="btn small danger remove-file" type="button" data-var="${esc(def.name)}">Rimuovi file</button>`:""}
-            <div class="file-status">${esc(fileText)}</div>
-          </div>
-          <div class="hint" style="margin-top:8px">Per file testuali viene importato il contenuto. Per PDF, DOCX, XLSX, immagini e ZIP viene inserito un riferimento al file selezionato.</div>
-        </div>
-      </div>`:""}
+      <h4>${def.fileLike?"Carica":"Inserisci"} ${esc(def.label||humanize(def.name))}</h4>
+      <p class="variable-help">${def.fileLike?`Il file selezionato verrà associato a <strong>${esc(def.raw)}</strong> e salvato insieme al prompt.`:`Questo valore sostituirà automaticamente <strong>${esc(def.raw)}</strong> nel prompt finale.`}</p>
+      ${filePanel}
+      ${def.fileLike?'<div class="manual-file-value"><label>In alternativa, inserisci un riferimento manuale</label>':''}
+      ${textInput}
+      ${def.fileLike?'</div>':''}
+      ${quickValues}
     </div>
   </article>`;
 }
@@ -959,7 +993,11 @@ function renderVariables(){
     const input=$(`#variableList .variable-input[data-var="${CSS.escape(button.dataset.var)}"]`);
     if(input){input.value=button.dataset.value;input.dispatchEvent(new Event("input",{bubbles:true}));input.focus()}
   });
-  $$("#variableList .choose-file").forEach(button=>button.onclick=()=>button.closest(".file-drop").querySelector(".variable-file").click());
+  $$("#variableList .choose-file").forEach(button=>button.onclick=()=>{
+    const input=button.closest(".file-drop").querySelector(".variable-file");
+    input.value=""; // consente di selezionare nuovamente lo stesso file
+    input.click();
+  });
   $$("#variableList .variable-file").forEach(input=>input.onchange=()=>input.files[0]&&processVariableFile(input.dataset.var,input.files[0]));
   $$("#variableList .download-file").forEach(button=>button.onclick=()=>downloadEmbeddedFile(state.editor.files[button.dataset.var]));
   $$("#variableList .remove-file").forEach(button=>button.onclick=()=>removeVariableFile(button.dataset.var));
@@ -1495,7 +1533,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:14,
+    version:15,
     exportedAt:now(),
     prompt:payload
   };
@@ -1514,7 +1552,7 @@ function downloadEmbeddedFile(file){
 function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
   return {
-    app:"Prompt Studio Standalone",version:14,exportedAt:now(),
+    app:"Prompt Studio Standalone",version:15,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,
     prompts:state.prompts,categories:state.categories,clients:state.clients
   };
