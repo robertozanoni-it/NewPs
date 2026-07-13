@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v9 — Standalone</title>
+<title>Prompt Studio v10 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -159,8 +159,23 @@ input[type=text],select,textarea{
 textarea{resize:vertical;line-height:1.55}
 #promptTitle{font-size:17px;font-weight:800}
 #promptContent{min-height:390px;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.tool-box{
+  padding:15px;border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));
+  border-radius:15px;background:linear-gradient(135deg,var(--primary-soft),var(--panel-2))
+}
+.tool-box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.tool-box-head label{font-size:15px;color:var(--text)}
+.tool-badge{
+  padding:4px 8px;border-radius:999px;background:var(--primary);color:#fff;
+  font-size:10px;font-weight:900;letter-spacing:.08em
+}
 .tool-link-row{display:grid;grid-template-columns:1fr auto;gap:8px}
 .tool-link-row input{min-width:0}
+.backup-note{
+  margin:12px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--success) 10%,var(--panel));
+  border:1px solid color-mix(in srgb,var(--success) 35%,var(--line));
+  color:var(--text);font-size:13px;line-height:1.5
+}
 .variable-highlight-note{
   margin:0 0 14px;padding:12px 14px;border-radius:12px;background:var(--panel-2);
   border:1px solid var(--line);color:var(--muted);font-size:13px;line-height:1.55
@@ -298,7 +313,8 @@ textarea{resize:vertical;line-height:1.55}
       <div id="clientList"></div>
     </section>
     <section class="side-section">
-      <button class="side-link" id="backupBtn"><span>⇩</span><span>Crea backup</span></button>
+      <button class="side-link" id="backupBtn"><span>⇩</span><span>Crea backup completo</span></button>
+      <div class="hint" style="padding:8px;color:var(--sidebar-muted)">Il backup include prompt, variabili e file caricati.</div>
     </section>
   </aside>
 
@@ -358,13 +374,18 @@ textarea{resize:vertical;line-height:1.55}
           <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
           <div class="field"><label>Cliente o progetto</label><select id="promptClient"></select></div>
           <div class="field"><label>Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
-          <div class="field full">
-            <label>Link del tool da usare</label>
-            <div class="tool-link-row">
-              <input id="promptToolUrl" type="text" placeholder="https://chatgpt.com/ oppure link del tool">
-              <button class="btn" id="openToolBtn" type="button">Apri tool</button>
+          <div class="field full tool-box">
+            <div class="tool-box-head">
+              <div>
+                <label for="promptToolUrl">Tool da utilizzare</label>
+                <div class="hint">Inserisci il link di ChatGPT, Claude, Gemini, Canva o di qualsiasi altro strumento.</div>
+              </div>
+              <span class="tool-badge">LINK TOOL</span>
             </div>
-            <div class="hint">Il link viene salvato insieme al prompt e può essere aperto direttamente dall’editor.</div>
+            <div class="tool-link-row">
+              <input id="promptToolUrl" type="text" placeholder="https://chatgpt.com/">
+              <button class="btn primary" id="openToolBtn" type="button">Apri tool</button>
+            </div>
           </div>
           <div class="field full"><label>Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
           <div class="field full"><label>Note interne</label><textarea id="promptNotes" placeholder="Note, istruzioni o contesto"></textarea></div>
@@ -380,6 +401,7 @@ textarea{resize:vertical;line-height:1.55}
         <div class="variable-highlight-note"><strong>Come funziona:</strong> compila i campi qui sotto. Il pulsante <strong>Copia Prompt</strong> sostituisce automaticamente tutte le variabili con i valori inseriti.</div>
         <div class="variable-summary" id="variableSummary"></div>
         <div class="variable-list" id="variableList"></div>
+        <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante l’importazione.</div>
         <div class="preview-box">
           <h3>Anteprima del prompt con le variabili inserite</h3>
           <textarea id="compiledPreview" readonly></textarea>
@@ -388,6 +410,7 @@ textarea{resize:vertical;line-height:1.55}
     </div>
     <div class="editor-footer">
       <button class="btn success copy-compiled" id="copyCompiledBtn">Copia Prompt</button>
+      <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
       <button class="btn danger" id="trashBtn">Cestina</button>
       <span class="spacer"></span>
@@ -446,6 +469,7 @@ const STORES=["prompts","categories","clients","settings","backups","versions"];
 const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
+const MAX_EMBED_FILE_SIZE=20*1024*1024;
 const state={
   db:null,prompts:[],categories:[],clients:[],
   filter:{type:"all",id:null},query:"",selected:new Set(),
@@ -531,6 +555,26 @@ function formatBytes(bytes){
   const units=["B","KB","MB","GB"];let size=bytes,index=0;
   while(size>=1024&&index<units.length-1){size/=1024;index++}
   return `${size.toFixed(index?1:0)} ${units[index]}`;
+}
+function arrayBufferToBase64(buffer){
+  const bytes=new Uint8Array(buffer);
+  let binary="";
+  const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+chunk,bytes.length)));
+  }
+  return btoa(binary);
+}
+function base64ToBlob(base64,mimeType="application/octet-stream"){
+  const binary=atob(base64),bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes],{type:mimeType});
+}
+function safeFilename(value){
+  return String(value||"prompt").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)||"prompt";
+}
+function promptAttachmentCount(prompt){
+  return Object.values(prompt?.variableFiles||{}).filter(file=>file&&file.base64).length;
 }
 function categoryColor(category){
   if(!category)return "#64748b";
@@ -672,6 +716,7 @@ function cardHtml(prompt){
   const accent=categoryColor(category);
   const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
   const variableCount=extractVariables(prompt.content).length;
+  const attachmentCount=promptAttachmentCount(prompt);
   return `<article class="card" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
     <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">★</span>':""}</div>
@@ -680,6 +725,7 @@ function cardHtml(prompt){
       ${category?`<span class="chip accent">${esc(category.name)}</span>`:'<span class="chip">Senza categoria</span>'}
       ${client?`<span class="chip">${esc(client.name)}</span>`:""}
       ${variableCount?`<span class="chip">${variableCount} variabil${variableCount===1?"e":"i"}</span>`:""}
+      ${attachmentCount?`<span class="chip">${attachmentCount} file allegat${attachmentCount===1?"o":"i"}</span>`:""}
       <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
     </div>
     <div class="card-actions">
@@ -824,7 +870,7 @@ function variableCardHtml(def,index){
   const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length];
   const value=valueFor(state.editor.values,def.name);
   const file=state.editor.files[def.name];
-  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.textExtracted?" · contenuto importato":" · file associato"}`:"Nessun file selezionato.";
+  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.base64?" · incluso nel backup":" · non incorporato"}${file.textExtracted?" · contenuto importato":""}`:"Nessun file selezionato.";
   const recent=(state.recentValues[def.name]||[]).slice(0,5);
   return `<article class="variable-card" style="--var-accent:${accent}" data-var="${esc(def.name)}">
     <div class="variable-card-head">
@@ -844,6 +890,7 @@ function variableCardHtml(def,index){
             <input class="variable-file" data-var="${esc(def.name)}" type="file">
             <strong>Trascina il file qui oppure scegli dal computer</strong><br>
             <button class="btn small choose-file" type="button">Scegli file</button>
+            ${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica file</button>`:""}
             <div class="file-status">${esc(fileText)}</div>
           </div>
           <div class="hint" style="margin-top:8px">Per file testuali viene importato il contenuto. Per PDF, DOCX, XLSX, immagini e ZIP viene inserito un riferimento al file selezionato.</div>
@@ -871,6 +918,7 @@ function renderVariables(){
   });
   $$("#variableList .choose-file").forEach(button=>button.onclick=()=>button.closest(".file-drop").querySelector(".variable-file").click());
   $$("#variableList .variable-file").forEach(input=>input.onchange=()=>input.files[0]&&processVariableFile(input.dataset.var,input.files[0]));
+  $$("#variableList .download-file").forEach(button=>button.onclick=()=>downloadEmbeddedFile(state.editor.files[button.dataset.var]));
   $$("#variableList .file-drop").forEach(zone=>{
     zone.ondragover=event=>{event.preventDefault();zone.classList.add("drag")};
     zone.ondragleave=()=>zone.classList.remove("drag");
@@ -882,17 +930,42 @@ async function processVariableFile(name,file){
   const extension=file.name.split(".").pop()?.toLowerCase()||"";
   const textLike=file.type.startsWith("text/")||TEXT_FILE_EXTENSIONS.has(extension);
   const metadata=`[File selezionato: ${file.name} | Tipo: ${file.type||"non specificato"} | Dimensione: ${formatBytes(file.size)}]`;
-  let value=metadata,textExtracted=false;
-  if(textLike&&file.size<=2*1024*1024){
-    try{value=await file.text();textExtracted=true}catch(_){value=metadata}
-  }else if(textLike&&file.size>2*1024*1024){
-    value=`${metadata}\n[Il contenuto non è stato incorporato perché supera 2 MB.]`;
+
+  if(file.size>MAX_EMBED_FILE_SIZE){
+    state.editor.values[name]=metadata+"\n[Il file supera 20 MB e non può essere incorporato nel backup.]";
+    state.editor.files[name]={
+      name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,
+      textExtracted:false,base64:null,embedded:false,tooLarge:true
+    };
+    renderVariables();markDirty();toast("File associato, ma non incorporato perché supera 20 MB.");
+    return;
   }
+
+  let base64=null,value=metadata,textExtracted=false;
+  try{
+    const buffer=await file.arrayBuffer();
+    base64=arrayBufferToBase64(buffer);
+    if(textLike){
+      value=new TextDecoder("utf-8").decode(buffer);
+      textExtracted=true;
+    }
+  }catch(error){
+    console.error(error);
+    toast("Non è stato possibile leggere completamente il file.");
+  }
+
   state.editor.values[name]=value;
-  state.editor.files[name]={name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,textExtracted};
+  state.editor.files[name]={
+    name:file.name,size:file.size,type:file.type||"application/octet-stream",
+    lastModified:file.lastModified,textExtracted,base64,embedded:Boolean(base64),tooLarge:false
+  };
+
   const input=$(`#variableList .variable-input[data-var="${CSS.escape(name)}"]`);
   if(input)input.value=value;
-  markDirty();renderVariables();toast(textExtracted?"Contenuto del file inserito nella variabile.":"File registrato nella variabile.");
+  markDirty();renderVariables();
+  toast(base64
+    ?(textExtracted?"File e contenuto inseriti; il file sarà incluso nel backup.":"File incluso nel backup.")
+    :"File associato senza contenuto incorporato.");
 }
 function collectVariableValues(){
   syncVariableInputs();
@@ -1110,34 +1183,93 @@ function deleteClient(id){
   });
 }
 
+async function exportCurrentPrompt(){
+  const payload=editorPayload();
+  if(!payload.title||!payload.content){
+    toast("Salva o completa il prompt prima di esportarlo.");
+    return;
+  }
+  const bundle={
+    type:"prompt-studio-prompt",
+    version:10,
+    exportedAt:now(),
+    prompt:payload
+  };
+  downloadJson(bundle,`${safeFilename(payload.title)}-prompt.json`);
+  toast(`Prompt esportato con ${promptAttachmentCount(payload)} file incorporat${promptAttachmentCount(payload)===1?"o":"i"}.`);
+}
+function downloadEmbeddedFile(file){
+  if(!file?.base64){toast("Questo file non è incorporato nel backup.");return}
+  const blob=base64ToBlob(file.base64,file.type);
+  const url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=file.name||"allegato";document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
 /* ---------- Importazione, esportazione e backup ---------- */
-function snapshot(){return {app:"Prompt Studio Standalone",version:9,exportedAt:now(),prompts:state.prompts,categories:state.categories,clients:state.clients}}
+function snapshot(){
+  const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
+  return {
+    app:"Prompt Studio Standalone",version:10,exportedAt:now(),
+    includesEmbeddedFiles:true,embeddedFileCount:fileCount,
+    prompts:state.prompts,categories:state.categories,clients:state.clients
+  };
+}
 function downloadJson(data,filename){
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
   link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
 }
-function exportData(){downloadJson(snapshot(),`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);toast("Backup JSON esportato.")}
+function exportData(){
+  const data=snapshot();
+  downloadJson(data,`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
+  toast(`Backup esportato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`);
+}
 async function createBackup(){
   const data=snapshot();await put("backups",{id:uid("backup"),createdAt:now(),data});
-  downloadJson(data,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Backup creato.");
+  downloadJson(data,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
+  toast(`Backup completo creato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`);
 }
 async function importData(file){
   try{
     const data=JSON.parse(await file.text());
-    if(!Array.isArray(data.prompts)||!Array.isArray(data.categories)||!Array.isArray(data.clients))throw new Error("Formato non riconosciuto");
-    choiceAction("Importa archivio","Modalità",'<option value="merge">Unisci con i dati esistenti</option><option value="replace">Sostituisci l’archivio attuale</option>',async mode=>{
-      if(mode==="replace"){
-        for(const name of ["prompts","categories","clients"]){for(const item of await getAll(name))await remove(name,item.id)}
+
+    if(data?.type==="prompt-studio-prompt"&&data.prompt){
+      const promptData={...data.prompt,id:uid("prompt"),createdAt:now(),updatedAt:now(),deletedAt:null};
+      await put("prompts",promptData);
+      await loadData();render();
+      toast(`Prompt importato con ${promptAttachmentCount(promptData)} file incorporat${promptAttachmentCount(promptData)===1?"o":"i"}.`);
+      return;
+    }
+
+    if(!Array.isArray(data.prompts)||!Array.isArray(data.categories)||!Array.isArray(data.clients)){
+      throw new Error("Formato non riconosciuto");
+    }
+
+    choiceAction(
+      "Importa archivio",
+      "Modalità",
+      '<option value="merge">Unisci con i dati esistenti</option><option value="replace">Sostituisci l’archivio attuale</option>',
+      async mode=>{
+        if(mode==="replace"){
+          for(const name of ["prompts","categories","clients"]){
+            for(const item of await getAll(name))await remove(name,item.id);
+          }
+        }
+        for(const item of data.categories)await put("categories",item);
+        for(const item of data.clients)await put("clients",item);
+        for(const item of data.prompts)await put("prompts",item);
+        await loadData();render();
+        const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
+        toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`);
       }
-      for(const item of data.categories)await put("categories",item);
-      for(const item of data.clients)await put("clients",item);
-      for(const item of data.prompts)await put("prompts",item);
-      await loadData();render();toast("Importazione completata.");
-    });
-  }catch(error){toast(`Importazione non riuscita: ${error.message}`)}
+    );
+  }catch(error){
+    console.error(error);
+    toast(`Importazione non riuscita: ${error.message}`);
+  }
 }
 
-/* ---------- Eventi ---------- */
+/* ---------- Eventi ---------- *//* ---------- Eventi ---------- */
 function bindEvents(){
   $$(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
   $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderCards()},160)};
@@ -1181,6 +1313,7 @@ function bindEvents(){
   };
   $("detectVariablesBtn").onclick=()=>{refreshVariables(true);toast(`${state.editor.variables.length} variabili rilevate.`)};
   $("copyCompiledBtn").onclick=()=>copyCompiled().catch(()=>toast("Impossibile copiare negli appunti."));
+  $("exportPromptBtn").onclick=exportCurrentPrompt;
   $("savePromptBtn").onclick=savePrompt;
   $("duplicateBtn").onclick=()=>state.editor.id&&duplicatePrompt(state.editor.id);
   $("trashBtn").onclick=()=>state.editor.id&&trashPrompt(state.editor.id);
