@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="light dark" />
-<title>Prompt Studio v4 — Organizer standalone</title>
+<title>Prompt Studio v5 — Organizer standalone</title>
 <style>
   :root{
     --bg:#f4f7fb;
@@ -273,6 +273,39 @@
     content:"";height:1px;background:var(--line);flex:1
   }
   .variable-separator span{padding:8px 0;white-space:nowrap}
+  .prompt-variable-header{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px
+  }
+  .prompt-variable-header label{display:block;color:var(--text);font-size:17px;margin-bottom:5px}
+  .prompt-variable-list{display:flex;flex-direction:column;gap:14px}
+  .prompt-variable-empty{
+    padding:22px;border:2px dashed var(--line);border-radius:15px;
+    background:var(--panel-2);text-align:center;color:var(--muted)
+  }
+  .prompt-variable-row{
+    border:1px solid color-mix(in srgb,var(--primary) 28%,var(--line));
+    border-left:5px solid var(--primary);border-radius:16px;
+    background:color-mix(in srgb,var(--primary) 4%,var(--panel));overflow:hidden
+  }
+  .prompt-variable-row-head{
+    display:flex;align-items:center;gap:9px;padding:11px 13px;
+    background:color-mix(in srgb,var(--primary) 10%,var(--panel));border-bottom:1px solid var(--line)
+  }
+  .prompt-variable-row-head .variable-number{min-width:96px}
+  .prompt-variable-row-head .variable-live-token{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    color:var(--primary-2);font-weight:850;font-size:14px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  .prompt-variable-row-head .spacer{flex:1}
+  .prompt-variable-row-body{
+    display:grid;grid-template-columns:minmax(220px,.7fr) minmax(360px,1.8fr);gap:14px;padding:15px
+  }
+  .prompt-variable-row .variable-name-input{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:750
+  }
+  .prompt-variable-row .variable-text-input{min-height:130px;background:var(--panel);font-size:16px}
+  .variable-row-help{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.45}
   .copy-mode-box{margin-top:18px;border:1px solid var(--line);border-radius:15px;padding:15px;background:var(--panel-2)}
   .copy-mode-box h3{margin:0 0 12px;font-size:19px}
   .copy-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -369,6 +402,8 @@
     .editor.full{width:100%!important;height:100%!important;border-radius:0}
     .editor-grid{grid-template-columns:1fr}
     .copy-options{grid-template-columns:1fr}
+    .prompt-variable-header{align-items:stretch;flex-direction:column}
+    .prompt-variable-row-body{grid-template-columns:1fr}
     .popup-resize-hint{display:none}
     .editor-tabs{padding-left:10px;padding-right:10px;overflow:auto}
     .editor-tab-btn{white-space:nowrap}
@@ -387,7 +422,7 @@
     <button class="btn icon-btn mobile-menu" id="mobileMenuBtn" title="Apri menu">☰</button>
     <div class="brand">
       <div class="logo">P</div>
-      <div><h1>Prompt Studio</h1><small>Standalone v2</small></div>
+      <div><h1>Prompt Studio</h1><small>Standalone v5</small></div>
     </div>
     <div class="search-wrap">
       <span class="search-icon">⌕</span>
@@ -531,9 +566,14 @@
           <input type="text" id="promptTags" placeholder="seo, wordpress, audit">
         </div>
         <div class="field full">
-          <label for="promptVariables">Nomi delle variabili</label>
-          <input type="text" id="promptVariables" placeholder="nome_cliente, sito_web, keyword">
-          <div class="hint">Puoi anche scrivere direttamente nel prompt segnaposto come {{nome_cliente}}.</div>
+          <div class="prompt-variable-header">
+            <div>
+              <label>Variabili del prompt</label>
+              <div class="hint">Ogni variabile è mostrata in una riga separata. Modifica il nome e inserisci direttamente il testo da usare.</div>
+            </div>
+            <button class="btn primary small" type="button" id="addVariableBtn">＋ Aggiungi variabile</button>
+          </div>
+          <div class="prompt-variable-list" id="promptVariableList"></div>
         </div>
         <div class="field full">
           <label for="promptNotes">Note interne</label>
@@ -705,6 +745,7 @@
     editingId:null,
     editorDirty:false,
     editorVariableValues:{},
+    editorVariables:[],
     variableTimer:null,
     renderLimit:80,
     viewMode:localStorage.getItem("ps_view") || "grid",
@@ -1097,8 +1138,8 @@
     $("promptClient").value=p?.clientId||"";
     $("promptStatus").value=p?.status||"draft";
     $("promptTags").value=(p?.tags||[]).join(", ");
-    $("promptVariables").value=(p?.variables||[]).join(", ");
-    state.editorVariableValues={...(p?.variableValues||{})};
+    initializeEditorVariables(p);
+    renderPromptVariableList();
     renderVariableValueFields();
     $("promptNotes").value=p?.notes||"";
     $("promptFavorite").checked=!!p?.favorite;
@@ -1123,7 +1164,7 @@
     $("editor").classList.remove("open","full");
     $("editorBackdrop").classList.remove("open");
     document.body.classList.remove("prompt-popup-open");
-    state.editingId=null; state.editorDirty=false;state.editorVariableValues={};
+    state.editingId=null; state.editorDirty=false;state.editorVariableValues={};state.editorVariables=[];
   }
   async function saveEditor(){
     const title=$("promptTitle").value.trim();
@@ -1172,10 +1213,164 @@
     $("wordCount").textContent=`${text.trim()?text.trim().split(/\s+/).length:0} parole`;
   }
 
+  function sanitizeVariableName(value){
+    return String(value||"").replace(/{{|}}/g,"").trim().replace(/\s+/g,"_");
+  }
+  function escapeRegExp(value){
+    return String(value||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  }
+  function variablesFoundInContent(){
+    return [...$("promptContent").value.matchAll(/{{\s*([^{}]+?)\s*}}/g)]
+      .map(match=>sanitizeVariableName(match[1])).filter(Boolean);
+  }
+  function initializeEditorVariables(prompt){
+    const declared=Array.isArray(prompt?.variables)?prompt.variables:[];
+    const found=[...String(prompt?.content||"").matchAll(/{{\s*([^{}]+?)\s*}}/g)]
+      .map(match=>sanitizeVariableName(match[1])).filter(Boolean);
+    const names=[...new Set([...declared.map(sanitizeVariableName),...found].filter(Boolean))];
+    const values={...(prompt?.variableValues||{})};
+    state.editorVariables=names.map(name=>({id:uid("editor_var"),name,value:String(values[name]??"")}));
+    state.editorVariableValues=Object.fromEntries(state.editorVariables.map(variable=>[variable.name,variable.value]));
+    if(!state.editorVariables.length){
+      state.editorVariables=[{id:uid("editor_var"),name:"",value:""}];
+    }
+  }
+  function syncVariableManagerFromDOM(){
+    const rows=$$("#promptVariableList .prompt-variable-row");
+    if(!rows.length)return;
+    state.editorVariables=rows.map(row=>({
+      id:row.dataset.rowId||uid("editor_var"),
+      name:sanitizeVariableName(row.querySelector(".variable-name-input")?.value||""),
+      value:row.querySelector(".variable-text-input")?.value||""
+    }));
+    state.editorVariableValues=Object.fromEntries(
+      state.editorVariables.filter(variable=>variable.name).map(variable=>[variable.name,variable.value])
+    );
+  }
   function getEditorVariableNames(){
-    const declared=$("promptVariables").value.split(",").map(x=>x.trim()).filter(Boolean);
-    const found=[...$("promptContent").value.matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(m=>m[1].trim());
-    return [...new Set([...declared,...found])];
+    syncVariableManagerFromDOM();
+    const declared=state.editorVariables.map(variable=>sanitizeVariableName(variable.name)).filter(Boolean);
+    return [...new Set([...declared,...variablesFoundInContent()])];
+  }
+  function addDetectedVariablesFromContent(render=true){
+    syncVariableManagerFromDOM();
+    const current=new Set(state.editorVariables.map(variable=>variable.name).filter(Boolean));
+    let added=false;
+    variablesFoundInContent().forEach(name=>{
+      if(current.has(name))return;
+      const reusableBlank=state.editorVariables.find(variable=>!variable.name&&!variable.value);
+      if(reusableBlank)reusableBlank.name=name;
+      else state.editorVariables.push({id:uid("editor_var"),name,value:""});
+      current.add(name);added=true;
+    });
+    if(added&&render)renderPromptVariableList();
+    return added;
+  }
+  function variableManagerRowMarkup(variable,index){
+    const name=sanitizeVariableName(variable.name);
+    return `<div class="prompt-variable-row" data-row-id="${esc(variable.id)}" data-original-name="${esc(name)}">
+      <div class="prompt-variable-row-head">
+        <span class="variable-number">Variabile ${index+1}</span>
+        <span class="variable-live-token">${name?`{{${esc(name)}}}`:"Nome non inserito"}</span>
+        <span class="spacer"></span>
+        <button class="btn small insert-variable-token" type="button" title="Inserisci il segnaposto nel prompt">Inserisci nel prompt</button>
+        <button class="btn small danger remove-variable-row" type="button" title="Rimuovi variabile">Elimina</button>
+      </div>
+      <div class="prompt-variable-row-body">
+        <div class="field">
+          <label>Nome della variabile</label>
+          <input type="text" class="variable-name-input" value="${esc(name)}" placeholder="es. nome_cliente">
+          <div class="variable-row-help">Il segnaposto sarà <strong>{{nome_variabile}}</strong>.</div>
+        </div>
+        <div class="field">
+          <label>Testo da inserire nella variabile</label>
+          <textarea class="variable-text-input" placeholder="Inserisci il testo per questa variabile, anche su più righe">${esc(variable.value||"")}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }
+  function renderPromptVariableList(focusLast=false){
+    const list=$("promptVariableList");if(!list)return;
+    list.innerHTML=state.editorVariables.length
+      ?state.editorVariables.map(variableManagerRowMarkup).join("")
+      :`<div class="prompt-variable-empty">Nessuna variabile. Premi “Aggiungi variabile” oppure inserisci un segnaposto come {{nome_cliente}} nel testo del prompt.</div>`;
+    $$("#promptVariableList .prompt-variable-row").forEach(row=>{
+      const id=row.dataset.rowId;
+      const nameInput=row.querySelector(".variable-name-input");
+      const valueInput=row.querySelector(".variable-text-input");
+      const token=row.querySelector(".variable-live-token");
+      nameInput.addEventListener("input",()=>{
+        const variable=state.editorVariables.find(item=>item.id===id);if(!variable)return;
+        const oldName=variable.name;
+        variable.name=sanitizeVariableName(nameInput.value);
+        token.textContent=variable.name?`{{${variable.name}}}`:"Nome non inserito";
+        if(oldName&&oldName!==variable.name&&state.editorVariableValues[oldName]!==undefined){
+          delete state.editorVariableValues[oldName];
+        }
+        if(variable.name)state.editorVariableValues[variable.name]=variable.value||"";
+        markDirty();updateEditorCopyPreview();
+      });
+      nameInput.addEventListener("blur",()=>{
+        const oldName=sanitizeVariableName(row.dataset.originalName);
+        const newName=sanitizeVariableName(nameInput.value);
+        nameInput.value=newName;
+        const variable=state.editorVariables.find(item=>item.id===id);
+        if(variable)variable.name=newName;
+        if(oldName&&newName&&oldName!==newName){
+          const pattern=new RegExp(`{{\\s*${escapeRegExp(oldName)}\\s*}}`,"g");
+          $("promptContent").value=$("promptContent").value.replace(pattern,`{{${newName}}}`);
+          row.dataset.originalName=newName;
+          updateCounts();markDirty();
+        }
+        const names=state.editorVariables.map(item=>sanitizeVariableName(item.name)).filter(Boolean);
+        if(newName&&names.filter(name=>name===newName).length>1){
+          toast(`La variabile “${newName}” è già presente.`);
+        }
+        renderVariableValueFields();
+      });
+      valueInput.addEventListener("input",()=>{
+        const variable=state.editorVariables.find(item=>item.id===id);if(!variable)return;
+        variable.value=valueInput.value;
+        if(variable.name)state.editorVariableValues[variable.name]=variable.value;
+        const copyField=[...document.querySelectorAll("#variableValuesFields .editor-variable-value")]
+          .find(field=>field.dataset.var===variable.name);
+        if(copyField&&copyField!==valueInput)copyField.value=variable.value;
+        markDirty();updateEditorCopyPreview();
+      });
+      row.querySelector(".insert-variable-token").addEventListener("click",()=>{
+        const variable=state.editorVariables.find(item=>item.id===id);
+        const name=sanitizeVariableName(variable?.name);
+        if(!name){toast("Inserisci prima il nome della variabile.");nameInput.focus();return}
+        const textarea=$("promptContent"),placeholder=`{{${name}}}`;
+        const start=textarea.selectionStart??textarea.value.length;
+        const end=textarea.selectionEnd??start;
+        textarea.value=textarea.value.slice(0,start)+placeholder+textarea.value.slice(end);
+        textarea.focus();textarea.setSelectionRange(start+placeholder.length,start+placeholder.length);
+        updateCounts();markDirty();updateEditorCopyPreview();
+      });
+      row.querySelector(".remove-variable-row").addEventListener("click",()=>{
+        const variable=state.editorVariables.find(item=>item.id===id);
+        const name=sanitizeVariableName(variable?.name);
+        state.editorVariables=state.editorVariables.filter(item=>item.id!==id);
+        if(name){
+          const pattern=new RegExp(`{{\\s*${escapeRegExp(name)}\\s*}}`,"g");
+          $("promptContent").value=$("promptContent").value.replace(pattern,"");
+          delete state.editorVariableValues[name];
+          updateCounts();
+        }
+        renderPromptVariableList();renderVariableValueFields();markDirty();
+        toast(name?`Variabile “${name}” rimossa anche dal testo del prompt.`:"Variabile rimossa.");
+      });
+    });
+    if(focusLast){
+      const inputs=$$("#promptVariableList .variable-name-input");
+      inputs.at(-1)?.focus();
+    }
+  }
+  function addEditorVariable(){
+    syncVariableManagerFromDOM();
+    state.editorVariables.push({id:uid("editor_var"),name:"",value:""});
+    renderPromptVariableList(true);markDirty();
   }
   function variableFieldMarkup(name,value,index,inputClass){
     return `<div class="variable-value-box">
@@ -1192,18 +1387,38 @@
       .join(`<div class="variable-separator"><span>Variabile successiva</span></div>`);
   }
   function collectVariableValues(){
-    const values={...state.editorVariableValues};
-    $$("#variableValuesFields .editor-variable-value").forEach(el=>values[el.dataset.var]=el.value);
-    state.editorVariableValues=values;
-    return values;
+    syncVariableManagerFromDOM();
+    $$("#variableValuesFields .editor-variable-value").forEach(el=>{
+      const name=sanitizeVariableName(el.dataset.var);
+      const variable=state.editorVariables.find(item=>item.name===name);
+      if(variable)variable.value=el.value;
+    });
+    state.editorVariableValues=Object.fromEntries(
+      state.editorVariables.filter(variable=>variable.name).map(variable=>[variable.name,variable.value||""])
+    );
+    return {...state.editorVariableValues};
   }
   function renderVariableValueFields(){
-    const current=collectVariableValues();
+    syncVariableManagerFromDOM();
+    const added=addDetectedVariablesFromContent(false);
+    if(added)renderPromptVariableList();
     const names=getEditorVariableNames();
-    state.editorVariableValues=Object.fromEntries(names.map(name=>[name,current[name]??""]));
-    $("variableValuesFields").innerHTML=names.length?variableFieldsMarkup(names,state.editorVariableValues,"editor-variable-value"):`<div class="hint" style="padding:18px">Aggiungi una variabile nell'elenco oppure scrivi {{nome_variabile}} nel prompt.</div>`;
+    const values=collectVariableValues();
+    $("variableValuesFields").innerHTML=names.length
+      ?variableFieldsMarkup(names,values,"editor-variable-value")
+      :`<div class="hint" style="padding:18px">Aggiungi una variabile nella scheda “Prompt e dettagli” oppure scrivi {{nome_variabile}} nel prompt.</div>`;
     $$("#variableValuesFields .editor-variable-value").forEach(el=>el.addEventListener("input",()=>{
-      state.editorVariableValues[el.dataset.var]=el.value;markDirty();updateEditorCopyPreview();
+      const name=sanitizeVariableName(el.dataset.var);
+      const variable=state.editorVariables.find(item=>item.name===name);
+      if(variable)variable.value=el.value;
+      state.editorVariableValues[name]=el.value;
+      if(variable){
+        const row=[...document.querySelectorAll("#promptVariableList .prompt-variable-row")]
+          .find(item=>item.dataset.rowId===variable.id);
+        const managerField=row?.querySelector(".variable-text-input");
+        if(managerField)managerField.value=el.value;
+      }
+      markDirty();updateEditorCopyPreview();
     }));
     updateEditorCopyPreview();
   }
@@ -1711,12 +1926,17 @@
     $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
     $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:nowISO()});
     $("promptCategory").onchange=()=>{updateSubcategories();markDirty()};
-    ["promptTitle","promptContent","promptTags","promptVariables","promptNotes"].forEach(id=>$(id).addEventListener("input",()=>{
+    ["promptTitle","promptContent","promptTags","promptNotes"].forEach(id=>$(id).addEventListener("input",()=>{
       markDirty();if(id==="promptContent")updateCounts();
-      if(id==="promptContent"||id==="promptVariables"){
-        clearTimeout(state.variableTimer);state.variableTimer=setTimeout(()=>{renderVariableValueFields();updateEditorCopyPreview()},180);
+      if(id==="promptContent"){
+        clearTimeout(state.variableTimer);state.variableTimer=setTimeout(()=>{
+          const added=addDetectedVariablesFromContent(true);
+          if(added)toast("Nuova variabile rilevata nel testo del prompt.");
+          renderVariableValueFields();updateEditorCopyPreview();
+        },220);
       }
     }));
+    $("addVariableBtn").onclick=addEditorVariable;
     ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).addEventListener("change",markDirty));
     $("savePromptBtn").onclick=saveEditor;
     $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
