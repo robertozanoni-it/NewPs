@@ -23,7 +23,7 @@
     --shadow:0 12px 32px rgba(15,23,42,.10);
     --radius:16px;
     --sidebar:270px;
-    --editor:500px;
+    --editor:1240px;
     --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   }
   body.dark{
@@ -152,35 +152,56 @@
   }
   .editor-backdrop.open{opacity:1;pointer-events:auto}
   .editor{
-    position:fixed;z-index:90;left:50%;top:50%;width:min(var(--editor),calc(100vw - 48px));height:min(88vh,900px);
-    min-width:560px;min-height:520px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);
-    background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 80px rgba(2,6,23,.35);
+    position:fixed;z-index:90;left:50%;top:50%;width:min(var(--editor),calc(100vw - 40px));height:min(92vh,1040px);
+    min-width:min(980px,calc(100vw - 24px));min-height:620px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);
+    background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 28px 90px rgba(2,6,23,.40);
     transform:translate(-50%,-47%) scale(.97);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;
-    display:flex;flex-direction:column;resize:both;overflow:hidden
+    display:flex;flex-direction:column;resize:both;overflow:hidden;font-size:16px
   }
   .editor.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
-  .editor.full{width:calc(100vw - 40px)!important;height:calc(100vh - 40px)!important;min-width:0;min-height:0;resize:none}
-  .popup-resize-hint{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
-  .editor-head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
-  .editor-head strong{margin-right:auto}
-  .editor-body{padding:16px;overflow:auto}
-  .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .field{display:flex;flex-direction:column;gap:6px}
+  .editor.full{width:calc(100vw - 28px)!important;height:calc(100vh - 28px)!important;min-width:0;min-height:0;resize:none}
+  .popup-resize-hint{font-size:13px;color:var(--muted);margin-left:auto;white-space:nowrap}
+  .editor-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .editor-head strong{margin-right:auto;font-size:21px;line-height:1.2}
+  .editor-tabs{display:flex;gap:8px;padding:12px 20px 0;background:var(--panel);border-bottom:1px solid var(--line)}
+  .editor-tab-btn{border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-weight:800;font-size:15px;padding:11px 14px 12px}
+  .editor-tab-btn:hover{color:var(--text);background:var(--panel-2);border-radius:10px 10px 0 0}
+  .editor-tab-btn.active{color:var(--primary-2);border-bottom-color:var(--primary);background:var(--primary-soft);border-radius:10px 10px 0 0}
+  .editor-body{padding:20px 22px;overflow:auto}
+  .editor-tab-panel{display:none}
+  .editor-tab-panel.active{display:block}
+  .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:8px}
   .field.full{grid-column:1/-1}
-  label{font-size:12px;color:var(--muted);font-weight:750}
+  label{font-size:14px;color:var(--muted);font-weight:800}
   input[type="text"],select,textarea{
-    width:100%;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:10px 11px;outline:none
+    width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);color:var(--text);padding:12px 13px;outline:none;font-size:16px
   }
   input[type="text"]:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%, transparent)}
-  textarea{resize:vertical;min-height:90px;line-height:1.5}
-  #promptContent{min-height:330px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
-  .editor-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0}
-  .editor-toolbar .btn{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .variable-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .variable-value-box{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--panel-2)}
-  .variable-value-box textarea{min-height:78px;margin-top:6px;background:var(--panel)}
-  .compiled-preview{min-height:220px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
-  .editor-footer{margin-top:auto;padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+  textarea{resize:vertical;min-height:110px;line-height:1.62}
+  #promptContent{min-height:390px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1.65}
+  .editor-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1px}
+  .editor-toolbar .btn{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
+  .variables-intro{padding:16px 18px;border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));background:var(--primary-soft);border-radius:14px;margin-bottom:16px}
+  .variables-intro h3{margin:0 0 6px;font-size:20px}
+  .variables-intro p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
+  .variable-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .variable-value-box{border:1px solid var(--line);border-radius:14px;padding:13px;background:var(--panel-2)}
+  .variable-value-box label{display:block;color:var(--text);font-size:15px}
+  .variable-value-box textarea{min-height:110px;margin-top:8px;background:var(--panel);font-size:15px}
+  .copy-mode-box{margin-top:18px;border:1px solid var(--line);border-radius:15px;padding:15px;background:var(--panel-2)}
+  .copy-mode-box h3{margin:0 0 12px;font-size:19px}
+  .copy-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .copy-option{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);border-radius:13px;padding:13px;background:var(--panel);cursor:pointer}
+  .copy-option:hover{border-color:var(--primary)}
+  .copy-option:has(input:checked){border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 16%,transparent);background:var(--primary-soft)}
+  .copy-option input{margin-top:3px;accent-color:var(--primary)}
+  .copy-option strong{display:block;font-size:15px;color:var(--text);margin-bottom:4px}
+  .copy-option small{display:block;color:var(--muted);font-size:13px;line-height:1.45}
+  .copy-preview-wrap{margin-top:16px}
+  .compiled-preview{min-height:250px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;line-height:1.6;background:var(--panel)}
+  .editor-footer{margin-top:auto;padding:15px 20px;border-top:1px solid var(--line);display:flex;gap:9px;flex-wrap:wrap;background:var(--panel)}
+  .editor-footer .btn{font-size:15px;min-height:43px}
   .editor-footer .spacer{flex:1}
   .suggestion{
     display:none;margin:10px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--primary) 35%, var(--line));
@@ -193,6 +214,7 @@
   .modal-backdrop.show{display:flex}
   .modal{width:min(920px,96vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column}
   .modal.small{width:min(560px,96vw)}
+  .modal.copy-wide{width:min(980px,96vw)}
   .modal-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
   .modal-head h3{margin:0;font-size:18px}
   .modal-head .spacer{flex:1}
@@ -240,6 +262,9 @@
     .settings-grid{grid-template-columns:1fr}
     .stats{grid-template-columns:1fr 1fr}
   }
+  @media(max-width:1100px) and (min-width:651px){
+    .editor{width:calc(100vw - 24px)!important;min-width:0}
+  }
   @media(max-width:650px){
     .topbar{padding:10px;height:66px}
     .app{grid-template-rows:66px 1fr}
@@ -255,8 +280,12 @@
     .editor.open{transform:translateY(0)}
     .editor.full{width:100%!important;height:100%!important;border-radius:0}
     .editor-grid{grid-template-columns:1fr}
-    .variable-fields{grid-template-columns:1fr}
+    .variable-fields,.copy-options{grid-template-columns:1fr}
     .popup-resize-hint{display:none}
+    .editor-tabs{padding-left:10px;padding-right:10px;overflow:auto}
+    .editor-tab-btn{white-space:nowrap}
+    .editor-body{padding:15px}
+    #promptContent{font-size:15px;min-height:330px}
     .field.full{grid-column:auto}
     .rule-form,.rule-row,.inline-form{grid-template-columns:1fr}
     .duplicate-grid{grid-template-columns:1fr}
@@ -364,73 +393,100 @@
     <button class="btn icon-btn small" id="fullscreenEditorBtn" title="Schermo intero">⛶</button>
     <button class="btn icon-btn small" id="closeEditorBtn" title="Chiudi">×</button>
   </div>
+  <div class="editor-tabs" role="tablist" aria-label="Modalità editor">
+    <button class="editor-tab-btn active" id="promptTabBtn" data-editor-tab="prompt" role="tab" aria-selected="true">Prompt e dettagli</button>
+    <button class="editor-tab-btn" id="variablesTabBtn" data-editor-tab="variables" role="tab" aria-selected="false">Variabili e copia</button>
+  </div>
   <div class="editor-body">
-    <div class="editor-grid">
-      <div class="field full">
-        <label for="promptTitle">Titolo</label>
-        <input type="text" id="promptTitle" placeholder="Titolo chiaro e descrittivo">
-      </div>
-      <div class="field full">
-        <label for="promptContent">Testo del prompt</label>
-        <div class="editor-toolbar" aria-label="Formattazione Markdown">
-          <button class="btn small md-btn" data-before="**" data-after="**" title="Grassetto"><b>B</b></button>
-          <button class="btn small md-btn" data-before="_" data-after="_" title="Corsivo"><i>I</i></button>
-          <button class="btn small md-btn" data-before="## " data-after="" title="Titolo">H2</button>
-          <button class="btn small md-btn" data-before="- " data-after="" title="Elenco">•</button>
-          <button class="btn small md-btn" data-before="`" data-after="`" title="Codice">&lt;/&gt;</button>
+    <section class="editor-tab-panel active" id="editorTabPrompt" data-editor-panel="prompt">
+      <div class="editor-grid">
+        <div class="field full">
+          <label for="promptTitle">Titolo</label>
+          <input type="text" id="promptTitle" placeholder="Titolo chiaro e descrittivo">
         </div>
-        <textarea id="promptContent" placeholder="Scrivi o incolla qui il prompt…"></textarea>
-        <div class="hint"><span id="wordCount">0 parole</span> · <span id="charCount">0 caratteri</span> · autosalvataggio bozza attivo</div>
+        <div class="field full">
+          <label for="promptContent">Testo del prompt</label>
+          <div class="editor-toolbar" aria-label="Formattazione Markdown">
+            <button class="btn small md-btn" data-before="**" data-after="**" title="Grassetto"><b>B</b></button>
+            <button class="btn small md-btn" data-before="_" data-after="_" title="Corsivo"><i>I</i></button>
+            <button class="btn small md-btn" data-before="## " data-after="" title="Titolo">H2</button>
+            <button class="btn small md-btn" data-before="- " data-after="" title="Elenco">•</button>
+            <button class="btn small md-btn" data-before="`" data-after="`" title="Codice">&lt;/&gt;</button>
+          </div>
+          <textarea id="promptContent" placeholder="Scrivi o incolla qui il prompt…"></textarea>
+          <div class="hint"><span id="wordCount">0 parole</span> · <span id="charCount">0 caratteri</span> · autosalvataggio bozza attivo</div>
+        </div>
+        <div class="field">
+          <label for="promptCategory">Categoria</label>
+          <select id="promptCategory"></select>
+        </div>
+        <div class="field">
+          <label for="promptSubcategory">Sottocategoria</label>
+          <select id="promptSubcategory"></select>
+        </div>
+        <div class="field">
+          <label for="promptClient">Cliente / progetto</label>
+          <select id="promptClient"></select>
+        </div>
+        <div class="field">
+          <label for="promptStatus">Stato</label>
+          <select id="promptStatus">
+            <option value="draft">Bozza</option>
+            <option value="review">Da verificare</option>
+            <option value="approved">Approvato</option>
+            <option value="obsolete">Obsoleto</option>
+            <option value="archived">Archiviato</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="promptTags">Tag, separati da virgola</label>
+          <input type="text" id="promptTags" placeholder="seo, wordpress, audit">
+        </div>
+        <div class="field full">
+          <label for="promptVariables">Nomi delle variabili</label>
+          <input type="text" id="promptVariables" placeholder="nome_cliente, sito_web, keyword">
+          <div class="hint">Puoi anche scrivere direttamente nel prompt segnaposto come {{nome_cliente}}.</div>
+        </div>
+        <div class="field full">
+          <label for="promptNotes">Note interne</label>
+          <textarea id="promptNotes" placeholder="Istruzioni, contesto o modifiche da ricordare"></textarea>
+        </div>
+        <div class="field full">
+          <label><input type="checkbox" id="promptFavorite"> Aggiungi ai preferiti</label>
+        </div>
       </div>
-      <div class="field">
-        <label for="promptCategory">Categoria</label>
-        <select id="promptCategory"></select>
+      <div class="suggestion" id="suggestionBox"></div>
+    </section>
+
+    <section class="editor-tab-panel" id="editorTabVariables" data-editor-panel="variables">
+      <div class="variables-intro">
+        <h3>Compila le variabili</h3>
+        <p>Inserisci qui i valori da sostituire ai segnaposto del tipo {{variabile}}. Questa modalità è separata dalla modifica del prompt.</p>
       </div>
-      <div class="field">
-        <label for="promptSubcategory">Sottocategoria</label>
-        <select id="promptSubcategory"></select>
+      <div class="variable-fields" id="variableValuesFields"></div>
+      <div class="copy-mode-box">
+        <h3>Come vuoi copiare il prompt?</h3>
+        <div class="copy-options">
+          <label class="copy-option">
+            <input type="radio" name="editorCopyMode" value="template">
+            <span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto, per esempio {{nome_cliente}}. Copia il modello non compilato.</small></span>
+          </label>
+          <label class="copy-option">
+            <input type="radio" name="editorCopyMode" value="compiled" checked>
+            <span><strong>Senza variabili nel testo</strong><small>Sostituisce ogni segnaposto con il valore inserito sopra. Copia il prompt pronto da usare.</small></span>
+          </label>
+        </div>
+        <div class="copy-preview-wrap field">
+          <label for="editorCopyPreview">Anteprima di ciò che verrà copiato</label>
+          <textarea id="editorCopyPreview" class="compiled-preview" readonly></textarea>
+        </div>
+        <button class="btn primary" id="copyVariableModeBtn" style="margin-top:12px">Copia con la modalità scelta</button>
       </div>
-      <div class="field">
-        <label for="promptClient">Cliente / progetto</label>
-        <select id="promptClient"></select>
-      </div>
-      <div class="field">
-        <label for="promptStatus">Stato</label>
-        <select id="promptStatus">
-          <option value="draft">Bozza</option>
-          <option value="review">Da verificare</option>
-          <option value="approved">Approvato</option>
-          <option value="obsolete">Obsoleto</option>
-          <option value="archived">Archiviato</option>
-        </select>
-      </div>
-      <div class="field full">
-        <label for="promptTags">Tag, separati da virgola</label>
-        <input type="text" id="promptTags" placeholder="seo, wordpress, audit">
-      </div>
-      <div class="field full">
-        <label for="promptVariables">Variabili, separate da virgola oppure inserite nel testo come {{variabile}}</label>
-        <input type="text" id="promptVariables" placeholder="nome_cliente, sito_web, keyword">
-      </div>
-      <div class="field full">
-        <label>Testo da inserire nelle variabili</label>
-        <div class="variable-fields" id="variableValuesFields"></div>
-        <div class="hint">I valori vengono salvati nel prompt. Il pulsante “Copia compilato” sostituisce automaticamente le variabili nel testo.</div>
-      </div>
-      <div class="field full">
-        <label for="promptNotes">Note interne</label>
-        <textarea id="promptNotes" placeholder="Istruzioni, contesto o modifiche da ricordare"></textarea>
-      </div>
-      <div class="field full">
-        <label><input type="checkbox" id="promptFavorite"> Aggiungi ai preferiti</label>
-      </div>
-    </div>
-    <div class="suggestion" id="suggestionBox"></div>
+    </section>
   </div>
   <div class="editor-footer">
-    <button class="btn primary" id="copyFromEditorBtn">Copia compilato</button>
-    <button class="btn" id="copyTemplateBtn">Copia modello</button>
-    <button class="btn" id="compileVariablesBtn">Anteprima variabili</button>
+    <button class="btn primary" id="copyFromEditorBtn">Copia con la modalità scelta</button>
+    <button class="btn" id="openVariablesTabBtn">Variabili e modalità di copia</button>
     <button class="btn" id="duplicateFromEditorBtn">Duplica</button>
     <button class="btn danger" id="trashFromEditorBtn">Cestina</button>
     <span class="spacer"></span>
@@ -934,6 +990,9 @@
     $("duplicateFromEditorBtn").classList.toggle("hidden",!p);
     $("versionsBtn").classList.toggle("hidden",!p);
     $("suggestionBox").classList.remove("show");
+    const preferredMode=localStorage.getItem("ps_copy_mode")||"compiled";
+    const copyRadio=document.querySelector(`input[name="editorCopyMode"][value="${preferredMode}"]`);if(copyRadio)copyRadio.checked=true;
+    setEditorTab("prompt");
     updateCounts();
     $("editor").classList.add("open");
     $("editorBackdrop").classList.add("open");
@@ -1014,8 +1073,9 @@
     state.editorVariableValues=Object.fromEntries(names.map(name=>[name,current[name]??""]));
     $("variableValuesFields").innerHTML=names.length?names.map(name=>`<div class="variable-value-box"><label>${esc(name)}</label><textarea class="editor-variable-value" data-var="${esc(name)}" placeholder="Inserisci testo, anche su più righe">${esc(state.editorVariableValues[name]||"")}</textarea></div>`).join(""):`<div class="hint">Aggiungi una variabile nell'elenco oppure scrivi {{nome_variabile}} nel prompt.</div>`;
     $$("#variableValuesFields .editor-variable-value").forEach(el=>el.addEventListener("input",()=>{
-      state.editorVariableValues[el.dataset.var]=el.value;markDirty();
+      state.editorVariableValues[el.dataset.var]=el.value;markDirty();updateEditorCopyPreview();
     }));
+    updateEditorCopyPreview();
   }
   function compilePromptText(content,values={}){
     return String(content||"").replace(/{{\s*([^{}]+?)\s*}}/g,(match,name)=>{
@@ -1023,18 +1083,78 @@
       return value===undefined||value===""?match:value;
     });
   }
+  function getEditorCopyMode(){
+    return document.querySelector('input[name="editorCopyMode"]:checked')?.value||"compiled";
+  }
+  function setEditorTab(name){
+    $$(".editor-tab-btn").forEach(btn=>{
+      const active=btn.dataset.editorTab===name;btn.classList.toggle("active",active);btn.setAttribute("aria-selected",String(active));
+    });
+    $$(".editor-tab-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.editorPanel===name));
+    if(name==="variables"){renderVariableValueFields();updateEditorCopyPreview()}
+  }
+  function getMissingEditorVariables(){
+    const values=collectVariableValues();
+    return getEditorVariableNames().filter(name=>!String(values[name]??"").trim());
+  }
+  function updateEditorCopyPreview(){
+    const preview=$("editorCopyPreview");if(!preview)return;
+    const content=$("promptContent").value;
+    preview.value=getEditorCopyMode()==="template"?content:compilePromptText(content,collectVariableValues());
+  }
   async function copyCompiledFromEditor(){
-    const result=compilePromptText($("promptContent").value,collectVariableValues());
+    const mode=getEditorCopyMode();
+    if(mode==="compiled"){
+      const missing=getMissingEditorVariables();
+      if(missing.length){setEditorTab("variables");toast(`Compila prima: ${missing.join(", ")}.`);return}
+    }
+    const result=mode==="template"?$("promptContent").value:compilePromptText($("promptContent").value,collectVariableValues());
     await navigator.clipboard.writeText(result);
-    const unresolved=/{{\s*[^{}]+?\s*}}/.test(result);
-    toast(unresolved?"Prompt copiato: alcune variabili non hanno ancora un valore.":"Prompt compilato e copiato.");
+    toast(mode==="template"?"Prompt copiato con i segnaposto delle variabili.":"Prompt copiato senza variabili: i valori sono stati inseriti.");
+  }
+  function promptVariableNames(p){
+    const declared=Array.isArray(p.variables)?p.variables:[];
+    const found=[...String(p.content||"").matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(m=>m[1].trim());
+    return [...new Set([...declared,...found])];
+  }
+  function openPromptCopyModal(p){
+    const vars=promptVariableNames(p),saved={...(p.variableValues||{})};
+    $("genericModal").querySelector(".modal").classList.add("copy-wide");
+    $("genericTitle").textContent="Modalità di copia";
+    $("genericBody").innerHTML=`
+      <div class="copy-mode-box" style="margin-top:0">
+        <h3>Come vuoi copiare il prompt?</h3>
+        <div class="copy-options">
+          <label class="copy-option"><input type="radio" name="quickCopyMode" value="template"><span><strong>Con le variabili nel testo</strong><small>Mantiene i segnaposto come {{variabile}}.</small></span></label>
+          <label class="copy-option"><input type="radio" name="quickCopyMode" value="compiled" checked><span><strong>Senza variabili nel testo</strong><small>Sostituisce i segnaposto con i valori inseriti.</small></span></label>
+        </div>
+      </div>
+      ${vars.length?`<div class="variables-intro" style="margin-top:14px"><h3>Valori delle variabili</h3><p>Servono solo scegliendo “Senza variabili nel testo”.</p></div><div class="variable-fields" id="quickCopyFields">${vars.map(v=>`<div class="variable-value-box"><label>${esc(v)}</label><textarea class="quick-copy-value" data-var="${esc(v)}" placeholder="Inserisci il valore">${esc(saved[v]||"")}</textarea></div>`).join("")}</div>`:""}
+      <div class="field" style="margin-top:14px"><label>Anteprima</label><textarea id="quickCopyPreview" class="compiled-preview" readonly></textarea></div>`;
+    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="quickCopyConfirm">Copia ora</button>`;
+    openModal("genericModal");bindModalClose();
+    const refresh=()=>{
+      const mode=document.querySelector('input[name="quickCopyMode"]:checked')?.value||"compiled";
+      const values={...saved};$$("#quickCopyFields .quick-copy-value").forEach(el=>values[el.dataset.var]=el.value);
+      $("quickCopyPreview").value=mode==="template"?p.content:compilePromptText(p.content,values);
+      return {mode,values};
+    };
+    $$('input[name="quickCopyMode"],#quickCopyFields .quick-copy-value').forEach(el=>el.addEventListener("input",refresh));refresh();
+    $("quickCopyConfirm").onclick=async()=>{
+      const {mode,values}=refresh();
+      const missing=mode==="compiled"?vars.filter(v=>!String(values[v]??"").trim()):[];
+      if(missing.length){toast(`Inserisci: ${missing.join(", ")}.`);return}
+      const result=mode==="template"?p.content:compilePromptText(p.content,values);
+      p.variableValues=values;p.usageCount=(p.usageCount||0)+1;await put("prompts",p);
+      await navigator.clipboard.writeText(result);closeModal("genericModal");
+      toast(mode==="template"?"Copiato con le variabili nel testo.":"Copiato senza variabili nel testo.");
+    };
   }
   async function copyPrompt(id){
-    const p=state.prompts.find(x=>x.id===id); if(!p)return;
-    const result=compilePromptText(p.content,p.variableValues||{});
-    await navigator.clipboard.writeText(result);
-    p.usageCount=(p.usageCount||0)+1;p.updatedAt=p.updatedAt||nowISO();await put("prompts",p);
-    toast(/{{\s*[^{}]+?\s*}}/.test(result)?"Prompt copiato: completa le variabili mancanti nel popup.":"Prompt compilato e copiato.");
+    const p=state.prompts.find(x=>x.id===id);if(!p)return;
+    if(promptVariableNames(p).length){openPromptCopyModal(p);return}
+    await navigator.clipboard.writeText(p.content);
+    p.usageCount=(p.usageCount||0)+1;await put("prompts",p);toast("Prompt copiato.");
   }
   async function duplicatePrompt(id){
     const p=state.prompts.find(x=>x.id===id);if(!p)return;
@@ -1085,7 +1205,7 @@
     openModal("genericModal");$("genericConfirm").onclick=()=>{closeModal("genericModal");onYes()};bindModalClose();
   }
   function openModal(id){$(id).classList.add("show")}
-  function closeModal(id){$(id).classList.remove("show")}
+  function closeModal(id){$(id).classList.remove("show");if(id==="genericModal")$(id).querySelector(".modal")?.classList.remove("copy-wide")}
   function bindModalClose(){
     $$("[data-close-modal]").forEach(b=>b.onclick=()=>closeModal(b.dataset.closeModal));
   }
@@ -1359,10 +1479,11 @@
     setTheme(true);
     const savedSidebarWidth=Math.max(220,Math.min(520,Number(localStorage.getItem("ps_sidebar_width"))||270));
     document.documentElement.style.setProperty("--sidebar",`${savedSidebarWidth}px`);
-    const savedEditorSize=JSON.parse(localStorage.getItem("ps_editor_size")||"null");
-    if(savedEditorSize&&innerWidth>650){
-      $("editor").style.width=`${Math.max(560,Math.min(innerWidth-24,savedEditorSize.width||760))}px`;
-      $("editor").style.height=`${Math.max(520,Math.min(innerHeight-24,savedEditorSize.height||760))}px`;
+    const savedEditorSize=JSON.parse(localStorage.getItem("ps_editor_size_v3")||"null");
+    if(innerWidth>650){
+      const maxWidth=innerWidth-24,minWidth=Math.min(1040,maxWidth),preferredWidth=savedEditorSize?.width||Math.min(1240,maxWidth);
+      $("editor").style.width=`${Math.max(minWidth,Math.min(maxWidth,preferredWidth))}px`;
+      $("editor").style.height=`${Math.max(650,Math.min(innerHeight-24,savedEditorSize?.height||Math.min(920,innerHeight-32)))}px`;
     }
     state.db=await openDB();
     await loadState();
@@ -1434,7 +1555,7 @@
       new ResizeObserver(entries=>{
         if(!$("editor").classList.contains("open")||$("editor").classList.contains("full")||innerWidth<=650)return;
         clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{
-          const r=entries[0].contentRect;localStorage.setItem("ps_editor_size",JSON.stringify({width:Math.round(r.width),height:Math.round(r.height)}));
+          const r=entries[0].contentRect;localStorage.setItem("ps_editor_size_v3",JSON.stringify({width:Math.round(r.width),height:Math.round(r.height)}));
         },250);
       }).observe($("editor"));
     }
@@ -1457,7 +1578,7 @@
     ["promptTitle","promptContent","promptTags","promptVariables","promptNotes"].forEach(id=>$(id).addEventListener("input",()=>{
       markDirty();if(id==="promptContent")updateCounts();
       if(id==="promptContent"||id==="promptVariables"){
-        clearTimeout(state.variableTimer);state.variableTimer=setTimeout(renderVariableValueFields,180);
+        clearTimeout(state.variableTimer);state.variableTimer=setTimeout(()=>{renderVariableValueFields();updateEditorCopyPreview()},180);
       }
     }));
     ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).addEventListener("change",markDirty));
@@ -1466,14 +1587,16 @@
     $("fullscreenEditorBtn").onclick=()=>$("editor").classList.toggle("full");
     $("suggestBtn").onclick=showSuggestion;
     $("versionsBtn").onclick=showVersions;
-    $("compileVariablesBtn").onclick=compileVariables;
+    $$(".editor-tab-btn").forEach(btn=>btn.onclick=()=>setEditorTab(btn.dataset.editorTab));
+    $("openVariablesTabBtn").onclick=()=>setEditorTab("variables");
+    $$('input[name="editorCopyMode"]').forEach(radio=>radio.onchange=()=>{localStorage.setItem("ps_copy_mode",radio.value);updateEditorCopyPreview()});
     $$(".md-btn").forEach(btn=>btn.onclick=()=>{
       const ta=$("promptContent"),start=ta.selectionStart,end=ta.selectionEnd,selected=ta.value.slice(start,end);
       const before=btn.dataset.before||"",after=btn.dataset.after||"";
       ta.setRangeText(before+selected+after,start,end,"end");ta.focus();markDirty();updateCounts();
     });
     $("copyFromEditorBtn").onclick=copyCompiledFromEditor;
-    $("copyTemplateBtn").onclick=async()=>{await navigator.clipboard.writeText($("promptContent").value);toast("Modello con segnaposto copiato.")};
+    $("copyVariableModeBtn").onclick=copyCompiledFromEditor;
     $("duplicateFromEditorBtn").onclick=()=>state.editingId&&duplicatePrompt(state.editingId);
     $("trashFromEditorBtn").onclick=()=>state.editingId&&trashPrompt(state.editingId);
     $("addCategoryBtn").onclick=async()=>{
