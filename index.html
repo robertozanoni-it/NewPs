@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v15 — Standalone</title>
+<title>Prompt Studio v16 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -423,7 +423,7 @@ textarea{resize:vertical;line-height:1.55}
           <div><h3>Compila il prompt</h3><p>L’app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
           <button class="btn" id="detectVariablesBtn">↻ Aggiorna campi</button>
         </div>
-        <div class="variable-highlight-note"><strong>Come funziona:</strong> compila i campi qui sotto. Il pulsante <strong>Copia Prompt</strong> sostituisce automaticamente tutte le variabili con i valori inseriti.</div>
+        <div class="variable-highlight-note"><strong>Come funziona:</strong> compila solo i campi che ti servono. Il pulsante <strong>Copia Prompt</strong> sostituisce le variabili valorizzate; quelle lasciate vuote restano nel testo come segnaposto e non bloccano la copia.</div>
         <div class="variable-summary" id="variableSummary"></div>
         <div class="variable-list" id="variableList"></div>
         <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante l’importazione.</div>
@@ -1306,21 +1306,41 @@ async function persistEditorVariables(){
   await put("prompts",prompt);await loadData();render();
 }
 async function copyCompiled(){
-  refreshVariables(false);renderVariables();
-  const invalid=invalidVariables();
-  if(invalid.length){
-    highlightInvalid(invalid);
-    toast(`Completa correttamente ${invalid.length} camp${invalid.length===1?"o":"i"} prima di copiare.`);
+  refreshVariables(false);
+  renderVariables();
+
+  const source=$("promptContent").value;
+  if(!source.trim()){
+    toast("Il testo del prompt è vuoto.");
+    setEditorTab("prompt");
+    $("promptContent").focus();
     return;
   }
+
   const values=collectVariableValues();
+  const incomplete=state.editor.variables.filter(def=>!String(values[def.name]??"").trim());
+  const invalid=state.editor.variables.filter(def=>{
+    const value=String(values[def.name]??"").trim();
+    return value&&Boolean(validateValue(def,value));
+  });
+
   Object.entries(values).forEach(([name,value])=>rememberValue(name,value));
-  let result=compilePrompt($("promptContent").value,values);
+
+  let result=compilePrompt(source,values);
   const toolUrl=$("promptToolUrl").value.trim();
   if(toolUrl)result=`TOOL DA USARE: ${toolUrl}\n\n${result}`;
+
   await copyText(result);
   await persistEditorVariables();
-  toast("Prompt copiato con tutte le variabili inserite.");
+
+  if(incomplete.length||invalid.length){
+    const messages=[];
+    if(incomplete.length)messages.push(`${incomplete.length} variabil${incomplete.length===1?"e è rimasta":"i sono rimaste"} come segnaposto`);
+    if(invalid.length)messages.push(`${invalid.length} valor${invalid.length===1?"e non valido è stato copiato":"i non validi sono stati copiati"} comunque`);
+    toast(`Prompt copiato: ${messages.join("; ")}.`);
+  }else{
+    toast("Prompt copiato con tutte le variabili inserite.");
+  }
 }
 
 /* ---------- Azioni sui prompt ---------- *//* ---------- Azioni sui prompt ---------- */
@@ -1533,7 +1553,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:15,
+    version:16,
     exportedAt:now(),
     prompt:payload
   };
@@ -1552,7 +1572,7 @@ function downloadEmbeddedFile(file){
 function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
   return {
-    app:"Prompt Studio Standalone",version:15,exportedAt:now(),
+    app:"Prompt Studio Standalone",version:16,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,
     prompts:state.prompts,categories:state.categories,clients:state.clients
   };
