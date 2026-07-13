@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v10 — Standalone</title>
+<title>Prompt Studio v11 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -124,7 +124,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
 .chip{font-size:11px;padding:4px 7px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
 .chip.accent{font-weight:850;color:color-mix(in srgb,var(--accent) 75%,var(--text));background:color-mix(in srgb,var(--accent) 15%,var(--panel));border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
-.card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);flex-wrap:wrap}
 .cards.list .meta{display:none}
 .cards.list .card-actions{margin:0;padding:0;border:0}
 .empty{padding:70px 20px;text-align:center;color:var(--muted)}
@@ -411,6 +411,7 @@ textarea{resize:vertical;line-height:1.55}
     <div class="editor-footer">
       <button class="btn success copy-compiled" id="copyCompiledBtn">Copia Prompt</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
+      <button class="btn" id="copyToCategoryBtn">Copia in categoria</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
       <button class="btn danger" id="trashBtn">Cestina</button>
       <span class="spacer"></span>
@@ -731,7 +732,7 @@ function cardHtml(prompt){
     <div class="card-actions">
       <button class="btn small edit-card">Apri</button>
       <button class="btn small copy-card">Copia</button>
-      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':'<button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>'}
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':'<button class="btn small copy-category-card">Copia in categoria</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>'}
     </div>
   </article>`;
 }
@@ -757,6 +758,7 @@ function bindCardEvents(){
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
     card.querySelector(".edit-card").onclick=()=>openEditor(id);
     card.querySelector(".copy-card").onclick=()=>quickCopy(id);
+    card.querySelector(".copy-category-card")?.addEventListener("click",()=>openCopyToCategory(id));
     card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
     card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
     card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
@@ -1114,6 +1116,64 @@ async function quickCopy(id){
   if(definitions.length){openEditor(id,"variables");toast("Compila i campi e usa il pulsante “Copia Prompt”.");return}
   await copyText(prompt.content);prompt.usageCount=(prompt.usageCount||0)+1;await put("prompts",prompt);toast("Prompt copiato.");
 }
+
+function categoryDestinationOptions(){
+  const roots=state.categories.filter(category=>!category.parentId);
+  const options=['<option value="">Senza categoria</option>'];
+  roots.forEach(root=>{
+    options.push(`<option value="${esc(root.id)}">${esc(root.name)}</option>`);
+    state.categories
+      .filter(category=>category.parentId===root.id)
+      .sort((a,b)=>a.name.localeCompare(b.name,"it"))
+      .forEach(child=>{
+        options.push(`<option value="${esc(child.id)}">↳ ${esc(root.name)} / ${esc(child.name)}</option>`);
+      });
+  });
+  return options.join("");
+}
+function openCopyToCategory(id){
+  const prompt=state.prompts.find(item=>item.id===id);
+  if(!prompt)return;
+
+  choiceAction(
+    "Copia prompt in una categoria",
+    "Categoria o sottocategoria di destinazione",
+    categoryDestinationOptions(),
+    destinationId=>copyPromptToCategory(id,destinationId)
+  );
+}
+async function copyPromptToCategory(id,destinationId){
+  const source=state.prompts.find(item=>item.id===id);
+  if(!source)return;
+
+  const destination=catById(destinationId);
+  const copy={
+    ...structuredClone(source),
+    id:uid("prompt"),
+    title:`${source.title} — copia`,
+    favorite:false,
+    usageCount:0,
+    version:1,
+    createdAt:now(),
+    updatedAt:now(),
+    deletedAt:null,
+    categoryId:destination?.parentId ? destination.parentId : (destination?.id||null),
+    subcategoryId:destination?.parentId ? destination.id : null
+  };
+
+  await put("prompts",copy);
+  await loadData();
+  render();
+
+  const destinationName=destination
+    ? (destination.parentId
+        ? `${catById(destination.parentId)?.name||""} / ${destination.name}`
+        : destination.name)
+    : "Senza categoria";
+
+  toast(`Copia creata in “${destinationName}”.`);
+}
+
 async function duplicatePrompt(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
   const copy={...prompt,id:uid("prompt"),title:`${prompt.title} — copia`,favorite:false,usageCount:0,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
@@ -1191,7 +1251,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:10,
+    version:11,
     exportedAt:now(),
     prompt:payload
   };
@@ -1314,6 +1374,13 @@ function bindEvents(){
   $("detectVariablesBtn").onclick=()=>{refreshVariables(true);toast(`${state.editor.variables.length} variabili rilevate.`)};
   $("copyCompiledBtn").onclick=()=>copyCompiled().catch(()=>toast("Impossibile copiare negli appunti."));
   $("exportPromptBtn").onclick=exportCurrentPrompt;
+  $("copyToCategoryBtn").onclick=()=>{
+    if(!state.editor.id){
+      toast("Salva prima il prompt, poi potrai copiarlo in una categoria.");
+      return;
+    }
+    openCopyToCategory(state.editor.id);
+  };
   $("savePromptBtn").onclick=savePrompt;
   $("duplicateBtn").onclick=()=>state.editor.id&&duplicatePrompt(state.editor.id);
   $("trashBtn").onclick=()=>state.editor.id&&trashPrompt(state.editor.id);
