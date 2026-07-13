@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="light dark" />
-<title>Prompt Studio — Organizer standalone</title>
+<title>Prompt Studio v2 — Organizer standalone</title>
 <style>
   :root{
     --bg:#f4f7fb;
@@ -78,8 +78,18 @@
   .btn.small{min-height:32px;padding:5px 9px;border-radius:9px;font-size:13px}
   .icon-btn{width:40px;padding:0}
   .sidebar{
-    grid-row:2;background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:12px 10px 18px
+    grid-row:2;background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:12px 10px 18px;
+    min-width:220px;max-width:520px
   }
+  .sidebar-resizer{
+    position:fixed;z-index:76;top:72px;bottom:0;left:calc(var(--sidebar) - 4px);width:8px;
+    cursor:col-resize;background:transparent;touch-action:none
+  }
+  .sidebar-resizer::after{
+    content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;background:transparent;transition:.15s
+  }
+  .sidebar-resizer:hover::after,.sidebar-resizer.resizing::after{background:var(--primary)}
+  body.resizing-sidebar{cursor:col-resize;user-select:none}
   .side-section{margin-bottom:18px}
   .side-title{display:flex;align-items:center;justify-content:space-between;padding:0 8px 6px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
   .side-link,.tree-row{
@@ -136,13 +146,21 @@
   .empty{padding:70px 20px;text-align:center;color:var(--muted)}
   .empty .big{font-size:48px;margin-bottom:10px}
   .load-more{display:block;margin:18px auto 0}
-  .editor{
-    position:fixed;z-index:60;right:0;top:72px;bottom:0;width:min(var(--editor),100vw);
-    background:var(--panel);border-left:1px solid var(--line);box-shadow:-12px 0 35px rgba(15,23,42,.14);
-    transform:translateX(102%);transition:.25s;display:flex;flex-direction:column
+  .editor-backdrop{
+    position:fixed;z-index:88;inset:0;background:rgba(2,6,23,.58);backdrop-filter:blur(3px);
+    opacity:0;pointer-events:none;transition:opacity .2s
   }
-  .editor.open{transform:translateX(0)}
-  .editor.full{width:calc(100vw - 40px);top:20px;bottom:20px;right:20px;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .editor-backdrop.open{opacity:1;pointer-events:auto}
+  .editor{
+    position:fixed;z-index:90;left:50%;top:50%;width:min(var(--editor),calc(100vw - 48px));height:min(88vh,900px);
+    min-width:560px;min-height:520px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 80px rgba(2,6,23,.35);
+    transform:translate(-50%,-47%) scale(.97);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;
+    display:flex;flex-direction:column;resize:both;overflow:hidden
+  }
+  .editor.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+  .editor.full{width:calc(100vw - 40px)!important;height:calc(100vh - 40px)!important;min-width:0;min-height:0;resize:none}
+  .popup-resize-hint{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
   .editor-head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
   .editor-head strong{margin-right:auto}
   .editor-body{padding:16px;overflow:auto}
@@ -158,6 +176,10 @@
   #promptContent{min-height:330px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
   .editor-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0}
   .editor-toolbar .btn{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .variable-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .variable-value-box{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--panel-2)}
+  .variable-value-box textarea{min-height:78px;margin-top:6px;background:var(--panel)}
+  .compiled-preview{min-height:220px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
   .editor-footer{margin-top:auto;padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
   .editor-footer .spacer{flex:1}
   .suggestion{
@@ -208,8 +230,9 @@
     .app{grid-template-columns:1fr}
     .brand{min-width:auto}
     .brand small{display:none}
-    .sidebar{position:fixed;z-index:80;top:72px;bottom:0;left:0;width:min(300px,88vw);transform:translateX(-102%);transition:.22s;box-shadow:var(--shadow)}
+    .sidebar{position:fixed;z-index:80;top:72px;bottom:0;left:0;width:min(300px,88vw)!important;min-width:0;max-width:none;transform:translateX(-102%);transition:.22s;box-shadow:var(--shadow)}
     .sidebar.open{transform:translateX(0)}
+    .sidebar-resizer{display:none}
     .mobile-menu{display:inline-flex}
     .overlay.show{display:block;position:fixed;z-index:70;inset:72px 0 0;background:rgba(2,6,23,.45)}
     .top-actions .optional{display:none}
@@ -228,9 +251,12 @@
     .content{padding:12px 12px 70px}
     .cards.list .card{display:flex}
     .cards.list .excerpt{margin:8px 0}
-    .editor{top:0;width:100vw}
-    .editor.full{inset:0;width:100%;border-radius:0}
+    .editor{left:0;top:0;width:100vw!important;height:100vh!important;min-width:0;min-height:0;max-width:none;max-height:none;border-radius:0;transform:translateY(20px);resize:none}
+    .editor.open{transform:translateY(0)}
+    .editor.full{width:100%!important;height:100%!important;border-radius:0}
     .editor-grid{grid-template-columns:1fr}
+    .variable-fields{grid-template-columns:1fr}
+    .popup-resize-hint{display:none}
     .field.full{grid-column:auto}
     .rule-form,.rule-row,.inline-form{grid-template-columns:1fr}
     .duplicate-grid{grid-template-columns:1fr}
@@ -244,7 +270,7 @@
     <button class="btn icon-btn mobile-menu" id="mobileMenuBtn" title="Apri menu">☰</button>
     <div class="brand">
       <div class="logo">P</div>
-      <div><h1>Prompt Studio</h1><small>Organizer standalone</small></div>
+      <div><h1>Prompt Studio</h1><small>Standalone v2</small></div>
     </div>
     <div class="search-wrap">
       <span class="search-icon">⌕</span>
@@ -286,6 +312,7 @@
       <button class="side-link" id="settingsBtn"><span>⚙</span><span>Strumenti e impostazioni</span></button>
     </section>
   </aside>
+  <div class="sidebar-resizer" id="sidebarResizer" title="Trascina per allargare o restringere la sidebar. Doppio clic per ripristinare."></div>
   <div class="overlay" id="overlay"></div>
 
   <main class="main">
@@ -327,11 +354,13 @@
   </main>
 </div>
 
-<aside class="editor" id="editor">
+<div class="editor-backdrop" id="editorBackdrop"></div>
+<aside class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorHeading">
   <div class="editor-head">
     <strong id="editorHeading">Nuovo prompt</strong>
     <button class="btn small" id="suggestBtn">Suggerisci categoria</button>
     <button class="btn small" id="versionsBtn">Versioni</button>
+    <span class="popup-resize-hint">Ridimensionabile ↘</span>
     <button class="btn icon-btn small" id="fullscreenEditorBtn" title="Schermo intero">⛶</button>
     <button class="btn icon-btn small" id="closeEditorBtn" title="Chiudi">×</button>
   </div>
@@ -380,8 +409,13 @@
         <input type="text" id="promptTags" placeholder="seo, wordpress, audit">
       </div>
       <div class="field full">
-        <label for="promptVariables">Variabili, separate da virgola</label>
+        <label for="promptVariables">Variabili, separate da virgola oppure inserite nel testo come {{variabile}}</label>
         <input type="text" id="promptVariables" placeholder="nome_cliente, sito_web, keyword">
+      </div>
+      <div class="field full">
+        <label>Testo da inserire nelle variabili</label>
+        <div class="variable-fields" id="variableValuesFields"></div>
+        <div class="hint">I valori vengono salvati nel prompt. Il pulsante “Copia compilato” sostituisce automaticamente le variabili nel testo.</div>
       </div>
       <div class="field full">
         <label for="promptNotes">Note interne</label>
@@ -394,8 +428,9 @@
     <div class="suggestion" id="suggestionBox"></div>
   </div>
   <div class="editor-footer">
-    <button class="btn" id="copyFromEditorBtn">Copia</button>
-    <button class="btn" id="compileVariablesBtn">Compila variabili</button>
+    <button class="btn primary" id="copyFromEditorBtn">Copia compilato</button>
+    <button class="btn" id="copyTemplateBtn">Copia modello</button>
+    <button class="btn" id="compileVariablesBtn">Anteprima variabili</button>
     <button class="btn" id="duplicateFromEditorBtn">Duplica</button>
     <button class="btn danger" id="trashFromEditorBtn">Cestina</button>
     <span class="spacer"></span>
@@ -525,6 +560,8 @@
     selected:new Set(),
     editingId:null,
     editorDirty:false,
+    editorVariableValues:{},
+    variableTimer:null,
     renderLimit:80,
     viewMode:localStorage.getItem("ps_view") || "grid",
     sort:localStorage.getItem("ps_sort") || "updated_desc",
@@ -813,7 +850,7 @@
     const cat=catById(p.subcategoryId)||catById(p.categoryId);
     const client=clientById(p.clientId);
     const statusLabels={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
-    return `<article class="card" data-id="${esc(p.id)}" draggable="true">
+    return `<article class="card" data-id="${esc(p.id)}" draggable="true" role="button" tabindex="0" title="Clicca per aprire il prompt">
       <input class="card-check" type="checkbox" ${state.selected.has(p.id)?"checked":""} aria-label="Seleziona prompt">
       <div class="card-top">
         <div class="card-title">${esc(p.title||"Senza titolo")}</div>
@@ -846,13 +883,22 @@
       card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
       card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
       card.querySelector(".delete-card")?.addEventListener("click",()=>deleteForever(id));
+      card.addEventListener("click",e=>{
+        if(e.target.closest("button,input,select,textarea,a")||card.dataset.justDragged==="1")return;
+        openEditor(id);
+      });
+      card.addEventListener("keydown",e=>{
+        if((e.key==="Enter"||e.key===" ")&&!e.target.closest("button,input")){e.preventDefault();openEditor(id)}
+      });
       card.addEventListener("dragstart",e=>{
         if(!state.selected.has(id)){state.selected.clear();state.selected.add(id);updateBulkbar()}
         card.classList.add("dragging");
         e.dataTransfer.effectAllowed="move";
         e.dataTransfer.setData("text/plain",JSON.stringify([...state.selected]));
       });
-      card.addEventListener("dragend",()=>card.classList.remove("dragging"));
+      card.addEventListener("dragend",()=>{
+        card.classList.remove("dragging");card.dataset.justDragged="1";setTimeout(()=>delete card.dataset.justDragged,120);
+      });
     });
   }
   function renderAll(){renderSidebar();renderCards();}
@@ -880,6 +926,8 @@
     $("promptStatus").value=p?.status||"draft";
     $("promptTags").value=(p?.tags||[]).join(", ");
     $("promptVariables").value=(p?.variables||[]).join(", ");
+    state.editorVariableValues={...(p?.variableValues||{})};
+    renderVariableValueFields();
     $("promptNotes").value=p?.notes||"";
     $("promptFavorite").checked=!!p?.favorite;
     $("trashFromEditorBtn").classList.toggle("hidden",!p);
@@ -888,6 +936,8 @@
     $("suggestionBox").classList.remove("show");
     updateCounts();
     $("editor").classList.add("open");
+    $("editorBackdrop").classList.add("open");
+    document.body.classList.add("prompt-popup-open");
     setTimeout(()=>$("promptTitle").focus(),120);
   }
   function closeEditor(force=false){
@@ -896,7 +946,9 @@
       return;
     }
     $("editor").classList.remove("open","full");
-    state.editingId=null; state.editorDirty=false;
+    $("editorBackdrop").classList.remove("open");
+    document.body.classList.remove("prompt-popup-open");
+    state.editingId=null; state.editorDirty=false;state.editorVariableValues={};
   }
   async function saveEditor(){
     const title=$("promptTitle").value.trim();
@@ -915,7 +967,8 @@
       clientId:$("promptClient").value||null,
       status:$("promptStatus").value,
       tags:$("promptTags").value.split(",").map(x=>x.trim()).filter(Boolean),
-      variables:$("promptVariables").value.split(",").map(x=>x.trim()).filter(Boolean),
+      variables:getEditorVariableNames(),
+      variableValues:collectVariableValues(),
       notes:$("promptNotes").value.trim(),
       favorite:$("promptFavorite").checked,
       usageCount:existing?.usageCount||0,
@@ -944,11 +997,44 @@
     $("wordCount").textContent=`${text.trim()?text.trim().split(/\s+/).length:0} parole`;
   }
 
+  function getEditorVariableNames(){
+    const declared=$("promptVariables").value.split(",").map(x=>x.trim()).filter(Boolean);
+    const found=[...$("promptContent").value.matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(m=>m[1].trim());
+    return [...new Set([...declared,...found])];
+  }
+  function collectVariableValues(){
+    const values={...state.editorVariableValues};
+    $$("#variableValuesFields .editor-variable-value").forEach(el=>values[el.dataset.var]=el.value);
+    state.editorVariableValues=values;
+    return values;
+  }
+  function renderVariableValueFields(){
+    const current=collectVariableValues();
+    const names=getEditorVariableNames();
+    state.editorVariableValues=Object.fromEntries(names.map(name=>[name,current[name]??""]));
+    $("variableValuesFields").innerHTML=names.length?names.map(name=>`<div class="variable-value-box"><label>${esc(name)}</label><textarea class="editor-variable-value" data-var="${esc(name)}" placeholder="Inserisci testo, anche su più righe">${esc(state.editorVariableValues[name]||"")}</textarea></div>`).join(""):`<div class="hint">Aggiungi una variabile nell'elenco oppure scrivi {{nome_variabile}} nel prompt.</div>`;
+    $$("#variableValuesFields .editor-variable-value").forEach(el=>el.addEventListener("input",()=>{
+      state.editorVariableValues[el.dataset.var]=el.value;markDirty();
+    }));
+  }
+  function compilePromptText(content,values={}){
+    return String(content||"").replace(/{{\s*([^{}]+?)\s*}}/g,(match,name)=>{
+      const value=values[String(name).trim()];
+      return value===undefined||value===""?match:value;
+    });
+  }
+  async function copyCompiledFromEditor(){
+    const result=compilePromptText($("promptContent").value,collectVariableValues());
+    await navigator.clipboard.writeText(result);
+    const unresolved=/{{\s*[^{}]+?\s*}}/.test(result);
+    toast(unresolved?"Prompt copiato: alcune variabili non hanno ancora un valore.":"Prompt compilato e copiato.");
+  }
   async function copyPrompt(id){
     const p=state.prompts.find(x=>x.id===id); if(!p)return;
-    await navigator.clipboard.writeText(p.content);
+    const result=compilePromptText(p.content,p.variableValues||{});
+    await navigator.clipboard.writeText(result);
     p.usageCount=(p.usageCount||0)+1;p.updatedAt=p.updatedAt||nowISO();await put("prompts",p);
-    toast("Prompt copiato negli appunti.");
+    toast(/{{\s*[^{}]+?\s*}}/.test(result)?"Prompt copiato: completa le variabili mancanti nel popup.":"Prompt compilato e copiato.");
   }
   async function duplicatePrompt(id){
     const p=state.prompts.find(x=>x.id===id);if(!p)return;
@@ -1224,21 +1310,28 @@
 
   function compileVariables(){
     const content=$("promptContent").value;
-    const declared=$("promptVariables").value.split(",").map(x=>x.trim()).filter(Boolean);
-    const found=[...content.matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(m=>m[1].trim());
-    const vars=[...new Set([...declared,...found])];
+    const vars=getEditorVariableNames();
     if(!vars.length){toast("Non sono state trovate variabili nel prompt.");return}
-    $("genericTitle").textContent="Compila variabili";
-    $("genericBody").innerHTML=vars.map((v,i)=>`<div class="field" style="margin-bottom:10px"><label>${esc(v)}</label><input type="text" class="variable-value" data-var="${esc(v)}" placeholder="Valore per ${esc(v)}"></div>`).join("");
-    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn primary" id="compileConfirm">Genera e copia</button>`;
+    const saved=collectVariableValues();
+    $("genericTitle").textContent="Anteprima e compilazione variabili";
+    $("genericBody").innerHTML=`<div class="variable-fields" id="popupVariableFields">${vars.map(v=>`<div class="variable-value-box"><label>${esc(v)}</label><textarea class="variable-value" data-var="${esc(v)}" placeholder="Inserisci testo, anche su più righe">${esc(saved[v]||"")}</textarea></div>`).join("")}</div><div class="field" style="margin-top:14px"><label>Anteprima del prompt compilato</label><textarea id="compiledPreview" class="compiled-preview" readonly></textarea></div>`;
+    $("genericFoot").innerHTML=`<button class="btn" data-close-modal="genericModal">Annulla</button><button class="btn" id="applyVariableValues">Salva valori</button><button class="btn primary" id="compileConfirm">Salva e copia</button>`;
     openModal("genericModal");bindModalClose();
+    const refresh=()=>{
+      const values={...saved};
+      $$("#popupVariableFields .variable-value").forEach(input=>values[input.dataset.var]=input.value);
+      $("compiledPreview").value=compilePromptText(content,values);
+      return values;
+    };
+    $$("#popupVariableFields .variable-value").forEach(input=>input.addEventListener("input",refresh));
+    refresh();
+    $("applyVariableValues").onclick=()=>{
+      state.editorVariableValues=refresh();renderVariableValueFields();markDirty();closeModal("genericModal");toast("Valori delle variabili salvati nel prompt.");
+    };
     $("compileConfirm").onclick=async()=>{
-      let result=content;
-      $$(".variable-value").forEach(input=>{
-        const name=input.dataset.var,value=input.value;
-        const escaped=name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-        result=result.replace(new RegExp(`{{\\s*${escaped}\\s*}}`,"g"),value);
-      });
+      state.editorVariableValues=refresh();
+      const result=compilePromptText(content,state.editorVariableValues);
+      renderVariableValueFields();markDirty();
       await navigator.clipboard.writeText(result);closeModal("genericModal");toast("Prompt compilato e copiato.");
     };
   }
@@ -1264,6 +1357,13 @@
 
   async function init(){
     setTheme(true);
+    const savedSidebarWidth=Math.max(220,Math.min(520,Number(localStorage.getItem("ps_sidebar_width"))||270));
+    document.documentElement.style.setProperty("--sidebar",`${savedSidebarWidth}px`);
+    const savedEditorSize=JSON.parse(localStorage.getItem("ps_editor_size")||"null");
+    if(savedEditorSize&&innerWidth>650){
+      $("editor").style.width=`${Math.max(560,Math.min(innerWidth-24,savedEditorSize.width||760))}px`;
+      $("editor").style.height=`${Math.max(520,Math.min(innerHeight-24,savedEditorSize.height||760))}px`;
+    }
     state.db=await openDB();
     await loadState();
     await seed();
@@ -1316,6 +1416,28 @@
     $("recountDuplicatesBtn").onclick=()=>{computeDuplicates();toast("Analisi duplicati aggiornata.")};
     $("mobileMenuBtn").onclick=()=>{$("sidebar").classList.add("open");$("overlay").classList.add("show")};
     $("overlay").onclick=closeMobileSidebar;
+    $("editorBackdrop").onclick=()=>closeEditor();
+    const sidebarResizer=$("sidebarResizer");
+    sidebarResizer.addEventListener("pointerdown",e=>{
+      if(innerWidth<=980)return;
+      e.preventDefault();sidebarResizer.setPointerCapture(e.pointerId);sidebarResizer.classList.add("resizing");document.body.classList.add("resizing-sidebar");
+      const move=ev=>{
+        const width=Math.max(220,Math.min(520,ev.clientX));
+        document.documentElement.style.setProperty("--sidebar",`${width}px`);localStorage.setItem("ps_sidebar_width",String(width));
+      };
+      const up=()=>{sidebarResizer.classList.remove("resizing");document.body.classList.remove("resizing-sidebar");sidebarResizer.removeEventListener("pointermove",move);sidebarResizer.removeEventListener("pointerup",up)};
+      sidebarResizer.addEventListener("pointermove",move);sidebarResizer.addEventListener("pointerup",up);
+    });
+    sidebarResizer.ondblclick=()=>{document.documentElement.style.setProperty("--sidebar","270px");localStorage.setItem("ps_sidebar_width","270")};
+    if("ResizeObserver" in window){
+      let resizeTimer;
+      new ResizeObserver(entries=>{
+        if(!$("editor").classList.contains("open")||$("editor").classList.contains("full")||innerWidth<=650)return;
+        clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{
+          const r=entries[0].contentRect;localStorage.setItem("ps_editor_size",JSON.stringify({width:Math.round(r.width),height:Math.round(r.height)}));
+        },250);
+      }).observe($("editor"));
+    }
     $$(".side-link[data-filter]").forEach(b=>b.onclick=()=>setFilter(b.dataset.filter));
     $("sortSelect").onchange=e=>{state.sort=e.target.value;localStorage.setItem("ps_sort",state.sort);renderCards()};
     $("gridBtn").onclick=()=>{state.viewMode="grid";localStorage.setItem("ps_view","grid");applyViewMode()};
@@ -1332,7 +1454,12 @@
     $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
     $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:nowISO()});
     $("promptCategory").onchange=()=>{updateSubcategories();markDirty()};
-    ["promptTitle","promptContent","promptTags","promptVariables","promptNotes"].forEach(id=>$(id).addEventListener("input",()=>{markDirty();if(id==="promptContent")updateCounts()}));
+    ["promptTitle","promptContent","promptTags","promptVariables","promptNotes"].forEach(id=>$(id).addEventListener("input",()=>{
+      markDirty();if(id==="promptContent")updateCounts();
+      if(id==="promptContent"||id==="promptVariables"){
+        clearTimeout(state.variableTimer);state.variableTimer=setTimeout(renderVariableValueFields,180);
+      }
+    }));
     ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).addEventListener("change",markDirty));
     $("savePromptBtn").onclick=saveEditor;
     $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
@@ -1345,7 +1472,8 @@
       const before=btn.dataset.before||"",after=btn.dataset.after||"";
       ta.setRangeText(before+selected+after,start,end,"end");ta.focus();markDirty();updateCounts();
     });
-    $("copyFromEditorBtn").onclick=async()=>{await navigator.clipboard.writeText($("promptContent").value);toast("Testo copiato.")};
+    $("copyFromEditorBtn").onclick=copyCompiledFromEditor;
+    $("copyTemplateBtn").onclick=async()=>{await navigator.clipboard.writeText($("promptContent").value);toast("Modello con segnaposto copiato.")};
     $("duplicateFromEditorBtn").onclick=()=>state.editingId&&duplicatePrompt(state.editingId);
     $("trashFromEditorBtn").onclick=()=>state.editingId&&trashPrompt(state.editingId);
     $("addCategoryBtn").onclick=async()=>{
