@@ -87,6 +87,9 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .tree-row{padding-left:calc(9px + var(--depth,0) * 16px)}
 .tree-dot{width:10px;height:10px;border-radius:50%;background:var(--dot,#60a5fa);flex:0 0 10px}
 .tree-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tree-delete{margin-left:4px;width:28px;height:28px;min-height:28px;padding:0;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fecaca;display:grid;place-items:center;flex:0 0 28px}
+.tree-delete:hover{background:rgba(220,38,38,.28);border-color:rgba(248,113,113,.65);color:#fff}
+.tree-row .count{margin-left:auto}
 .sidebar .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:#fff}
 .sidebar .btn:hover{background:rgba(255,255,255,.14)}
 
@@ -453,7 +456,7 @@ textarea{resize:vertical;line-height:1.55}
     <div class="modal-body">
       <div class="manage-grid">
         <div class="panel-box">
-          <h4>Categorie e sottocategorie</h4>
+          <h4>Categorie e sottocategorie</h4><div class="hint" style="margin-bottom:10px">Senza categoria genitore, la voce viene creata come nuova categoria indipendente.</div>
           <div class="manage-list" id="manageCategories"></div>
           <div class="inline-form">
             <input id="newCategoryName" type="text" placeholder="Nome categoria">
@@ -462,7 +465,7 @@ textarea{resize:vertical;line-height:1.55}
           </div>
         </div>
         <div class="panel-box">
-          <h4>Clienti e progetti</h4>
+          <h4>Clienti e progetti</h4><div class="hint" style="margin-bottom:10px">Ogni nuovo nome crea un cliente o progetto indipendente.</div>
           <div class="manage-list" id="manageClients"></div>
           <div class="inline-form" style="grid-template-columns:1fr auto">
             <input id="newClientName" type="text" placeholder="Nome cliente o progetto">
@@ -746,17 +749,19 @@ function renderSidebar(){
   });
   const node=(category,depth=0)=>{
     const children=state.categories.filter(item=>item.parentId===category.id);
-    return `<button class="tree-row ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth}" data-category="${esc(category.id)}">
-      <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span>
-    </button>${children.map(child=>node(child,depth+1)).join("")}`;
+    return `<div class="tree-row ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth}" data-category="${esc(category.id)}" role="button" tabindex="0">
+      <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span><button class="tree-delete delete-sidebar-category" data-delete-category="${esc(category.id)}" title="Elimina categoria" aria-label="Elimina categoria ${esc(category.name)}">×</button>
+    </div>${children.map(child=>node(child,depth+1)).join("")}`;
   };
   $("categoryTree").innerHTML=state.categories.filter(item=>!item.parentId).map(item=>node(item)).join("");
   $("clientList").innerHTML=state.clients.map(client=>{
     const count=live.filter(item=>item.clientId===client.id).length;
-    return `<button class="tree-row ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span></button>`;
+    return `<div class="tree-row ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}" role="button" tabindex="0"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span><button class="tree-delete delete-sidebar-client" data-delete-client="${esc(client.id)}" title="Elimina cliente" aria-label="Elimina cliente ${esc(client.name)}">×</button></div>`;
   }).join("");
-  $$("[data-category]").forEach(button=>button.onclick=()=>setFilter("category",button.dataset.category));
-  $$("[data-client]").forEach(button=>button.onclick=()=>setFilter("client",button.dataset.client));
+  $$("[data-category]").forEach(button=>{button.onclick=event=>{if(event.target.closest("[data-delete-category]"))return;setFilter("category",button.dataset.category)};button.onkeydown=event=>{if((event.key==="Enter"||event.key===" ")&&!event.target.closest("button")){event.preventDefault();setFilter("category",button.dataset.category)}}});
+  $$("[data-client]").forEach(button=>{button.onclick=event=>{if(event.target.closest("[data-delete-client]"))return;setFilter("client",button.dataset.client)};button.onkeydown=event=>{if((event.key==="Enter"||event.key===" ")&&!event.target.closest("button")){event.preventDefault();setFilter("client",button.dataset.client)}}});
+  $$("[data-delete-category]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteCategory(button.dataset.deleteCategory)});
+  $$("[data-delete-client]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteClient(button.dataset.deleteClient)});
 }
 function renderStats(){
   const visible=state.filter.type==="all"&&!state.query;
