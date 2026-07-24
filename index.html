@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17 — Standalone</title>
+<title>Prompt Studio v17.1 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -305,7 +305,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.1</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -457,7 +457,7 @@ textarea{resize:vertical;line-height:1.55}
           <div class="manage-list" id="manageCategories"></div>
           <div class="inline-form">
             <input id="newCategoryName" type="text" placeholder="Nome categoria">
-            <select id="newCategoryParent"><option value="">Categoria principale</option></select>
+            <select id="newCategoryParent"><option value="">Nessuna: categoria indipendente</option></select>
             <button class="btn primary small" id="addCategoryBtn">Aggiungi</button>
           </div>
         </div>
@@ -488,7 +488,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.0.0";
+const APP_VERSION="17.1.0";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -545,6 +545,14 @@ async function loadData(){
   state.categories.sort((a,b)=>(a.order??999)-(b.order??999)||a.name.localeCompare(b.name,"it"));
   state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
 }
+async function removeLegacyDemoPrompt(){
+  const demo=state.prompts.find(item=>
+    item.title==="Esempio di prompt con variabili" &&
+    Array.isArray(item.tags) && item.tags.length===1 && item.tags[0]==="esempio" &&
+    String(item.content||"").includes("DOMINIO: [DOMINIO_SITO]")
+  );
+  if(demo)await remove("prompts",demo.id);
+}
 async function seedData(){
   if(!state.categories.length){
     const seeds=[
@@ -565,15 +573,7 @@ async function seedData(){
       await put("clients",{id:uid("client"),name,createdAt:now()});
     }
   }
-  if(!state.prompts.length){
-    await put("prompts",{
-      id:uid("prompt"),title:"Esempio di prompt con variabili",
-      content:"DOMINIO: [DOMINIO_SITO]\n\nLINGUA PRINCIPALE: [LINGUA]\n\nPAESE/MERCATO: [PAESE_O_MERCATO]\n\nAnalizza il sito indicato e crea un piano d'azione.",
-      categoryId:null,subcategoryId:null,clientId:null,status:"draft",tags:["esempio"],notes:"",
-      favorite:true,usageCount:0,version:1,variableValues:{},variableFiles:{},
-      createdAt:now(),updatedAt:now(),deletedAt:null
-    });
-  }
+  /* La libreria dei prompt parte vuota: non vengono creati prompt dimostrativi. */
   await loadData();
 }
 
@@ -1526,7 +1526,7 @@ async function bulkUpdate(patch){
 /* ---------- Gestione categorie e clienti ---------- */
 function renderManage(){
   const roots=state.categories.filter(item=>!item.parentId);
-  $("newCategoryParent").innerHTML='<option value="">Categoria principale</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("newCategoryParent").innerHTML='<option value="">Nessuna: categoria indipendente</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("manageCategories").innerHTML=state.categories.map(category=>`
     <div class="manage-row">
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
@@ -1550,19 +1550,32 @@ async function renameEntity(type,id){
   item.name=name;await put(type,item);await loadData();render();renderManage();
 }
 function deleteCategory(id){
+  const category=catById(id);if(!category)return;
   const children=state.categories.filter(item=>item.parentId===id);
-  const affected=state.prompts.filter(prompt=>prompt.categoryId===id||prompt.subcategoryId===id||children.some(child=>prompt.subcategoryId===child.id));
-  confirmAction("Elimina categoria",`${affected.length} prompt verranno spostati in “Senza categoria”.`,async()=>{
-    for(const prompt of affected){if(prompt.categoryId===id)prompt.categoryId=null;if(prompt.subcategoryId===id||children.some(child=>prompt.subcategoryId===child.id))prompt.subcategoryId=null;await put("prompts",prompt)}
+  const removedIds=new Set([id,...children.map(child=>child.id)]);
+  const affected=state.prompts.filter(prompt=>removedIds.has(prompt.categoryId)||removedIds.has(prompt.subcategoryId));
+  const childNote=children.length?` Verranno eliminate anche ${children.length} sottocategori${children.length===1?"a":"e"}.`:"";
+  confirmAction("Elimina categoria",`${affected.length} prompt verranno spostati in “Senza categoria”.${childNote}`,async()=>{
+    for(const prompt of affected){
+      if(removedIds.has(prompt.categoryId))prompt.categoryId=null;
+      if(removedIds.has(prompt.subcategoryId))prompt.subcategoryId=null;
+      prompt.updatedAt=now();
+      await put("prompts",prompt);
+    }
     for(const child of children)await remove("categories",child.id);
-    await remove("categories",id);await loadData();render();renderManage();toast("Categoria eliminata.");
+    await remove("categories",id);
+    if(state.filter.type==="category"&&removedIds.has(state.filter.id))state.filter={type:"all",id:null};
+    await loadData();render();renderManage();toast(`Categoria “${category.name}” eliminata.`);
   });
 }
 function deleteClient(id){
+  const client=clientById(id);if(!client)return;
   const affected=state.prompts.filter(prompt=>prompt.clientId===id);
-  confirmAction("Elimina cliente",`${affected.length} prompt perderanno l’assegnazione al cliente.`,async()=>{
-    for(const prompt of affected){prompt.clientId=null;await put("prompts",prompt)}
-    await remove("clients",id);await loadData();render();renderManage();toast("Cliente eliminato.");
+  confirmAction("Elimina cliente",`${affected.length} prompt perderanno l’assegnazione al cliente, ma non saranno eliminati.`,async()=>{
+    for(const prompt of affected){prompt.clientId=null;prompt.updatedAt=now();await put("prompts",prompt)}
+    await remove("clients",id);
+    if(state.filter.type==="client"&&state.filter.id===id)state.filter={type:"all",id:null};
+    await loadData();render();renderManage();toast(`Cliente “${client.name}” eliminato.`);
   });
 }
 
@@ -1712,9 +1725,16 @@ function bindEvents(){
   $("trashBtn").onclick=()=>state.editor.id&&trashPrompt(state.editor.id);
 
   $("addCategoryBtn").onclick=async()=>{
-    const name=$("newCategoryName").value.trim(),parentId=$("newCategoryParent").value||null;if(!name)return;
+    const name=$("newCategoryName").value.trim();
+    const parentId=$("newCategoryParent").value||null;
+    if(!name){toast("Inserisci il nome della categoria.");return}
+    const duplicate=state.categories.some(category=>normalize(category.name)===normalize(name)&&(category.parentId||null)===parentId);
+    if(duplicate){toast("Esiste già una categoria con questo nome nello stesso livello.");return}
     await put("categories",{id:uid("cat"),name,parentId,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
-    $("newCategoryName").value="";await loadData();render();renderManage();
+    $("newCategoryName").value="";
+    $("newCategoryParent").value=""; /* Ogni nuova categoria torna indipendente per impostazione predefinita. */
+    await loadData();render();renderManage();
+    toast(parentId?"Sottocategoria aggiunta.":"Categoria indipendente aggiunta.");
   };
   $("addClientBtn").onclick=async()=>{
     const name=$("newClientName").value.trim();if(!name)return;
@@ -1752,7 +1772,7 @@ function bindEvents(){
 async function init(){
   setTheme(true);
   const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
-  state.db=await openDatabase();await loadData();await seedData();bindEvents();render();
+  state.db=await openDatabase();await loadData();await removeLegacyDemoPrompt();await loadData();await seedData();bindEvents();render();
 }
 init().catch(error=>{
   console.error(error);
