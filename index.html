@@ -110,6 +110,9 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .content{overflow:auto;padding:16px 18px 80px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .stat{padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.stat-btn{width:100%;text-align:left;cursor:pointer;transition:.18s;display:block;color:var(--text)}
+.stat-btn:hover{transform:translateY(-2px);border-color:var(--primary);background:var(--panel-3);box-shadow:0 12px 28px color-mix(in srgb,var(--primary) 16%,transparent)}
+.stat-btn:focus-visible{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)}
 .stat strong{display:block;font-size:22px}
 .stat span{font-size:12px;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
@@ -813,10 +816,21 @@ function renderStats(){
   if(!visible)return;
   const live=livePrompts();
   $("stats").innerHTML=`
-    <div class="stat"><strong>${live.length}</strong><span>Prompt attivi</span></div>
-    <div class="stat"><strong>${state.categories.length}</strong><span>Categorie e sottocategorie</span></div>
-    <div class="stat"><strong>${live.filter(item=>!item.categoryId&&!item.subcategoryId).length}</strong><span>Da categorizzare</span></div>
-    <div class="stat"><strong>${live.filter(item=>item.favorite).length}</strong><span>Preferiti</span></div>`;
+    <button type="button" class="stat stat-btn" data-stat-action="all" title="Mostra tutti i prompt"><strong>${live.length}</strong><span>Prompt attivi</span></button>
+    <button type="button" class="stat stat-btn" data-stat-action="manage-categories" title="Apri la gestione di categorie e sottocategorie"><strong>${state.categories.length}</strong><span>Categorie e sottocategorie</span></button>
+    <button type="button" class="stat stat-btn" data-stat-action="uncategorized" title="Mostra i prompt da categorizzare"><strong>${live.filter(item=>!item.categoryId&&!item.subcategoryId).length}</strong><span>Da categorizzare</span></button>
+    <button type="button" class="stat stat-btn" data-stat-action="favorites" title="Mostra i prompt preferiti"><strong>${live.filter(item=>item.favorite).length}</strong><span>Preferiti</span></button>`;
+  $$('[data-stat-action]').forEach(button=>button.onclick=()=>{
+    const action=button.dataset.statAction;
+    if(action==="manage-categories"){
+      renderManage();
+      openModal("manageModal");
+      return;
+    }
+    if(action==="favorites")return setFilter("favorites");
+    if(action==="uncategorized")return setFilter("uncategorized");
+    setFilter("all");
+  });
 }
 function cardHtml(prompt){
   const category=catById(prompt.subcategoryId)||catById(prompt.categoryId);
