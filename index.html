@@ -418,7 +418,7 @@ textarea{resize:vertical;line-height:1.55}
             </div>
             <div class="tool-link-row">
               <input id="promptToolUrl" type="text" placeholder="https://chatgpt.com/">
-              <button class="btn primary" id="openToolBtn" type="button">Apri tool</button>
+              <button class="btn primary" id="openToolBtn" type="button">Apri tool con prompt</button>
             </div>
           </div>
           <div class="field full"><label>Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
@@ -1622,11 +1622,39 @@ function bindEvents(){
     markDirty();
   };
   ["promptTitle","promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
-  $("openToolBtn").onclick=()=>{
+  $("openToolBtn").onclick=async()=>{
     let url=$("promptToolUrl").value.trim();
     if(!url){toast("Inserisci prima il link del tool.");$("promptToolUrl").focus();return}
     if(!/^https?:\/\//i.test(url))url=`https://${url}`;
-    try{new URL(url);window.open(url,"_blank","noopener")}catch{toast("Il link del tool non è valido.")}
+
+    const source=$("promptContent").value.trim();
+    if(!source){toast("Inserisci prima il testo del prompt.");$("promptContent").focus();return}
+
+    refreshVariables(false);
+    const compiled=compilePrompt(source,collectVariableValues());
+
+    try{
+      const parsed=new URL(url);
+      const host=parsed.hostname.replace(/^www\./,"").toLowerCase();
+
+      /* ChatGPT supporta l'apertura con il prompt precompilato tramite parametro q.
+         Per gli altri tool il prompt viene copiato negli appunti, perché i browser
+         non permettono di scrivere automaticamente dentro siti di terze parti. */
+      if(host==="chatgpt.com"||host.endsWith(".chatgpt.com")){
+        parsed.searchParams.set("q",compiled);
+        window.open(parsed.toString(),"_blank","noopener");
+        toast("ChatGPT aperto con l’ultimo prompt compilato.");
+      }else{
+        await copyText(compiled);
+        window.open(parsed.toString(),"_blank","noopener");
+        toast("Tool aperto. L’ultimo prompt è già copiato: incollalo con Ctrl+V o Cmd+V.");
+      }
+
+      try{await persistEditorVariables()}catch(error){console.error("Valori non salvati durante l’apertura del tool:",error)}
+    }catch(error){
+      console.error(error);
+      toast("Il link del tool non è valido.");
+    }
   };
   ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
   $("promptContent").oninput=()=>{
