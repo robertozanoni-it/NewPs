@@ -418,7 +418,7 @@ textarea{resize:vertical;line-height:1.55}
             </div>
             <div class="tool-link-row">
               <input id="promptToolUrl" type="text" placeholder="https://chatgpt.com/">
-              <button class="btn primary" id="openToolBtn" type="button">Apri tool con prompt</button>
+              <button class="btn primary" id="openToolBtn" type="button">Copia prompt e apri tool</button>
             </div>
           </div>
           <div class="field full"><label>Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
@@ -1631,29 +1631,34 @@ function bindEvents(){
     if(!source){toast("Inserisci prima il testo del prompt.");$("promptContent").focus();return}
 
     refreshVariables(false);
-    const compiled=compilePrompt(source,collectVariableValues());
+    const compiled=compilePrompt(source,collectVariableValues()).trim();
+    if(!compiled){toast("Il prompt compilato è vuoto.");return}
 
     try{
-      const parsed=new URL(url);
-      const host=parsed.hostname.replace(/^www\./,"").toLowerCase();
+      new URL(url);
 
-      /* ChatGPT supporta l'apertura con il prompt precompilato tramite parametro q.
-         Per gli altri tool il prompt viene copiato negli appunti, perché i browser
-         non permettono di scrivere automaticamente dentro siti di terze parti. */
-      if(host==="chatgpt.com"||host.endsWith(".chatgpt.com")){
-        parsed.searchParams.set("q",compiled);
-        window.open(parsed.toString(),"_blank","noopener");
-        toast("ChatGPT aperto con l’ultimo prompt compilato.");
-      }else{
-        await copyText(compiled);
-        window.open(parsed.toString(),"_blank","noopener");
-        toast("Tool aperto. L’ultimo prompt è già copiato: incollalo con Ctrl+V o Cmd+V.");
+      /* Salva prima il prompt corrente senza chiudere l'editor. */
+      const payload=editorPayload();
+      if(!payload.title)throw new Error("Inserisci il titolo del prompt prima di aprire il tool.");
+      if(!payload.content)throw new Error("Inserisci il testo del prompt prima di aprire il tool.");
+      await put("prompts",payload);
+      await loadData();
+      state.editor.id=payload.id;
+      state.editor.dirty=false;
+
+      /* I browser impediscono di scrivere direttamente nei campi di siti esterni.
+         Copiare negli appunti prima dell'apertura è il comportamento affidabile
+         per ChatGPT, Claude, Gemini e gli altri strumenti. */
+      await copyText(compiled);
+      const opened=window.open(url,"_blank","noopener");
+      if(!opened){
+        toast("Popup bloccato. Consenti i popup e riprova: il prompt è già copiato.");
+        return;
       }
-
-      try{await persistEditorVariables()}catch(error){console.error("Valori non salvati durante l’apertura del tool:",error)}
+      toast("Ultimo prompt copiato. Nel tool premi Cmd+V oppure Ctrl+V per inserirlo.");
     }catch(error){
       console.error(error);
-      toast("Il link del tool non è valido.");
+      toast(error?.message||"Impossibile aprire il tool.");
     }
   };
   ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
