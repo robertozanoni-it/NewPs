@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.5 — Standalone</title>
+<title>Prompt Studio v17.6 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -117,6 +117,19 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .stat span{font-size:12px;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
 .cards.list{display:flex;flex-direction:column}
+.cards.grouped{display:flex;flex-direction:column;gap:24px}
+.category-group{display:flex;flex-direction:column;gap:12px}
+.category-group-head{display:flex;align-items:center;gap:10px;padding:12px 15px;border:1px solid var(--line);border-left:7px solid var(--group-accent,#64748b);border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--group-accent,#64748b) 13%,var(--panel)),var(--panel));box-shadow:0 5px 16px color-mix(in srgb,var(--group-accent,#64748b) 10%,transparent)}
+.category-group-title{font-size:21px;font-weight:950;line-height:1.2}
+.category-group-count{margin-left:auto;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--group-accent,#64748b) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--group-accent,#64748b) 38%,var(--line));font-size:13px;font-weight:900}
+.category-group-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
+.category-group-cards.list{display:flex;flex-direction:column}
+.category-group-cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(190px,1fr) minmax(280px,2fr) auto;gap:11px;align-items:center}
+.category-group-cards.list .card-check{position:static}
+.category-group-cards.list .card-top{padding-left:0}
+.category-group-cards.list .excerpt{margin:0;-webkit-line-clamp:2}
+.category-group-cards.list .meta{display:none}
+.category-group-cards.list .card-actions{margin:0;padding:0;border:0}
 .card{
   --accent:#64748b;position:relative;min-height:195px;padding:14px;border-radius:16px;
   border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));border-left:6px solid var(--accent);
@@ -321,7 +334,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.5</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -503,7 +516,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.5.0";
+const APP_VERSION="17.6.0";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -867,10 +880,46 @@ function cardHtml(prompt){
     </div>
   </article>`;
 }
+function rootCategoryForPrompt(prompt){
+  const direct=catById(prompt.categoryId);
+  const sub=catById(prompt.subcategoryId);
+  if(direct)return direct.parentId?catById(direct.parentId)||direct:direct;
+  if(sub)return sub.parentId?catById(sub.parentId)||sub:sub;
+  return null;
+}
+function groupedCardsHtml(items){
+  const groups=new Map();
+  items.forEach(prompt=>{
+    const root=rootCategoryForPrompt(prompt);
+    const key=root?.id||"__uncategorized__";
+    if(!groups.has(key))groups.set(key,{category:root,items:[]});
+    groups.get(key).items.push(prompt);
+  });
+  const categoryOrder=new Map(state.categories.filter(cat=>!cat.parentId).map((cat,index)=>[cat.id,index]));
+  return [...groups.values()]
+    .sort((a,b)=>{
+      if(!a.category)return 1;
+      if(!b.category)return -1;
+      return (categoryOrder.get(a.category.id)??9999)-(categoryOrder.get(b.category.id)??9999)||a.category.name.localeCompare(b.category.name,"it");
+    })
+    .map(group=>{
+      const name=group.category?.name||"Senza categoria";
+      const accent=categoryColor(group.category);
+      return `<section class="category-group" style="--group-accent:${esc(accent)}">
+        <div class="category-group-head">
+          <span class="tree-dot" style="--dot:${esc(accent)}"></span>
+          <div class="category-group-title">${esc(name)}</div>
+          <span class="category-group-count">${group.items.length} prompt</span>
+        </div>
+        <div class="category-group-cards ${state.view==="list"?"list":""}">${group.items.map(cardHtml).join("")}</div>
+      </section>`;
+    }).join("");
+}
 function renderCards(){
   const items=filteredPrompts();
-  $("cards").className=`cards ${state.view==="list"?"list":""}`;
-  $("cards").innerHTML=items.length?items.map(cardHtml).join(""):`<div class="empty"><div class="big">⌕</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
+  const shouldGroup=state.filter.type==="all"&&!state.query;
+  $("cards").className=`cards ${shouldGroup?"grouped":(state.view==="list"?"list":"")}`;
+  $("cards").innerHTML=items.length?(shouldGroup?groupedCardsHtml(items):items.map(cardHtml).join("")):`<div class="empty"><div class="big">⌕</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
   const [title,subtitle]=filterInfo();
   $("viewTitle").textContent=title;
   $("viewSubtitle").textContent=state.query?`${items.length} risultati per “${state.query}”`:`${subtitle} · ${items.length} elementi`;
