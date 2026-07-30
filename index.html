@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.6.1 — Standalone</title>
+<title>Prompt Studio v17.6.2 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -334,7 +334,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6.1</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6.2</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -380,9 +380,9 @@ textarea{resize:vertical;line-height:1.55}
       <div class="toolbar">
         <button class="btn small" id="selectAllBtn">Seleziona tutti</button>
         <select id="sortSelect">
+          <option value="title_asc">Titolo 1–9 / A–Z</option>
+          <option value="title_desc">Titolo Z–A / 9–1</option>
           <option value="updated_desc">Modificati di recente</option>
-          <option value="title_asc">Titolo A–Z</option>
-          <option value="title_desc">Titolo Z–A</option>
           <option value="created_desc">Creati di recente</option>
           <option value="usage_desc">Più utilizzati</option>
         </select>
@@ -516,7 +516,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.6.1";
+const APP_VERSION="17.6.2";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -530,7 +530,7 @@ const MAX_EMBED_FILE_SIZE=20*1024*1024;
 const state={
   db:null,prompts:[],categories:[],clients:[],
   filter:{type:"all",id:null},query:"",selected:new Set(),
-  sort:localStorage.getItem("ps_sort")||"updated_desc",
+  sort:localStorage.getItem("ps_sort")||"title_asc",
   view:localStorage.getItem("ps_view")||"grid",
   editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""},
   searchTimer:null,detectTimer:null,
@@ -547,6 +547,7 @@ const uid=prefix=>`${prefix}_${crypto.randomUUID?.()||Date.now()+"_"+Math.random
 const now=()=>new Date().toISOString();
 const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]));
 const normalize=value=>String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+const naturalTitleCompare=(a,b)=>String(a?.title||"").localeCompare(String(b?.title||""),"it",{numeric:true,sensitivity:"base",ignorePunctuation:true});
 const catById=id=>state.categories.find(item=>item.id===id);
 const clientById=id=>state.clients.find(item=>item.id===id);
 const livePrompts=()=>state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
@@ -738,8 +739,8 @@ function filteredPrompts(){
     });
   }
   return items.sort((a,b)=>{
-    if(state.sort==="title_asc")return a.title.localeCompare(b.title,"it");
-    if(state.sort==="title_desc")return b.title.localeCompare(a.title,"it");
+    if(state.sort==="title_asc")return naturalTitleCompare(a,b);
+    if(state.sort==="title_desc")return naturalTitleCompare(b,a);
     if(state.sort==="created_desc")return new Date(b.createdAt)-new Date(a.createdAt);
     if(state.sort==="usage_desc")return (b.usageCount||0)-(a.usageCount||0);
     return new Date(b.updatedAt)-new Date(a.updatedAt);
