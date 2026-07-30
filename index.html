@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.6.2 — Standalone</title>
+<title>Prompt Studio v17.6.3 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -334,7 +334,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6.2</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6.3</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -516,7 +516,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.6.2";
+const APP_VERSION="17.6.3";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -527,10 +527,17 @@ const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
 const MAX_EMBED_FILE_SIZE=20*1024*1024;
+const SORT_RULE_VERSION="17.6.3";
+const savedSortRuleVersion=localStorage.getItem("ps_sort_rule_version");
+const initialSort=savedSortRuleVersion===SORT_RULE_VERSION?(localStorage.getItem("ps_sort")||"title_asc"):"title_asc";
+if(savedSortRuleVersion!==SORT_RULE_VERSION){
+  localStorage.setItem("ps_sort","title_asc");
+  localStorage.setItem("ps_sort_rule_version",SORT_RULE_VERSION);
+}
 const state={
   db:null,prompts:[],categories:[],clients:[],
   filter:{type:"all",id:null},query:"",selected:new Set(),
-  sort:localStorage.getItem("ps_sort")||"title_asc",
+  sort:initialSort,
   view:localStorage.getItem("ps_view")||"grid",
   editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""},
   searchTimer:null,detectTimer:null,
@@ -547,7 +554,17 @@ const uid=prefix=>`${prefix}_${crypto.randomUUID?.()||Date.now()+"_"+Math.random
 const now=()=>new Date().toISOString();
 const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]));
 const normalize=value=>String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
-const naturalTitleCompare=(a,b)=>String(a?.title||"").localeCompare(String(b?.title||""),"it",{numeric:true,sensitivity:"base",ignorePunctuation:true});
+const titleSortData=item=>{
+  const title=String(item?.title||"").trim();
+  const match=title.match(/^(?:[#№\s]*)?(\d+(?:[.,]\d+)?)/);
+  return {title,hasNumber:Boolean(match),number:match?Number(match[1].replace(",",".")):Number.POSITIVE_INFINITY};
+};
+const naturalTitleCompare=(a,b)=>{
+  const left=titleSortData(a),right=titleSortData(b);
+  if(left.hasNumber!==right.hasNumber)return left.hasNumber?-1:1;
+  if(left.hasNumber&&left.number!==right.number)return left.number-right.number;
+  return left.title.localeCompare(right.title,"it",{numeric:true,sensitivity:"base",ignorePunctuation:true});
+};
 const catById=id=>state.categories.find(item=>item.id===id);
 const clientById=id=>state.clients.find(item=>item.id===id);
 const livePrompts=()=>state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
