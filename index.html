@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.6 — Standalone</title>
+<title>Prompt Studio v17.6.1 — Standalone</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -334,7 +334,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6.1</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -516,7 +516,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.6.0";
+const APP_VERSION="17.6.1";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -1488,9 +1488,15 @@ async function copyCompiled(){
 /* ---------- Azioni sui prompt ---------- *//* ---------- Azioni sui prompt ---------- */
 async function quickCopy(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
-  const definitions=extractVariables(prompt.content);
-  if(definitions.length){openEditor(id,"variables");toast("Compila i campi e usa il pulsante “Copia Prompt”.");return}
-  await copyText(prompt.content);prompt.usageCount=(prompt.usageCount||0)+1;await put("prompts",prompt);toast("Prompt copiato.");
+  try{
+    await copyText(prompt.content||"");
+    prompt.usageCount=(prompt.usageCount||0)+1;
+    await put("prompts",prompt);
+    toast("Prompt copiato.");
+  }catch(error){
+    console.error("Errore durante la copia rapida:",error);
+    toast(`Impossibile copiare: ${error.message||"errore del browser"}`);
+  }
 }
 
 async function duplicatePrompt(id){
