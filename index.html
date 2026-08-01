@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.6.3 — Standalone</title>
+<title>Prompt Studio v17.10.0 — Verifica finale</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -115,6 +115,27 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .stat-btn:focus-visible{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)}
 .stat strong{display:block;font-size:22px}
 .stat span{font-size:12px;color:var(--muted)}
+
+.workflow-overview{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr);gap:14px;margin-bottom:2px}
+.dashboard-intro,.recommended-action{padding:19px 20px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 8px 22px rgba(15,23,42,.06)}
+.dashboard-intro{background:linear-gradient(135deg,var(--primary-soft),var(--panel) 68%)}
+.dashboard-intro-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.dashboard-intro h3,.recommended-action h3{margin:0 0 6px;font-size:22px}.dashboard-intro p,.recommended-action p{margin:0;color:var(--muted);line-height:1.55}.dashboard-progress-label{font-size:13px;font-weight:900;color:var(--primary-2);white-space:nowrap}
+.workflow-progress{height:10px;margin:15px 0 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);overflow:hidden}.workflow-progress>span{display:block;height:100%;width:var(--progress,0%);background:linear-gradient(90deg,var(--primary),var(--success));transition:width .25s ease}.workflow-summary{display:flex;gap:8px;flex-wrap:wrap}.workflow-chip{padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:12px;font-weight:800;color:var(--muted)}
+.recommended-action{--recommend:#ea580c;border-left:7px solid var(--recommend);background:linear-gradient(145deg,color-mix(in srgb,var(--recommend) 10%,var(--panel)),var(--panel) 72%)}.recommended-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}.recommended-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--recommend) 17%,var(--panel));font-size:22px}.priority-badge{margin-left:auto;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--recommend) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--recommend) 36%,var(--line));font-size:11px;font-weight:900}.recommended-meta{margin:11px 0;display:flex;gap:7px;flex-wrap:wrap}.recommended-action .btn{width:100%;margin-top:4px}
+.stats.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:22px}
+.dashboard-card{--dash:#64748b;--dash-bg:color-mix(in srgb,var(--dash) 10%,var(--panel));position:relative;min-height:218px;text-align:left;padding:16px;border:1px solid color-mix(in srgb,var(--dash) 38%,var(--line));border-left:7px solid var(--dash);border-radius:17px;background:linear-gradient(145deg,var(--dash-bg),var(--panel) 74%);color:var(--text);display:flex;flex-direction:column;gap:9px;transition:transform .18s,border-color .18s,box-shadow .18s,opacity .18s;cursor:pointer;scroll-margin-top:90px}
+.dashboard-card:hover{transform:translateY(-3px);border-color:var(--dash);box-shadow:0 15px 34px color-mix(in srgb,var(--dash) 19%,transparent)}.dashboard-card:focus-visible{outline:3px solid color-mix(in srgb,var(--dash) 62%,transparent);outline-offset:3px;box-shadow:0 0 0 6px color-mix(in srgb,var(--dash) 17%,transparent)}.dashboard-card.active{border-color:var(--dash);box-shadow:0 0 0 4px color-mix(in srgb,var(--dash) 18%,transparent)}.dashboard-card.completed{--dash-bg:color-mix(in srgb,var(--success) 10%,var(--panel))}.dashboard-card.blocked{opacity:.82;border-style:dashed}.dashboard-card.error{--dash:#dc2626}.dashboard-card[aria-disabled="true"]{cursor:not-allowed}
+.dashboard-card .dash-top{display:flex;align-items:center;gap:10px}.dashboard-card .dash-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--dash) 17%,var(--panel));font-size:22px}.dashboard-card .dash-step{margin-left:auto;font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.dashboard-card strong{font-size:18px;line-height:1.25}.dashboard-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.48}.dashboard-card .dash-meta{margin-top:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.dashboard-card .dash-state,.dashboard-card .dash-count{padding:5px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:11px;font-weight:850}.dashboard-card .dash-state{color:color-mix(in srgb,var(--dash) 76%,var(--text))}.dashboard-card .dash-count{color:var(--muted)}.dashboard-card .dash-next{width:100%;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.dashboard-card .dash-next strong{font-size:11px;color:var(--text)}
+.dashboard-card.blue{--dash:#2563eb}.dashboard-card.cyan{--dash:#0e7490}.dashboard-card.purple{--dash:#7c3aed}.dashboard-card.green{--dash:#15803d}.dashboard-card.yellow{--dash:#a16207}.dashboard-card.orange{--dash:#c2410c}.dashboard-card.red{--dash:#b91c1c}.dashboard-card.gray{--dash:#64748b}.dashboard-card.charcoal{--dash:#334155}
+.dashboard-card.warning{--dash:#a16207}.dashboard-card.critical{--dash:#b91c1c}.dashboard-card .dash-state[data-level="error"]{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 38%,var(--line));background:color-mix(in srgb,var(--danger) 9%,var(--panel))}.dashboard-card .dash-state[data-level="warning"]{color:var(--warning);border-color:color-mix(in srgb,var(--warning) 38%,var(--line));background:color-mix(in srgb,var(--warning) 9%,var(--panel))}.dashboard-card .dash-state[data-level="success"]{color:var(--success);border-color:color-mix(in srgb,var(--success) 34%,var(--line));background:color-mix(in srgb,var(--success) 8%,var(--panel))}
+.problem-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 14px}.problem-summary span{padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:12px;font-weight:850;text-align:center}.problem-list{display:flex;flex-direction:column;gap:10px}.problem-item{--problem:#64748b;border:1px solid color-mix(in srgb,var(--problem) 38%,var(--line));border-left:6px solid var(--problem);border-radius:14px;background:color-mix(in srgb,var(--problem) 7%,var(--panel));padding:13px;scroll-margin-top:90px}.problem-item[data-priority="Bloccante"]{--problem:#b91c1c}.problem-item[data-priority="Alta"]{--problem:#dc2626}.problem-item[data-priority="Media"]{--problem:#c2410c}.problem-item[data-priority="Bassa"]{--problem:#a16207}.problem-item[data-priority="Informativa"]{--problem:#64748b}.problem-head{display:flex;gap:10px;align-items:flex-start}.problem-head strong{font-size:16px}.problem-badge{margin-left:auto;padding:4px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--problem) 42%,var(--line));background:var(--panel);font-size:11px;font-weight:900;color:var(--problem)}.problem-item p{margin:7px 0;color:var(--muted);line-height:1.48}.problem-meta{display:flex;gap:6px;flex-wrap:wrap}.problem-meta span{padding:4px 7px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:11px}.problem-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.diagnostic-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.diagnostic-table{width:100%;border-collapse:collapse}.diagnostic-table th,.diagnostic-table td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere;word-break:break-word}.diagnostic-table th{width:38%;color:var(--muted);font-size:12px}.resolved-list{display:flex;flex-direction:column;gap:8px}.resolved-item{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel);font-size:12px}.toast.info{background:#1e293b}.toast.success{background:#166534}.toast.warning{background:#92400e}.toast.error{background:#991b1b}.toast-code{display:block;margin-top:5px;font-size:11px;opacity:.8}.section-flash{animation:sectionFlash 1.8s ease}@keyframes sectionFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 40%,transparent)}45%{box-shadow:0 0 0 10px transparent}100%{box-shadow:none}}
+@media(max-width:900px){.problem-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.diagnostic-grid{grid-template-columns:1fr}}
+
+.workflow-legend{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:2px 2px 5px;color:var(--muted);font-size:12px}.legend-item{display:inline-flex;align-items:center;gap:5px}.legend-dot{width:9px;height:9px;border-radius:50%;background:var(--legend,#64748b)}
+@media(max-width:1280px){.stats.dashboard-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.workflow-overview{grid-template-columns:1fr}.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.dashboard-intro-head{flex-direction:column}.dashboard-progress-label{white-space:normal}.dashboard-card{min-height:0}.workflow-overview{gap:10px}}
+.section-flash{animation:sectionFlash 1.8s ease}@keyframes sectionFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 45%,transparent)}45%{box-shadow:0 0 0 12px transparent}100%{box-shadow:none}}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
 .cards.list{display:flex;flex-direction:column}
 .cards.grouped{display:flex;flex-direction:column;gap:24px}
@@ -306,12 +327,12 @@ textarea{resize:vertical;line-height:1.55}
 .panel-box{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
 .panel-box h4{margin:0 0 10px}
 .manage-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}
-.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);flex-wrap:wrap}.manage-row .grow{flex:1 1 180px}
 .manage-row .grow{flex:1;min-width:0}
 .color-input{width:38px;height:34px;padding:2px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
 .inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
 .toast-wrap{position:fixed;right:18px;bottom:18px;z-index:300;display:flex;flex-direction:column;gap:8px}
-.toast{min-width:280px;max-width:470px;padding:12px 14px;border-radius:12px;background:var(--text);color:var(--panel);box-shadow:var(--shadow)}
+.toast{width:min(470px,calc(100vw - 24px));min-width:0;max-width:470px;padding:12px 14px;border-radius:12px;background:var(--text);color:var(--panel);box-shadow:var(--shadow);overflow-wrap:anywhere}
 
 @media(max-width:980px){
   .app{grid-template-columns:1fr}
@@ -323,10 +344,16 @@ textarea{resize:vertical;line-height:1.55}
 }
 @media(max-width:650px){
   .topbar{padding:9px}.brand h1{display:none}.main-head{padding:12px}.content{padding:12px 12px 70px}
-  .toolbar select,.view-toggle{display:none}.editor-backdrop{padding:0}.editor-modal{width:100vw;height:100vh;border-radius:0}
+  .toolbar select,.view-toggle{display:none}.editor-backdrop{padding:0}.editor-modal{width:100vw;height:100dvh;max-height:100dvh;border-radius:0}
   .editor-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.editor-head{flex-wrap:wrap}.editor-tabs{order:3;width:100%}
   .editor-tab{flex:1}.stats{grid-template-columns:1fr}.cards.list .card{display:flex}.cards.list .excerpt{margin:9px 0}
   .variables-header{flex-direction:column}.inline-form{grid-template-columns:1fr}
+  .modal-foot,.editor-footer{flex-wrap:wrap}.modal-foot .btn,.editor-footer .btn{max-width:100%}
+}
+@media(max-width:450px){
+  .top-actions #newPromptBtn{width:42px;min-width:42px;padding:0;font-size:0}
+  .top-actions #newPromptBtn::after{content:"＋";font-size:20px}
+  .search-wrap{min-width:0}.topbar{gap:6px}.logo{width:36px;height:36px}
 }
 </style>
 </head>
@@ -334,23 +361,24 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Standalone v17.6.3</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Verifica finale v17.10.0</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
       <button class="search-clear" id="clearSearch">×</button>
     </div>
     <div class="top-actions">
-      <button class="btn optional" id="importBtn">Importa</button>
-      <button class="btn optional" id="exportBtn">Esporta</button>
+      <button class="btn optional" id="importBtn">Importa JSON</button>
+      <button class="btn optional" id="exportBtn">Esporta archivio</button>
       <button class="btn icon optional" id="themeBtn" title="Tema">◐</button>
-      <button class="btn primary" id="newPromptBtn">＋ Nuovo prompt</button>
+      <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">＋ Nuovo prompt</button>
     </div>
   </header>
 
   <aside class="sidebar" id="sidebar">
     <section class="side-section">
       <div class="side-title">Libreria</div>
+      <button class="side-link" id="dashboardBtn"><span>⌂</span><span>Dashboard</span></button>
       <button class="side-link active" data-filter="all"><span>▦</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
       <button class="side-link" data-filter="favorites"><span>★</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
       <button class="side-link" data-filter="recent"><span>◷</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
@@ -378,7 +406,7 @@ textarea{resize:vertical;line-height:1.55}
     <div class="main-head">
       <div class="main-title"><h2 id="viewTitle">Tutti i prompt</h2><p id="viewSubtitle"></p></div>
       <div class="toolbar">
-        <button class="btn small" id="selectAllBtn">Seleziona tutti</button>
+        <button class="btn small" id="selectAllBtn">Seleziona risultati</button>
         <select id="sortSelect">
           <option value="title_asc">Titolo 1–9 / A–Z</option>
           <option value="title_desc">Titolo Z–A / 9–1</option>
@@ -405,7 +433,7 @@ textarea{resize:vertical;line-height:1.55}
 </div>
 
 <div class="editor-backdrop" id="editorBackdrop">
-  <section class="editor-modal" id="editorModal">
+  <section class="editor-modal" id="editorModal" role="dialog" aria-modal="true" aria-labelledby="editorTitle" tabindex="-1">
     <div class="editor-head">
       <strong id="editorTitle">Nuovo prompt</strong>
       <div class="editor-tabs">
@@ -438,7 +466,7 @@ textarea{resize:vertical;line-height:1.55}
             </div>
             <div class="tool-link-row">
               <input id="promptToolUrl" type="text" placeholder="https://chatgpt.com/">
-              <button class="btn primary" id="openToolBtn" type="button">Copia prompt e apri tool</button>
+              <button class="btn primary" id="openToolBtn" type="button">Copia e apri il tool</button>
             </div>
           </div>
           <div class="field full"><label>Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
@@ -464,7 +492,7 @@ textarea{resize:vertical;line-height:1.55}
     </div>
     <div class="editor-footer">
       <span class="save-status" id="saveStatus">Salvataggio in corso…</span>
-      <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia Prompt</button>
+      <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia prompt compilato</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
       <button class="btn danger" id="trashBtn">Cestina</button>
@@ -476,8 +504,8 @@ textarea{resize:vertical;line-height:1.55}
 </div>
 
 <div class="modal-backdrop" id="manageModal">
-  <div class="modal">
-    <div class="modal-head"><h3>Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">×</button></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="manageModalTitle" tabindex="-1">
+    <div class="modal-head"><h3 id="manageModalTitle">Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">×</button></div>
     <div class="modal-body">
       <div class="manage-grid">
         <div class="panel-box">
@@ -503,7 +531,7 @@ textarea{resize:vertical;line-height:1.55}
 </div>
 
 <div class="modal-backdrop" id="choiceModal">
-  <div class="modal small">
+  <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="choiceTitle" tabindex="-1">
     <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal">×</button></div>
     <div class="modal-body" id="choiceBody"></div>
     <div class="modal-foot" id="choiceFoot"></div>
@@ -511,12 +539,12 @@ textarea{resize:vertical;line-height:1.55}
 </div>
 
 <input type="file" id="importInput" accept=".json,application/json" hidden>
-<div class="toast-wrap" id="toastWrap"></div>
+<div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.6.3";
+const APP_VERSION="17.10.0";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -527,7 +555,7 @@ const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
 const MAX_EMBED_FILE_SIZE=20*1024*1024;
-const SORT_RULE_VERSION="17.6.3";
+const SORT_RULE_VERSION="17.7.0";
 const savedSortRuleVersion=localStorage.getItem("ps_sort_rule_version");
 const initialSort=savedSortRuleVersion===SORT_RULE_VERSION?(localStorage.getItem("ps_sort")||"title_asc"):"title_asc";
 if(savedSortRuleVersion!==SORT_RULE_VERSION){
@@ -543,7 +571,8 @@ const state={
   searchTimer:null,detectTimer:null,
   lastSavedId:null,
   recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}"),
-  openCategories:new Set(JSON.parse(localStorage.getItem("ps_open_categories")||"[]"))
+  openCategories:new Set(JSON.parse(localStorage.getItem("ps_open_categories")||"[]")),
+  busy:new Set(),modalReturnFocus:{}
 };
 const $=value=>{
   const key=String(value||"");
@@ -625,10 +654,22 @@ async function seedData(){
 }
 
 /* ---------- Utilità UI ---------- */
-function toast(message){
+function diagnosticEvents(){
+  try{return JSON.parse(localStorage.getItem("ps_diagnostic_events")||"[]")}catch{return []}
+}
+function recordDiagnosticEvent(level,operation,message,code=""){
+  const events=diagnosticEvents();
+  events.unshift({id:uid("event"),at:now(),level,operation,message:String(message||""),code:String(code||"")});
+  localStorage.setItem("ps_diagnostic_events",JSON.stringify(events.slice(0,50)));
+}
+function toast(message,type="info",code=""){
   const node=document.createElement("div");
-  node.className="toast";node.textContent=message;$("toastWrap").appendChild(node);
-  setTimeout(()=>node.remove(),4200);
+  node.className=`toast ${type}`;
+  node.setAttribute("role",type==="error"?"alert":"status");
+  node.innerHTML=`<strong>${esc(message)}</strong>${code?`<span class="toast-code">Codice: ${esc(code)}</span>`:""}`;
+  $("toastWrap").appendChild(node);
+  if(type==="error"||type==="warning")recordDiagnosticEvent(type,"interfaccia",message,code);
+  setTimeout(()=>node.remove(),5200);
 }
 function formatDate(value){return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value))}
 function formatBytes(bytes){
@@ -706,8 +747,19 @@ function setTheme(initial=false){
     localStorage.setItem("ps_theme",document.body.classList.contains("dark")?"dark":"light");
   }
 }
-function openModal(id){$(id).classList.add("show")}
-function closeModal(id){$(id).classList.remove("show")}
+function openModal(id){
+  const backdrop=$(id);if(!backdrop)return;
+  state.modalReturnFocus[id]=document.activeElement;
+  backdrop.classList.add("show");
+  const dialog=backdrop.querySelector('[role="dialog"],.modal');
+  setTimeout(()=>{const first=dialog?.querySelector('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])');(first||dialog)?.focus({preventScroll:true})},30);
+}
+function closeModal(id){
+  const backdrop=$(id);if(!backdrop)return;
+  backdrop.classList.remove("show");
+  const previous=state.modalReturnFocus[id];delete state.modalReturnFocus[id];
+  if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
+}
 function confirmAction(title,message,onConfirm){
   $("choiceTitle").textContent=title;
   $("choiceBody").innerHTML=`<p>${esc(message)}</p>`;
@@ -799,7 +851,7 @@ function renderSidebar(){
       ? `<button class="tree-toggle" data-toggle-category="${esc(category.id)}" aria-expanded="${isOpen}" title="${isOpen?"Chiudi":"Apri"} sottocategorie" aria-label="${isOpen?"Chiudi":"Apri"} sottocategorie di ${esc(category.name)}">▶</button>`
       : `<span class="tree-toggle-placeholder" aria-hidden="true"></span>`;
     const row=`<div class="tree-row ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth}" data-category="${esc(category.id)}" data-has-children="${hasChildren}" role="button" tabindex="0">
-      ${toggle}<span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span><button class="tree-delete delete-sidebar-category" data-delete-category="${esc(category.id)}" title="Elimina categoria" aria-label="Elimina categoria ${esc(category.name)}">×</button>
+      ${toggle}<span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span>
     </div>`;
     if(!hasChildren)return row;
     return `${row}<div class="tree-children ${isOpen?"open":""}" data-category-children="${esc(category.id)}">${children.map(child=>node(child,depth+1)).join("")}</div>`;
@@ -807,7 +859,7 @@ function renderSidebar(){
   $("categoryTree").innerHTML=state.categories.filter(item=>!item.parentId).map(item=>node(item)).join("");
   $("clientList").innerHTML=state.clients.map(client=>{
     const count=live.filter(item=>item.clientId===client.id).length;
-    return `<div class="tree-row ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}" role="button" tabindex="0"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span><button class="tree-delete delete-sidebar-client" data-delete-client="${esc(client.id)}" title="Elimina cliente" aria-label="Elimina cliente ${esc(client.name)}">×</button></div>`;
+    return `<div class="tree-row ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}" role="button" tabindex="0"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span></div>`;
   }).join("");
   $$("[data-toggle-category]").forEach(toggle=>{
     toggle.onclick=event=>{
@@ -845,28 +897,162 @@ function renderSidebar(){
   $$("[data-delete-category]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteCategory(button.dataset.deleteCategory)});
   $$("[data-delete-client]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteClient(button.dataset.deleteClient)});
 }
+function validHttpUrl(value){
+  if(!String(value||"").trim())return true;
+  try{const url=new URL(String(value).trim());return ["http:","https:"].includes(url.protocol)}catch{return false}
+}
+function problemPriorityRank(priority){return {Bloccante:0,Alta:1,Media:2,Bassa:3,Informativa:4}[priority]??9}
+function collectProblems(){
+  const live=livePrompts();
+  const problems=[];
+  const add=problem=>problems.push({...problem,lastChecked:now(),status:"Attivo"});
+  const missingTitle=live.filter(item=>!String(item.title||"").trim());
+  if(missingTitle.length)add({id:"data-missing-title",title:"Prompt senza titolo",description:"Sono presenti record senza un titolo utilizzabile.",priority:"Alta",cause:"Dati importati o salvati in modo incompleto.",functionName:"Creazione e importazione",impact:"Ricerca, ordinamento ed esportazione possono risultare poco affidabili.",solution:"Apri i prompt coinvolti e inserisci un titolo.",mode:"Manuale",target:"library",count:missingTitle.length,itemIds:missingTitle.map(x=>x.id)});
+  const missingContent=live.filter(item=>!String(item.content||"").trim());
+  if(missingContent.length)add({id:"data-missing-content",title:"Prompt senza contenuto",description:"Sono presenti prompt privi del testo principale.",priority:"Bloccante",cause:"Importazione incompleta o record danneggiato.",functionName:"Editor prompt",impact:"Il prompt non può essere compilato o utilizzato.",solution:"Apri il prompt e inserisci il contenuto obbligatorio.",mode:"Manuale",target:"library",count:missingContent.length,itemIds:missingContent.map(x=>x.id)});
+  const uncategorized=live.filter(item=>!item.categoryId&&!item.subcategoryId);
+  if(uncategorized.length)add({id:"organization-uncategorized",title:"Prompt senza categoria",description:"Alcuni prompt non sono classificati.",priority:"Media",cause:"Categoria non assegnata.",functionName:"Organizzazione libreria",impact:"La ricerca per struttura e il riutilizzo risultano meno efficaci.",solution:"Assegna una categoria o sottocategoria.",mode:"Manuale",target:"organize",count:uncategorized.length,itemIds:uncategorized.map(x=>x.id)});
+  const review=live.filter(item=>item.status==="review");
+  if(review.length)add({id:"verification-review",title:"Prompt da verificare",description:"Sono presenti prompt con stato “Da verificare”.",priority:"Media",cause:"Revisione non ancora conclusa.",functionName:"Verifica prompt",impact:"I contenuti potrebbero non essere pronti per l’uso.",solution:"Apri i prompt, controlla anteprima e contenuto, quindi aggiorna lo stato.",mode:"Manuale",target:"verify",count:review.length,itemIds:review.map(x=>x.id)});
+  const orphanCategory=live.filter(item=>(item.categoryId&&!catById(item.categoryId))||(item.subcategoryId&&!catById(item.subcategoryId)));
+  if(orphanCategory.length)add({id:"data-orphan-category",title:"Riferimenti a categorie mancanti",description:"Alcuni prompt puntano a categorie non più presenti.",priority:"Alta",cause:"Eliminazione, importazione o dati non coerenti.",functionName:"Categorie",impact:"Filtri e raggruppamenti possono mostrare risultati incoerenti.",solution:"Riassegna una categoria valida ai prompt coinvolti.",mode:"Manuale",target:"organize",count:orphanCategory.length,itemIds:orphanCategory.map(x=>x.id)});
+  const orphanClient=live.filter(item=>item.clientId&&!clientById(item.clientId));
+  if(orphanClient.length)add({id:"data-orphan-client",title:"Riferimenti a clienti mancanti",description:"Alcuni prompt puntano a clienti o progetti non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Clienti e progetti",impact:"Il filtro per cliente non può rappresentare correttamente i dati.",solution:"Riassegna un cliente valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanClient.length,itemIds:orphanClient.map(x=>x.id)});
+  const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
+  if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o più collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L’apertura del tool può fallire o essere bloccata.",solution:"Correggi il campo “Tool da utilizzare”.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
+  const invalidFiles=[];
+  live.forEach(prompt=>Object.values(prompt.variableFiles||{}).forEach(file=>{if(file&&(!file.base64||Number(file.size)>MAX_EMBED_FILE_SIZE))invalidFiles.push(prompt.id)}));
+  if(invalidFiles.length)add({id:"file-invalid-attachment",title:"File incorporati non validi",description:"Sono presenti file senza contenuto incorporato o oltre il limite previsto.",priority:"Alta",cause:"Importazione incompleta o file superiore al limite.",functionName:"Variabili e file",impact:"Backup e ripristino del file potrebbero non funzionare.",solution:"Apri il prompt, rimuovi il file e caricalo nuovamente entro il limite.",mode:"Manuale",target:"files",count:new Set(invalidFiles).size,itemIds:[...new Set(invalidFiles)]});
+  return problems.sort((a,b)=>problemPriorityRank(a.priority)-problemPriorityRank(b.priority)||a.title.localeCompare(b.title,"it"));
+}
+function syncResolvedProblems(activeProblems){
+  const previous=JSON.parse(localStorage.getItem("ps_active_problem_ids")||"[]");
+  const activeIds=activeProblems.map(item=>item.id);
+  const resolved=JSON.parse(localStorage.getItem("ps_resolved_problems")||"[]");
+  previous.filter(id=>!activeIds.includes(id)).forEach(id=>{
+    if(!resolved.some(item=>item.id===id&&item.resolvedAt===localStorage.getItem(`ps_problem_resolved_${id}`))){
+      const resolvedAt=now();localStorage.setItem(`ps_problem_resolved_${id}`,resolvedAt);
+      resolved.unshift({id,resolvedAt,mode:"Rilevamento automatico",verification:"Problema non più presente alla nuova lettura dei dati"});
+    }
+  });
+  localStorage.setItem("ps_active_problem_ids",JSON.stringify(activeIds));
+  localStorage.setItem("ps_resolved_problems",JSON.stringify(resolved.slice(0,30)));
+}
+function workflowSnapshot(){
+  const live=livePrompts();
+  const configured=state.categories.length>0&&state.clients.length>0;
+  const uncategorized=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
+  const review=live.filter(item=>item.status==="review").length;
+  const attachments=live.reduce((sum,item)=>sum+promptAttachmentCount(item),0);
+  const variables=live.reduce((sum,item)=>sum+extractVariables(item.content).length,0);
+  const hasPrompts=live.length>0;
+  const problems=collectProblems();syncResolvedProblems(problems);
+  const blocking=problems.filter(item=>item.priority==="Bloccante").length;
+  const high=problems.filter(item=>item.priority==="Alta").length;
+  const warnings=problems.filter(item=>["Media","Bassa"].includes(item.priority)).length;
+  const completed=[configured,hasPrompts,hasPrompts&&uncategorized===0,hasPrompts,hasPrompts&&review===0,hasPrompts&&blocking===0].filter(Boolean).length;
+  const total=6;
+  const percent=Math.round(completed/total*100);
+  return {live,configured,uncategorized,review,attachments,variables,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
+}
+function recommendedWorkflowAction(snapshot){
+  if(!snapshot.configured)return {action:"configure",icon:"⚙",title:"Completa la configurazione",reason:"Categorie, clienti o progetti non sono ancora pronti.",priority:"Alta",count:`${state.categories.length} categorie · ${state.clients.length} clienti`,after:"Dopo potrai organizzare correttamente i prompt."};
+  if(!snapshot.hasPrompts)return {action:"new",icon:"＋",title:"Crea o importa il primo prompt",reason:"La libreria è vuota.",priority:"Alta",count:"0 prompt disponibili",after:"Dopo potrai compilare e verificare il contenuto."};
+  if(snapshot.blocking||snapshot.high)return {action:"problems",icon:"!",title:"Risolvi i problemi prioritari",reason:"Sono presenti anomalie che possono impedire o compromettere l’utilizzo dei prompt.",priority:snapshot.blocking?"Bloccante":"Alta",count:`${snapshot.blocking} bloccanti · ${snapshot.high} alta priorità`,after:"Dopo la modifica la dashboard rileggerà i dati e verificherà il problema."};
+  if(snapshot.uncategorized)return {action:"organize",icon:"🗂",title:"Organizza i prompt non classificati",reason:"Alcuni prompt non hanno una categoria.",priority:"Media",count:`${snapshot.uncategorized} elementi coinvolti`,after:"Dopo sarà più semplice trovarli e riutilizzarli."};
+  if(snapshot.review)return {action:"verify",icon:"✓",title:"Verifica i prompt in revisione",reason:"Sono presenti prompt con stato “Da verificare”.",priority:"Media",count:`${snapshot.review} elementi coinvolti`,after:"Dopo potrai utilizzarli con maggiore sicurezza."};
+  return {action:"library",icon:"⌕",title:"Seleziona il prompt da utilizzare",reason:"Non risultano problemi attivi o attività organizzative pendenti.",priority:"Normale",count:`${snapshot.live.length} prompt disponibili`,after:"Apri un prompt, compila le variabili e copialo."};
+}
+function updateDashboardHash(action){
+  const hash=`#step-${action}`;
+  if(location.hash!==hash)history.replaceState(null,"",hash);
+  localStorage.setItem("ps_last_dashboard_action",action);
+}
+function highlightDashboardCard(action){
+  $$(".dashboard-card.active").forEach(card=>card.classList.remove("active"));
+  const card=document.querySelector(`[data-dash-action="${CSS.escape(action)}"]`);
+  if(card)card.classList.add("active");
+}
+function openProblemTarget(problem){
+  updateDashboardHash(problem.target);
+  if(problem.target==="organize"){setFilter("uncategorized");return}
+  if(["library","verify","files","use"].includes(problem.target)){
+    const id=problem.itemIds?.find(itemId=>state.prompts.some(item=>item.id===itemId));
+    if(id){openEditor(id,["verify","files","use"].includes(problem.target)?"variables":null);return}
+  }
+  performDashboardAction(problem.target);
+}
+function renderProblemsPanel(){
+  const problems=collectProblems();
+  const counts={Bloccante:0,Alta:0,Media:0,Bassa:0,Informativa:0};problems.forEach(item=>counts[item.priority]++);
+  $("choiceTitle").textContent="Problemi rilevati";
+  $("choiceBody").innerHTML=`<section id="section-problems" tabindex="-1"><div class="problem-summary">${Object.entries(counts).map(([name,count])=>`<span>${esc(name)}<br><strong>${count}</strong></span>`).join("")}</div>${problems.length?`<div class="problem-list">${problems.map(problem=>`<article class="problem-item" id="problem-${esc(problem.id)}" data-priority="${esc(problem.priority)}" tabindex="-1"><div class="problem-head"><strong>${esc(problem.title)}</strong><span class="problem-badge">${esc(problem.priority)}</span></div><p>${esc(problem.description)}</p><div class="problem-meta"><span>${problem.count} elementi</span><span>${esc(problem.functionName)}</span><span>Correzione ${esc(problem.mode.toLowerCase())}</span><span>Stato: ${esc(problem.status)}</span></div><details><summary>Mostra causa, impatto e soluzione</summary><p><strong>Causa probabile:</strong> ${esc(problem.cause)}</p><p><strong>Impatto:</strong> ${esc(problem.impact)}</p><p><strong>Soluzione:</strong> ${esc(problem.solution)}</p><p><strong>Ultima verifica:</strong> ${esc(formatDate(problem.lastChecked))}</p></details><div class="problem-actions"><button class="btn primary small" data-open-problem="${esc(problem.id)}">Apri la sezione interessata</button><button class="btn small" data-recheck-problem="${esc(problem.id)}">Verifica nuovamente</button></div></article>`).join("")}</div>`:`<div class="panel-box"><strong>Tutto corretto</strong><p>La nuova lettura dei dati non ha rilevato problemi attivi.</p></div>`}</section>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn primary" id="openDiagnosticsFromProblems">Apri diagnostica</button>`;
+  bindModalClose();
+  $$('[data-open-problem]').forEach(button=>button.onclick=()=>{const problem=problems.find(item=>item.id===button.dataset.openProblem);if(problem){closeModal("choiceModal");openProblemTarget(problem)}});
+  $$('[data-recheck-problem]').forEach(button=>button.onclick=()=>{const id=button.dataset.recheckProblem;const stillPresent=collectProblems().some(item=>item.id===id);toast(stillPresent?"Il problema è ancora presente. I dati non soddisfano ancora il requisito.":"Il problema non è più presente dopo la nuova verifica.",stillPresent?"warning":"success",stillPresent?"PS-VERIFY-001":"");render();renderProblemsPanel()});
+  $("openDiagnosticsFromProblems").onclick=()=>{closeModal("choiceModal");setTimeout(()=>performDashboardAction("diagnostics"),40)};
+  openModal("choiceModal");setTimeout(()=>$("section-problems")?.focus(),60);
+}
+function sanitizedDiagnosticReport(){
+  const snapshot=workflowSnapshot();
+  const resolved=JSON.parse(localStorage.getItem("ps_resolved_problems")||"[]");
+  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,attachments:snapshot.attachments,variables:snapshot.variables,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
+}
+function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prompt-studio-diagnostica-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Report diagnostico esportato senza contenuti completi o credenziali.","success")}
+function renderDiagnosticsPanel(){
+  const snapshot=workflowSnapshot();const report=sanitizedDiagnosticReport();const resolved=report.resolvedProblems;
+  $("choiceTitle").textContent="Diagnostica tecnica";
+  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"Sì":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"Sì":"No"}</td></tr><tr><th>Limite file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> · ${esc(event.operation)} · ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} · ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
+  bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
+}
+function performDashboardAction(action,{fromHash=false}={}){
+  const snapshot=workflowSnapshot();
+  if(!fromHash)updateDashboardHash(action);
+  highlightDashboardCard(action);
+  if(action==="configure"){renderManage();openModal("manageModal");return}
+  if(action==="new"){openEditor();return}
+  if(action==="import"){$("importInput").click();return}
+  if(action==="organize"){setFilter(snapshot.uncategorized?"uncategorized":"all");return}
+  if(action==="library"){setFilter("all");setTimeout(()=>$('globalSearch').focus(),80);return}
+  if(action==="problems"){renderProblemsPanel();return}
+  if(["variables","files","verify","use"].includes(action)){
+    if(!snapshot.hasPrompts){toast("Passaggio bloccato: crea o importa prima un prompt.","warning","PS-REQ-001");openEditor();return}
+    openEditor(snapshot.live[0].id,"variables");return;
+  }
+  if(action==="export"){
+    if(!snapshot.hasPrompts){toast("Esportazione non disponibile: non esistono prompt da includere.","warning","PS-REQ-002");openEditor();return}
+    exportData();return;
+  }
+  if(action==="diagnostics")renderDiagnosticsPanel();
+}
+function stateDescriptor(stateName){
+  const map={"Non configurato":["○","warning"],"Configurazione incompleta":["△","warning"],"Dati mancanti":["!","error"],"Pronto":["●","info"],"In attesa":["◷","info"],"Operazione in corso":["↻","info"],"Analisi completata":["✓","success"],"Completato con avvisi":["△","warning"],"Verifica necessaria":["?","warning"],"Correzione disponibile":["✎","warning"],"Correzione eseguita":["✓","success"],"Correzione da confermare":["?","warning"],"Errore":["!","error"],"Bloccato":["⛔","error"],"Nessun risultato":["○","info"],"Tutto corretto":["✓","success"]};return map[stateName]||["●","info"];
+}
 function renderStats(){
   const visible=state.filter.type==="all"&&!state.query;
-  $("stats").classList.toggle("hidden",!visible);
-  if(!visible)return;
-  const live=livePrompts();
-  $("stats").innerHTML=`
-    <button type="button" class="stat stat-btn" data-stat-action="all" title="Mostra tutti i prompt"><strong>${live.length}</strong><span>Prompt attivi</span></button>
-    <button type="button" class="stat stat-btn" data-stat-action="manage-categories" title="Apri la gestione di categorie e sottocategorie"><strong>${state.categories.length}</strong><span>Categorie e sottocategorie</span></button>
-    <button type="button" class="stat stat-btn" data-stat-action="uncategorized" title="Mostra i prompt da categorizzare"><strong>${live.filter(item=>!item.categoryId&&!item.subcategoryId).length}</strong><span>Da categorizzare</span></button>
-    <button type="button" class="stat stat-btn" data-stat-action="favorites" title="Mostra i prompt preferiti"><strong>${live.filter(item=>item.favorite).length}</strong><span>Preferiti</span></button>`;
-  $$('[data-stat-action]').forEach(button=>button.onclick=()=>{
-    const action=button.dataset.statAction;
-    if(action==="manage-categories"){
-      renderManage();
-      openModal("manageModal");
-      return;
-    }
-    if(action==="favorites")return setFilter("favorites");
-    if(action==="uncategorized")return setFilter("uncategorized");
-    setFilter("all");
-  });
+  $("stats").classList.toggle("hidden",!visible);$("stats").classList.toggle("dashboard-grid",visible);if(!visible)return;
+  const s=workflowSnapshot(),recommendation=recommendedWorkflowAction(s);
+  const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":s.problems.length?"Correzione disponibile":"Tutto corretto";
+  const stepCards=[
+    {action:"configure",step:"Step 1",tone:"blue",icon:"⚙",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti e progetti.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie · ${state.clients.length} clienti`,next:s.configured?"Crea o importa un prompt":"Completa categorie e clienti",className:s.configured?"completed":""},
+    {action:"new",step:"Step 2",tone:"cyan",icon:"＋",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
+    {action:"import",step:"Alternativa",tone:"cyan",icon:"⇧",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
+    {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"🗂",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
+    {action:"problems",step:"Controllo",tone:s.blocking?"red":s.problems.length?"orange":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorità, cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi · ${s.blocking} bloccanti`,next:s.problems.length?"Apri il problema e correggi i dati":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":s.problems.length?"":"completed",blocked:!s.hasPrompts},
+    {action:"library",step:"Step 4",tone:"gray",icon:"⌕",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"variables",step:"Step 5",tone:"purple",icon:"✎",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"files",step:"Step 6",tone:s.attachments?"green":"cyan",icon:"📎",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.attachments?"Analisi completata":"Verifica necessaria",count:`${s.attachments} file incorporati`,next:s.hasPrompts?"Verifica il prompt":"Richiede almeno un prompt",className:!s.hasPrompts?"blocked":s.attachments?"completed":"",blocked:!s.hasPrompts},
+    {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"✓",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
+    {action:"use",step:"Step 8",tone:"green",icon:"⧉",title:"Copia e utilizza",description:"Copia il prompt compilato oppure apri il tool associato.",state:s.hasPrompts&&s.blocking===0?"Pronto":s.hasPrompts?"Bloccato":"Nessun risultato",count:s.hasPrompts?"Prompt disponibili":"Nessun prompt",next:s.blocking?"Risolvi prima i problemi bloccanti":"Salva gli eventuali aggiornamenti",className:s.hasPrompts&&s.blocking===0?"":"blocked",blocked:!s.hasPrompts||s.blocking>0},
+    {action:"export",step:"Step 9",tone:"charcoal",icon:"⇩",title:"Esporta e crea backup",description:"Scarica l’archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt · ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"🛠",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per l’assistenza",className:s.problems.length?"":"completed"}
+  ];
+  $("stats").innerHTML=`<div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali · ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">✓ ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorità ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
+  $$('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));$('[data-recommended-action]')?.addEventListener('click',event=>performDashboardAction(event.currentTarget.dataset.recommendedAction));const hashAction=location.hash.match(/^#step-(.+)$/)?.[1];if(hashAction)highlightDashboardCard(hashAction);
 }
+
 function cardHtml(prompt){
   const mainCategory=catById(prompt.categoryId);
   const subcategory=catById(prompt.subcategoryId);
@@ -893,7 +1079,7 @@ function cardHtml(prompt){
     </div>
     <div class="card-actions">
       <button class="btn small primary edit-card" title="Modifica questo prompt">✎ Modifica</button>
-      <button class="btn small copy-card">Copia</button>
+      <button class="btn small copy-card">Copia testo originale</button>
       ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':'<button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>'}
     </div>
   </article>`;
@@ -963,7 +1149,7 @@ function bindCardEvents(){
       if(event.target.closest("button,input"))return;
       openEditor(id);
     };
-    card.onkeydown=event=>{if(event.key==="Enter")openEditor(id)};
+    card.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
     card.querySelector(".edit-card").onclick=()=>openEditor(id);
     card.querySelector(".copy-card").onclick=()=>quickCopy(id);
@@ -1250,6 +1436,7 @@ function fillSubcategories(selected=""){
   $("promptSubcategory").value=selected;
 }
 function openEditor(id=null,preferredTab=null){
+  state.modalReturnFocus.editorBackdrop=document.activeElement;
   const prompt=id?state.prompts.find(item=>item.id===id):null;
 
   let initialPrompt=prompt;
@@ -1323,6 +1510,8 @@ function closeEditor(force=false){
   }
   $("editorBackdrop").classList.remove("show");
   state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""};
+  const previous=state.modalReturnFocus.editorBackdrop;delete state.modalReturnFocus.editorBackdrop;
+  if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
 }
 function markDirty(){state.editor.dirty=true}
 function updateCounts(){
@@ -1386,6 +1575,8 @@ function navigateToSavedPrompt(prompt){
 
 async function savePrompt(){
   const saveButton=$("savePromptBtn");
+  if(saveButton.disabled||state.busy.has("savePrompt"))return;
+  state.busy.add("savePrompt");
   const saveStatus=$("saveStatus");
 
   try{
@@ -1440,6 +1631,7 @@ async function savePrompt(){
     console.error(error);
     toast(`Errore nel salvataggio: ${error.message}`);
   }finally{
+    state.busy.delete("savePrompt");
     saveButton.disabled=false;
     saveButton.textContent="Salva prompt";
     saveStatus.classList.remove("show");
@@ -1510,7 +1702,8 @@ async function quickCopy(id){
     await copyText(prompt.content||"");
     prompt.usageCount=(prompt.usageCount||0)+1;
     await put("prompts",prompt);
-    toast("Prompt copiato.");
+    await loadData();render();
+    toast("Prompt copiato.","success");
   }catch(error){
     console.error("Errore durante la copia rapida:",error);
     toast(`Impossibile copiare: ${error.message||"errore del browser"}`);
@@ -1633,27 +1826,39 @@ function snapshot(){
 }
 function downloadJson(data,filename){
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
-  link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+  link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function exportData(){
   const data=snapshot();
   downloadJson(data,`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
-  toast(`Backup esportato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`);
+  toast(`Backup esportato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`,"success");
 }
 async function createBackup(){
-  const data=snapshot();await put("backups",{id:uid("backup"),createdAt:now(),data});
-  downloadJson(data,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
-  toast(`Backup completo creato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`);
+  if(state.busy.has("backup")){toast("Un backup è già in corso.","warning","PS-BACKUP-BUSY");return}
+  state.busy.add("backup");
+  try{
+    const data=snapshot();await put("backups",{id:uid("backup"),createdAt:now(),data});
+    downloadJson(data,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
+    toast(`Backup completo creato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`,"success");
+  }catch(error){console.error(error);toast(`Backup non creato: ${error.message||"errore del database"}.`,"error","PS-BACKUP-FAILED")}finally{state.busy.delete("backup")}
 }
 async function importData(file){
+  if(state.busy.has("importRead")||state.busy.has("importApply")){
+    toast("Un’importazione è già in corso.","warning","PS-IMPORT-BUSY");return;
+  }
+  state.busy.add("importRead");
   try{
-    const data=JSON.parse(await file.text());
+    if(!file||file.size===0)throw new Error("Il file selezionato è vuoto.");
+    if(file.size>MAX_EMBED_FILE_SIZE)throw new Error(`Il file supera il limite di ${formatBytes(MAX_EMBED_FILE_SIZE)}.`);
+    const raw=await file.text();
+    if(!raw.trim())throw new Error("Il file selezionato non contiene dati.");
+    const data=JSON.parse(raw);
 
     if(data?.type==="prompt-studio-prompt"&&data.prompt){
       const promptData={...data.prompt,id:uid("prompt"),createdAt:now(),updatedAt:now(),deletedAt:null};
       await put("prompts",promptData);
       await loadData();render();
-      toast(`Prompt importato con ${promptAttachmentCount(promptData)} file incorporat${promptAttachmentCount(promptData)===1?"o":"i"}.`);
+      toast(`Prompt importato con ${promptAttachmentCount(promptData)} file incorporat${promptAttachmentCount(promptData)===1?"o":"i"}.`,"success");
       return;
     }
 
@@ -1666,27 +1871,42 @@ async function importData(file){
       "Modalità",
       '<option value="merge">Unisci con i dati esistenti</option><option value="replace">Sostituisci l’archivio attuale</option>',
       async mode=>{
+        const executeImport=async()=>{
+          if(state.busy.has("importApply")){toast("L’archivio è già in fase di importazione.","warning","PS-IMPORT-BUSY");return}
+          state.busy.add("importApply");
+          try{
+            if(mode==="replace"){
+              for(const name of ["prompts","categories","clients"]){
+                for(const item of await getAll(name))await remove(name,item.id);
+              }
+            }
+            for(const item of data.categories)await put("categories",item);
+            for(const item of data.clients)await put("clients",item);
+            for(const item of data.prompts)await put("prompts",item);
+            await loadData();render();
+            const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
+            toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
+          }catch(error){
+            console.error(error);
+            toast(`Importazione non riuscita: ${error.message}. Verifica l’archivio e riprova.`,"error","PS-IMPORT-APPLY");
+          }finally{state.busy.delete("importApply")}
+        };
         if(mode==="replace"){
-          for(const name of ["prompts","categories","clients"]){
-            for(const item of await getAll(name))await remove(name,item.id);
-          }
+          confirmAction("Conferma sostituzione","Tutti i prompt, le categorie e i clienti attuali verranno sostituiti. Crea prima un backup se devi conservarli.",executeImport);
+        }else{
+          await executeImport();
         }
-        for(const item of data.categories)await put("categories",item);
-        for(const item of data.clients)await put("clients",item);
-        for(const item of data.prompts)await put("prompts",item);
-        await loadData();render();
-        const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
-        toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`);
       }
     );
   }catch(error){
     console.error(error);
-    toast(`Importazione non riuscita: ${error.message}`);
-  }
+    toast(`Importazione non riuscita: ${error.message}. Nessun dato è stato modificato.`,"error","PS-IMPORT-001");
+  }finally{state.busy.delete("importRead")}
 }
 
 /* ---------- Eventi ---------- *//* ---------- Eventi ---------- */
 function bindEvents(){
+  $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");setFilter("all");setTimeout(()=>{$("workflow-overview")?.scrollIntoView({behavior:"smooth",block:"start"});$("workflowTitle")?.focus?.()},80)};
   $$(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
   $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderCards()},160)};
   $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderCards()};
@@ -1720,6 +1940,7 @@ function bindEvents(){
   };
   ["promptTitle","promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
   $("openToolBtn").onclick=async()=>{
+    if(state.busy.has("openTool"))return;
     let url=$("promptToolUrl").value.trim();
     if(!url){toast("Inserisci prima il link del tool.");$("promptToolUrl").focus();return}
     if(!/^https?:\/\//i.test(url))url=`https://${url}`;
@@ -1731,15 +1952,21 @@ function bindEvents(){
     const compiled=compilePrompt(source,collectVariableValues()).trim();
     if(!compiled){toast("Il prompt compilato è vuoto.");return}
 
+    let opened=null;
     try{
       new URL(url);
+      opened=window.open("about:blank","_blank");
+      if(!opened)throw new Error("Popup bloccato. Consenti i popup e riprova.");
+      state.busy.add("openTool");$("openToolBtn").disabled=true;
 
       /* Salva prima il prompt corrente senza chiudere l'editor. */
       const payload=editorPayload();
       if(!payload.title)throw new Error("Inserisci il titolo del prompt prima di aprire il tool.");
       if(!payload.content)throw new Error("Inserisci il testo del prompt prima di aprire il tool.");
       await put("prompts",payload);
-      await loadData();
+      const stored=await getOne("prompts",payload.id);
+      if(!stored)throw new Error("Il prompt non risulta salvato nel database.");
+      await loadData();render();
       state.editor.id=payload.id;
       state.editor.dirty=false;
 
@@ -1747,15 +1974,14 @@ function bindEvents(){
          Copiare negli appunti prima dell'apertura è il comportamento affidabile
          per ChatGPT, Claude, Gemini e gli altri strumenti. */
       await copyText(compiled);
-      const opened=window.open(url,"_blank","noopener");
-      if(!opened){
-        toast("Popup bloccato. Consenti i popup e riprova: il prompt è già copiato.");
-        return;
-      }
-      toast("Ultimo prompt copiato. Nel tool premi Cmd+V oppure Ctrl+V per inserirlo.");
+      opened.opener=null;opened.location.replace(url);
+      toast("Prompt salvato e copiato. Nel tool premi Cmd+V oppure Ctrl+V per inserirlo.","success");
     }catch(error){
+      if(opened&&!opened.closed)opened.close();
       console.error(error);
-      toast(error?.message||"Impossibile aprire il tool.");
+      toast(error?.message||"Impossibile aprire il tool.","error","PS-TOOL-OPEN");
+    }finally{
+      state.busy.delete("openTool");$("openToolBtn").disabled=false;
     }
   };
   ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
@@ -1767,12 +1993,6 @@ function bindEvents(){
   $("copyCompiledBtn").onclick=copyCompiled;
   $("exportPromptBtn").onclick=exportCurrentPrompt;
   $("savePromptBtn").onclick=savePrompt;
-  document.addEventListener("keydown",event=>{
-    if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="s"&&$("editorBackdrop").classList.contains("show")){
-      event.preventDefault();
-      savePrompt();
-    }
-  });
   $("duplicateBtn").onclick=()=>state.editor.id&&duplicatePrompt(state.editor.id);
   $("trashBtn").onclick=()=>state.editor.id&&trashPrompt(state.editor.id);
 
@@ -1820,11 +2040,24 @@ function bindEvents(){
   bindModalClose();
 }
 
+/* ---------- Changelog 17.10.0 ----------
+   - corretto il doppio listener Cmd/Ctrl+S;
+   - sincronizzata la versione visibile;
+   - ripristino del focus dopo la chiusura delle modali;
+   - protezione da operazioni duplicate per salvataggio, importazione, backup e apertura tool;
+   - conferma esplicita prima della sostituzione dell’archivio;
+   - gestione più chiara di file vuoti, file troppo grandi ed errori di importazione;
+   - aggiornamento immediato dei contatori dopo la copia rapida;
+   - correzioni responsive per toast, modali, barra superiore e righe di gestione.
+*/
+
 /* ---------- Avvio ---------- */
 async function init(){
   setTheme(true);
   const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
   state.db=await openDatabase();await loadData();await removeLegacyDemoPrompt();await loadData();await seedData();bindEvents();render();
+  const hashAction=location.hash.match(/^#step-(.+)$/)?.[1]||localStorage.getItem("ps_last_dashboard_action");
+  if(hashAction&&document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)){setTimeout(()=>{highlightDashboardCard(hashAction);document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)?.scrollIntoView({block:"center"})},100)}
 }
 init().catch(error=>{
   console.error(error);
