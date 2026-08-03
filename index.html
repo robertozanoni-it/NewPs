@@ -75,14 +75,34 @@ button:disabled{cursor:not-allowed;opacity:.55}
 }
 .resizer::after{content:"";position:absolute;left:2px;top:0;bottom:0;width:2px;background:var(--line);opacity:.65}
 .resizer:hover::after,.resizer.dragging::after{background:var(--primary);opacity:1;width:3px}
-.side-section{margin-bottom:19px}
-.side-title{display:flex;align-items:center;justify-content:space-between;padding:0 8px 7px;color:var(--sidebar-muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
-.side-link,.tree-row{
-  width:100%;min-height:38px;border:0;border-radius:10px;background:transparent;color:var(--sidebar-text);
-  padding:7px 9px;display:flex;align-items:center;gap:9px;text-align:left
+.side-section{
+  --section-accent:#64748b;margin-bottom:14px;padding:10px 8px 9px;border-radius:15px;
+  border:1px solid color-mix(in srgb,var(--section-accent) 34%,transparent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--section-accent) 25%,transparent),rgba(255,255,255,.025));
+  box-shadow:inset 4px 0 color-mix(in srgb,var(--section-accent) 78%,#fff 5%)
 }
-.side-link:hover,.tree-row:hover{background:rgba(255,255,255,.08)}
+.side-section.library{--section-accent:#2563eb}
+.side-section.categories{--section-accent:#7c3aed}
+.side-section.clients{--section-accent:#0891b2}
+.side-section.backup{--section-accent:#059669}
+.side-title{display:flex;align-items:center;justify-content:space-between;padding:1px 6px 9px;color:#fff;font-size:11px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
+.side-title::before{content:"";width:7px;height:7px;border-radius:50%;margin-right:7px;background:var(--section-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--section-accent) 23%,transparent)}
+.side-title>span:first-child{margin-right:auto}
+.side-link,.tree-row{
+  width:100%;min-height:38px;border:1px solid transparent;border-radius:10px;background:rgba(255,255,255,.035);color:var(--sidebar-text);
+  padding:7px 9px;display:flex;align-items:center;gap:9px;text-align:left;transition:background .16s,border-color .16s,transform .16s
+}
+.side-link+.side-link,.tree-row+.tree-row{margin-top:4px}
+.side-link:hover,.tree-row:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.10);transform:translateX(2px)}
 .side-link.active,.tree-row.active{background:rgba(96,165,250,.24);box-shadow:inset 3px 0 #60a5fa;color:#fff;font-weight:850}
+.tree-row.sidebar-category-color{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--item-color,#60a5fa) 30%,transparent),rgba(255,255,255,.025));
+  border-color:color-mix(in srgb,var(--item-color,#60a5fa) 36%,transparent);
+  box-shadow:inset 3px 0 var(--item-color,#60a5fa)
+}
+.tree-row.sidebar-category-color:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--item-color,#60a5fa) 42%,transparent),rgba(255,255,255,.07))}
+.tree-row.sidebar-category-color.active{background:linear-gradient(90deg,color-mix(in srgb,var(--item-color,#60a5fa) 58%,transparent),rgba(255,255,255,.10));border-color:color-mix(in srgb,var(--item-color,#60a5fa) 70%,#fff 8%);box-shadow:inset 4px 0 var(--item-color,#60a5fa)}
+.tree-row.client-color{--item-color:#0891b2;background:linear-gradient(90deg,color-mix(in srgb,var(--item-color) 24%,transparent),rgba(255,255,255,.025));border-color:color-mix(in srgb,var(--item-color) 30%,transparent);box-shadow:inset 3px 0 var(--item-color)}
 .count{margin-left:auto;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);font-size:12px}
 .tree-row{padding-left:calc(9px + var(--depth,0) * 16px)}
 .tree-toggle{width:24px;height:24px;min-height:24px;padding:0;border:0;border-radius:7px;background:transparent;color:inherit;display:grid;place-items:center;flex:0 0 24px;font-size:13px;transition:transform .18s,background .18s}
@@ -376,8 +396,8 @@ textarea{resize:vertical;line-height:1.55}
   </header>
 
   <aside class="sidebar" id="sidebar">
-    <section class="side-section">
-      <div class="side-title">Libreria</div>
+    <section class="side-section library">
+      <div class="side-title"><span>Libreria</span></div>
       <button class="side-link" id="dashboardBtn"><span>⌂</span><span>Dashboard</span></button>
       <button class="side-link active" data-filter="all"><span>▦</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
       <button class="side-link" data-filter="favorites"><span>★</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
@@ -386,15 +406,15 @@ textarea{resize:vertical;line-height:1.55}
       <button class="side-link" data-filter="archived"><span>▣</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
       <button class="side-link" data-filter="trash"><span>⌫</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
     </section>
-    <section class="side-section">
+    <section class="side-section categories">
       <div class="side-title"><span>Categorie</span><button class="btn small" id="manageBtn">Gestisci</button></div>
       <div id="categoryTree"></div>
     </section>
-    <section class="side-section">
-      <div class="side-title">Clienti e progetti</div>
+    <section class="side-section clients">
+      <div class="side-title"><span>Clienti e progetti</span></div>
       <div id="clientList"></div>
     </section>
-    <section class="side-section">
+    <section class="side-section backup">
       <button class="side-link" id="backupBtn"><span>⇩</span><span>Crea backup completo</span></button>
       <div class="hint" style="padding:8px;color:var(--sidebar-muted)">Il backup include prompt, variabili e file caricati.</div>
     </section>
@@ -552,8 +572,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.7";
-const APP_RELEASE_NAME="Filtro sottocategorie per categoria";
+const APP_VERSION="17.10.8";
+const APP_RELEASE_NAME="Sidebar con sezioni e categorie colorate";
 document.title=`Prompt Studio v${APP_VERSION} — ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -879,7 +899,7 @@ function renderSidebar(){
     const toggle=hasChildren
       ? `<button class="tree-toggle" data-toggle-category="${esc(category.id)}" aria-expanded="${isOpen}" title="${isOpen?"Chiudi":"Apri"} sottocategorie" aria-label="${isOpen?"Chiudi":"Apri"} sottocategorie di ${esc(category.name)}">▶</button>`
       : `<span class="tree-toggle-placeholder" aria-hidden="true"></span>`;
-    const row=`<div class="tree-row ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth}" data-category="${esc(category.id)}" data-has-children="${hasChildren}" role="button" tabindex="0">
+    const row=`<div class="tree-row sidebar-category-color ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth};--item-color:${esc(categoryColor(category))}" data-category="${esc(category.id)}" data-has-children="${hasChildren}" role="button" tabindex="0">
       ${toggle}<span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span>
     </div>`;
     if(!hasChildren)return row;
@@ -888,7 +908,7 @@ function renderSidebar(){
   $("categoryTree").innerHTML=rootCategoriesAlphabetical().map(item=>node(item)).join("");
   $("clientList").innerHTML=state.clients.map(client=>{
     const count=live.filter(item=>item.clientId===client.id).length;
-    return `<div class="tree-row ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}" role="button" tabindex="0"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span></div>`;
+    return `<div class="tree-row client-color ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}" role="button" tabindex="0"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span></div>`;
   }).join("");
   $$("[data-toggle-category]").forEach(toggle=>{
     toggle.onclick=event=>{
