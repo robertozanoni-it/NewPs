@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.10.2 — Categorie alfabetiche</title>
+<title>Prompt Studio v17.10.3 — Rinomina rapida</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -327,7 +327,7 @@ textarea{resize:vertical;line-height:1.55}
 .panel-box{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
 .panel-box h4{margin:0 0 10px}
 .manage-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}
-.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);flex-wrap:wrap}.manage-row .grow{flex:1 1 180px}
+.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);flex-wrap:wrap}.manage-row .grow{flex:1 1 180px}.category-name-editable{display:inline-flex;align-items:center;min-height:32px;padding:5px 8px;margin:-5px -8px;border-radius:8px;cursor:text;transition:background .15s,box-shadow .15s}.category-name-editable:hover,.category-name-editable:focus-visible{background:var(--primary-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 24%,transparent);outline:none}.inline-category-name{width:100%;min-width:160px;height:36px;padding:6px 9px;border:2px solid var(--primary);border-radius:9px;background:var(--panel);color:var(--text);font-weight:850}
 .manage-row .grow{flex:1;min-width:0}
 .color-input{width:38px;height:34px;padding:2px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
 .inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
@@ -361,7 +361,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Categorie alfabetiche v17.10.1</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Rinomina rapida v17.10.3</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -544,7 +544,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.2";
+const APP_VERSION="17.10.3";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -1759,19 +1759,74 @@ function renderManage(){
   $("manageCategories").innerHTML=categoriesHierarchicalAlphabetical().map(category=>`
     <div class="manage-row">
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
-      <div class="grow"><strong>${category.parentId?"↳ ":""}${esc(category.name)}</strong>${category.parentId?`<div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} · colore ereditato</div>`:""}</div>
+      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${category.parentId?"↳ ":""}${esc(category.name)}</strong>${category.parentId?`<div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} · colore ereditato</div>`:""}</div>
       <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}" ${category.parentId?'disabled title="Il colore è ereditato dalla categoria principale"':""}>
-      <button class="btn small rename-category" data-id="${esc(category.id)}" title="Modifica il nome senza perdere prompt e collegamenti">Modifica nome</button>
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("");
   $("manageClients").innerHTML=state.clients.map(client=>`
     <div class="manage-row"><div class="grow"><strong>${esc(client.name)}</strong></div><button class="btn small rename-client" data-id="${esc(client.id)}">Rinomina</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
   $$(".category-color:not(:disabled)").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
-  $$(".rename-category").forEach(button=>button.onclick=()=>renameEntity("categories",button.dataset.id));
+  $$(".category-name-editable").forEach(name=>{
+    name.onclick=()=>beginInlineCategoryRename(name);
+    name.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineCategoryRename(name)}};
+  });
   $$(".rename-client").forEach(button=>button.onclick=()=>renameEntity("clients",button.dataset.id));
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
   $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
 }
+function beginInlineCategoryRename(labelElement){
+  const category=catById(labelElement.dataset.id);
+  if(!category||labelElement.dataset.editing==="true")return;
+  labelElement.dataset.editing="true";
+
+  const input=document.createElement("input");
+  input.type="text";
+  input.className="inline-category-name";
+  input.value=category.name;
+  input.setAttribute("aria-label",`Nuovo nome della ${category.parentId?"sottocategoria":"categoria"}`);
+  labelElement.replaceWith(input);
+  input.focus();
+  input.select();
+
+  let settled=false;
+  const cancel=()=>{
+    if(settled)return;
+    settled=true;
+    renderManage();
+  };
+  const save=async()=>{
+    if(settled)return;
+    settled=true;
+    const label=category.parentId?"sottocategoria":"categoria";
+    const name=input.value.trim().replace(/\s+/g," ");
+    if(!name){
+      toast(`Il nome della ${label} non può essere vuoto.`,"warning");
+      renderManage();
+      return;
+    }
+    const duplicate=state.categories.some(entry=>entry.id!==category.id&&normalize(entry.name)===normalize(name)&&(entry.parentId||null)===(category.parentId||null));
+    if(duplicate){
+      toast(`Esiste già una ${label} con questo nome.`,"warning");
+      renderManage();
+      return;
+    }
+    if(name===category.name){renderManage();return}
+    const previousName=category.name;
+    category.name=name;
+    category.updatedAt=now();
+    await put("categories",category);
+    await loadData();
+    render();
+    renderManage();
+    toast(`${label.charAt(0).toUpperCase()+label.slice(1)} “${previousName}” rinominata in “${name}”.`,"success");
+  };
+  input.onkeydown=event=>{
+    if(event.key==="Enter"){event.preventDefault();save()}
+    if(event.key==="Escape"){event.preventDefault();cancel()}
+  };
+  input.onblur=save;
+}
+
 async function renameEntity(type,id){
   const collection=type==="categories"?state.categories:state.clients;
   const item=collection.find(entry=>entry.id===id);
