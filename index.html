@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.10.3 — Rinomina rapida</title>
+<title>Prompt Studio</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -361,7 +361,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Rinomina rapida v17.10.3</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel"></small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -552,7 +552,11 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.6";
+const APP_VERSION="17.10.7";
+const APP_RELEASE_NAME="Filtro sottocategorie per categoria";
+document.title=`Prompt Studio v${APP_VERSION} — ${APP_RELEASE_NAME}`;
+const versionLabel=document.getElementById("appVersionLabel");
+if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -2215,8 +2219,13 @@ function bindEvents(){
 /* ---------- Avvio ---------- */
 async function init(){
   setTheme(true);
+  const previousVersion=localStorage.getItem("ps_app_version");
   const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
   state.db=await openDatabase();await loadData();await removeLegacyDemoPrompt();await loadData();await seedData();bindEvents();render();
+  localStorage.setItem("ps_app_version",APP_VERSION);
+  if(previousVersion&&previousVersion!==APP_VERSION){
+    toast(`Applicazione aggiornata dalla versione ${previousVersion} alla ${APP_VERSION}. I dati sono stati mantenuti.`,"success");
+  }
   const hashAction=location.hash.match(/^#step-(.+)$/)?.[1]||localStorage.getItem("ps_last_dashboard_action");
   if(hashAction&&document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)){setTimeout(()=>{highlightDashboardCard(hashAction);document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)?.scrollIntoView({block:"center"})},100)}
 }
