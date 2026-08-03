@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.10.0 — Verifica finale</title>
+<title>Prompt Studio v17.10.1 — Categorie alfabetiche</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -361,7 +361,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Verifica finale v17.10.0</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small>Categorie alfabetiche v17.10.1</small></div></div>
     <div class="search-wrap">
       <span>⌕</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
@@ -544,7 +544,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.0";
+const APP_VERSION="17.10.1";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -555,7 +555,7 @@ const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
 const MAX_EMBED_FILE_SIZE=20*1024*1024;
-const SORT_RULE_VERSION="17.7.0";
+const SORT_RULE_VERSION="17.10.1";
 const savedSortRuleVersion=localStorage.getItem("ps_sort_rule_version");
 const initialSort=savedSortRuleVersion===SORT_RULE_VERSION?(localStorage.getItem("ps_sort")||"title_asc"):"title_asc";
 if(savedSortRuleVersion!==SORT_RULE_VERSION){
@@ -618,7 +618,7 @@ function put(name,value){return new Promise((resolve,reject)=>{const request=sto
 function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
 async function loadData(){
   [state.prompts,state.categories,state.clients]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients")]);
-  state.categories.sort((a,b)=>(a.order??999)-(b.order??999)||a.name.localeCompare(b.name,"it"));
+  state.categories.sort(categoryAlphabeticalCompare);
   state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
 }
 async function removeLegacyDemoPrompt(){
@@ -698,10 +698,26 @@ function safeFilename(value){
 function promptAttachmentCount(prompt){
   return Object.values(prompt?.variableFiles||{}).filter(file=>file&&file.base64).length;
 }
+function categoryAlphabeticalCompare(a,b){
+  return String(a?.name||"").localeCompare(String(b?.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true});
+}
 function categoryColor(category){
   if(!category)return "#64748b";
+  if(category.parentId){
+    const parent=catById(category.parentId);
+    if(parent)return categoryColor(parent);
+  }
   if(category.color)return category.color;
   return CATEGORY_COLORS[Math.abs([...category.id].reduce((sum,char)=>sum+char.charCodeAt(0),0))%CATEGORY_COLORS.length];
+}
+function rootCategoriesAlphabetical(){
+  return state.categories.filter(item=>!item.parentId).sort(categoryAlphabeticalCompare);
+}
+function childCategoriesAlphabetical(parentId){
+  return state.categories.filter(item=>item.parentId===parentId).sort(categoryAlphabeticalCompare);
+}
+function categoriesHierarchicalAlphabetical(){
+  return rootCategoriesAlphabetical().flatMap(root=>[root,...childCategoriesAlphabetical(root.id)]);
 }
 async function copyText(text){
   const value=String(text??"");
@@ -844,7 +860,7 @@ function renderSidebar(){
     if(item.subcategoryId)counts[item.subcategoryId]=(counts[item.subcategoryId]||0)+1;
   });
   const node=(category,depth=0)=>{
-    const children=state.categories.filter(item=>item.parentId===category.id);
+    const children=childCategoriesAlphabetical(category.id);
     const hasChildren=children.length>0;
     const isOpen=state.openCategories.has(category.id);
     const toggle=hasChildren
@@ -856,7 +872,7 @@ function renderSidebar(){
     if(!hasChildren)return row;
     return `${row}<div class="tree-children ${isOpen?"open":""}" data-category-children="${esc(category.id)}">${children.map(child=>node(child,depth+1)).join("")}</div>`;
   };
-  $("categoryTree").innerHTML=state.categories.filter(item=>!item.parentId).map(item=>node(item)).join("");
+  $("categoryTree").innerHTML=rootCategoriesAlphabetical().map(item=>node(item)).join("");
   $("clientList").innerHTML=state.clients.map(client=>{
     const count=live.filter(item=>item.clientId===client.id).length;
     return `<div class="tree-row ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}" role="button" tabindex="0"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span></div>`;
@@ -1099,7 +1115,7 @@ function groupedCardsHtml(items){
     if(!groups.has(key))groups.set(key,{category:root,items:[]});
     groups.get(key).items.push(prompt);
   });
-  const categoryOrder=new Map(state.categories.filter(cat=>!cat.parentId).map((cat,index)=>[cat.id,index]));
+  const categoryOrder=new Map(rootCategoriesAlphabetical().map((cat,index)=>[cat.id,index]));
   return [...groups.values()]
     .sort((a,b)=>{
       if(!a.category)return 1;
@@ -1422,7 +1438,7 @@ function updateCompiledPreview(){
 
 /* ---------- Editor ---------- *//* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
-  const roots=state.categories.filter(item=>!item.parentId);
+  const roots=rootCategoriesAlphabetical();
   $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptClient").innerHTML='<option value="">Nessun cliente</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptCategory").value=prompt?.categoryId||"";
@@ -1431,7 +1447,7 @@ function fillEditorSelects(prompt){
 }
 function fillSubcategories(selected=""){
   const parent=$("promptCategory").value;
-  const children=state.categories.filter(item=>item.parentId===parent);
+  const children=childCategoriesAlphabetical(parent);
   $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptSubcategory").value=selected;
 }
@@ -1738,19 +1754,19 @@ async function bulkUpdate(patch){
 
 /* ---------- Gestione categorie e clienti ---------- */
 function renderManage(){
-  const roots=state.categories.filter(item=>!item.parentId);
+  const roots=rootCategoriesAlphabetical();
   $("newCategoryParent").innerHTML='<option value="">Nessuna: categoria indipendente</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
-  $("manageCategories").innerHTML=state.categories.map(category=>`
+  $("manageCategories").innerHTML=categoriesHierarchicalAlphabetical().map(category=>`
     <div class="manage-row">
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
-      <div class="grow"><strong>${esc(category.name)}</strong>${category.parentId?`<div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")}</div>`:""}</div>
-      <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}">
+      <div class="grow"><strong>${category.parentId?"↳ ":""}${esc(category.name)}</strong>${category.parentId?`<div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} · colore ereditato</div>`:""}</div>
+      <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}" ${category.parentId?'disabled title="Il colore è ereditato dalla categoria principale"':""}>
       <button class="btn small rename-category" data-id="${esc(category.id)}">Rinomina</button>
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("");
   $("manageClients").innerHTML=state.clients.map(client=>`
     <div class="manage-row"><div class="grow"><strong>${esc(client.name)}</strong></div><button class="btn small rename-client" data-id="${esc(client.id)}">Rinomina</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
-  $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
+  $$(".category-color:not(:disabled)").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
   $$(".rename-category").forEach(button=>button.onclick=()=>renameEntity("categories",button.dataset.id));
   $$(".rename-client").forEach(button=>button.onclick=()=>renameEntity("clients",button.dataset.id));
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
@@ -2002,7 +2018,7 @@ function bindEvents(){
     if(!name){toast("Inserisci il nome della categoria.");return}
     const duplicate=state.categories.some(category=>normalize(category.name)===normalize(name)&&(category.parentId||null)===parentId);
     if(duplicate){toast("Esiste già una categoria con questo nome nello stesso livello.");return}
-    await put("categories",{id:uid("cat"),name,parentId,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
+    await put("categories",{id:uid("cat"),name,parentId,color:parentId?categoryColor(catById(parentId)):CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
     $("newCategoryName").value="";
     $("newCategoryParent").value=""; /* Ogni nuova categoria torna indipendente per impostazione predefinita. */
     await loadData();render();renderManage();
