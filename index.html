@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>Prompt Studio v17.10.1 — Categorie alfabetiche</title>
+<title>Prompt Studio v17.10.2 — Categorie alfabetiche</title>
 <style>
 :root{
   --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
@@ -544,7 +544,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.1";
+const APP_VERSION="17.10.2";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -1761,7 +1761,7 @@ function renderManage(){
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
       <div class="grow"><strong>${category.parentId?"↳ ":""}${esc(category.name)}</strong>${category.parentId?`<div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} · colore ereditato</div>`:""}</div>
       <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}" ${category.parentId?'disabled title="Il colore è ereditato dalla categoria principale"':""}>
-      <button class="btn small rename-category" data-id="${esc(category.id)}">Rinomina</button>
+      <button class="btn small rename-category" data-id="${esc(category.id)}" title="Modifica il nome senza perdere prompt e collegamenti">Modifica nome</button>
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("");
   $("manageClients").innerHTML=state.clients.map(client=>`
@@ -1774,9 +1774,35 @@ function renderManage(){
 }
 async function renameEntity(type,id){
   const collection=type==="categories"?state.categories:state.clients;
-  const item=collection.find(entry=>entry.id===id);if(!item)return;
-  const name=prompt("Nuovo nome:",item.name)?.trim();if(!name||name===item.name)return;
-  item.name=name;await put(type,item);await loadData();render();renderManage();
+  const item=collection.find(entry=>entry.id===id);
+  if(!item)return;
+
+  const isCategory=type==="categories";
+  const label=isCategory?(item.parentId?"sottocategoria":"categoria"):"cliente o progetto";
+  const entered=window.prompt(`Nuovo nome della ${label}:`,item.name);
+  if(entered===null)return;
+
+  const name=entered.trim().replace(/\s+/g," ");
+  if(!name){
+    toast(`Il nome della ${label} non può essere vuoto.`,"warning");
+    return;
+  }
+  if(name===item.name)return;
+
+  const duplicate=collection.some(entry=>entry.id!==id&&normalize(entry.name)===normalize(name)&&(!isCategory||entry.parentId===item.parentId));
+  if(duplicate){
+    toast(`Esiste già una ${label} con questo nome.`,"warning");
+    return;
+  }
+
+  const previousName=item.name;
+  item.name=name;
+  item.updatedAt=now();
+  await put(type,item);
+  await loadData();
+  render();
+  renderManage();
+  toast(`${label.charAt(0).toUpperCase()+label.slice(1)} “${previousName}” rinominata in “${name}”.`,"success");
 }
 function deleteCategory(id){
   const category=catById(id);if(!category)return;
