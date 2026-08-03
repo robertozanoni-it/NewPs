@@ -517,11 +517,11 @@ textarea{resize:vertical;line-height:1.55}
           </div>
         </div>
         <div class="panel-box">
-          <h4>Sottocategorie</h4><div class="hint" style="margin-bottom:10px">Scegli la categoria principale. Il colore viene ereditato automaticamente.</div>
+          <h4>Sottocategorie</h4><div class="hint" style="margin-bottom:10px">Seleziona una categoria dal menu in basso per vedere e modificare solo le sue sottocategorie. Il colore viene ereditato automaticamente.</div>
           <div class="manage-list" id="manageSubcategories"></div>
           <div class="inline-form">
             <input id="newSubcategoryName" type="text" placeholder="Nome sottocategoria">
-            <select id="newSubcategoryParent"><option value="">Seleziona categoria</option></select>
+            <select id="newSubcategoryParent"><option value="">Tutte le categorie</option></select>
             <button class="btn primary small" id="addSubcategoryBtn">Aggiungi</button>
           </div>
         </div>
@@ -552,7 +552,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.5";
+const APP_VERSION="17.10.6";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -580,6 +580,7 @@ const state={
   lastSavedId:null,
   recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}"),
   openCategories:new Set(JSON.parse(localStorage.getItem("ps_open_categories")||"[]")),
+  manageSubcategoryFilter:null,
   busy:new Set(),modalReturnFocus:{}
 };
 const $=value=>{
@@ -1763,12 +1764,17 @@ async function bulkUpdate(patch){
 /* ---------- Gestione categorie e clienti ---------- */
 function renderManage(){
   const roots=rootCategoriesAlphabetical();
-  const subcategories=state.categories.filter(item=>item.parentId).sort((a,b)=>{
+  const allSubcategories=state.categories.filter(item=>item.parentId).sort((a,b)=>{
     const parentCompare=String(catById(a.parentId)?.name||"").localeCompare(String(catById(b.parentId)?.name||""),"it",{sensitivity:"base"});
     return parentCompare||a.name.localeCompare(b.name,"it",{sensitivity:"base"});
   });
 
-  $("newSubcategoryParent").innerHTML='<option value="">Seleziona categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  if(state.manageSubcategoryFilter&&!roots.some(item=>item.id===state.manageSubcategoryFilter))state.manageSubcategoryFilter=null;
+  const filteredSubcategories=state.manageSubcategoryFilter
+    ? allSubcategories.filter(item=>item.parentId===state.manageSubcategoryFilter)
+    : allSubcategories;
+
+  $("newSubcategoryParent").innerHTML='<option value="">Tutte le categorie</option>'+roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(item.name)}</option>`).join("");
 
   $("manageCategories").innerHTML=roots.map(category=>`
     <div class="manage-row">
@@ -1778,18 +1784,23 @@ function renderManage(){
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("")||'<div class="hint">Nessuna categoria presente.</div>';
 
-  $("manageSubcategories").innerHTML=subcategories.map(category=>`
+  $("manageSubcategories").innerHTML=filteredSubcategories.map(category=>`
     <div class="manage-row">
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
       <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong><div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} · colore ereditato</div></div>
       <input class="color-input" type="color" value="${esc(categoryColor(category))}" disabled title="Il colore è ereditato dalla categoria principale">
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
-    </div>`).join("")||'<div class="hint">Nessuna sottocategoria presente.</div>';
+    </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in “${esc(catById(state.manageSubcategoryFilter)?.name||"")}”.`:'Nessuna sottocategoria presente.'}</div>`;
 
   $("manageClients").innerHTML=state.clients.map(client=>`
     <div class="manage-row"><div class="grow"><strong>${esc(client.name)}</strong></div><button class="btn small rename-client" data-id="${esc(client.id)}">Rinomina</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
 
   $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
+
+  $("newSubcategoryParent").onchange=()=>{
+    state.manageSubcategoryFilter=$("newSubcategoryParent").value||null;
+    renderManage();
+  };
 
   [$("manageCategories"),$("manageSubcategories")].forEach(categoryList=>{
     categoryList.onclick=event=>{
