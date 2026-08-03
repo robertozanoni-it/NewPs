@@ -316,14 +316,14 @@ textarea{resize:vertical;line-height:1.55}
 .variable-empty{padding:38px 22px;border:2px dashed var(--line);border-radius:18px;text-align:center;color:var(--muted);background:var(--panel-2);line-height:1.65}
 .variable-empty code{padding:3px 7px;border-radius:7px;background:var(--primary-soft);color:var(--primary-2);font-weight:850}
 
-.modal{width:min(900px,96vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:19px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.modal{width:min(1400px,97vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:19px;box-shadow:var(--shadow);display:flex;flex-direction:column}
 .modal.small{width:min(580px,96vw)}
 .modal-head{display:flex;align-items:center;gap:10px;padding:15px 17px;border-bottom:1px solid var(--line)}
 .modal-head h3{margin:0}
 .modal-body{padding:17px;overflow:auto}
 .modal-body .field + .field{margin-top:14px}
 .modal-foot{padding:12px 17px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
-.manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.manage-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .panel-box{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
 .panel-box h4{margin:0 0 10px}
 .manage-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}
@@ -509,12 +509,20 @@ textarea{resize:vertical;line-height:1.55}
     <div class="modal-body">
       <div class="manage-grid">
         <div class="panel-box">
-          <h4>Categorie e sottocategorie</h4><div class="hint" style="margin-bottom:10px">Senza categoria genitore, la voce viene creata come nuova categoria indipendente.</div>
+          <h4>Categorie</h4><div class="hint" style="margin-bottom:10px">Clicca sul nome di una categoria per rinominarla.</div>
           <div class="manage-list" id="manageCategories"></div>
-          <div class="inline-form">
+          <div class="inline-form" style="grid-template-columns:1fr auto">
             <input id="newCategoryName" type="text" placeholder="Nome categoria">
-            <select id="newCategoryParent"><option value="">Nessuna: categoria indipendente</option></select>
             <button class="btn primary small" id="addCategoryBtn">Aggiungi</button>
+          </div>
+        </div>
+        <div class="panel-box">
+          <h4>Sottocategorie</h4><div class="hint" style="margin-bottom:10px">Scegli la categoria principale. Il colore viene ereditato automaticamente.</div>
+          <div class="manage-list" id="manageSubcategories"></div>
+          <div class="inline-form">
+            <input id="newSubcategoryName" type="text" placeholder="Nome sottocategoria">
+            <select id="newSubcategoryParent"><option value="">Seleziona categoria</option></select>
+            <button class="btn primary small" id="addSubcategoryBtn">Aggiungi</button>
           </div>
         </div>
         <div class="panel-box">
@@ -544,7 +552,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.4";
+const APP_VERSION="17.10.5";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -1755,34 +1763,47 @@ async function bulkUpdate(patch){
 /* ---------- Gestione categorie e clienti ---------- */
 function renderManage(){
   const roots=rootCategoriesAlphabetical();
-  $("newCategoryParent").innerHTML='<option value="">Nessuna: categoria indipendente</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
-  $("manageCategories").innerHTML=categoriesHierarchicalAlphabetical().map(category=>`
+  const subcategories=state.categories.filter(item=>item.parentId).sort((a,b)=>{
+    const parentCompare=String(catById(a.parentId)?.name||"").localeCompare(String(catById(b.parentId)?.name||""),"it",{sensitivity:"base"});
+    return parentCompare||a.name.localeCompare(b.name,"it",{sensitivity:"base"});
+  });
+
+  $("newSubcategoryParent").innerHTML='<option value="">Seleziona categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+
+  $("manageCategories").innerHTML=roots.map(category=>`
     <div class="manage-row">
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
-      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${category.parentId?"↳ ":""}${esc(category.name)}</strong>${category.parentId?`<div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} · colore ereditato</div>`:""}</div>
-      <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}" ${category.parentId?'disabled title="Il colore è ereditato dalla categoria principale"':""}>
+      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong></div>
+      <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}">
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
-    </div>`).join("");
+    </div>`).join("")||'<div class="hint">Nessuna categoria presente.</div>';
+
+  $("manageSubcategories").innerHTML=subcategories.map(category=>`
+    <div class="manage-row">
+      <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
+      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong><div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} · colore ereditato</div></div>
+      <input class="color-input" type="color" value="${esc(categoryColor(category))}" disabled title="Il colore è ereditato dalla categoria principale">
+      <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
+    </div>`).join("")||'<div class="hint">Nessuna sottocategoria presente.</div>';
+
   $("manageClients").innerHTML=state.clients.map(client=>`
     <div class="manage-row"><div class="grow"><strong>${esc(client.name)}</strong></div><button class="btn small rename-client" data-id="${esc(client.id)}">Rinomina</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
-  $$(".category-color:not(:disabled)").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
-  const categoryList=$("manageCategories");
-  categoryList.onclick=event=>{
-    const name=event.target.closest(".category-name-editable");
-    if(!name||!categoryList.contains(name))return;
-    event.preventDefault();
-    event.stopPropagation();
-    beginInlineCategoryRename(name);
-  };
-  categoryList.onkeydown=event=>{
-    const name=event.target.closest(".category-name-editable");
-    if(!name||!categoryList.contains(name))return;
-    if(event.key==="Enter"||event.key===" "){
-      event.preventDefault();
-      event.stopPropagation();
-      beginInlineCategoryRename(name);
-    }
-  };
+
+  $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
+
+  [$("manageCategories"),$("manageSubcategories")].forEach(categoryList=>{
+    categoryList.onclick=event=>{
+      const name=event.target.closest(".category-name-editable");
+      if(!name||!categoryList.contains(name))return;
+      event.preventDefault();event.stopPropagation();beginInlineCategoryRename(name);
+    };
+    categoryList.onkeydown=event=>{
+      const name=event.target.closest(".category-name-editable");
+      if(!name||!categoryList.contains(name))return;
+      if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();beginInlineCategoryRename(name)}
+    };
+  });
+
   $$(".rename-client").forEach(button=>button.onclick=()=>renameEntity("clients",button.dataset.id));
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
   $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
@@ -2118,16 +2139,24 @@ function bindEvents(){
   $("trashBtn").onclick=()=>state.editor.id&&trashPrompt(state.editor.id);
 
   $("addCategoryBtn").onclick=async()=>{
-    const name=$("newCategoryName").value.trim();
-    const parentId=$("newCategoryParent").value||null;
-    if(!name){toast("Inserisci il nome della categoria.");return}
-    const duplicate=state.categories.some(category=>normalize(category.name)===normalize(name)&&(category.parentId||null)===parentId);
-    if(duplicate){toast("Esiste già una categoria con questo nome nello stesso livello.");return}
-    await put("categories",{id:uid("cat"),name,parentId,color:parentId?categoryColor(catById(parentId)):CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
+    const name=$("newCategoryName").value.trim().replace(/\s+/g," ");
+    if(!name){toast("Inserisci il nome della categoria.","warning");return}
+    const duplicate=state.categories.some(category=>!category.parentId&&normalize(category.name)===normalize(name));
+    if(duplicate){toast("Esiste già una categoria con questo nome.","warning");return}
+    await put("categories",{id:uid("cat"),name,parentId:null,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
     $("newCategoryName").value="";
-    $("newCategoryParent").value=""; /* Ogni nuova categoria torna indipendente per impostazione predefinita. */
-    await loadData();render();renderManage();
-    toast(parentId?"Sottocategoria aggiunta.":"Categoria indipendente aggiunta.");
+    await loadData();render();renderManage();toast("Categoria aggiunta.","success");
+  };
+  $("addSubcategoryBtn").onclick=async()=>{
+    const name=$("newSubcategoryName").value.trim().replace(/\s+/g," ");
+    const parentId=$("newSubcategoryParent").value||null;
+    if(!name){toast("Inserisci il nome della sottocategoria.","warning");return}
+    if(!parentId){toast("Seleziona la categoria principale.","warning");return}
+    const duplicate=state.categories.some(category=>category.parentId===parentId&&normalize(category.name)===normalize(name));
+    if(duplicate){toast("Esiste già una sottocategoria con questo nome nella categoria selezionata.","warning");return}
+    await put("categories",{id:uid("cat"),name,parentId,color:categoryColor(catById(parentId)),order:state.categories.length,createdAt:now()});
+    $("newSubcategoryName").value="";
+    await loadData();render();renderManage();toast("Sottocategoria aggiunta.","success");
   };
   $("addClientBtn").onclick=async()=>{
     const name=$("newClientName").value.trim();if(!name)return;
