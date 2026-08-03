@@ -327,7 +327,7 @@ textarea{resize:vertical;line-height:1.55}
 .panel-box{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
 .panel-box h4{margin:0 0 10px}
 .manage-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}
-.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);flex-wrap:wrap}.manage-row .grow{flex:1 1 180px}.category-name-editable{display:inline-flex;align-items:center;min-height:32px;padding:5px 8px;margin:-5px -8px;border-radius:8px;cursor:text;transition:background .15s,box-shadow .15s}.category-name-editable:hover,.category-name-editable:focus-visible{background:var(--primary-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 24%,transparent);outline:none}.inline-category-name{width:100%;min-width:160px;height:36px;padding:6px 9px;border:2px solid var(--primary);border-radius:9px;background:var(--panel);color:var(--text);font-weight:850}
+.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);flex-wrap:wrap}.manage-row .grow{flex:1 1 180px}.category-name-editable{display:inline-flex;align-items:center;min-height:32px;padding:5px 8px;margin:-5px -8px;border-radius:8px;cursor:text;transition:background .15s,box-shadow .15s}.category-name-editable:hover,.category-name-editable:focus-visible{background:var(--primary-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 24%,transparent);outline:none}.category-name-editable.editing{display:block;width:100%;min-width:160px;padding:6px 9px;margin:-6px -9px;border:2px solid var(--primary);border-radius:9px;background:var(--panel);color:var(--text);cursor:text;box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 16%,transparent)}.inline-category-name{width:100%;min-width:160px;height:36px;padding:6px 9px;border:2px solid var(--primary);border-radius:9px;background:var(--panel);color:var(--text);font-weight:850}
 .manage-row .grow{flex:1;min-width:0}
 .color-input{width:38px;height:34px;padding:2px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
 .inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
@@ -544,7 +544,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.3";
+const APP_VERSION="17.10.4";
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
@@ -1766,10 +1766,23 @@ function renderManage(){
   $("manageClients").innerHTML=state.clients.map(client=>`
     <div class="manage-row"><div class="grow"><strong>${esc(client.name)}</strong></div><button class="btn small rename-client" data-id="${esc(client.id)}">Rinomina</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
   $$(".category-color:not(:disabled)").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
-  $$(".category-name-editable").forEach(name=>{
-    name.onclick=()=>beginInlineCategoryRename(name);
-    name.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineCategoryRename(name)}};
-  });
+  const categoryList=$("manageCategories");
+  categoryList.onclick=event=>{
+    const name=event.target.closest(".category-name-editable");
+    if(!name||!categoryList.contains(name))return;
+    event.preventDefault();
+    event.stopPropagation();
+    beginInlineCategoryRename(name);
+  };
+  categoryList.onkeydown=event=>{
+    const name=event.target.closest(".category-name-editable");
+    if(!name||!categoryList.contains(name))return;
+    if(event.key==="Enter"||event.key===" "){
+      event.preventDefault();
+      event.stopPropagation();
+      beginInlineCategoryRename(name);
+    }
+  };
   $$(".rename-client").forEach(button=>button.onclick=()=>renameEntity("clients",button.dataset.id));
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
   $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
@@ -1777,28 +1790,36 @@ function renderManage(){
 function beginInlineCategoryRename(labelElement){
   const category=catById(labelElement.dataset.id);
   if(!category||labelElement.dataset.editing==="true")return;
-  labelElement.dataset.editing="true";
 
-  const input=document.createElement("input");
-  input.type="text";
-  input.className="inline-category-name";
-  input.value=category.name;
-  input.setAttribute("aria-label",`Nuovo nome della ${category.parentId?"sottocategoria":"categoria"}`);
-  labelElement.replaceWith(input);
-  input.focus();
-  input.select();
+  labelElement.dataset.editing="true";
+  labelElement.dataset.originalName=category.name;
+  labelElement.textContent=category.name;
+  labelElement.contentEditable="true";
+  labelElement.setAttribute("role","textbox");
+  labelElement.setAttribute("aria-label",`Modifica nome ${category.parentId?"sottocategoria":"categoria"}`);
+  labelElement.classList.add("editing");
+
+  requestAnimationFrame(()=>{
+    labelElement.focus();
+    const selection=window.getSelection();
+    const range=document.createRange();
+    range.selectNodeContents(labelElement);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
 
   let settled=false;
-  const cancel=()=>{
-    if(settled)return;
-    settled=true;
-    renderManage();
-  };
-  const save=async()=>{
+  const finish=async saveChanges=>{
     if(settled)return;
     settled=true;
     const label=category.parentId?"sottocategoria":"categoria";
-    const name=input.value.trim().replace(/\s+/g," ");
+    const originalName=labelElement.dataset.originalName||category.name;
+    const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");
+
+    labelElement.contentEditable="false";
+    labelElement.classList.remove("editing");
+
+    if(!saveChanges){renderManage();return}
     if(!name){
       toast(`Il nome della ${label} non può essere vuoto.`,"warning");
       renderManage();
@@ -1810,21 +1831,24 @@ function beginInlineCategoryRename(labelElement){
       renderManage();
       return;
     }
-    if(name===category.name){renderManage();return}
-    const previousName=category.name;
+    if(name===originalName){renderManage();return}
+
     category.name=name;
     category.updatedAt=now();
     await put("categories",category);
     await loadData();
     render();
     renderManage();
-    toast(`${label.charAt(0).toUpperCase()+label.slice(1)} “${previousName}” rinominata in “${name}”.`,"success");
+    toast(`${label.charAt(0).toUpperCase()+label.slice(1)} “${originalName}” rinominata in “${name}”.`,"success");
   };
-  input.onkeydown=event=>{
-    if(event.key==="Enter"){event.preventDefault();save()}
-    if(event.key==="Escape"){event.preventDefault();cancel()}
+
+  labelElement.onkeydown=event=>{
+    event.stopPropagation();
+    if(event.key==="Enter"){event.preventDefault();finish(true)}
+    else if(event.key==="Escape"){event.preventDefault();finish(false)}
   };
-  input.onblur=save;
+  labelElement.onblur=()=>finish(true);
+  labelElement.onclick=event=>event.stopPropagation();
 }
 
 async function renameEntity(type,id){
