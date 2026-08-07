@@ -375,6 +375,20 @@ textarea{resize:vertical;line-height:1.55}
   .top-actions #newPromptBtn::after{content:"＋";font-size:20px}
   .search-wrap{min-width:0}.topbar{gap:6px}.logo{width:36px;height:36px}
 }
+
+/* ---------- UX 18.0 ---------- */
+.top-actions #importBtn,.top-actions #exportBtn{display:none}
+.more-menu-wrap{position:relative}.more-menu{position:absolute;right:0;top:46px;min-width:220px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;z-index:80}.more-menu.show{display:block}.more-menu .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.more-menu .btn:hover{background:var(--panel-3)}
+.home-actions{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(240px,.8fr);gap:14px;margin-bottom:16px}.home-primary,.home-secondary{padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.home-primary{background:linear-gradient(135deg,var(--primary-soft),var(--panel) 70%)}.home-primary h3,.home-secondary h3{margin:0 0 7px;font-size:22px}.home-primary p,.home-secondary p{margin:0 0 14px;color:var(--muted);line-height:1.55}.home-primary .search{height:50px;font-size:16px;background:var(--panel)}.home-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.recent-strip{display:flex;gap:8px;flex-wrap:wrap}.recent-strip .btn{justify-content:flex-start}
+.stats.dashboard-grid .dashboard-card[data-dash-action="configure"],.stats.dashboard-grid .dashboard-card[data-dash-action="import"],.stats.dashboard-grid .dashboard-card[data-dash-action="files"],.stats.dashboard-grid .dashboard-card[data-dash-action="export"],.stats.dashboard-grid .dashboard-card[data-dash-action="diagnostics"]{display:none}
+.stats.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.dashboard-card{min-height:180px}.workflow-legend{display:none}.dashboard-intro{padding:17px 18px}.recommended-action{padding:17px 18px}.dashboard-card .dash-next{display:none}.dashboard-card p{font-size:12.5px}.dashboard-card strong{font-size:17px}
+.sidebar .side-section.backup{display:none}.side-title{font-size:10px}.side-section{margin-bottom:10px}.side-link,.tree-row{min-height:36px}.tree-row.sidebar-category-color{background:rgba(255,255,255,.035);border-color:transparent;box-shadow:inset 3px 0 var(--item-color,#60a5fa)}.tree-row.sidebar-category-color:hover{background:rgba(255,255,255,.10)}
+.card{min-height:170px}.card-actions{justify-content:flex-start}.card-actions .secondary-card-action{display:none}.card .meta .chip:nth-last-child(-n+2){display:none}.use-card{font-weight:900}.card-menu{position:relative}.card-menu-panel{position:absolute;right:0;bottom:42px;min-width:170px;display:none;padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);z-index:30}.card-menu.open .card-menu-panel{display:block}.card-menu-panel .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.card-menu-panel .btn:hover{background:var(--panel-3)}
+.use-mode .editor-tab[data-tab="prompt"]{display:none}.use-mode #savePromptBtn,.use-mode #duplicateBtn,.use-mode #trashBtn,.use-mode #exportPromptBtn{display:none}.use-mode #cancelEditorBtn{margin-left:auto}.use-mode .editor-head strong::after{content:" · Usa";color:var(--primary);font-weight:900}.use-mode .variables-header p{max-width:760px}.use-mode .variable-highlight-note{display:none}.use-mode .variables-header #detectVariablesBtn{display:none}.use-mode .preview-box{position:sticky;bottom:0;z-index:5;box-shadow:0 -8px 24px rgba(15,23,42,.08)}.use-mode .editor-footer{position:sticky;bottom:0;z-index:10}.use-mode .copy-compiled{font-size:16px;min-height:44px}.use-progress{display:none;margin:0 0 14px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-weight:850}.use-mode .use-progress{display:block}.editor-mode-switch{display:inline-flex;gap:6px;margin-left:8px}.editor-mode-switch .btn.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-2)}
+@media(max-width:900px){.home-actions{grid-template-columns:1fr}.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.home-actions{grid-template-columns:1fr}.card-actions .btn{flex:1 1 auto}}
+
 </style>
 </head>
 <body>
@@ -390,8 +404,8 @@ textarea{resize:vertical;line-height:1.55}
     <div class="top-actions">
       <button class="btn optional" id="importBtn">Importa JSON</button>
       <button class="btn optional" id="exportBtn">Esporta archivio</button>
-      <button class="btn icon optional" id="themeBtn" title="Tema">◐</button>
       <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">＋ Nuovo prompt</button>
+      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">⋯</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuManageBtn">Gestisci categorie e clienti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
     </div>
   </header>
 
@@ -455,7 +469,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="editor-backdrop" id="editorBackdrop">
   <section class="editor-modal" id="editorModal" role="dialog" aria-modal="true" aria-labelledby="editorTitle" tabindex="-1">
     <div class="editor-head">
-      <strong id="editorTitle">Nuovo prompt</strong>
+      <strong id="editorTitle">Nuovo prompt</strong><div class="editor-mode-switch" id="editorModeSwitch"><button class="btn small active" type="button" data-editor-mode="use">Usa</button><button class="btn small" type="button" data-editor-mode="edit">Modifica</button></div>
       <div class="editor-tabs">
         <button class="editor-tab active" data-tab="prompt">Prompt e dettagli</button>
         <button class="editor-tab" data-tab="variables" id="variablesTab">Variabili</button>
@@ -501,7 +515,7 @@ textarea{resize:vertical;line-height:1.55}
           <button class="btn" id="detectVariablesBtn">↻ Aggiorna campi</button>
         </div>
         <div class="variable-highlight-note"><strong>Come funziona:</strong> compila solo i campi che ti servono. Il pulsante <strong>Copia Prompt</strong> sostituisce le variabili valorizzate; quelle lasciate vuote restano nel testo come segnaposto e non bloccano la copia.</div>
-        <div class="variable-summary" id="variableSummary"></div>
+        <div class="use-progress" id="useProgress"></div><div class="variable-summary" id="variableSummary"></div>
         <div class="variable-list" id="variableList"></div>
         <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante l’importazione.</div>
         <div class="preview-box">
@@ -572,8 +586,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="17.10.8";
-const APP_RELEASE_NAME="Sidebar con sezioni e categorie colorate";
+const APP_VERSION="18.0.0";
+const APP_RELEASE_NAME="UX semplificata e modalità Usa prompt";
 document.title=`Prompt Studio v${APP_VERSION} — ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -599,7 +613,7 @@ const state={
   filter:{type:"all",id:null},query:"",selected:new Set(),
   sort:initialSort,
   view:localStorage.getItem("ps_view")||"grid",
-  editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""},
+  editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit"},
   searchTimer:null,detectTimer:null,
   lastSavedId:null,
   recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}"),
@@ -922,24 +936,12 @@ function renderSidebar(){
   $$("[data-category]").forEach(button=>{
     button.onclick=event=>{
       if(event.target.closest("[data-delete-category],[data-toggle-category]"))return;
-      if(button.dataset.hasChildren==="true"){
-        const id=button.dataset.category;
-        state.openCategories.has(id)?state.openCategories.delete(id):state.openCategories.add(id);
-        localStorage.setItem("ps_open_categories",JSON.stringify([...state.openCategories]));
-        renderSidebar();
-        return;
-      }
       setFilter("category",button.dataset.category);
     };
     button.onkeydown=event=>{
       if((event.key!=="Enter"&&event.key!==" ")||event.target.closest("button"))return;
       event.preventDefault();
-      if(button.dataset.hasChildren==="true"){
-        const id=button.dataset.category;
-        state.openCategories.has(id)?state.openCategories.delete(id):state.openCategories.add(id);
-        localStorage.setItem("ps_open_categories",JSON.stringify([...state.openCategories]));
-        renderSidebar();
-      }else setFilter("category",button.dataset.category);
+      setFilter("category",button.dataset.category);
     };
   });
   $$("[data-client]").forEach(button=>{button.onclick=event=>{if(event.target.closest("[data-delete-client]"))return;setFilter("client",button.dataset.client)};button.onkeydown=event=>{if((event.key==="Enter"||event.key===" ")&&!event.target.closest("button")){event.preventDefault();setFilter("client",button.dataset.client)}}});
@@ -1056,6 +1058,13 @@ function renderDiagnosticsPanel(){
   $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
   bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
 }
+function promptForAction(action,snapshot){
+  if(!snapshot.hasPrompts)return null;
+  if(action==="verify")return snapshot.live.find(item=>item.status==="review")||snapshot.live[0];
+  if(action==="files")return snapshot.live.find(item=>extractVariables(item.content).some(def=>def.fileLike&&!def.optional&&!promptAttachmentCount(item)))||snapshot.live[0];
+  if(action==="variables")return snapshot.live.find(item=>extractVariables(item.content).length>0)||snapshot.live[0];
+  return snapshot.live[0];
+}
 function performDashboardAction(action,{fromHash=false}={}){
   const snapshot=workflowSnapshot();
   if(!fromHash)updateDashboardHash(action);
@@ -1068,7 +1077,8 @@ function performDashboardAction(action,{fromHash=false}={}){
   if(action==="problems"){renderProblemsPanel();return}
   if(["variables","files","verify","use"].includes(action)){
     if(!snapshot.hasPrompts){toast("Passaggio bloccato: crea o importa prima un prompt.","warning","PS-REQ-001");openEditor();return}
-    openEditor(snapshot.live[0].id,"variables");return;
+    const target=promptForAction(action,snapshot);
+    openEditor(target?.id||snapshot.live[0].id,"variables",action==="use"||action==="variables"||action==="files"||action==="verify"?"use":"edit");return;
   }
   if(action==="export"){
     if(!snapshot.hasPrompts){toast("Esportazione non disponibile: non esistono prompt da includere.","warning","PS-REQ-002");openEditor();return}
@@ -1098,8 +1108,16 @@ function renderStats(){
     {action:"export",step:"Step 9",tone:"charcoal",icon:"⇩",title:"Esporta e crea backup",description:"Scarica l’archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt · ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"🛠",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per l’assistenza",className:s.problems.length?"":"completed"}
   ];
-  $("stats").innerHTML=`<div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali · ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">✓ ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorità ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
-  $$('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));$('[data-recommended-action]')?.addEventListener('click',event=>performDashboardAction(event.currentTarget.dataset.recommendedAction));const hashAction=location.hash.match(/^#step-(.+)$/)?.[1];if(hashAction)highlightDashboardCard(hashAction);
+  const recent=s.live.slice().sort((a,b)=>new Date(b.lastUsedAt||b.updatedAt)-new Date(a.lastUsedAt||a.updatedAt)).slice(0,4);
+  const recentHtml=recent.length?recent.map(item=>'<button class="btn small" type="button" data-recent-prompt="'+esc(item.id)+'">'+esc(item.title||"Senza titolo")+'</button>').join(""):'<span class="hint">Nessun prompt ancora utilizzato.</span>';
+  $("stats").innerHTML=`<div class="home-actions"><section class="home-primary"><h3>Che cosa vuoi fare?</h3><p>Cerca un prompt e usalo subito. Le funzioni di gestione restano disponibili nel menu ⋯.</p><input class="search" id="dashboardSearch" type="search" placeholder="Cosa devi fare? Es. audit SEO, articolo, social…"><div class="home-quick-actions"><button class="btn primary" type="button" data-home-action="search">Cerca un prompt</button><button class="btn" type="button" data-home-action="new">Crea nuovo prompt</button></div></section><section class="home-secondary"><h3>Usati di recente</h3><div class="recent-strip">${recentHtml}</div></section></div><div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali · ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">✓ ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorità ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
+  $$('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));
+  $('[data-recommended-action]')?.addEventListener('click',event=>performDashboardAction(event.currentTarget.dataset.recommendedAction));
+  $('[data-home-action="new"]')?.addEventListener('click',()=>openEditor());
+  $('[data-home-action="search"]')?.addEventListener('click',()=>{const q=$('dashboardSearch')?.value||'';$('globalSearch').value=q;state.query=q;renderCards();setTimeout(()=>$('cards').scrollIntoView({behavior:'smooth',block:'start'}),40)});
+  $('dashboardSearch')?.addEventListener('keydown',event=>{if(event.key==='Enter')$('[data-home-action="search"]')?.click()});
+  $$('[data-recent-prompt]').forEach(button=>button.onclick=()=>openEditor(button.dataset.recentPrompt,'variables','use'));
+  const hashAction=location.hash.match(/^#step-(.+)$/)?.[1];if(hashAction)highlightDashboardCard(hashAction);
 }
 
 function cardHtml(prompt){
@@ -1127,9 +1145,7 @@ function cardHtml(prompt){
       <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
     </div>
     <div class="card-actions">
-      <button class="btn small primary edit-card" title="Modifica questo prompt">✎ Modifica</button>
-      <button class="btn small copy-card">Copia testo originale</button>
-      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':'<button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button>'}
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">▶ Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">✎ Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">⋯</button><div class="card-menu-panel"><button class="btn small copy-card">Copia sorgente</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
     </div>
   </article>`;
 }
@@ -1200,8 +1216,10 @@ function bindCardEvents(){
     };
     card.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
-    card.querySelector(".edit-card").onclick=()=>openEditor(id);
-    card.querySelector(".copy-card").onclick=()=>quickCopy(id);
+    card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=extractVariables(prompt.content);if(!vars.length){quickCopy(id)}else openEditor(id,"variables","use")});
+    card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
+    card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();event.currentTarget.closest('.card-menu').classList.toggle('open')});
+    card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopy(id));
     card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
     card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
     card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
@@ -1380,6 +1398,10 @@ function variableCardHtml(def,index){
 function renderVariables(){
   const definitions=state.editor.variables;
   $("variablesTab").textContent=definitions.length?`Variabili (${definitions.length})`:"Variabili";
+  const values=collectVariableValues();
+  const required=definitions.filter(def=>!def.optional);
+  const completedRequired=required.filter(def=>String(values[def.name]??"").trim()).length;
+  if($("useProgress"))$("useProgress").textContent=required.length?`${completedRequired} di ${required.length} campi obbligatori compilati${completedRequired===required.length?" · Prompt pronto":""}`:"Nessun campo obbligatorio · Prompt pronto";
   $("variableSummary").textContent=definitions.length?`${definitions.length} variabil${definitions.length===1?"e rilevata":"i rilevate"} automaticamente nel prompt.`:"";
   $("variableSummary").classList.toggle("show",definitions.length>0);
   $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
@@ -1484,7 +1506,7 @@ function fillSubcategories(selected=""){
   $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptSubcategory").value=selected;
 }
-function openEditor(id=null,preferredTab=null){
+function openEditor(id=null,preferredTab=null,mode=null){
   state.modalReturnFocus.editorBackdrop=document.activeElement;
   const prompt=id?state.prompts.find(item=>item.id===id):null;
 
@@ -1524,10 +1546,14 @@ function openEditor(id=null,preferredTab=null){
     variables:[],
     values:{...(initialPrompt?.variableValues||{})},
     files:{...(initialPrompt?.variableFiles||{})},
-    toolUrl:initialPrompt?.toolUrl||""
+    toolUrl:initialPrompt?.toolUrl||"",
+    mode:mode||(prompt?"edit":"edit")
   };
 
-  $("editorTitle").textContent=prompt?"Modifica prompt":"Nuovo prompt";
+  $("editorTitle").textContent=prompt?(state.editor.mode==="use"?"Usa prompt":"Modifica prompt"):"Nuovo prompt";
+  $("editorModal").classList.toggle("use-mode",state.editor.mode==="use");
+  $$("[data-editor-mode]").forEach(button=>button.classList.toggle("active",button.dataset.editorMode===state.editor.mode));
+  $("editorModeSwitch").classList.toggle("hidden",!prompt);
   $("promptTitle").value=prompt?.title||"";
   $("promptContent").value=prompt?.content||"";
   $("promptStatus").value=initialPrompt?.status||"draft";
@@ -1542,7 +1568,7 @@ function openEditor(id=null,preferredTab=null){
   refreshVariables(false);
   renderVariables();
   updateCounts();
-  setEditorTab(preferredTab||(state.editor.variables.length?"variables":"prompt"));
+  setEditorTab(state.editor.mode==="use"?"variables":(preferredTab||(state.editor.variables.length?"variables":"prompt")));
   $("editorBackdrop").classList.add("show");
 
   setTimeout(()=>{(prompt?$("promptContent"):$("promptTitle")).focus()},120);
@@ -1558,7 +1584,7 @@ function closeEditor(force=false){
     return;
   }
   $("editorBackdrop").classList.remove("show");
-  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:""};
+  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit"};
   const previous=state.modalReturnFocus.editorBackdrop;delete state.modalReturnFocus.editorBackdrop;
   if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
 }
@@ -1731,6 +1757,7 @@ async function copyCompiled(){
     /* Un eventuale errore di persistenza non deve annullare una copia riuscita. */
     try{
       await persistEditorVariables();
+      if(state.editor.id){const used=state.prompts.find(item=>item.id===state.editor.id);if(used){used.usageCount=(used.usageCount||0)+1;used.lastUsedAt=now();await put("prompts",used);await loadData();}}
     }catch(error){
       console.error("Copia riuscita, ma salvataggio dei valori non completato:",error);
       toast("Il prompt è stato copiato, ma i valori non sono stati salvati nell’archivio.");
@@ -1817,7 +1844,7 @@ function renderManage(){
     </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in “${esc(catById(state.manageSubcategoryFilter)?.name||"")}”.`:'Nessuna sottocategoria presente.'}</div>`;
 
   $("manageClients").innerHTML=state.clients.map(client=>`
-    <div class="manage-row"><div class="grow"><strong>${esc(client.name)}</strong></div><button class="btn small rename-client" data-id="${esc(client.id)}">Rinomina</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
+    <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
 
   $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
 
@@ -1839,7 +1866,7 @@ function renderManage(){
     };
   });
 
-  $$(".rename-client").forEach(button=>button.onclick=()=>renameEntity("clients",button.dataset.id));
+  $$(".client-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineClientRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineClientRename(label)}}});
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
   $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
 }
@@ -1905,6 +1932,14 @@ function beginInlineCategoryRename(labelElement){
   };
   labelElement.onblur=()=>finish(true);
   labelElement.onclick=event=>event.stopPropagation();
+}
+
+async function beginInlineClientRename(labelElement){
+  const client=clientById(labelElement.dataset.id);if(!client||labelElement.dataset.editing==="true")return;
+  labelElement.dataset.editing="true";labelElement.dataset.originalName=client.name;labelElement.contentEditable="true";labelElement.setAttribute("role","textbox");labelElement.classList.add("editing");
+  requestAnimationFrame(()=>{labelElement.focus();const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(labelElement);selection.removeAllRanges();selection.addRange(range)});
+  let settled=false;const finish=async save=>{if(settled)return;settled=true;const original=labelElement.dataset.originalName||client.name;const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");labelElement.contentEditable="false";labelElement.classList.remove("editing");if(!save){renderManage();return}if(!name){toast("Il nome del cliente o progetto non può essere vuoto.","warning");renderManage();return}if(state.clients.some(item=>item.id!==client.id&&normalize(item.name)===normalize(name))){toast("Esiste già un cliente o progetto con questo nome.","warning");renderManage();return}if(name===original){renderManage();return}client.name=name;client.updatedAt=now();await put("clients",client);await loadData();render();renderManage();toast(`Cliente o progetto “${original}” rinominato in “${name}”.`,"success")};
+  labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
 }
 
 async function renameEntity(type,id){
@@ -2057,9 +2092,17 @@ async function importData(file){
                 for(const item of await getAll(name))await remove(name,item.id);
               }
             }
-            for(const item of data.categories)await put("categories",item);
-            for(const item of data.clients)await put("clients",item);
-            for(const item of data.prompts)await put("prompts",item);
+            let categories=data.categories,clients=data.clients,prompts=data.prompts;
+            if(mode==="merge"){
+              const catMap=new Map(),clientMap=new Map();
+              categories=categories.map(item=>{if(state.categories.some(existing=>existing.id===item.id)){const id=uid("cat");catMap.set(item.id,id);return {...item,id,parentId:item.parentId}}return item});
+              categories=categories.map(item=>({...item,parentId:catMap.get(item.parentId)||item.parentId}));
+              clients=clients.map(item=>{if(state.clients.some(existing=>existing.id===item.id)){const id=uid("client");clientMap.set(item.id,id);return {...item,id}}return item});
+              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId}));
+            }
+            for(const item of categories)await put("categories",item);
+            for(const item of clients)await put("clients",item);
+            for(const item of prompts)await put("prompts",item);
             await loadData();render();
             const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
             toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
@@ -2088,7 +2131,14 @@ function bindEvents(){
   $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderCards()},160)};
   $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderCards()};
   $("newPromptBtn").onclick=()=>openEditor();
-  $("themeBtn").onclick=()=>setTheme();
+  $("themeBtn").onclick=()=>{setTheme();$("moreMenu").classList.remove("show")};
+  $("moreBtn").onclick=event=>{event.stopPropagation();$("moreMenu").classList.toggle("show")};
+  $("menuImportBtn").onclick=()=>{$("moreMenu").classList.remove("show");$("importInput").click()};
+  $("menuExportBtn").onclick=()=>{$("moreMenu").classList.remove("show");exportData()};
+  $("menuManageBtn").onclick=()=>{$("moreMenu").classList.remove("show");renderManage();openModal("manageModal")};
+  $("menuBackupBtn").onclick=()=>{$("moreMenu").classList.remove("show");createBackup()};
+  $("menuDiagnosticsBtn").onclick=()=>{$("moreMenu").classList.remove("show");performDashboardAction("diagnostics")};
+  document.addEventListener("click",event=>{if(!event.target.closest('.more-menu-wrap'))$("moreMenu")?.classList.remove("show")});
   $("mobileMenuBtn").onclick=()=>$("sidebar").classList.add("open");
   $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
   $("backupBtn").onclick=createBackup;
@@ -2109,6 +2159,7 @@ function bindEvents(){
   $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:now()});
 
   $$(".editor-tab").forEach(button=>button.onclick=()=>setEditorTab(button.dataset.tab));
+  $$("[data-editor-mode]").forEach(button=>button.onclick=()=>{if(!state.editor.id)return;state.editor.mode=button.dataset.editorMode;$("editorModal").classList.toggle("use-mode",state.editor.mode==="use");$$("[data-editor-mode]").forEach(item=>item.classList.toggle("active",item===button));$("editorTitle").textContent=state.editor.mode==="use"?"Usa prompt":"Modifica prompt";setEditorTab(state.editor.mode==="use"?"variables":"prompt")});
   $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
   $("editorBackdrop").onclick=event=>{if(event.target===$("editorBackdrop"))closeEditor()};
   $("promptCategory").onchange=()=>{
@@ -2194,8 +2245,9 @@ function bindEvents(){
     await loadData();render();renderManage();toast("Sottocategoria aggiunta.","success");
   };
   $("addClientBtn").onclick=async()=>{
-    const name=$("newClientName").value.trim();if(!name)return;
-    await put("clients",{id:uid("client"),name,createdAt:now()});$("newClientName").value="";await loadData();render();renderManage();
+    const name=$("newClientName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome del cliente o progetto.","warning");return}
+    if(state.clients.some(client=>normalize(client.name)===normalize(name))){toast("Esiste già un cliente o progetto con questo nome.","warning");return}
+    await put("clients",{id:uid("client"),name,createdAt:now()});$("newClientName").value="";await loadData();render();renderManage();toast("Cliente o progetto aggiunto.","success");
   };
 
   const resizer=$("sidebarResizer");
