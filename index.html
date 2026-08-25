@@ -119,6 +119,8 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .sidebar .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:#fff}
 .sidebar .btn:hover{background:rgba(255,255,255,.14)}
 
+
+
 .main{grid-column:3;grid-row:2;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .main-head{display:flex;align-items:flex-start;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
 .main-title h2{margin:0;font-size:22px}
@@ -135,6 +137,8 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .stat-btn:focus-visible{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)}
 .stat strong{display:block;font-size:22px}
 .stat span{font-size:12px;color:var(--muted)}
+
+
 
 .workflow-overview{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr);gap:14px;margin-bottom:2px}
 .dashboard-intro,.recommended-action{padding:19px 20px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 8px 22px rgba(15,23,42,.06)}
@@ -156,6 +160,8 @@ button:disabled{cursor:not-allowed;opacity:.55}
 @media(max-width:900px){.workflow-overview{grid-template-columns:1fr}.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.dashboard-intro-head{flex-direction:column}.dashboard-progress-label{white-space:normal}.dashboard-card{min-height:0}.workflow-overview{gap:10px}}
 .section-flash{animation:sectionFlash 1.8s ease}@keyframes sectionFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 45%,transparent)}45%{box-shadow:0 0 0 12px transparent}100%{box-shadow:none}}
+
+
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
 .cards.list{display:flex;flex-direction:column}
 .cards.grouped{display:flex;flex-direction:column;gap:24px}
@@ -376,6 +382,8 @@ textarea{resize:vertical;line-height:1.55}
   .search-wrap{min-width:0}.topbar{gap:6px}.logo{width:36px;height:36px}
 }
 
+
+
 /* ---------- UX 18.0 ---------- */
 .top-actions #importBtn,.top-actions #exportBtn{display:none}
 .more-menu-wrap{position:relative}.more-menu{position:absolute;right:0;top:46px;min-width:220px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;z-index:80}.more-menu.show{display:block}.more-menu .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.more-menu .btn:hover{background:var(--panel-3)}
@@ -391,7 +399,10 @@ textarea{resize:vertical;line-height:1.55}
 @media(max-width:1100px){.home-actions{grid-template-columns:1fr}}@media(max-width:900px){.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.home-actions{grid-template-columns:1fr}.card-actions .btn{flex:1 1 auto}}
 
+
+
 </style>
+
 </head>
 <body>
 <div class="app">
@@ -588,8 +599,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.0.1";
-const APP_RELEASE_NAME="Codifica corretta e sezioni cromatiche";
+const APP_VERSION="18.1.0";
+const APP_RELEASE_NAME="Architettura modulare con build standalone";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -648,6 +659,8 @@ const clientById=id=>state.clients.find(item=>item.id===id);
 const livePrompts=()=>state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
 const activePrompts=()=>state.prompts.filter(item=>!item.deletedAt);
 
+
+
 /* ---------- Database ---------- */
 function openDatabase(){
   return new Promise((resolve,reject)=>{
@@ -701,6 +714,8 @@ async function seedData(){
   /* La libreria dei prompt parte vuota: non vengono creati prompt dimostrativi. */
   await loadData();
 }
+
+
 
 /* ---------- Utilit\u00E0 UI ---------- */
 function diagnosticEvents(){
@@ -843,6 +858,8 @@ function choiceAction(title,label,options,onConfirm){
 }
 function bindModalClose(){$$("[data-close]").forEach(button=>button.onclick=()=>closeModal(button.dataset.close))}
 
+
+
 /* ---------- Ricerca e filtri ---------- */
 function setFilter(type,id=null){
   state.filter={type,id};state.selected.clear();
@@ -892,6 +909,8 @@ function filterInfo(){
   if(type==="client")return [clientById(id)?.name||"Cliente","Prompt assegnati al cliente o progetto"];
   return ["Prompt",""];
 }
+
+
 
 /* ---------- Rendering ---------- */
 function renderSidebar(){
@@ -950,6 +969,8 @@ function renderSidebar(){
   $$("[data-delete-category]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteCategory(button.dataset.deleteCategory)});
   $$("[data-delete-client]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteClient(button.dataset.deleteClient)});
 }
+
+
 function validHttpUrl(value){
   if(!String(value||"").trim())return true;
   try{const url=new URL(String(value).trim());return ["http:","https:"].includes(url.protocol)}catch{return false}
@@ -1091,6 +1112,8 @@ function performDashboardAction(action,{fromHash=false}={}){
 function stateDescriptor(stateName){
   const map={"Non configurato":["\u25CB","warning"],"Configurazione incompleta":["\u25B3","warning"],"Dati mancanti":["!","error"],"Pronto":["\u25CF","info"],"In attesa":["\u25F7","info"],"Operazione in corso":["\u21BB","info"],"Analisi completata":["\u2713","success"],"Completato con avvisi":["\u25B3","warning"],"Verifica necessaria":["?","warning"],"Correzione disponibile":["\u270E","warning"],"Correzione eseguita":["\u2713","success"],"Correzione da confermare":["?","warning"],"Errore":["!","error"],"Bloccato":["\u26D4","error"],"Nessun risultato":["\u25CB","info"],"Tutto corretto":["\u2713","success"]};return map[stateName]||["\u25CF","info"];
 }
+
+
 function renderStats(){
   const visible=state.filter.type==="all"&&!state.query;
   $("stats").classList.toggle("hidden",!visible);$("stats").classList.toggle("dashboard-grid",visible);if(!visible)return;
@@ -1121,6 +1144,8 @@ function renderStats(){
   $$('[data-recent-prompt]').forEach(button=>button.onclick=()=>openEditor(button.dataset.recentPrompt,'variables','use'));
   const hashAction=location.hash.match(/^#step-(.+)$/)?.[1];if(hashAction)highlightDashboardCard(hashAction);
 }
+
+
 
 function cardHtml(prompt){
   const mainCategory=catById(prompt.categoryId);
@@ -1232,6 +1257,8 @@ function updateBulkbar(){
   $("selectedCount").textContent=state.selected.size;
   $("bulkbar").classList.toggle("show",state.selected.size>0);
 }
+
+
 
 /* ---------- Motore delle variabili ---------- */
 function variableRegex(){
@@ -1492,6 +1519,8 @@ function updateCompiledPreview(){
 }
 /* La copia del prompt \u00E8 volutamente permissiva:
    nessuna variabile vuota o formalmente non valida pu\u00F2 bloccarla. */
+
+
 
 /* ---------- Editor ---------- *//* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
@@ -1773,6 +1802,8 @@ async function copyCompiled(){
   }
 }
 
+
+
 /* ---------- Azioni sui prompt ---------- *//* ---------- Azioni sui prompt ---------- */
 async function quickCopy(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
@@ -1813,6 +1844,8 @@ async function bulkUpdate(patch){
   }
   state.selected.clear();await loadData();render();toast(`${ids.length} prompt aggiornati.`);
 }
+
+
 
 /* ---------- Gestione categorie e clienti ---------- */
 function renderManage(){
@@ -2029,6 +2062,8 @@ function downloadEmbeddedFile(file){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
+
+
 /* ---------- Importazione, esportazione e backup ---------- */
 function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
@@ -2125,6 +2160,8 @@ async function importData(file){
     toast(`Importazione non riuscita: ${error.message}. Nessun dato \u00E8 stato modificato.`,"error","PS-IMPORT-001");
   }finally{state.busy.delete("importRead")}
 }
+
+
 
 /* ---------- Eventi ---------- *//* ---------- Eventi ---------- */
 function bindEvents(){
@@ -2279,16 +2316,7 @@ function bindEvents(){
   bindModalClose();
 }
 
-/* ---------- Changelog 17.10.0 ----------
-   - corretto il doppio listener Cmd/Ctrl+S;
-   - sincronizzata la versione visibile;
-   - ripristino del focus dopo la chiusura delle modali;
-   - protezione da operazioni duplicate per salvataggio, importazione, backup e apertura tool;
-   - conferma esplicita prima della sostituzione dell\u2019archivio;
-   - gestione pi\u00F9 chiara di file vuoti, file troppo grandi ed errori di importazione;
-   - aggiornamento immediato dei contatori dopo la copia rapida;
-   - correzioni responsive per toast, modali, barra superiore e righe di gestione.
-*/
+
 
 /* ---------- Avvio ---------- */
 async function init(){
@@ -2307,6 +2335,7 @@ init().catch(error=>{
   console.error(error);
   document.body.innerHTML=`<div style="padding:40px;font-family:system-ui"><h1>Errore di inizializzazione</h1><p>${esc(error.message)}</p><p>Apri il file con Chrome o Brave.</p></div>`;
 });
+
 })();
 </script>
 </body>
