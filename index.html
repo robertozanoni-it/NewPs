@@ -5,10 +5,399 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
 <title>Prompt Studio</title>
-  <link rel="stylesheet" href="css/app-shell.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <link rel="stylesheet" href="css/prompt-library.css">
-  <link rel="stylesheet" href="css/responsive-ux.css">
+<style>
+:root{
+  --bg:#f3f6fb;--panel:#fff;--panel-2:#f8fafc;--panel-3:#eef4ff;
+  --text:#172033;--muted:#667085;--line:#d9e2ef;
+  --primary:#2563eb;--primary-2:#1d4ed8;--primary-soft:#dbeafe;
+  --success:#15803d;--warning:#b45309;--danger:#dc2626;
+  --sidebar:#14233d;--sidebar-2:#0d192c;--sidebar-text:#f6f8ff;--sidebar-muted:#aebbd0;
+  --shadow:0 18px 50px rgba(15,23,42,.15);--radius:16px;
+  --sidebar-width:292px;--font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body.dark{
+  --bg:#0b1220;--panel:#111b2d;--panel-2:#172238;--panel-3:#1e2d49;
+  --text:#edf3ff;--muted:#9fb0c7;--line:#293a55;
+  --primary:#60a5fa;--primary-2:#93c5fd;--primary-soft:#1d3a60;
+  --success:#4ade80;--warning:#fbbf24;--danger:#f87171;
+  --sidebar:#07111f;--sidebar-2:#040b15;--shadow:0 18px 55px rgba(0,0,0,.42);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:var(--font);background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.55}
+.app{
+  height:100%;display:grid;
+  grid-template-columns:var(--sidebar-width) 6px minmax(0,1fr);
+  grid-template-rows:70px minmax(0,1fr);overflow:hidden
+}
+.topbar{
+  grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:11px 16px;
+  background:var(--panel);border-bottom:1px solid var(--line);z-index:30
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:235px}
+.logo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;color:#fff;font-weight:900;background:linear-gradient(135deg,#2563eb,#7c3aed);box-shadow:0 8px 24px rgba(37,99,235,.25)}
+.brand h1{font-size:17px;margin:0;line-height:1.1}
+.brand small{display:block;margin-top:4px;color:var(--muted)}
+.search-wrap{position:relative;flex:1;max-width:760px}
+.search-wrap span{position:absolute;left:14px;top:12px;color:var(--muted)}
+.search{
+  width:100%;height:45px;border:1px solid var(--line);border-radius:14px;
+  background:var(--panel-2);color:var(--text);padding:0 42px;outline:none
+}
+.search:focus,input:focus,select:focus,textarea:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)
+}
+.search-clear{position:absolute;right:10px;top:8px;border:0;background:transparent;color:var(--muted);font-size:22px}
+.top-actions{display:flex;gap:8px;margin-left:auto}
+.btn{
+  min-height:39px;border:1px solid var(--line);border-radius:11px;background:var(--panel);
+  color:var(--text);padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;
+  gap:7px;font-weight:750
+}
+.btn:hover{border-color:var(--primary);background:var(--panel-3)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-2)}
+.btn.success{background:var(--success);border-color:var(--success);color:#fff}
+.btn.danger{color:var(--danger)}
+.btn.small{min-height:32px;padding:5px 9px;border-radius:9px;font-size:13px}
+.btn.icon{width:40px;padding:0}
+.mobile-menu{display:none}
+
+.sidebar{
+  grid-column:1;grid-row:2;overflow:auto;padding:14px 10px 22px;
+  color:var(--sidebar-text);background:linear-gradient(180deg,var(--sidebar),var(--sidebar-2));
+  border-right:1px solid rgba(255,255,255,.08)
+}
+.resizer{
+  grid-column:2;grid-row:2;background:transparent;cursor:col-resize;position:relative;z-index:20
+}
+.resizer::after{content:"";position:absolute;left:2px;top:0;bottom:0;width:2px;background:var(--line);opacity:.65}
+.resizer:hover::after,.resizer.dragging::after{background:var(--primary);opacity:1;width:3px}
+.side-section{
+  --section-accent:#64748b;margin-bottom:14px;padding:10px 8px 9px;border-radius:15px;
+  border:1px solid color-mix(in srgb,var(--section-accent) 34%,transparent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--section-accent) 25%,transparent),rgba(255,255,255,.025));
+  box-shadow:inset 4px 0 color-mix(in srgb,var(--section-accent) 78%,#fff 5%)
+}
+.side-section.library{--section-accent:#2563eb}
+.side-section.categories{--section-accent:#7c3aed}
+.side-section.clients{--section-accent:#0891b2}
+.side-section.backup{--section-accent:#059669}
+.side-title{display:flex;align-items:center;justify-content:space-between;padding:1px 6px 9px;color:#fff;font-size:11px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
+.side-title::before{content:"";width:7px;height:7px;border-radius:50%;margin-right:7px;background:var(--section-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--section-accent) 23%,transparent)}
+.side-title>span:first-child{margin-right:auto}
+.side-link,.tree-row{
+  width:100%;min-height:38px;border:1px solid transparent;border-radius:10px;background:rgba(255,255,255,.035);color:var(--sidebar-text);
+  padding:7px 9px;display:flex;align-items:center;gap:9px;text-align:left;transition:background .16s,border-color .16s,transform .16s
+}
+.side-link+.side-link,.tree-row+.tree-row{margin-top:4px}
+.side-link:hover,.tree-row:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.10);transform:translateX(2px)}
+.side-link.active,.tree-row.active{background:rgba(96,165,250,.24);box-shadow:inset 3px 0 #60a5fa;color:#fff;font-weight:850}
+.tree-row.sidebar-category-color{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--item-color,#60a5fa) 30%,transparent),rgba(255,255,255,.025));
+  border-color:color-mix(in srgb,var(--item-color,#60a5fa) 36%,transparent);
+  box-shadow:inset 3px 0 var(--item-color,#60a5fa)
+}
+.tree-row.sidebar-category-color:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--item-color,#60a5fa) 42%,transparent),rgba(255,255,255,.07))}
+.tree-row.sidebar-category-color.active{background:linear-gradient(90deg,color-mix(in srgb,var(--item-color,#60a5fa) 58%,transparent),rgba(255,255,255,.10));border-color:color-mix(in srgb,var(--item-color,#60a5fa) 70%,#fff 8%);box-shadow:inset 4px 0 var(--item-color,#60a5fa)}
+.tree-row.client-color{--item-color:#0891b2;background:linear-gradient(90deg,color-mix(in srgb,var(--item-color) 24%,transparent),rgba(255,255,255,.025));border-color:color-mix(in srgb,var(--item-color) 30%,transparent);box-shadow:inset 3px 0 var(--item-color)}
+.count{margin-left:auto;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);font-size:12px}
+.tree-row{padding-left:calc(9px + var(--depth,0) * 16px)}
+.tree-toggle{width:24px;height:24px;min-height:24px;padding:0;border:0;border-radius:7px;background:transparent;color:inherit;display:grid;place-items:center;flex:0 0 24px;font-size:13px;transition:transform .18s,background .18s}
+.tree-toggle:hover{background:rgba(255,255,255,.12)}
+.tree-toggle[aria-expanded="true"]{transform:rotate(90deg)}
+.tree-toggle-placeholder{width:24px;flex:0 0 24px}
+.tree-children{display:none}
+.tree-children.open{display:block}
+.tree-dot{width:10px;height:10px;border-radius:50%;background:var(--dot,#60a5fa);flex:0 0 10px}
+.tree-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tree-delete{margin-left:4px;width:28px;height:28px;min-height:28px;padding:0;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fecaca;display:grid;place-items:center;flex:0 0 28px}
+.tree-delete:hover{background:rgba(220,38,38,.28);border-color:rgba(248,113,113,.65);color:#fff}
+.tree-row .count{margin-left:auto}
+.sidebar .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:#fff}
+.sidebar .btn:hover{background:rgba(255,255,255,.14)}
+
+.main{grid-column:3;grid-row:2;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.main-head{display:flex;align-items:flex-start;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.main-title h2{margin:0;font-size:22px}
+.main-title p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.toolbar{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.toolbar select{height:39px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:0 34px 0 10px}
+.bulkbar{display:none;align-items:center;gap:8px;padding:9px 18px;background:var(--primary-soft);border-bottom:1px solid var(--line)}
+.bulkbar.show{display:flex}
+.content{overflow:auto;padding:16px 18px 80px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.stat-btn{width:100%;text-align:left;cursor:pointer;transition:.18s;display:block;color:var(--text)}
+.stat-btn:hover{transform:translateY(-2px);border-color:var(--primary);background:var(--panel-3);box-shadow:0 12px 28px color-mix(in srgb,var(--primary) 16%,transparent)}
+.stat-btn:focus-visible{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)}
+.stat strong{display:block;font-size:22px}
+.stat span{font-size:12px;color:var(--muted)}
+
+
+
+.workflow-overview{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr);gap:14px;margin-bottom:2px}
+.dashboard-intro,.recommended-action{padding:19px 20px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 8px 22px rgba(15,23,42,.06)}
+.dashboard-intro{background:linear-gradient(135deg,var(--primary-soft),var(--panel) 68%)}
+.dashboard-intro-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.dashboard-intro h3,.recommended-action h3{margin:0 0 6px;font-size:22px}.dashboard-intro p,.recommended-action p{margin:0;color:var(--muted);line-height:1.55}.dashboard-progress-label{font-size:13px;font-weight:900;color:var(--primary-2);white-space:nowrap}
+.workflow-progress{height:10px;margin:15px 0 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);overflow:hidden}.workflow-progress>span{display:block;height:100%;width:var(--progress,0%);background:linear-gradient(90deg,var(--primary),var(--success));transition:width .25s ease}.workflow-summary{display:flex;gap:8px;flex-wrap:wrap}.workflow-chip{padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:12px;font-weight:800;color:var(--muted)}
+.recommended-action{--recommend:#ea580c;border-left:7px solid var(--recommend);background:linear-gradient(145deg,color-mix(in srgb,var(--recommend) 10%,var(--panel)),var(--panel) 72%)}.recommended-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}.recommended-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--recommend) 17%,var(--panel));font-size:22px}.priority-badge{margin-left:auto;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--recommend) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--recommend) 36%,var(--line));font-size:11px;font-weight:900}.recommended-meta{margin:11px 0;display:flex;gap:7px;flex-wrap:wrap}.recommended-action .btn{width:100%;margin-top:4px}
+.stats.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:22px}
+.dashboard-card{--dash:#64748b;--dash-bg:color-mix(in srgb,var(--dash) 10%,var(--panel));position:relative;min-height:218px;text-align:left;padding:16px;border:1px solid color-mix(in srgb,var(--dash) 38%,var(--line));border-left:7px solid var(--dash);border-radius:17px;background:linear-gradient(145deg,var(--dash-bg),var(--panel) 74%);color:var(--text);display:flex;flex-direction:column;gap:9px;transition:transform .18s,border-color .18s,box-shadow .18s,opacity .18s;cursor:pointer;scroll-margin-top:90px}
+.dashboard-card:hover{transform:translateY(-3px);border-color:var(--dash);box-shadow:0 15px 34px color-mix(in srgb,var(--dash) 19%,transparent)}.dashboard-card:focus-visible{outline:3px solid color-mix(in srgb,var(--dash) 62%,transparent);outline-offset:3px;box-shadow:0 0 0 6px color-mix(in srgb,var(--dash) 17%,transparent)}.dashboard-card.active{border-color:var(--dash);box-shadow:0 0 0 4px color-mix(in srgb,var(--dash) 18%,transparent)}.dashboard-card.completed{--dash-bg:color-mix(in srgb,var(--success) 10%,var(--panel))}.dashboard-card.blocked{opacity:.82;border-style:dashed}.dashboard-card.error{--dash:#dc2626}.dashboard-card[aria-disabled="true"]{cursor:not-allowed}
+.dashboard-card .dash-top{display:flex;align-items:center;gap:10px}.dashboard-card .dash-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--dash) 17%,var(--panel));font-size:22px}.dashboard-card .dash-step{margin-left:auto;font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.dashboard-card strong{font-size:18px;line-height:1.25}.dashboard-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.48}.dashboard-card .dash-meta{margin-top:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.dashboard-card .dash-state,.dashboard-card .dash-count{padding:5px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:11px;font-weight:850}.dashboard-card .dash-state{color:color-mix(in srgb,var(--dash) 76%,var(--text))}.dashboard-card .dash-count{color:var(--muted)}.dashboard-card .dash-next{width:100%;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.dashboard-card .dash-next strong{font-size:11px;color:var(--text)}
+.dashboard-card.blue{--dash:#2563eb}.dashboard-card.cyan{--dash:#0e7490}.dashboard-card.purple{--dash:#7c3aed}.dashboard-card.green{--dash:#15803d}.dashboard-card.yellow{--dash:#a16207}.dashboard-card.orange{--dash:#c2410c}.dashboard-card.red{--dash:#b91c1c}.dashboard-card.gray{--dash:#64748b}.dashboard-card.charcoal{--dash:#334155}
+.dashboard-card.warning{--dash:#a16207}.dashboard-card.critical{--dash:#b91c1c}.dashboard-card .dash-state[data-level="error"]{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 38%,var(--line));background:color-mix(in srgb,var(--danger) 9%,var(--panel))}.dashboard-card .dash-state[data-level="warning"]{color:var(--warning);border-color:color-mix(in srgb,var(--warning) 38%,var(--line));background:color-mix(in srgb,var(--warning) 9%,var(--panel))}.dashboard-card .dash-state[data-level="success"]{color:var(--success);border-color:color-mix(in srgb,var(--success) 34%,var(--line));background:color-mix(in srgb,var(--success) 8%,var(--panel))}
+.problem-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 14px}.problem-summary span{padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:12px;font-weight:850;text-align:center}.problem-list{display:flex;flex-direction:column;gap:10px}.problem-item{--problem:#64748b;border:1px solid color-mix(in srgb,var(--problem) 38%,var(--line));border-left:6px solid var(--problem);border-radius:14px;background:color-mix(in srgb,var(--problem) 7%,var(--panel));padding:13px;scroll-margin-top:90px}.problem-item[data-priority="Bloccante"]{--problem:#b91c1c}.problem-item[data-priority="Alta"]{--problem:#dc2626}.problem-item[data-priority="Media"]{--problem:#c2410c}.problem-item[data-priority="Bassa"]{--problem:#a16207}.problem-item[data-priority="Informativa"]{--problem:#64748b}.problem-head{display:flex;gap:10px;align-items:flex-start}.problem-head strong{font-size:16px}.problem-badge{margin-left:auto;padding:4px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--problem) 42%,var(--line));background:var(--panel);font-size:11px;font-weight:900;color:var(--problem)}.problem-item p{margin:7px 0;color:var(--muted);line-height:1.48}.problem-meta{display:flex;gap:6px;flex-wrap:wrap}.problem-meta span{padding:4px 7px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:11px}.problem-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.diagnostic-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.diagnostic-table{width:100%;border-collapse:collapse}.diagnostic-table th,.diagnostic-table td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere;word-break:break-word}.diagnostic-table th{width:38%;color:var(--muted);font-size:12px}.resolved-list{display:flex;flex-direction:column;gap:8px}.resolved-item{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel);font-size:12px}.toast.info{background:#1e293b}.toast.success{background:#166534}.toast.warning{background:#92400e}.toast.error{background:#991b1b}.toast-code{display:block;margin-top:5px;font-size:11px;opacity:.8}.section-flash{animation:sectionFlash 1.8s ease}@keyframes sectionFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 40%,transparent)}45%{box-shadow:0 0 0 10px transparent}100%{box-shadow:none}}
+@media(max-width:900px){.problem-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.diagnostic-grid{grid-template-columns:1fr}}
+
+.workflow-legend{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:2px 2px 5px;color:var(--muted);font-size:12px}.legend-item{display:inline-flex;align-items:center;gap:5px}.legend-dot{width:9px;height:9px;border-radius:50%;background:var(--legend,#64748b)}
+@media(max-width:1280px){.stats.dashboard-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.workflow-overview{grid-template-columns:1fr}.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.dashboard-intro-head{flex-direction:column}.dashboard-progress-label{white-space:normal}.dashboard-card{min-height:0}.workflow-overview{gap:10px}}
+.section-flash{animation:sectionFlash 1.8s ease}@keyframes sectionFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 45%,transparent)}45%{box-shadow:0 0 0 12px transparent}100%{box-shadow:none}}
+
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
+.cards.list{display:flex;flex-direction:column}
+.cards.grouped{display:flex;flex-direction:column;gap:24px}
+.category-group{display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid color-mix(in srgb,var(--group-accent,#64748b) 34%,var(--line));border-radius:18px;background:linear-gradient(145deg,color-mix(in srgb,var(--group-accent,#64748b) 11%,var(--panel)),color-mix(in srgb,var(--group-accent,#64748b) 4%,var(--panel)) 78%)}
+.category-group-head{display:flex;align-items:center;gap:10px;padding:12px 15px;border:1px solid var(--line);border-left:7px solid var(--group-accent,#64748b);border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--group-accent,#64748b) 13%,var(--panel)),var(--panel));box-shadow:0 5px 16px color-mix(in srgb,var(--group-accent,#64748b) 10%,transparent)}
+.category-group-title{font-size:21px;font-weight:950;line-height:1.2}
+.category-group-count{margin-left:auto;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--group-accent,#64748b) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--group-accent,#64748b) 38%,var(--line));font-size:13px;font-weight:900}
+.category-group-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
+.category-group-cards.list{display:flex;flex-direction:column}
+.category-group-cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(190px,1fr) minmax(280px,2fr) auto;gap:11px;align-items:center}
+.category-group-cards.list .card-check{position:static}
+.category-group-cards.list .card-top{padding-left:0}
+.category-group-cards.list .excerpt{margin:0;-webkit-line-clamp:2}
+.category-group-cards.list .meta{display:none}
+.category-group-cards.list .card-actions{margin:0;padding:0;border:0}
+.card{
+  --accent:#64748b;position:relative;min-height:195px;padding:14px;border-radius:16px;
+  border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));border-left:6px solid var(--accent);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--panel)),var(--panel) 76%);
+  display:flex;flex-direction:column;transition:.18s;box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 10%,transparent)
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 16px 35px color-mix(in srgb,var(--accent) 20%,transparent);border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.card.just-saved{
+  animation:savedPulse 1.8s ease;
+  outline:4px solid color-mix(in srgb,var(--success) 38%,transparent)
+}
+@keyframes savedPulse{
+  0%{transform:scale(.985);box-shadow:0 0 0 0 color-mix(in srgb,var(--success) 35%,transparent)}
+  45%{transform:scale(1.012);box-shadow:0 0 0 12px transparent}
+  100%{transform:scale(1);box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 10%,transparent)}
+}
+.save-status{
+  display:none;padding:7px 10px;border-radius:9px;
+  background:color-mix(in srgb,var(--success) 11%,var(--panel));
+  border:1px solid color-mix(in srgb,var(--success) 35%,var(--line));
+  color:var(--success);font-size:12px;font-weight:850
+}
+.save-status.show{display:inline-flex}
+.cards.list .card{min-height:auto;display:grid;grid-template-columns:28px minmax(190px,1fr) minmax(280px,2fr) auto;gap:11px;align-items:center}
+.card-check{position:absolute;left:12px;top:12px}
+.cards.list .card-check{position:static}
+.card-top{padding-left:26px;display:flex;gap:8px;align-items:flex-start}
+.cards.list .card-top{padding-left:0}
+.card-title{font-size:20px;font-weight:900;line-height:1.3;margin-right:auto;overflow-wrap:anywhere}
+.star{color:#f59e0b;font-size:18px}
+.excerpt{color:var(--muted);font-size:16px;line-height:1.65;margin:13px 0;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.cards.list .excerpt{margin:0;-webkit-line-clamp:2}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.chip{font-size:14px;padding:6px 10px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);line-height:1.25}
+.chip.accent{font-weight:850;color:color-mix(in srgb,var(--accent) 75%,var(--text));background:color-mix(in srgb,var(--accent) 15%,var(--panel));border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.card-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.card-actions .btn.small{font-size:15px;min-height:38px;padding:8px 12px}
+.category-line{display:flex;align-items:center;gap:8px;margin:10px 0 2px;font-size:15px;line-height:1.4;font-weight:800;color:var(--text)}
+.category-line-label{color:var(--muted);font-weight:750}
+.category-line-value{color:color-mix(in srgb,var(--accent) 78%,var(--text));overflow-wrap:anywhere}
+.cards.list .meta{display:none}
+.cards.list .card-actions{margin:0;padding:0;border:0}
+.empty{padding:70px 20px;text-align:center;color:var(--muted)}
+.empty .big{font-size:48px}
+.hidden{display:none!important}
+
+.editor-backdrop,.modal-backdrop{
+  position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.62);display:none;align-items:center;justify-content:center;padding:20px
+}
+.editor-backdrop.show,.modal-backdrop.show{display:flex}
+.editor-modal{
+  width:min(1280px,96vw);height:min(900px,94vh);min-width:760px;min-height:600px;
+  resize:both;overflow:hidden;background:var(--panel);border:1px solid var(--line);
+  border-radius:20px;box-shadow:var(--shadow);display:flex;flex-direction:column
+}
+.editor-head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.editor-head strong{font-size:18px;margin-right:8px}
+.editor-tabs{display:flex;gap:6px}
+.editor-tab{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);color:var(--text);padding:8px 12px;font-weight:800}
+.editor-tab.active{background:var(--primary-soft);color:var(--primary-2);border-color:color-mix(in srgb,var(--primary) 42%,var(--line))}
+.spacer{flex:1}
+.editor-body{overflow:auto;padding:19px}
+.editor-panel{display:none}
+.editor-panel.active{display:block}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;color:var(--muted);font-weight:800}
+input[type=text],select,textarea{
+  width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);color:var(--text);padding:11px 12px;outline:none
+}
+textarea{resize:vertical;line-height:1.55}
+#promptTitle{font-size:17px;font-weight:800}
+#promptContent{min-height:390px;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.tool-box{
+  padding:15px;border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));
+  border-radius:15px;background:linear-gradient(135deg,var(--primary-soft),var(--panel-2))
+}
+.tool-box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.tool-box-head label{font-size:15px;color:var(--text)}
+.tool-badge{
+  padding:4px 8px;border-radius:999px;background:var(--primary);color:#fff;
+  font-size:10px;font-weight:900;letter-spacing:.08em
+}
+.tool-link-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+.tool-link-row input{min-width:0}
+.backup-note{
+  margin:12px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--success) 10%,var(--panel));
+  border:1px solid color-mix(in srgb,var(--success) 35%,var(--line));
+  color:var(--text);font-size:13px;line-height:1.5
+}
+.variable-highlight-note{
+  margin:0 0 14px;padding:12px 14px;border-radius:12px;background:var(--panel-2);
+  border:1px solid var(--line);color:var(--muted);font-size:13px;line-height:1.55
+}
+.variable-highlight-note strong{color:var(--text)}
+.quick-values{
+  margin:14px 0 0;padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2)
+}
+.quick-values-title{font-weight:850;margin-bottom:8px}
+.quick-values-list{display:flex;gap:7px;flex-wrap:wrap}
+.quick-value-chip{
+  border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);
+  padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer
+}
+.quick-value-chip:hover{border-color:var(--primary);background:var(--primary-soft)}
+.validation-error{color:var(--danger);font-size:12px;font-weight:800;margin-top:7px}
+.file-required-label{color:var(--warning);font-weight:850}
+
+.hint{font-size:12px;color:var(--muted);line-height:1.5}
+.editor-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 15px;border-top:1px solid var(--line);background:var(--panel)}
+.editor-footer .btn.copy-compiled{font-size:15px;padding-inline:17px}
+
+.variables-header{
+  display:flex;align-items:flex-start;gap:18px;justify-content:space-between;padding:18px 20px;margin-bottom:14px;
+  border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));border-radius:17px;
+  background:linear-gradient(135deg,var(--primary-soft),var(--panel-2))
+}
+.variables-header h3{margin:0 0 6px;font-size:22px}
+.variables-header p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+.variable-summary{display:none;margin-bottom:16px;padding:11px 14px;border-radius:12px;color:var(--success);font-weight:850;background:color-mix(in srgb,var(--success) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--success) 35%,var(--line))}
+.variable-summary.show{display:block}
+.variable-list{display:flex;flex-direction:column;gap:18px}
+.variable-card{
+  --var-accent:#2563eb;border:2px solid color-mix(in srgb,var(--var-accent) 38%,var(--line));
+  border-left:9px solid var(--var-accent);border-radius:18px;overflow:hidden;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--var-accent) 9%,var(--panel)),var(--panel) 70%);
+  box-shadow:0 12px 28px color-mix(in srgb,var(--var-accent) 12%,transparent)
+}
+.variable-card-head{
+  display:flex;align-items:center;gap:10px;padding:13px 17px;background:color-mix(in srgb,var(--var-accent) 13%,var(--panel));
+  border-bottom:1px solid color-mix(in srgb,var(--var-accent) 25%,var(--line))
+}
+.variable-number{padding:5px 9px;border-radius:999px;background:var(--var-accent);color:#fff;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.variable-token{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;font-weight:900;color:color-mix(in srgb,var(--var-accent) 78%,var(--text))}
+.variable-badge{margin-left:auto;padding:4px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:11px;color:var(--muted);font-weight:850}
+.variable-card-body{padding:19px}
+.variable-card h4{margin:0 0 7px;font-size:20px}
+.variable-help{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.variable-input{min-height:140px;font-size:16px;border-width:2px}
+.variable-input.missing{border-color:var(--danger);box-shadow:0 0 0 3px color-mix(in srgb,var(--danger) 15%,transparent)}
+.file-panel{margin-top:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);overflow:hidden}
+.file-panel summary{padding:10px 12px;cursor:pointer;font-weight:850;color:var(--text)}
+.file-zone{padding:13px;border-top:1px solid var(--line)}
+.file-drop{
+  padding:16px;border:2px dashed color-mix(in srgb,var(--var-accent) 45%,var(--line));border-radius:12px;text-align:center;
+  background:var(--panel);color:var(--muted);transition:.15s
+}
+.file-drop.drag{background:color-mix(in srgb,var(--var-accent) 12%,var(--panel));border-color:var(--var-accent)}
+.file-drop input{display:none}
+.file-panel-primary{margin:0 0 14px;border-width:2px}
+.file-panel-primary .file-zone{padding:14px}
+.file-drop-icon{width:44px;height:44px;margin:0 auto 8px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--var-accent) 16%,var(--panel));color:var(--var-accent);font-size:25px;font-weight:900}
+.file-drop-help{margin:5px 0 12px;font-size:13px;color:var(--muted)}
+.file-actions{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.file-status{margin-top:9px;font-size:12px;color:var(--muted);line-height:1.45}
+.file-status.has-file{display:inline-flex;padding:7px 10px;border-radius:9px;background:color-mix(in srgb,var(--success) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--success) 35%,var(--line));color:var(--success);font-weight:800}
+.manual-file-value{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.manual-file-value label{display:block;margin-bottom:8px}
+.preview-box{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+.preview-box h3{margin:0 0 10px;font-size:18px}
+#compiledPreview{min-height:260px;background:var(--panel);font-size:15px}
+.variable-empty{padding:38px 22px;border:2px dashed var(--line);border-radius:18px;text-align:center;color:var(--muted);background:var(--panel-2);line-height:1.65}
+.variable-empty code{padding:3px 7px;border-radius:7px;background:var(--primary-soft);color:var(--primary-2);font-weight:850}
+
+.modal{width:min(1400px,97vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:19px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.modal.small{width:min(580px,96vw)}
+.modal-head{display:flex;align-items:center;gap:10px;padding:15px 17px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0}
+.modal-body{padding:17px;overflow:auto}
+.modal-body .field + .field{margin-top:14px}
+.modal-foot{padding:12px 17px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.manage-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.panel-box{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
+.panel-box h4{margin:0 0 10px}
+.manage-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}
+.manage-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);flex-wrap:wrap}.manage-row .grow{flex:1 1 180px}.category-name-editable{display:inline-flex;align-items:center;min-height:32px;padding:5px 8px;margin:-5px -8px;border-radius:8px;cursor:text;transition:background .15s,box-shadow .15s}.category-name-editable:hover,.category-name-editable:focus-visible{background:var(--primary-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 24%,transparent);outline:none}.category-name-editable.editing{display:block;width:100%;min-width:160px;padding:6px 9px;margin:-6px -9px;border:2px solid var(--primary);border-radius:9px;background:var(--panel);color:var(--text);cursor:text;box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 16%,transparent)}.inline-category-name{width:100%;min-width:160px;height:36px;padding:6px 9px;border:2px solid var(--primary);border-radius:9px;background:var(--panel);color:var(--text);font-weight:850}
+.manage-row .grow{flex:1;min-width:0}
+.color-input{width:38px;height:34px;padding:2px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}
+.toast-wrap{position:fixed;right:18px;bottom:18px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{width:min(470px,calc(100vw - 24px));min-width:0;max-width:470px;padding:12px 14px;border-radius:12px;background:var(--text);color:var(--panel);box-shadow:var(--shadow);overflow-wrap:anywhere}
+
+@media(max-width:980px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:0;top:70px;bottom:0;width:min(320px,88vw);z-index:90;transform:translateX(-103%);transition:.2s;box-shadow:var(--shadow)}
+  .sidebar.open{transform:translateX(0)}
+  .resizer{display:none}.main{grid-column:1}.mobile-menu{display:inline-flex}.brand{min-width:auto}.brand small{display:none}
+  .top-actions .optional{display:none}.cards{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}
+  .editor-modal{min-width:0;width:98vw;height:96vh;resize:none}.manage-grid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .topbar{padding:9px}.brand h1{display:none}.main-head{padding:12px}.content{padding:12px 12px 70px}
+  .toolbar select,.view-toggle{display:none}.editor-backdrop{padding:0}.editor-modal{width:100vw;height:100dvh;max-height:100dvh;border-radius:0}
+  .editor-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.editor-head{flex-wrap:wrap}.editor-tabs{order:3;width:100%}
+  .editor-tab{flex:1}.stats{grid-template-columns:1fr}.cards.list .card{display:flex}.cards.list .excerpt{margin:9px 0}
+  .variables-header{flex-direction:column}.inline-form{grid-template-columns:1fr}
+  .modal-foot,.editor-footer{flex-wrap:wrap}.modal-foot .btn,.editor-footer .btn{max-width:100%}
+}
+@media(max-width:450px){
+  .top-actions #newPromptBtn{width:42px;min-width:42px;padding:0;font-size:0}
+  .top-actions #newPromptBtn::after{content:"\FF0B";font-size:20px}
+  .search-wrap{min-width:0}.topbar{gap:6px}.logo{width:36px;height:36px}
+}
+
+
+/* ---------- UX 18.0 ---------- */
+.top-actions #importBtn,.top-actions #exportBtn{display:none}
+.more-menu-wrap{position:relative}.more-menu{position:absolute;right:0;top:46px;min-width:220px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;z-index:80}.more-menu.show{display:block}.more-menu .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.more-menu .btn:hover{background:var(--panel-3)}
+.stats > .home-actions{grid-column:1/-1;width:100%;min-width:0}.home-actions{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.8fr);gap:14px;margin-bottom:16px}.home-primary,.home-secondary{min-width:0;padding:20px;border:1px solid var(--line);border-radius:18px}.home-primary{border-color:color-mix(in srgb,#2563eb 48%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#2563eb 22%,var(--panel)),color-mix(in srgb,#0e7490 9%,var(--panel)) 72%)}.home-secondary{border-color:color-mix(in srgb,#7c3aed 44%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,#7c3aed 18%,var(--panel)),color-mix(in srgb,#db2777 7%,var(--panel)) 76%)}.home-primary h3,.home-secondary h3{margin:0 0 7px;font-size:22px}.home-primary p,.home-secondary p{margin:0 0 14px;color:var(--muted);line-height:1.55}.home-primary .search{height:50px;font-size:16px;background:color-mix(in srgb,var(--panel) 90%,transparent)}.home-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.recent-strip{display:flex;gap:8px;flex-wrap:wrap}.recent-strip .btn{justify-content:flex-start}
+.workflow-overview .dashboard-intro{border-color:color-mix(in srgb,#0891b2 46%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#0891b2 18%,var(--panel)),color-mix(in srgb,#2563eb 9%,var(--panel)) 76%)}
+.workflow-overview .recommended-action{border-color:color-mix(in srgb,#ea580c 45%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,#ea580c 18%,var(--panel)),color-mix(in srgb,#b45309 8%,var(--panel)) 76%)}
+.stats.dashboard-grid .dashboard-card[data-dash-action="configure"],.stats.dashboard-grid .dashboard-card[data-dash-action="import"],.stats.dashboard-grid .dashboard-card[data-dash-action="files"],.stats.dashboard-grid .dashboard-card[data-dash-action="export"],.stats.dashboard-grid .dashboard-card[data-dash-action="diagnostics"]{display:none}
+.stats.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr));padding:14px;border:1px solid color-mix(in srgb,#334155 65%,var(--line));border-radius:20px;background:linear-gradient(145deg,color-mix(in srgb,#334155 15%,var(--panel)),color-mix(in srgb,#0e7490 5%,var(--panel)))}
+.dashboard-card{min-height:180px;background:linear-gradient(145deg,color-mix(in srgb,var(--dash) 18%,var(--panel)),color-mix(in srgb,var(--dash) 6%,var(--panel)) 74%)}.workflow-legend{display:none}.dashboard-intro{padding:17px 18px}.recommended-action{padding:17px 18px}.dashboard-card .dash-next{display:none}.dashboard-card p{font-size:12.5px}.dashboard-card strong{font-size:17px}
+.sidebar .side-section.backup{display:none}.side-title{font-size:10px}.side-section{margin-bottom:10px}.side-link,.tree-row{min-height:36px}.tree-row.sidebar-category-color{background:rgba(255,255,255,.035);border-color:transparent;box-shadow:inset 3px 0 var(--item-color,#60a5fa)}.tree-row.sidebar-category-color:hover{background:rgba(255,255,255,.10)}
+.card{min-height:170px}.card-actions{justify-content:flex-start}.card-actions .secondary-card-action{display:none}.card .meta .chip:nth-last-child(-n+2){display:none}.use-card{font-weight:900}.card-menu{position:relative}.card-menu-panel{position:absolute;right:0;bottom:42px;min-width:170px;display:none;padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);z-index:30}.card-menu.open .card-menu-panel{display:block}.card-menu-panel .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.card-menu-panel .btn:hover{background:var(--panel-3)}
+.use-mode .editor-tab[data-tab="prompt"]{display:none}.use-mode #savePromptBtn,.use-mode #duplicateBtn,.use-mode #trashBtn,.use-mode #exportPromptBtn{display:none}.use-mode #cancelEditorBtn{margin-left:auto}.use-mode .editor-head strong::after{content:" \00B7  Usa";color:var(--primary);font-weight:900}.use-mode .variables-header p{max-width:760px}.use-mode .variable-highlight-note{display:none}.use-mode .variables-header #detectVariablesBtn{display:none}.use-mode .preview-box{position:sticky;bottom:0;z-index:5;box-shadow:0 -8px 24px rgba(15,23,42,.08)}.use-mode .editor-footer{position:sticky;bottom:0;z-index:10}.use-mode .copy-compiled{font-size:16px;min-height:44px}.use-progress{display:none;margin:0 0 14px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-weight:850}.use-mode .use-progress{display:block}.editor-mode-switch{display:inline-flex;gap:6px;margin-left:8px}.editor-mode-switch .btn.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-2)}
+@media(max-width:1100px){.home-actions{grid-template-columns:1fr}}@media(max-width:900px){.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.home-actions{grid-template-columns:1fr}.card-actions .btn{flex:1 1 auto}}
+
+
+</style>
 
 </head>
 <body>
@@ -203,20 +592,1769 @@
 <input type="file" id="importInput" accept=".json,application/json" hidden>
 <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 
-<script defer src="js/core/config.js"></script>
-<script defer src="js/data/database.js"></script>
-<script defer src="js/core/ui.js"></script>
-<script defer src="js/features/library.js"></script>
-<script defer src="js/views/navigation.js"></script>
-<script defer src="js/views/dashboard.js"></script>
-<script defer src="js/views/prompt-cards.js"></script>
-<script defer src="js/features/variables.js"></script>
-<script defer src="js/features/editor.js"></script>
-<script defer src="js/features/prompt-actions.js"></script>
-<script defer src="js/features/management.js"></script>
-<script defer src="js/data/transfer.js"></script>
-<script defer src="js/app/events.js"></script>
-<script defer src="js/app/start.js"></script>
+<script>
+"use strict";
+const APP_VERSION="18.0.1";
+const APP_RELEASE_NAME="UX modulare e modalit\u00E0 Usa prompt";
+document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
+const versionLabel=document.getElementById("appVersionLabel");
+if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
+console.info(`Prompt Studio v${APP_VERSION} avviato`);
+
+/* ---------- Configurazione e stato ---------- */
+const DB_NAME="PromptStudioStandalone";
+const DB_VERSION=3;
+const STORES=["prompts","categories","clients","settings","backups","versions"];
+const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
+const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
+const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
+const MAX_EMBED_FILE_SIZE=20*1024*1024;
+const SORT_RULE_VERSION="17.10.1";
+const savedSortRuleVersion=localStorage.getItem("ps_sort_rule_version");
+const initialSort=savedSortRuleVersion===SORT_RULE_VERSION?(localStorage.getItem("ps_sort")||"title_asc"):"title_asc";
+if(savedSortRuleVersion!==SORT_RULE_VERSION){
+  localStorage.setItem("ps_sort","title_asc");
+  localStorage.setItem("ps_sort_rule_version",SORT_RULE_VERSION);
+}
+const state={
+  db:null,prompts:[],categories:[],clients:[],
+  filter:{type:"all",id:null},query:"",selected:new Set(),
+  sort:initialSort,
+  view:localStorage.getItem("ps_view")||"grid",
+  editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit"},
+  searchTimer:null,detectTimer:null,
+  lastSavedId:null,
+  recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}"),
+  openCategories:new Set(JSON.parse(localStorage.getItem("ps_open_categories")||"[]")),
+  manageSubcategoryFilter:null,
+  busy:new Set(),modalReturnFocus:{}
+};
+const $=value=>{
+  const key=String(value||"");
+  return /^[#.[>:]/.test(key)?document.querySelector(key):document.getElementById(key);
+};
+const $=selector=>[...document.querySelectorAll(selector)];
+const uid=prefix=>`${prefix}_${crypto.randomUUID?.()||Date.now()+"_"+Math.random().toString(16).slice(2)}`;
+const now=()=>new Date().toISOString();
+const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]));
+const normalize=value=>String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+const titleSortData=item=>{
+  const title=String(item?.title||"").trim();
+  const match=title.match(/^(?:[#\u2116\s]*)?(\d+(?:[.,]\d+)?)/);
+  return {title,hasNumber:Boolean(match),number:match?Number(match[1].replace(",",".")):Number.POSITIVE_INFINITY};
+};
+const naturalTitleCompare=(a,b)=>{
+  const left=titleSortData(a),right=titleSortData(b);
+  if(left.hasNumber!==right.hasNumber)return left.hasNumber?-1:1;
+  if(left.hasNumber&&left.number!==right.number)return left.number-right.number;
+  return left.title.localeCompare(right.title,"it",{numeric:true,sensitivity:"base",ignorePunctuation:true});
+};
+const catById=id=>state.categories.find(item=>item.id===id);
+const clientById=id=>state.clients.find(item=>item.id===id);
+const livePrompts=()=>state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
+const activePrompts=()=>state.prompts.filter(item=>!item.deletedAt);
+
+
+</script>
+<script>
+/* ---------- Database ---------- */
+function openDatabase(){
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open(DB_NAME,DB_VERSION);
+    request.onupgradeneeded=()=>{
+      const db=request.result;
+      STORES.forEach(name=>{if(!db.objectStoreNames.contains(name))db.createObjectStore(name,{keyPath:"id"})});
+    };
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+  });
+}
+function store(name,mode="readonly"){return state.db.transaction(name,mode).objectStore(name)}
+function getAll(name){return new Promise((resolve,reject)=>{const request=store(name).getAll();request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error)})}
+function getOne(name,id){return new Promise((resolve,reject)=>{const request=store(name).get(id);request.onsuccess=()=>resolve(request.result||null);request.onerror=()=>reject(request.error)})}
+function put(name,value){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").put(value);request.onsuccess=()=>resolve(value);request.onerror=()=>reject(request.error)})}
+function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
+async function loadData(){
+  [state.prompts,state.categories,state.clients]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients")]);
+  state.categories.sort(categoryAlphabeticalCompare);
+  state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
+}
+async function removeLegacyDemoPrompt(){
+  const demo=state.prompts.find(item=>
+    item.title==="Esempio di prompt con variabili" &&
+    Array.isArray(item.tags) && item.tags.length===1 && item.tags[0]==="esempio" &&
+    String(item.content||"").includes("DOMINIO: [DOMINIO_SITO]")
+  );
+  if(demo)await remove("prompts",demo.id);
+}
+async function seedData(){
+  if(!state.categories.length){
+    const seeds=[
+      ["SEO",null],["Audit SEO","SEO"],["Contenuti SEO","SEO"],["Local SEO","SEO"],["SEO tecnica","SEO"],
+      ["WordPress",null],["Social media",null],["Immagini",null],["Copywriting",null],["Sviluppo web",null]
+    ];
+    const roots={};
+    for(let index=0;index<seeds.length;index++){
+      const [name,parentName]=seeds[index];
+      const id=uid("cat");
+      const parentId=parentName?roots[parentName]:null;
+      if(!parentName)roots[name]=id;
+      await put("categories",{id,name,parentId,color:CATEGORY_COLORS[index%CATEGORY_COLORS.length],order:index,createdAt:now()});
+    }
+  }
+  if(!state.clients.length){
+    for(const name of ["Roberto Zanoni","Studio Dentistico Zirafa","Yoga Buena Onda","Pilates Buena Onda","Trova Esperti Digitali"]){
+      await put("clients",{id:uid("client"),name,createdAt:now()});
+    }
+  }
+  /* La libreria dei prompt parte vuota: non vengono creati prompt dimostrativi. */
+  await loadData();
+}
+
+
+
+</script>
+<script>
+/* ---------- Utilit\u00E0 UI ---------- */
+function diagnosticEvents(){
+  try{return JSON.parse(localStorage.getItem("ps_diagnostic_events")||"[]")}catch{return []}
+}
+function recordDiagnosticEvent(level,operation,message,code=""){
+  const events=diagnosticEvents();
+  events.unshift({id:uid("event"),at:now(),level,operation,message:String(message||""),code:String(code||"")});
+  localStorage.setItem("ps_diagnostic_events",JSON.stringify(events.slice(0,50)));
+}
+function toast(message,type="info",code=""){
+  const node=document.createElement("div");
+  node.className=`toast ${type}`;
+  node.setAttribute("role",type==="error"?"alert":"status");
+  node.innerHTML=`<strong>${esc(message)}</strong>${code?`<span class="toast-code">Codice: ${esc(code)}</span>`:""}`;
+  $("toastWrap").appendChild(node);
+  if(type==="error"||type==="warning")recordDiagnosticEvent(type,"interfaccia",message,code);
+  setTimeout(()=>node.remove(),5200);
+}
+function formatDate(value){return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value))}
+function formatBytes(bytes){
+  if(!Number.isFinite(bytes))return "";
+  const units=["B","KB","MB","GB"];let size=bytes,index=0;
+  while(size>=1024&&index<units.length-1){size/=1024;index++}
+  return `${size.toFixed(index?1:0)} ${units[index]}`;
+}
+function arrayBufferToBase64(buffer){
+  const bytes=new Uint8Array(buffer);
+  let binary="";
+  const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+chunk,bytes.length)));
+  }
+  return btoa(binary);
+}
+function base64ToBlob(base64,mimeType="application/octet-stream"){
+  const binary=atob(base64),bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes],{type:mimeType});
+}
+function safeFilename(value){
+  return String(value||"prompt").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)||"prompt";
+}
+function promptAttachmentCount(prompt){
+  return Object.values(prompt?.variableFiles||{}).filter(file=>file&&file.base64).length;
+}
+function categoryAlphabeticalCompare(a,b){
+  return String(a?.name||"").localeCompare(String(b?.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true});
+}
+function categoryColor(category){
+  if(!category)return "#64748b";
+  if(category.parentId){
+    const parent=catById(category.parentId);
+    if(parent)return categoryColor(parent);
+  }
+  if(category.color)return category.color;
+  return CATEGORY_COLORS[Math.abs([...category.id].reduce((sum,char)=>sum+char.charCodeAt(0),0))%CATEGORY_COLORS.length];
+}
+function rootCategoriesAlphabetical(){
+  return state.categories.filter(item=>!item.parentId).sort(categoryAlphabeticalCompare);
+}
+function childCategoriesAlphabetical(parentId){
+  return state.categories.filter(item=>item.parentId===parentId).sort(categoryAlphabeticalCompare);
+}
+function categoriesHierarchicalAlphabetical(){
+  return rootCategoriesAlphabetical().flatMap(root=>[root,...childCategoriesAlphabetical(root.id)]);
+}
+async function copyText(text){
+  const value=String(text??"");
+
+  if(navigator.clipboard&&window.isSecureContext){
+    try{
+      await navigator.clipboard.writeText(value);
+      return;
+    }catch(error){
+      console.warn("Clipboard API non disponibile, uso il metodo alternativo.",error);
+    }
+  }
+
+  return new Promise((resolve,reject)=>{
+    const area=document.createElement("textarea");
+    area.value=value;
+    area.setAttribute("readonly","");
+    area.style.position="fixed";
+    area.style.top="0";
+    area.style.left="-9999px";
+    area.style.opacity="0";
+    document.body.appendChild(area);
+    area.focus({preventScroll:true});
+    area.select();
+    area.setSelectionRange(0,area.value.length);
+
+    try{
+      const copied=document.execCommand("copy");
+      area.remove();
+      copied?resolve():reject(new Error("Il browser ha bloccato l\u2019accesso agli appunti."));
+    }catch(error){
+      area.remove();
+      reject(error);
+    }
+  });
+}
+function setTheme(initial=false){
+  if(initial){
+    const saved=localStorage.getItem("ps_theme");
+    document.body.classList.toggle("dark",saved?saved==="dark":matchMedia("(prefers-color-scheme:dark)").matches);
+  }else{
+    document.body.classList.toggle("dark");
+    localStorage.setItem("ps_theme",document.body.classList.contains("dark")?"dark":"light");
+  }
+}
+function openModal(id){
+  const backdrop=$(id);if(!backdrop)return;
+  state.modalReturnFocus[id]=document.activeElement;
+  backdrop.classList.add("show");
+  const dialog=backdrop.querySelector('[role="dialog"],.modal');
+  setTimeout(()=>{const first=dialog?.querySelector('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])');(first||dialog)?.focus({preventScroll:true})},30);
+}
+function closeModal(id){
+  const backdrop=$(id);if(!backdrop)return;
+  backdrop.classList.remove("show");
+  const previous=state.modalReturnFocus[id];delete state.modalReturnFocus[id];
+  if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
+}
+function confirmAction(title,message,onConfirm){
+  $("choiceTitle").textContent=title;
+  $("choiceBody").innerHTML=`<p>${esc(message)}</p>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Annulla</button><button class="btn danger" id="choiceConfirm">Conferma</button>`;
+  bindModalClose();
+  $("choiceConfirm").onclick=()=>{closeModal("choiceModal");onConfirm()};
+  openModal("choiceModal");
+}
+function choiceAction(title,label,options,onConfirm){
+  $("choiceTitle").textContent=title;
+  $("choiceBody").innerHTML=`<div class="field"><label>${esc(label)}</label><select id="choiceSelect">${options}</select></div>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Annulla</button><button class="btn primary" id="choiceConfirm">Applica</button>`;
+  bindModalClose();
+  $("choiceConfirm").onclick=()=>{const value=$("choiceSelect").value;closeModal("choiceModal");onConfirm(value)};
+  openModal("choiceModal");
+}
+function bindModalClose(){$("[data-close]").forEach(button=>button.onclick=()=>closeModal(button.dataset.close))}
+
+
+
+</script>
+<script>
+/* ---------- Ricerca e filtri ---------- */
+function setFilter(type,id=null){
+  state.filter={type,id};state.selected.clear();
+  $(".side-link[data-filter]").forEach(button=>button.classList.toggle("active",button.dataset.filter===type));
+  render();
+  $("sidebar").classList.remove("open");
+}
+function filteredPrompts(){
+  const filter=state.filter;
+  let items=[...state.prompts];
+  if(filter.type==="trash")items=items.filter(item=>item.deletedAt);
+  else if(filter.type==="archived")items=items.filter(item=>!item.deletedAt&&item.status==="archived");
+  else items=items.filter(item=>!item.deletedAt&&item.status!=="archived");
+  if(filter.type==="favorites")items=items.filter(item=>item.favorite);
+  if(filter.type==="recent"){const limit=Date.now()-7*864e5;items=items.filter(item=>new Date(item.updatedAt).getTime()>=limit)}
+  if(filter.type==="uncategorized")items=items.filter(item=>!item.categoryId&&!item.subcategoryId);
+  if(filter.type==="category"){
+    const childIds=state.categories.filter(cat=>cat.parentId===filter.id).map(cat=>cat.id);
+    items=items.filter(item=>item.categoryId===filter.id||item.subcategoryId===filter.id||childIds.includes(item.subcategoryId));
+  }
+  if(filter.type==="client")items=items.filter(item=>item.clientId===filter.id);
+  const query=normalize(state.query);
+  if(query){
+    const words=query.split(" ").filter(Boolean);
+    items=items.filter(item=>{
+      const text=normalize([item.title,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name].join(" "));
+      return words.every(word=>text.includes(word));
+    });
+  }
+  return items.sort((a,b)=>{
+    if(state.sort==="title_asc")return naturalTitleCompare(a,b);
+    if(state.sort==="title_desc")return naturalTitleCompare(b,a);
+    if(state.sort==="created_desc")return new Date(b.createdAt)-new Date(a.createdAt);
+    if(state.sort==="usage_desc")return (b.usageCount||0)-(a.usageCount||0);
+    return new Date(b.updatedAt)-new Date(a.updatedAt);
+  });
+}
+function filterInfo(){
+  const {type,id}=state.filter;
+  if(type==="all")return ["Tutti i prompt","La tua libreria completa"];
+  if(type==="favorites")return ["Preferiti","I prompt che utilizzi pi\u00F9 spesso"];
+  if(type==="recent")return ["Recenti","Modificati negli ultimi sette giorni"];
+  if(type==="uncategorized")return ["Senza categoria","Prompt ancora da organizzare"];
+  if(type==="archived")return ["Archivio","Prompt esclusi dalla libreria attiva"];
+  if(type==="trash")return ["Cestino","Prompt eliminati e recuperabili"];
+  if(type==="category")return [catById(id)?.name||"Categoria","Prompt della categoria selezionata"];
+  if(type==="client")return [clientById(id)?.name||"Cliente","Prompt assegnati al cliente o progetto"];
+  return ["Prompt",""];
+}
+
+
+
+</script>
+<script>
+/* ---------- Rendering ---------- */
+function renderSidebar(){
+  const live=livePrompts(),active=activePrompts();
+  $("countAll").textContent=live.length;
+  $("countFavorites").textContent=live.filter(item=>item.favorite).length;
+  $("countRecent").textContent=live.filter(item=>Date.now()-new Date(item.updatedAt).getTime()<=7*864e5).length;
+  $("countUncategorized").textContent=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
+  $("countArchived").textContent=active.filter(item=>item.status==="archived").length;
+  $("countTrash").textContent=state.prompts.filter(item=>item.deletedAt).length;
+
+  const counts={};
+  live.forEach(item=>{
+    if(item.categoryId)counts[item.categoryId]=(counts[item.categoryId]||0)+1;
+    if(item.subcategoryId)counts[item.subcategoryId]=(counts[item.subcategoryId]||0)+1;
+  });
+  const node=(category,depth=0)=>{
+    const children=childCategoriesAlphabetical(category.id);
+    const hasChildren=children.length>0;
+    const isOpen=state.openCategories.has(category.id);
+    const toggle=hasChildren
+      ? `<button class="tree-toggle" data-toggle-category="${esc(category.id)}" aria-expanded="${isOpen}" title="${isOpen?"Chiudi":"Apri"} sottocategorie" aria-label="${isOpen?"Chiudi":"Apri"} sottocategorie di ${esc(category.name)}">\u25B6</button>`
+      : `<span class="tree-toggle-placeholder" aria-hidden="true"></span>`;
+    const row=`<div class="tree-row sidebar-category-color ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth};--item-color:${esc(categoryColor(category))}" data-category="${esc(category.id)}" data-has-children="${hasChildren}" role="button" tabindex="0">
+      ${toggle}<span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span>
+    </div>`;
+    if(!hasChildren)return row;
+    return `${row}<div class="tree-children ${isOpen?"open":""}" data-category-children="${esc(category.id)}">${children.map(child=>node(child,depth+1)).join("")}</div>`;
+  };
+  $("categoryTree").innerHTML=rootCategoriesAlphabetical().map(item=>node(item)).join("");
+  $("clientList").innerHTML=state.clients.map(client=>{
+    const count=live.filter(item=>item.clientId===client.id).length;
+    return `<div class="tree-row client-color ${state.filter.type==="client"&&state.filter.id===client.id?"active":""}" data-client="${esc(client.id)}" role="button" tabindex="0"><span class="tree-dot" style="--dot:#94a3b8"></span><span class="tree-label">${esc(client.name)}</span><span class="count">${count}</span></div>`;
+  }).join("");
+  $("[data-toggle-category]").forEach(toggle=>{
+    toggle.onclick=event=>{
+      event.stopPropagation();
+      const id=toggle.dataset.toggleCategory;
+      state.openCategories.has(id)?state.openCategories.delete(id):state.openCategories.add(id);
+      localStorage.setItem("ps_open_categories",JSON.stringify([...state.openCategories]));
+      renderSidebar();
+    };
+  });
+  $("[data-category]").forEach(button=>{
+    button.onclick=event=>{
+      if(event.target.closest("[data-delete-category],[data-toggle-category]"))return;
+      setFilter("category",button.dataset.category);
+    };
+    button.onkeydown=event=>{
+      if((event.key!=="Enter"&&event.key!==" ")||event.target.closest("button"))return;
+      event.preventDefault();
+      setFilter("category",button.dataset.category);
+    };
+  });
+  $("[data-client]").forEach(button=>{button.onclick=event=>{if(event.target.closest("[data-delete-client]"))return;setFilter("client",button.dataset.client)};button.onkeydown=event=>{if((event.key==="Enter"||event.key===" ")&&!event.target.closest("button")){event.preventDefault();setFilter("client",button.dataset.client)}}});
+  $("[data-delete-category]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteCategory(button.dataset.deleteCategory)});
+  $("[data-delete-client]").forEach(button=>button.onclick=event=>{event.stopPropagation();deleteClient(button.dataset.deleteClient)});
+}
+
+
+</script>
+<script>
+function validHttpUrl(value){
+  if(!String(value||"").trim())return true;
+  try{const url=new URL(String(value).trim());return ["http:","https:"].includes(url.protocol)}catch{return false}
+}
+function problemPriorityRank(priority){return {Bloccante:0,Alta:1,Media:2,Bassa:3,Informativa:4}[priority]??9}
+function collectProblems(){
+  const live=livePrompts();
+  const problems=[];
+  const add=problem=>problems.push({...problem,lastChecked:now(),status:"Attivo"});
+  const missingTitle=live.filter(item=>!String(item.title||"").trim());
+  if(missingTitle.length)add({id:"data-missing-title",title:"Prompt senza titolo",description:"Sono presenti record senza un titolo utilizzabile.",priority:"Alta",cause:"Dati importati o salvati in modo incompleto.",functionName:"Creazione e importazione",impact:"Ricerca, ordinamento ed esportazione possono risultare poco affidabili.",solution:"Apri i prompt coinvolti e inserisci un titolo.",mode:"Manuale",target:"library",count:missingTitle.length,itemIds:missingTitle.map(x=>x.id)});
+  const missingContent=live.filter(item=>!String(item.content||"").trim());
+  if(missingContent.length)add({id:"data-missing-content",title:"Prompt senza contenuto",description:"Sono presenti prompt privi del testo principale.",priority:"Bloccante",cause:"Importazione incompleta o record danneggiato.",functionName:"Editor prompt",impact:"Il prompt non pu\u00F2 essere compilato o utilizzato.",solution:"Apri il prompt e inserisci il contenuto obbligatorio.",mode:"Manuale",target:"library",count:missingContent.length,itemIds:missingContent.map(x=>x.id)});
+  const uncategorized=live.filter(item=>!item.categoryId&&!item.subcategoryId);
+  if(uncategorized.length)add({id:"organization-uncategorized",title:"Prompt senza categoria",description:"Alcuni prompt non sono classificati.",priority:"Media",cause:"Categoria non assegnata.",functionName:"Organizzazione libreria",impact:"La ricerca per struttura e il riutilizzo risultano meno efficaci.",solution:"Assegna una categoria o sottocategoria.",mode:"Manuale",target:"organize",count:uncategorized.length,itemIds:uncategorized.map(x=>x.id)});
+  const review=live.filter(item=>item.status==="review");
+  if(review.length)add({id:"verification-review",title:"Prompt da verificare",description:"Sono presenti prompt con stato \u201CDa verificare\u201D.",priority:"Media",cause:"Revisione non ancora conclusa.",functionName:"Verifica prompt",impact:"I contenuti potrebbero non essere pronti per l\u2019uso.",solution:"Apri i prompt, controlla anteprima e contenuto, quindi aggiorna lo stato.",mode:"Manuale",target:"verify",count:review.length,itemIds:review.map(x=>x.id)});
+  const orphanCategory=live.filter(item=>(item.categoryId&&!catById(item.categoryId))||(item.subcategoryId&&!catById(item.subcategoryId)));
+  if(orphanCategory.length)add({id:"data-orphan-category",title:"Riferimenti a categorie mancanti",description:"Alcuni prompt puntano a categorie non pi\u00F9 presenti.",priority:"Alta",cause:"Eliminazione, importazione o dati non coerenti.",functionName:"Categorie",impact:"Filtri e raggruppamenti possono mostrare risultati incoerenti.",solution:"Riassegna una categoria valida ai prompt coinvolti.",mode:"Manuale",target:"organize",count:orphanCategory.length,itemIds:orphanCategory.map(x=>x.id)});
+  const orphanClient=live.filter(item=>item.clientId&&!clientById(item.clientId));
+  if(orphanClient.length)add({id:"data-orphan-client",title:"Riferimenti a clienti mancanti",description:"Alcuni prompt puntano a clienti o progetti non pi\u00F9 presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Clienti e progetti",impact:"Il filtro per cliente non pu\u00F2 rappresentare correttamente i dati.",solution:"Riassegna un cliente valido oppure rimuovi l\u2019associazione.",mode:"Manuale",target:"organize",count:orphanClient.length,itemIds:orphanClient.map(x=>x.id)});
+  const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
+  if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o pi\u00F9 collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L\u2019apertura del tool pu\u00F2 fallire o essere bloccata.",solution:"Correggi il campo \u201CTool da utilizzare\u201D.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
+  const invalidFiles=[];
+  live.forEach(prompt=>Object.values(prompt.variableFiles||{}).forEach(file=>{if(file&&(!file.base64||Number(file.size)>MAX_EMBED_FILE_SIZE))invalidFiles.push(prompt.id)}));
+  if(invalidFiles.length)add({id:"file-invalid-attachment",title:"File incorporati non validi",description:"Sono presenti file senza contenuto incorporato o oltre il limite previsto.",priority:"Alta",cause:"Importazione incompleta o file superiore al limite.",functionName:"Variabili e file",impact:"Backup e ripristino del file potrebbero non funzionare.",solution:"Apri il prompt, rimuovi il file e caricalo nuovamente entro il limite.",mode:"Manuale",target:"files",count:new Set(invalidFiles).size,itemIds:[...new Set(invalidFiles)]});
+  return problems.sort((a,b)=>problemPriorityRank(a.priority)-problemPriorityRank(b.priority)||a.title.localeCompare(b.title,"it"));
+}
+function syncResolvedProblems(activeProblems){
+  const previous=JSON.parse(localStorage.getItem("ps_active_problem_ids")||"[]");
+  const activeIds=activeProblems.map(item=>item.id);
+  const resolved=JSON.parse(localStorage.getItem("ps_resolved_problems")||"[]");
+  previous.filter(id=>!activeIds.includes(id)).forEach(id=>{
+    if(!resolved.some(item=>item.id===id&&item.resolvedAt===localStorage.getItem(`ps_problem_resolved_${id}`))){
+      const resolvedAt=now();localStorage.setItem(`ps_problem_resolved_${id}`,resolvedAt);
+      resolved.unshift({id,resolvedAt,mode:"Rilevamento automatico",verification:"Problema non pi\u00F9 presente alla nuova lettura dei dati"});
+    }
+  });
+  localStorage.setItem("ps_active_problem_ids",JSON.stringify(activeIds));
+  localStorage.setItem("ps_resolved_problems",JSON.stringify(resolved.slice(0,30)));
+}
+function workflowSnapshot(){
+  const live=livePrompts();
+  const configured=state.categories.length>0&&state.clients.length>0;
+  const uncategorized=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
+  const review=live.filter(item=>item.status==="review").length;
+  const attachments=live.reduce((sum,item)=>sum+promptAttachmentCount(item),0);
+  const variables=live.reduce((sum,item)=>sum+extractVariables(item.content).length,0);
+  const hasPrompts=live.length>0;
+  const problems=collectProblems();syncResolvedProblems(problems);
+  const blocking=problems.filter(item=>item.priority==="Bloccante").length;
+  const high=problems.filter(item=>item.priority==="Alta").length;
+  const warnings=problems.filter(item=>["Media","Bassa"].includes(item.priority)).length;
+  const completed=[configured,hasPrompts,hasPrompts&&uncategorized===0,hasPrompts,hasPrompts&&review===0,hasPrompts&&blocking===0].filter(Boolean).length;
+  const total=6;
+  const percent=Math.round(completed/total*100);
+  return {live,configured,uncategorized,review,attachments,variables,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
+}
+function recommendedWorkflowAction(snapshot){
+  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"Categorie, clienti o progetti non sono ancora pronti.",priority:"Alta",count:`${state.categories.length} categorie \u00B7 ${state.clients.length} clienti`,after:"Dopo potrai organizzare correttamente i prompt."};
+  if(!snapshot.hasPrompts)return {action:"new",icon:"\uFF0B",title:"Crea o importa il primo prompt",reason:"La libreria \u00E8 vuota.",priority:"Alta",count:"0 prompt disponibili",after:"Dopo potrai compilare e verificare il contenuto."};
+  if(snapshot.blocking||snapshot.high)return {action:"problems",icon:"!",title:"Risolvi i problemi prioritari",reason:"Sono presenti anomalie che possono impedire o compromettere l\u2019utilizzo dei prompt.",priority:snapshot.blocking?"Bloccante":"Alta",count:`${snapshot.blocking} bloccanti \u00B7 ${snapshot.high} alta priorit\u00E0`,after:"Dopo la modifica la dashboard rilegger\u00E0 i dati e verificher\u00E0 il problema."};
+  if(snapshot.uncategorized)return {action:"organize",icon:"\uD83D\uDDC2",title:"Organizza i prompt non classificati",reason:"Alcuni prompt non hanno una categoria.",priority:"Media",count:`${snapshot.uncategorized} elementi coinvolti`,after:"Dopo sar\u00E0 pi\u00F9 semplice trovarli e riutilizzarli."};
+  if(snapshot.review)return {action:"verify",icon:"\u2713",title:"Verifica i prompt in revisione",reason:"Sono presenti prompt con stato \u201CDa verificare\u201D.",priority:"Media",count:`${snapshot.review} elementi coinvolti`,after:"Dopo potrai utilizzarli con maggiore sicurezza."};
+  return {action:"library",icon:"\u2315",title:"Seleziona il prompt da utilizzare",reason:"Non risultano problemi attivi o attivit\u00E0 organizzative pendenti.",priority:"Normale",count:`${snapshot.live.length} prompt disponibili`,after:"Apri un prompt, compila le variabili e copialo."};
+}
+function updateDashboardHash(action){
+  const hash=`#step-${action}`;
+  if(location.hash!==hash)history.replaceState(null,"",hash);
+  localStorage.setItem("ps_last_dashboard_action",action);
+}
+function highlightDashboardCard(action){
+  $(".dashboard-card.active").forEach(card=>card.classList.remove("active"));
+  const card=document.querySelector(`[data-dash-action="${CSS.escape(action)}"]`);
+  if(card)card.classList.add("active");
+}
+function openProblemTarget(problem){
+  updateDashboardHash(problem.target);
+  if(problem.target==="organize"){setFilter("uncategorized");return}
+  if(["library","verify","files","use"].includes(problem.target)){
+    const id=problem.itemIds?.find(itemId=>state.prompts.some(item=>item.id===itemId));
+    if(id){openEditor(id,["verify","files","use"].includes(problem.target)?"variables":null);return}
+  }
+  performDashboardAction(problem.target);
+}
+function renderProblemsPanel(){
+  const problems=collectProblems();
+  const counts={Bloccante:0,Alta:0,Media:0,Bassa:0,Informativa:0};problems.forEach(item=>counts[item.priority]++);
+  $("choiceTitle").textContent="Problemi rilevati";
+  $("choiceBody").innerHTML=`<section id="section-problems" tabindex="-1"><div class="problem-summary">${Object.entries(counts).map(([name,count])=>`<span>${esc(name)}<br><strong>${count}</strong></span>`).join("")}</div>${problems.length?`<div class="problem-list">${problems.map(problem=>`<article class="problem-item" id="problem-${esc(problem.id)}" data-priority="${esc(problem.priority)}" tabindex="-1"><div class="problem-head"><strong>${esc(problem.title)}</strong><span class="problem-badge">${esc(problem.priority)}</span></div><p>${esc(problem.description)}</p><div class="problem-meta"><span>${problem.count} elementi</span><span>${esc(problem.functionName)}</span><span>Correzione ${esc(problem.mode.toLowerCase())}</span><span>Stato: ${esc(problem.status)}</span></div><details><summary>Mostra causa, impatto e soluzione</summary><p><strong>Causa probabile:</strong> ${esc(problem.cause)}</p><p><strong>Impatto:</strong> ${esc(problem.impact)}</p><p><strong>Soluzione:</strong> ${esc(problem.solution)}</p><p><strong>Ultima verifica:</strong> ${esc(formatDate(problem.lastChecked))}</p></details><div class="problem-actions"><button class="btn primary small" data-open-problem="${esc(problem.id)}">Apri la sezione interessata</button><button class="btn small" data-recheck-problem="${esc(problem.id)}">Verifica nuovamente</button></div></article>`).join("")}</div>`:`<div class="panel-box"><strong>Tutto corretto</strong><p>La nuova lettura dei dati non ha rilevato problemi attivi.</p></div>`}</section>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn primary" id="openDiagnosticsFromProblems">Apri diagnostica</button>`;
+  bindModalClose();
+  $('[data-open-problem]').forEach(button=>button.onclick=()=>{const problem=problems.find(item=>item.id===button.dataset.openProblem);if(problem){closeModal("choiceModal");openProblemTarget(problem)}});
+  $('[data-recheck-problem]').forEach(button=>button.onclick=()=>{const id=button.dataset.recheckProblem;const stillPresent=collectProblems().some(item=>item.id===id);toast(stillPresent?"Il problema \u00E8 ancora presente. I dati non soddisfano ancora il requisito.":"Il problema non \u00E8 pi\u00F9 presente dopo la nuova verifica.",stillPresent?"warning":"success",stillPresent?"PS-VERIFY-001":"");render();renderProblemsPanel()});
+  $("openDiagnosticsFromProblems").onclick=()=>{closeModal("choiceModal");setTimeout(()=>performDashboardAction("diagnostics"),40)};
+  openModal("choiceModal");setTimeout(()=>$("section-problems")?.focus(),60);
+}
+function sanitizedDiagnosticReport(){
+  const snapshot=workflowSnapshot();
+  const resolved=JSON.parse(localStorage.getItem("ps_resolved_problems")||"[]");
+  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,attachments:snapshot.attachments,variables:snapshot.variables,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
+}
+function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prompt-studio-diagnostica-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Report diagnostico esportato senza contenuti completi o credenziali.","success")}
+function renderDiagnosticsPanel(){
+  const snapshot=workflowSnapshot();const report=sanitizedDiagnosticReport();const resolved=report.resolvedProblems;
+  $("choiceTitle").textContent="Diagnostica tecnica";
+  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
+  bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
+}
+function promptForAction(action,snapshot){
+  if(!snapshot.hasPrompts)return null;
+  if(action==="verify")return snapshot.live.find(item=>item.status==="review")||snapshot.live[0];
+  if(action==="files")return snapshot.live.find(item=>extractVariables(item.content).some(def=>def.fileLike&&!def.optional&&!promptAttachmentCount(item)))||snapshot.live[0];
+  if(action==="variables")return snapshot.live.find(item=>extractVariables(item.content).length>0)||snapshot.live[0];
+  return snapshot.live[0];
+}
+function performDashboardAction(action,{fromHash=false}={}){
+  const snapshot=workflowSnapshot();
+  if(!fromHash)updateDashboardHash(action);
+  highlightDashboardCard(action);
+  if(action==="configure"){renderManage();openModal("manageModal");return}
+  if(action==="new"){openEditor();return}
+  if(action==="import"){$("importInput").click();return}
+  if(action==="organize"){setFilter(snapshot.uncategorized?"uncategorized":"all");return}
+  if(action==="library"){setFilter("all");setTimeout(()=>$('globalSearch').focus(),80);return}
+  if(action==="problems"){renderProblemsPanel();return}
+  if(["variables","files","verify","use"].includes(action)){
+    if(!snapshot.hasPrompts){toast("Passaggio bloccato: crea o importa prima un prompt.","warning","PS-REQ-001");openEditor();return}
+    const target=promptForAction(action,snapshot);
+    openEditor(target?.id||snapshot.live[0].id,"variables",action==="use"||action==="variables"||action==="files"||action==="verify"?"use":"edit");return;
+  }
+  if(action==="export"){
+    if(!snapshot.hasPrompts){toast("Esportazione non disponibile: non esistono prompt da includere.","warning","PS-REQ-002");openEditor();return}
+    exportData();return;
+  }
+  if(action==="diagnostics")renderDiagnosticsPanel();
+}
+function stateDescriptor(stateName){
+  const map={"Non configurato":["\u25CB","warning"],"Configurazione incompleta":["\u25B3","warning"],"Dati mancanti":["!","error"],"Pronto":["\u25CF","info"],"In attesa":["\u25F7","info"],"Operazione in corso":["\u21BB","info"],"Analisi completata":["\u2713","success"],"Completato con avvisi":["\u25B3","warning"],"Verifica necessaria":["?","warning"],"Correzione disponibile":["\u270E","warning"],"Correzione eseguita":["\u2713","success"],"Correzione da confermare":["?","warning"],"Errore":["!","error"],"Bloccato":["\u26D4","error"],"Nessun risultato":["\u25CB","info"],"Tutto corretto":["\u2713","success"]};return map[stateName]||["\u25CF","info"];
+}
+function renderStats(){
+  const visible=state.filter.type==="all"&&!state.query;
+  $("stats").classList.toggle("hidden",!visible);$("stats").classList.toggle("dashboard-grid",visible);if(!visible)return;
+  const s=workflowSnapshot(),recommendation=recommendedWorkflowAction(s);
+  const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":s.problems.length?"Correzione disponibile":"Tutto corretto";
+  const stepCards=[
+    {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti e progetti.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie \u00B7 ${state.clients.length} clienti`,next:s.configured?"Crea o importa un prompt":"Completa categorie e clienti",className:s.configured?"completed":""},
+    {action:"new",step:"Step 2",tone:"cyan",icon:"\uFF0B",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
+    {action:"import",step:"Alternativa",tone:"cyan",icon:"\u21E7",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
+    {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"\uD83D\uDDC2",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
+    {action:"problems",step:"Controllo",tone:s.blocking?"red":s.problems.length?"orange":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorit\u00E0, cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi \u00B7 ${s.blocking} bloccanti`,next:s.problems.length?"Apri il problema e correggi i dati":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":s.problems.length?"":"completed",blocked:!s.hasPrompts},
+    {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"variables",step:"Step 5",tone:"purple",icon:"\u270E",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"files",step:"Step 6",tone:s.attachments?"green":"cyan",icon:"\uD83D\uDCCE",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.attachments?"Analisi completata":"Verifica necessaria",count:`${s.attachments} file incorporati`,next:s.hasPrompts?"Verifica il prompt":"Richiede almeno un prompt",className:!s.hasPrompts?"blocked":s.attachments?"completed":"",blocked:!s.hasPrompts},
+    {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"\u2713",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
+    {action:"use",step:"Step 8",tone:"green",icon:"\u29C9",title:"Copia e utilizza",description:"Copia il prompt compilato oppure apri il tool associato.",state:s.hasPrompts&&s.blocking===0?"Pronto":s.hasPrompts?"Bloccato":"Nessun risultato",count:s.hasPrompts?"Prompt disponibili":"Nessun prompt",next:s.blocking?"Risolvi prima i problemi bloccanti":"Salva gli eventuali aggiornamenti",className:s.hasPrompts&&s.blocking===0?"":"blocked",blocked:!s.hasPrompts||s.blocking>0},
+    {action:"export",step:"Step 9",tone:"charcoal",icon:"\u21E9",title:"Esporta e crea backup",description:"Scarica l\u2019archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt \u00B7 ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"\uD83D\uDEE0",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per l\u2019assistenza",className:s.problems.length?"":"completed"}
+  ];
+  const recent=s.live.slice().sort((a,b)=>new Date(b.lastUsedAt||b.updatedAt)-new Date(a.lastUsedAt||a.updatedAt)).slice(0,4);
+  const recentHtml=recent.length?recent.map(item=>'<button class="btn small" type="button" data-recent-prompt="'+esc(item.id)+'">'+esc(item.title||"Senza titolo")+'</button>').join(""):'<span class="hint">Nessun prompt ancora utilizzato.</span>';
+  $("stats").innerHTML=`<div class="home-actions"><section class="home-primary"><h3>Che cosa vuoi fare?</h3><p>Cerca un prompt e usalo subito. Le funzioni di gestione restano disponibili nel menu \u22EF.</p><input class="search" id="dashboardSearch" type="search" placeholder="Cosa devi fare? Es. audit SEO, articolo, social\u2026"><div class="home-quick-actions"><button class="btn primary" type="button" data-home-action="search">Cerca un prompt</button><button class="btn" type="button" data-home-action="new">Crea nuovo prompt</button></div></section><section class="home-secondary"><h3>Usati di recente</h3><div class="recent-strip">${recentHtml}</div></section></div><div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali \u00B7 ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">\u2713 ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorit\u00E0 ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
+  $('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));
+  $('[data-recommended-action]')?.addEventListener('click',event=>performDashboardAction(event.currentTarget.dataset.recommendedAction));
+  $('[data-home-action="new"]')?.addEventListener('click',()=>openEditor());
+  $('[data-home-action="search"]')?.addEventListener('click',()=>{const q=$('dashboardSearch')?.value||'';$('globalSearch').value=q;state.query=q;renderCards();setTimeout(()=>$('cards').scrollIntoView({behavior:'smooth',block:'start'}),40)});
+  $('dashboardSearch')?.addEventListener('keydown',event=>{if(event.key==='Enter')$('[data-home-action="search"]')?.click()});
+  $('[data-recent-prompt]').forEach(button=>button.onclick=()=>openEditor(button.dataset.recentPrompt,'variables','use'));
+  const hashAction=location.hash.match(/^#step-(.+)$/)?.[1];if(hashAction)highlightDashboardCard(hashAction);
+}
+
+
+
+</script>
+<script>
+function cardHtml(prompt){
+  const mainCategory=catById(prompt.categoryId);
+  const subcategory=catById(prompt.subcategoryId);
+  const category=subcategory||mainCategory;
+  const categoryPath=mainCategory&&subcategory
+    ? `${mainCategory.name} \u203A ${subcategory.name}`
+    : (category?.name||"Senza categoria");
+  const client=clientById(prompt.clientId);
+  const accent=categoryColor(category);
+  const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
+  const variableCount=extractVariables(prompt.content).length;
+  const attachmentCount=promptAttachmentCount(prompt);
+  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
+    <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
+    <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">\u2605</span>':""}</div>
+    <div class="category-line"><span class="category-line-label">Categoria:</span><span class="category-line-value">${esc(categoryPath)}</span></div>
+    <div class="excerpt">${esc(prompt.content||"Nessun contenuto")}</div>
+    <div class="meta">
+      ${category?`<span class="chip accent">${esc(category.name)}</span>`:'<span class="chip">Senza categoria</span>'}
+      ${client?`<span class="chip">${esc(client.name)}</span>`:""}
+      ${variableCount?`<span class="chip">${variableCount} variabil${variableCount===1?"e":"i"}</span>`:""}
+      ${attachmentCount?`<span class="chip">${attachmentCount} file allegat${attachmentCount===1?"o":"i"}</span>`:""}
+      <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
+    </div>
+    <div class="card-actions">
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">\u25B6 Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">\u270E Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">\u22EF</button><div class="card-menu-panel"><button class="btn small copy-card">Copia sorgente</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
+    </div>
+  </article>`;
+}
+function rootCategoryForPrompt(prompt){
+  const direct=catById(prompt.categoryId);
+  const sub=catById(prompt.subcategoryId);
+  if(direct)return direct.parentId?catById(direct.parentId)||direct:direct;
+  if(sub)return sub.parentId?catById(sub.parentId)||sub:sub;
+  return null;
+}
+function groupedCardsHtml(items){
+  const groups=new Map();
+  items.forEach(prompt=>{
+    const root=rootCategoryForPrompt(prompt);
+    const key=root?.id||"__uncategorized__";
+    if(!groups.has(key))groups.set(key,{category:root,items:[]});
+    groups.get(key).items.push(prompt);
+  });
+  const categoryOrder=new Map(rootCategoriesAlphabetical().map((cat,index)=>[cat.id,index]));
+  return [...groups.values()]
+    .sort((a,b)=>{
+      if(!a.category)return 1;
+      if(!b.category)return -1;
+      return (categoryOrder.get(a.category.id)??9999)-(categoryOrder.get(b.category.id)??9999)||a.category.name.localeCompare(b.category.name,"it");
+    })
+    .map(group=>{
+      const name=group.category?.name||"Senza categoria";
+      const accent=categoryColor(group.category);
+      return `<section class="category-group" style="--group-accent:${esc(accent)}">
+        <div class="category-group-head">
+          <span class="tree-dot" style="--dot:${esc(accent)}"></span>
+          <div class="category-group-title">${esc(name)}</div>
+          <span class="category-group-count">${group.items.length} prompt</span>
+        </div>
+        <div class="category-group-cards ${state.view==="list"?"list":""}">${group.items.map(cardHtml).join("")}</div>
+      </section>`;
+    }).join("");
+}
+function renderCards(){
+  const items=filteredPrompts();
+  const shouldGroup=state.filter.type==="all"&&!state.query;
+  $("cards").className=`cards ${shouldGroup?"grouped":(state.view==="list"?"list":"")}`;
+  $("cards").innerHTML=items.length?(shouldGroup?groupedCardsHtml(items):items.map(cardHtml).join("")):`<div class="empty"><div class="big">\u2315</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
+  const [title,subtitle]=filterInfo();
+  $("viewTitle").textContent=title;
+  $("viewSubtitle").textContent=state.query?`${items.length} risultati per \u201C${state.query}\u201D`:`${subtitle} \u00B7 ${items.length} elementi`;
+  bindCardEvents();
+  updateBulkbar();
+
+  if(state.lastSavedId){
+    const savedCard=$(`#cards .card[data-id="${CSS.escape(state.lastSavedId)}"]`);
+    if(savedCard){
+      setTimeout(()=>savedCard.scrollIntoView({behavior:"smooth",block:"center"}),120);
+      setTimeout(()=>{
+        savedCard.classList.remove("just-saved");
+        state.lastSavedId=null;
+      },1900);
+    }
+  }
+}
+function render(){renderSidebar();renderStats();renderCards()}
+function bindCardEvents(){
+  $("#cards .card").forEach(card=>{
+    const id=card.dataset.id;
+    card.onclick=event=>{
+      if(event.target.closest("button,input"))return;
+      openEditor(id);
+    };
+    card.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
+    card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
+    card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=extractVariables(prompt.content);if(!vars.length){quickCopy(id)}else openEditor(id,"variables","use")});
+    card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
+    card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();event.currentTarget.closest('.card-menu').classList.toggle('open')});
+    card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopy(id));
+    card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
+    card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
+    card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
+    card.querySelector(".delete-card")?.addEventListener("click",()=>deletePrompt(id));
+  });
+}
+function updateBulkbar(){
+  $("selectedCount").textContent=state.selected.size;
+  $("bulkbar").classList.toggle("show",state.selected.size>0);
+}
+
+
+
+</script>
+<script>
+/* ---------- Motore delle variabili ---------- */
+function variableRegex(){
+  // Supporta anche segnaposto descrittivi come [ALLEGA FILE, SE DISPONIBILE].
+  return /{{\s*([^{}\n]{1,120}?)\s*}}|\[\s*([^\]\n]{2,120}?)\s*\]|%\s*([^%\n]{2,120}?)\s*%|<\s*([^<>\n]{2,120}?)\s*>/g;
+}
+function variableName(value){return String(value||"").replace(/{{|}}|\[|\]|%|<|>/g,"").trim().replace(/\s+/g,"_")}
+function humanize(value){
+  let text=String(value||"").replace(/{{|}}|\[|\]|%|<|>/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
+  const map={
+    "dominio sito":"dominio del sito","lingua":"lingua principale","paese o mercato":"paese o mercato",
+    "keyword":"keyword","keyword principale":"keyword principale","url":"URL","url pagina":"URL della pagina",
+    "nome cliente":"nome cliente","cliente":"nome cliente","target":"pubblico target","tono di voce":"tono di voce",
+    "file":"file da usare","file da analizzare":"file da analizzare","documento":"documento","pdf":"PDF",
+    "immagine":"immagine","screenshot":"screenshot","excel":"file Excel","csv":"file CSV"
+  };
+  return map[text]||text||"valore";
+}
+function variableSearchText(definition){
+  return normalize(`${definition.name||""} ${definition.label||""} ${definition.raw||""}`)
+    .replace(/[_\/\\.\-]+/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+function variableIcon(definition){
+  const text=variableSearchText(definition);
+  if(/\b(immagine|image|foto|screenshot)\b/.test(text))return "\uD83D\uDDBC\uFE0F";
+  if(isFileVariable(definition))return "\uD83D\uDCC4";
+  if(/\b(dominio|url|sito|link)\b/.test(text))return "\uD83C\uDF10";
+  if(/\b(lingua|paese|mercato|localita)\b/.test(text))return "\uD83C\uDF0D";
+  if(/\b(keyword|query|serp)\b/.test(text))return "\uD83D\uDD0E";
+  if(/\b(cliente|persona|nome)\b/.test(text))return "\uD83D\uDC64";
+  if(/\b(email|mail)\b/.test(text))return "\u2709\uFE0F";
+  return "\u270F\uFE0F";
+}
+function contextLabel(content,index){
+  const start=content.lastIndexOf("\n",index)+1;
+  return content.slice(start,index).replace(/[*_`#>]/g,"").replace(/^[\s\-\u2013\u2014\u2022\d.)]+/,"").replace(/[:\uFF1A\-\u2013\u2014]\s*$/,"").replace(/\s+/g," ").trim().toLowerCase();
+}
+function isFileVariable(definition){
+  const text=variableSearchText(definition);
+  const name=String(definition.name||"").trim();
+
+  // I segnaposto tecnici usano spesso underscore, per esempio
+  // [FILE_GSC_QUERY_URL]. L'underscore \u00E8 un carattere di parola e rendeva
+  // inefficace il vecchio controllo con \b, quindi il selettore file non appariva.
+  if(/^(file|files|upload|allega|allegato|attachment)(?:_|-|\s|$)/i.test(name))return true;
+  if(/(?:^|_|-)(file|files|upload|allegato|attachment)(?:_|-|$)/i.test(name))return true;
+
+  return /\b(file|files|allega|allegare|allegato|allegati|attachment|documento|documenti|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|caricare|caricamento|dataset|sitemap|report|zip|screenshot|esportazione|export)\b/.test(text);
+}
+function isOptionalVariable(definition){
+  const text=variableSearchText(definition);
+  return /\b(opzionale|facoltativo|se disponibile|se presente|se noto|se noti|eventuale|eventuali)\b/.test(text);
+}
+function expectedInputType(definition){
+  // Un campo file pu\u00F2 contenere anche "URL" nel nome, ma dopo il caricamento
+  // il valore \u00E8 un riferimento al file e non deve essere validato come URL.
+  if(definition.fileLike)return "text";
+  const text=variableSearchText(definition);
+  if(/\b(url|dominio|sito|link)\b/.test(text))return "url";
+  if(/\b(email|mail)\b/.test(text))return "email";
+  return "text";
+}
+function extractVariables(content){
+  const text=String(content||""),definitions=[],seen=new Set(),regex=variableRegex();
+  let match;
+  while((match=regex.exec(text))){
+    const rawName=match[1]??match[2]??match[3]??match[4];
+    const name=variableName(rawName),key=name.toLowerCase();
+    if(!name||seen.has(key))continue;
+    seen.add(key);
+    const context=contextLabel(text,match.index);
+    const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":"angle"};
+    definition.fileLike=isFileVariable(definition);
+    definition.optional=isOptionalVariable(definition);
+    definition.inputType=expectedInputType(definition);
+    definition.icon=variableIcon(definition);
+    definitions.push(definition);
+  }
+  return definitions;
+}
+function valueFor(values,name){
+  if(Object.prototype.hasOwnProperty.call(values,name))return values[name];
+  const key=Object.keys(values||{}).find(item=>item.toLowerCase()===name.toLowerCase());
+  return key?values[key]:"";
+}
+function compilePrompt(content,values){
+  return String(content||"").replace(variableRegex(),(match,curly,square,percent,angle)=>{
+    const name=variableName(curly??square??percent??angle),value=valueFor(values,name);
+    return String(value??"").trim()?value:match;
+  });
+}
+function rememberValue(name,value){
+  const clean=String(value||"").trim();
+  if(!clean||clean.length>500)return;
+  const list=state.recentValues[name]||[];
+  state.recentValues[name]=[clean,...list.filter(item=>item!==clean)].slice(0,5);
+  localStorage.setItem("ps_recent_values",JSON.stringify(state.recentValues));
+}
+function validateValue(def,value){
+  const clean=String(value||"").trim();
+  if(!clean)return def.optional?"":"Campo obbligatorio";
+  if(def.inputType==="url"){
+    const normalized=/^https?:\/\//i.test(clean)?clean:`https://${clean}`;
+    try{new URL(normalized)}catch{return "Inserisci un URL o dominio valido"}
+  }
+  if(def.inputType==="email"&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean))return "Inserisci un indirizzo email valido";
+  return "";
+}
+function refreshVariables(renderNow=true){
+  syncVariableInputs();
+  const oldValues={...state.editor.values};
+  const oldFiles={...state.editor.files};
+  state.editor.variables=extractVariables($("promptContent").value);
+  state.editor.values=Object.fromEntries(state.editor.variables.map(def=>[def.name,valueFor(oldValues,def.name)||""]));
+  state.editor.files=Object.fromEntries(state.editor.variables.map(def=>[def.name,oldFiles[def.name]||null]));
+  if(renderNow)renderVariables();
+}
+function syncVariableInputs(){
+  $("#variableList .variable-input").forEach(input=>state.editor.values[input.dataset.var]=input.value);
+}
+function variableCardHtml(def,index){
+  const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length];
+  const value=valueFor(state.editor.values,def.name);
+  const file=state.editor.files[def.name];
+  const fileText=file?`${file.name} \u00B7 ${formatBytes(file.size)}${file.base64?" \u00B7 salvato nell\u2019app":" \u00B7 non incorporato"}${file.textExtracted?" \u00B7 testo importato":""}`:"Nessun file selezionato.";
+  const recent=(state.recentValues[def.name]||[]).slice(0,5);
+  const textInput=`<textarea class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="${def.fileLike?"Oppure inserisci un URL, un percorso o una nota manuale\u2026":`Inserisci ${esc(def.label||humanize(def.name))}\u2026`}">${esc(value)}</textarea>
+      <div class="validation-error hidden" data-error-for="${esc(def.name)}"></div>`;
+  const quickValues=recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"\u2026":item)}</button>`).join("")}</div></div>`:"";
+  const filePanel=def.fileLike?`<div class="file-panel file-panel-primary">
+        <div class="file-zone">
+          <div class="file-drop" data-var="${esc(def.name)}">
+            <input class="variable-file" data-var="${esc(def.name)}" type="file">
+            <div class="file-drop-icon">\u21E7</div>
+            <strong>${file?"File caricato":"Carica il file dal computer"}</strong>
+            <div class="file-drop-help">Trascinalo in quest\u2019area oppure usa il pulsante.</div>
+            <div class="file-actions">
+              <button class="btn primary choose-file" type="button">${file?"Sostituisci file":"Scegli file"}</button>
+              ${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica</button>`:""}
+              ${file?`<button class="btn small danger remove-file" type="button" data-var="${esc(def.name)}">Rimuovi</button>`:""}
+            </div>
+            <div class="file-status ${file?"has-file":""}">${esc(fileText)}</div>
+          </div>
+          <div class="hint" style="margin-top:8px">Sono supportati CSV, XLSX, ZIP, PDF, DOCX, TXT, JSON, immagini e altri formati. I file fino a 20 MB vengono conservati nel prompt e nel backup.</div>
+        </div>
+      </div>`:"";
+  return `<article class="variable-card" style="--var-accent:${accent}" data-var="${esc(def.name)}">
+    <div class="variable-card-head">
+      <span class="variable-number">${def.icon} Campo ${index+1}</span>
+      <span class="variable-token">${esc(def.raw)}</span>
+      <span class="variable-badge">${def.optional?"Opzionale \u00B7 ":""}${def.fileLike?"Caricamento file":"Campo testo"}</span>
+    </div>
+    <div class="variable-card-body">
+      <h4>${def.fileLike?"Carica":"Inserisci"} ${esc(def.label||humanize(def.name))}</h4>
+      <p class="variable-help">${def.fileLike?`Il file selezionato verr\u00E0 associato a <strong>${esc(def.raw)}</strong> e salvato insieme al prompt.`:`Questo valore sostituir\u00E0 automaticamente <strong>${esc(def.raw)}</strong> nel prompt finale.`}</p>
+      ${filePanel}
+      ${def.fileLike?'<div class="manual-file-value"><label>In alternativa, inserisci un riferimento manuale</label>':''}
+      ${textInput}
+      ${def.fileLike?'</div>':''}
+      ${quickValues}
+    </div>
+  </article>`;
+}
+function renderVariables(){
+  const definitions=state.editor.variables;
+  $("variablesTab").textContent=definitions.length?`Variabili (${definitions.length})`:"Variabili";
+  const values=collectVariableValues();
+  const required=definitions.filter(def=>!def.optional);
+  const completedRequired=required.filter(def=>String(values[def.name]??"").trim()).length;
+  if($("useProgress"))$("useProgress").textContent=required.length?`${completedRequired} di ${required.length} campi obbligatori compilati${completedRequired===required.length?" \u00B7 Prompt pronto":""}`:"Nessun campo obbligatorio \u00B7 Prompt pronto";
+  $("variableSummary").textContent=definitions.length?`${definitions.length} variabil${definitions.length===1?"e rilevata":"i rilevate"} automaticamente nel prompt.`:"";
+  $("variableSummary").classList.toggle("show",definitions.length>0);
+  $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
+  $("#variableList .variable-input").forEach(input=>input.addEventListener("input",()=>{
+    state.editor.values[input.dataset.var]=input.value;
+    const error=$(`[data-error-for="${CSS.escape(input.dataset.var)}"]`);
+    if(error){error.textContent="";error.classList.add("hidden")}
+    input.classList.remove("missing");
+    markDirty();updateCompiledPreview();
+  }));
+  $("#variableList .quick-value-chip").forEach(button=>button.onclick=()=>{
+    const input=$(`#variableList .variable-input[data-var="${CSS.escape(button.dataset.var)}"]`);
+    if(input){input.value=button.dataset.value;input.dispatchEvent(new Event("input",{bubbles:true}));input.focus()}
+  });
+  $("#variableList .choose-file").forEach(button=>button.onclick=()=>{
+    const input=button.closest(".file-drop").querySelector(".variable-file");
+    input.value=""; // consente di selezionare nuovamente lo stesso file
+    input.click();
+  });
+  $("#variableList .variable-file").forEach(input=>input.onchange=()=>input.files[0]&&processVariableFile(input.dataset.var,input.files[0]));
+  $("#variableList .download-file").forEach(button=>button.onclick=()=>downloadEmbeddedFile(state.editor.files[button.dataset.var]));
+  $("#variableList .remove-file").forEach(button=>button.onclick=()=>removeVariableFile(button.dataset.var));
+  $("#variableList .file-drop").forEach(zone=>{
+    zone.ondragover=event=>{event.preventDefault();zone.classList.add("drag")};
+    zone.ondragleave=()=>zone.classList.remove("drag");
+    zone.ondrop=event=>{event.preventDefault();zone.classList.remove("drag");const file=event.dataTransfer.files[0];if(file)processVariableFile(zone.dataset.var,file)};
+  });
+  updateCompiledPreview();
+}
+async function processVariableFile(name,file){
+  const extension=file.name.split(".").pop()?.toLowerCase()||"";
+  const textLike=file.type.startsWith("text/")||TEXT_FILE_EXTENSIONS.has(extension);
+  const metadata=`[File selezionato: ${file.name} | Tipo: ${file.type||"non specificato"} | Dimensione: ${formatBytes(file.size)}]`;
+
+  if(file.size>MAX_EMBED_FILE_SIZE){
+    state.editor.values[name]=metadata+"\n[Il file supera 20 MB e non pu\u00F2 essere incorporato nel backup.]";
+    state.editor.files[name]={
+      name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,
+      textExtracted:false,base64:null,embedded:false,tooLarge:true
+    };
+    renderVariables();markDirty();toast("File associato, ma non incorporato perch\u00E9 supera 20 MB.");
+    return;
+  }
+
+  let base64=null,value=metadata,textExtracted=false;
+  try{
+    const buffer=await file.arrayBuffer();
+    base64=arrayBufferToBase64(buffer);
+    if(textLike){
+      value=new TextDecoder("utf-8").decode(buffer);
+      textExtracted=true;
+    }
+  }catch(error){
+    console.error(error);
+    toast("Non \u00E8 stato possibile leggere completamente il file.");
+  }
+
+  state.editor.values[name]=value;
+  state.editor.files[name]={
+    name:file.name,size:file.size,type:file.type||"application/octet-stream",
+    lastModified:file.lastModified,textExtracted,base64,embedded:Boolean(base64),tooLarge:false
+  };
+
+  const input=$(`#variableList .variable-input[data-var="${CSS.escape(name)}"]`);
+  if(input)input.value=value;
+  markDirty();renderVariables();
+  toast(base64
+    ?(textExtracted?"File e contenuto inseriti; il file sar\u00E0 incluso nel backup.":"File incluso nel backup.")
+    :"File associato senza contenuto incorporato.");
+}
+
+function removeVariableFile(name){
+  state.editor.files[name]=null;
+  state.editor.values[name]="";
+  markDirty();
+  renderVariables();
+  toast("File rimosso dal prompt.");
+}
+
+function collectVariableValues(){
+  syncVariableInputs();
+  return Object.fromEntries(state.editor.variables.map(def=>[def.name,state.editor.values[def.name]||""]));
+}
+function updateCompiledPreview(){
+  $("compiledPreview").value=compilePrompt($("promptContent").value,collectVariableValues());
+}
+/* La copia del prompt \u00E8 volutamente permissiva:
+   nessuna variabile vuota o formalmente non valida pu\u00F2 bloccarla. */
+
+
+
+</script>
+<script>
+/* ---------- Editor ---------- *//* ---------- Editor ---------- */
+function fillEditorSelects(prompt){
+  const roots=rootCategoriesAlphabetical();
+  $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptClient").innerHTML='<option value="">Nessun cliente</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptCategory").value=prompt?.categoryId||"";
+  fillSubcategories(prompt?.subcategoryId||"");
+  $("promptClient").value=prompt?.clientId||"";
+}
+function fillSubcategories(selected=""){
+  const parent=$("promptCategory").value;
+  const children=childCategoriesAlphabetical(parent);
+  $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptSubcategory").value=selected;
+}
+function openEditor(id=null,preferredTab=null,mode=null){
+  state.modalReturnFocus.editorBackdrop=document.activeElement;
+  const prompt=id?state.prompts.find(item=>item.id===id):null;
+
+  let initialPrompt=prompt;
+  if(!prompt){
+    initialPrompt={
+      categoryId:null,
+      subcategoryId:null,
+      clientId:null,
+      status:"draft",
+      tags:[],
+      notes:"",
+      toolUrl:"",
+      favorite:false,
+      variableValues:{},
+      variableFiles:{}
+    };
+
+    if(state.filter.type==="category"&&state.filter.id){
+      const selectedCategory=catById(state.filter.id);
+      if(selectedCategory?.parentId){
+        initialPrompt.categoryId=selectedCategory.parentId;
+        initialPrompt.subcategoryId=selectedCategory.id;
+      }else if(selectedCategory){
+        initialPrompt.categoryId=selectedCategory.id;
+      }
+    }
+
+    if(state.filter.type==="client"&&state.filter.id){
+      initialPrompt.clientId=state.filter.id;
+    }
+  }
+
+  state.editor={
+    id:prompt?.id||null,
+    dirty:false,
+    variables:[],
+    values:{...(initialPrompt?.variableValues||{})},
+    files:{...(initialPrompt?.variableFiles||{})},
+    toolUrl:initialPrompt?.toolUrl||"",
+    mode:mode||(prompt?"edit":"edit")
+  };
+
+  $("editorTitle").textContent=prompt?(state.editor.mode==="use"?"Usa prompt":"Modifica prompt"):"Nuovo prompt";
+  $("editorModal").classList.toggle("use-mode",state.editor.mode==="use");
+  $("[data-editor-mode]").forEach(button=>button.classList.toggle("active",button.dataset.editorMode===state.editor.mode));
+  $("editorModeSwitch").classList.toggle("hidden",!prompt);
+  $("promptTitle").value=prompt?.title||"";
+  $("promptContent").value=prompt?.content||"";
+  $("promptStatus").value=initialPrompt?.status||"draft";
+  $("promptTags").value=(initialPrompt?.tags||[]).join(", ");
+  $("promptNotes").value=initialPrompt?.notes||"";
+  $("promptToolUrl").value=initialPrompt?.toolUrl||"";
+  $("promptFavorite").checked=!!initialPrompt?.favorite;
+  $("duplicateBtn").classList.toggle("hidden",!prompt);
+  $("trashBtn").classList.toggle("hidden",!prompt);
+
+  fillEditorSelects(initialPrompt);
+  refreshVariables(false);
+  renderVariables();
+  updateCounts();
+  setEditorTab(state.editor.mode==="use"?"variables":(preferredTab||(state.editor.variables.length?"variables":"prompt")));
+  $("editorBackdrop").classList.add("show");
+
+  setTimeout(()=>{(prompt?$("promptContent"):$("promptTitle")).focus()},120);
+}
+function setEditorTab(name){
+  $(".editor-tab").forEach(button=>button.classList.toggle("active",button.dataset.tab===name));
+  $(".editor-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.panel===name));
+  if(name==="variables"){refreshVariables(false);renderVariables()}
+}
+function closeEditor(force=false){
+  if(state.editor.dirty&&!force){
+    confirmAction("Modifiche non salvate","Chiudere il prompt senza salvare le modifiche?",()=>closeEditor(true));
+    return;
+  }
+  $("editorBackdrop").classList.remove("show");
+  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit"};
+  const previous=state.modalReturnFocus.editorBackdrop;delete state.modalReturnFocus.editorBackdrop;
+  if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
+}
+function markDirty(){state.editor.dirty=true}
+function updateCounts(){
+  const text=$("promptContent").value;
+  $("charCount").textContent=`${text.length} caratteri`;
+  $("wordCount").textContent=`${text.trim()?text.trim().split(/\s+/).length:0} parole`;
+}
+function editorPayload(){
+  refreshVariables(false);
+  const existing=state.editor.id?state.prompts.find(item=>item.id===state.editor.id):null;
+
+  const selectedCategoryId=$("promptCategory").value||null;
+  const selectedSubcategoryId=$("promptSubcategory").value||null;
+  const selectedSubcategory=catById(selectedSubcategoryId);
+
+  const validSubcategoryId=selectedSubcategory?.parentId===selectedCategoryId
+    ? selectedSubcategoryId
+    : null;
+
+  return {
+    id:existing?.id||uid("prompt"),
+    title:$("promptTitle").value.trim(),
+    content:$("promptContent").value.trim(),
+    categoryId:selectedCategoryId,
+    subcategoryId:validSubcategoryId,
+    clientId:$("promptClient").value||null,
+    status:$("promptStatus").value,
+    tags:$("promptTags").value.split(",").map(item=>item.trim()).filter(Boolean),
+    notes:$("promptNotes").value.trim(),
+    toolUrl:$("promptToolUrl").value.trim(),
+    favorite:$("promptFavorite").checked,
+    usageCount:existing?.usageCount||0,
+    version:(existing?.version||0)+1,
+    variableValues:collectVariableValues(),
+    variableFiles:{...state.editor.files},
+    createdAt:existing?.createdAt||now(),
+    updatedAt:now(),
+    deletedAt:existing?.deletedAt||null
+  };
+}
+function navigateToSavedPrompt(prompt){
+  state.lastSavedId=prompt.id;
+
+  if(prompt.subcategoryId){
+    setFilter("category",prompt.subcategoryId);
+    return;
+  }
+
+  if(prompt.categoryId){
+    setFilter("category",prompt.categoryId);
+    return;
+  }
+
+  if(prompt.clientId){
+    setFilter("client",prompt.clientId);
+    return;
+  }
+
+  setFilter("all");
+}
+
+async function savePrompt(){
+  const saveButton=$("savePromptBtn");
+  if(saveButton.disabled||state.busy.has("savePrompt"))return;
+  state.busy.add("savePrompt");
+  const saveStatus=$("saveStatus");
+
+  try{
+    const payload=editorPayload();
+
+    if(!payload.title){
+      toast("Inserisci il titolo del prompt.");
+      setEditorTab("prompt");
+      $("promptTitle").focus();
+      return;
+    }
+
+    if(!payload.content){
+      toast("Inserisci il testo del prompt.");
+      setEditorTab("prompt");
+      $("promptContent").focus();
+      return;
+    }
+
+    saveButton.disabled=true;
+    saveButton.textContent="Salvataggio\u2026";
+    saveStatus.classList.add("show");
+
+    await put("prompts",payload);
+    // Verifica reale della persistenza prima di chiudere l\u2019editor.
+    const stored=await getOne("prompts",payload.id);
+    if(!stored){
+      throw new Error("Il database non ha restituito il prompt appena salvato.");
+    }
+
+    if(
+      stored.categoryId!==payload.categoryId ||
+      stored.subcategoryId!==payload.subcategoryId ||
+      stored.clientId!==payload.clientId
+    ){
+      throw new Error("Categoria, sottocategoria o cliente non sono stati salvati correttamente.");
+    }
+
+    await loadData();
+
+    state.editor.id=payload.id;
+    state.editor.dirty=false;
+
+    const categoryName=payload.subcategoryId
+      ? `${catById(payload.categoryId)?.name||""} / ${catById(payload.subcategoryId)?.name||""}`
+      : (catById(payload.categoryId)?.name||"Senza categoria");
+
+    closeEditor(true);
+    navigateToSavedPrompt(payload);
+    toast(`Prompt salvato correttamente in \u201C${categoryName}\u201D.`);
+  }catch(error){
+    console.error(error);
+    toast(`Errore nel salvataggio: ${error.message}`);
+  }finally{
+    state.busy.delete("savePrompt");
+    saveButton.disabled=false;
+    saveButton.textContent="Salva prompt";
+    saveStatus.classList.remove("show");
+  }
+}
+async function persistEditorVariables(){
+  if(!state.editor.id)return;
+  const prompt=state.prompts.find(item=>item.id===state.editor.id);if(!prompt)return;
+  prompt.variableValues=collectVariableValues();prompt.variableFiles={...state.editor.files};prompt.toolUrl=$("promptToolUrl").value.trim();prompt.updatedAt=now();
+  await put("prompts",prompt);await loadData();render();
+}
+async function copyCompiled(){
+  const copyButton=$("copyCompiledBtn");
+
+  try{
+    copyButton.disabled=true;
+    copyButton.textContent="Copia in corso\u2026";
+
+    /* Sincronizza i valori presenti a schermo senza applicare alcuna validazione. */
+    refreshVariables(false);
+
+    const source=$("promptContent").value;
+    if(!source.trim()){
+      toast("Il testo del prompt \u00E8 vuoto.");
+      setEditorTab("prompt");
+      $("promptContent").focus();
+      return;
+    }
+
+    const values=collectVariableValues();
+    const incomplete=state.editor.variables.filter(def=>!String(values[def.name]??"").trim());
+
+    Object.entries(values).forEach(([name,value])=>rememberValue(name,value));
+
+    let result=compilePrompt(source,values);
+    const toolUrl=$("promptToolUrl").value.trim();
+    if(toolUrl)result=`TOOL DA USARE: ${toolUrl}\n\n${result}`;
+
+    /* Copia sempre: i campi vuoti restano nel testo come [SEGNAPOSTO]. */
+    await copyText(result);
+
+    if(incomplete.length){
+      toast(`Prompt copiato. ${incomplete.length} variabil${incomplete.length===1?"e \u00E8 rimasta":"i sono rimaste"} come segnaposto.`);
+    }else{
+      toast("Prompt copiato con tutte le variabili inserite.");
+    }
+
+    /* Un eventuale errore di persistenza non deve annullare una copia riuscita. */
+    try{
+      await persistEditorVariables();
+      if(state.editor.id){const used=state.prompts.find(item=>item.id===state.editor.id);if(used){used.usageCount=(used.usageCount||0)+1;used.lastUsedAt=now();await put("prompts",used);await loadData();}}
+    }catch(error){
+      console.error("Copia riuscita, ma salvataggio dei valori non completato:",error);
+      toast("Il prompt \u00E8 stato copiato, ma i valori non sono stati salvati nell\u2019archivio.");
+    }
+  }catch(error){
+    console.error("Errore durante la copia:",error);
+    toast(`Impossibile copiare: ${error.message||"errore del browser"}`);
+  }finally{
+    copyButton.disabled=false;
+    copyButton.textContent="Copia Prompt";
+  }
+}
+
+
+
+</script>
+<script>
+/* ---------- Azioni sui prompt ---------- *//* ---------- Azioni sui prompt ---------- */
+async function quickCopy(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  try{
+    await copyText(prompt.content||"");
+    prompt.usageCount=(prompt.usageCount||0)+1;
+    await put("prompts",prompt);
+    await loadData();render();
+    toast("Prompt copiato.","success");
+  }catch(error){
+    console.error("Errore durante la copia rapida:",error);
+    toast(`Impossibile copiare: ${error.message||"errore del browser"}`);
+  }
+}
+
+async function duplicatePrompt(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  const copy={...prompt,id:uid("prompt"),title:`${prompt.title} \u2014 copia`,favorite:false,usageCount:0,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
+  await put("prompts",copy);await loadData();render();toast("Prompt duplicato.");
+}
+async function trashPrompt(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  prompt.deletedAt=now();prompt.updatedAt=now();await put("prompts",prompt);await loadData();render();
+  if(state.editor.id===id)closeEditor(true);toast("Prompt spostato nel cestino.");
+}
+async function restorePrompt(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  prompt.deletedAt=null;prompt.updatedAt=now();await put("prompts",prompt);await loadData();render();toast("Prompt ripristinato.");
+}
+function deletePrompt(id){
+  confirmAction("Eliminazione definitiva","Questa operazione non pu\u00F2 essere annullata.",async()=>{await remove("prompts",id);await loadData();render();toast("Prompt eliminato definitivamente.")});
+}
+async function bulkUpdate(patch){
+  const ids=[...state.selected];
+  for(const id of ids){
+    const prompt=state.prompts.find(item=>item.id===id);if(!prompt)continue;
+    Object.assign(prompt,patch,{updatedAt:now()});await put("prompts",prompt);
+  }
+  state.selected.clear();await loadData();render();toast(`${ids.length} prompt aggiornati.`);
+}
+
+
+
+</script>
+<script>
+/* ---------- Gestione categorie e clienti ---------- */
+function renderManage(){
+  const roots=rootCategoriesAlphabetical();
+  const allSubcategories=state.categories.filter(item=>item.parentId).sort((a,b)=>{
+    const parentCompare=String(catById(a.parentId)?.name||"").localeCompare(String(catById(b.parentId)?.name||""),"it",{sensitivity:"base"});
+    return parentCompare||a.name.localeCompare(b.name,"it",{sensitivity:"base"});
+  });
+
+  if(state.manageSubcategoryFilter&&!roots.some(item=>item.id===state.manageSubcategoryFilter))state.manageSubcategoryFilter=null;
+  const filteredSubcategories=state.manageSubcategoryFilter
+    ? allSubcategories.filter(item=>item.parentId===state.manageSubcategoryFilter)
+    : allSubcategories;
+
+  $("newSubcategoryParent").innerHTML='<option value="">Tutte le categorie</option>'+roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(item.name)}</option>`).join("");
+
+  $("manageCategories").innerHTML=roots.map(category=>`
+    <div class="manage-row">
+      <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
+      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong></div>
+      <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}">
+      <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
+    </div>`).join("")||'<div class="hint">Nessuna categoria presente.</div>';
+
+  $("manageSubcategories").innerHTML=filteredSubcategories.map(category=>`
+    <div class="manage-row">
+      <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
+      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong><div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} \u00B7 colore ereditato</div></div>
+      <input class="color-input" type="color" value="${esc(categoryColor(category))}" disabled title="Il colore \u00E8 ereditato dalla categoria principale">
+      <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
+    </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in \u201C${esc(catById(state.manageSubcategoryFilter)?.name||"")}\u201D.`:'Nessuna sottocategoria presente.'}</div>`;
+
+  $("manageClients").innerHTML=state.clients.map(client=>`
+    <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
+
+  $(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
+
+  $("newSubcategoryParent").onchange=()=>{
+    state.manageSubcategoryFilter=$("newSubcategoryParent").value||null;
+    renderManage();
+  };
+
+  [$("manageCategories"),$("manageSubcategories")].forEach(categoryList=>{
+    categoryList.onclick=event=>{
+      const name=event.target.closest(".category-name-editable");
+      if(!name||!categoryList.contains(name))return;
+      event.preventDefault();event.stopPropagation();beginInlineCategoryRename(name);
+    };
+    categoryList.onkeydown=event=>{
+      const name=event.target.closest(".category-name-editable");
+      if(!name||!categoryList.contains(name))return;
+      if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();beginInlineCategoryRename(name)}
+    };
+  });
+
+  $(".client-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineClientRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineClientRename(label)}}});
+  $(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
+  $(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
+}
+function beginInlineCategoryRename(labelElement){
+  const category=catById(labelElement.dataset.id);
+  if(!category||labelElement.dataset.editing==="true")return;
+
+  labelElement.dataset.editing="true";
+  labelElement.dataset.originalName=category.name;
+  labelElement.textContent=category.name;
+  labelElement.contentEditable="true";
+  labelElement.setAttribute("role","textbox");
+  labelElement.setAttribute("aria-label",`Modifica nome ${category.parentId?"sottocategoria":"categoria"}`);
+  labelElement.classList.add("editing");
+
+  requestAnimationFrame(()=>{
+    labelElement.focus();
+    const selection=window.getSelection();
+    const range=document.createRange();
+    range.selectNodeContents(labelElement);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+
+  let settled=false;
+  const finish=async saveChanges=>{
+    if(settled)return;
+    settled=true;
+    const label=category.parentId?"sottocategoria":"categoria";
+    const originalName=labelElement.dataset.originalName||category.name;
+    const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");
+
+    labelElement.contentEditable="false";
+    labelElement.classList.remove("editing");
+
+    if(!saveChanges){renderManage();return}
+    if(!name){
+      toast(`Il nome della ${label} non pu\u00F2 essere vuoto.`,"warning");
+      renderManage();
+      return;
+    }
+    const duplicate=state.categories.some(entry=>entry.id!==category.id&&normalize(entry.name)===normalize(name)&&(entry.parentId||null)===(category.parentId||null));
+    if(duplicate){
+      toast(`Esiste gi\u00E0 una ${label} con questo nome.`,"warning");
+      renderManage();
+      return;
+    }
+    if(name===originalName){renderManage();return}
+
+    category.name=name;
+    category.updatedAt=now();
+    await put("categories",category);
+    await loadData();
+    render();
+    renderManage();
+    toast(`${label.charAt(0).toUpperCase()+label.slice(1)} \u201C${originalName}\u201D rinominata in \u201C${name}\u201D.`,"success");
+  };
+
+  labelElement.onkeydown=event=>{
+    event.stopPropagation();
+    if(event.key==="Enter"){event.preventDefault();finish(true)}
+    else if(event.key==="Escape"){event.preventDefault();finish(false)}
+  };
+  labelElement.onblur=()=>finish(true);
+  labelElement.onclick=event=>event.stopPropagation();
+}
+
+async function beginInlineClientRename(labelElement){
+  const client=clientById(labelElement.dataset.id);if(!client||labelElement.dataset.editing==="true")return;
+  labelElement.dataset.editing="true";labelElement.dataset.originalName=client.name;labelElement.contentEditable="true";labelElement.setAttribute("role","textbox");labelElement.classList.add("editing");
+  requestAnimationFrame(()=>{labelElement.focus();const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(labelElement);selection.removeAllRanges();selection.addRange(range)});
+  let settled=false;const finish=async save=>{if(settled)return;settled=true;const original=labelElement.dataset.originalName||client.name;const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");labelElement.contentEditable="false";labelElement.classList.remove("editing");if(!save){renderManage();return}if(!name){toast("Il nome del cliente o progetto non pu\u00F2 essere vuoto.","warning");renderManage();return}if(state.clients.some(item=>item.id!==client.id&&normalize(item.name)===normalize(name))){toast("Esiste gi\u00E0 un cliente o progetto con questo nome.","warning");renderManage();return}if(name===original){renderManage();return}client.name=name;client.updatedAt=now();await put("clients",client);await loadData();render();renderManage();toast(`Cliente o progetto \u201C${original}\u201D rinominato in \u201C${name}\u201D.`,"success")};
+  labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
+}
+
+async function renameEntity(type,id){
+  const collection=type==="categories"?state.categories:state.clients;
+  const item=collection.find(entry=>entry.id===id);
+  if(!item)return;
+
+  const isCategory=type==="categories";
+  const label=isCategory?(item.parentId?"sottocategoria":"categoria"):"cliente o progetto";
+  const entered=window.prompt(`Nuovo nome della ${label}:`,item.name);
+  if(entered===null)return;
+
+  const name=entered.trim().replace(/\s+/g," ");
+  if(!name){
+    toast(`Il nome della ${label} non pu\u00F2 essere vuoto.`,"warning");
+    return;
+  }
+  if(name===item.name)return;
+
+  const duplicate=collection.some(entry=>entry.id!==id&&normalize(entry.name)===normalize(name)&&(!isCategory||entry.parentId===item.parentId));
+  if(duplicate){
+    toast(`Esiste gi\u00E0 una ${label} con questo nome.`,"warning");
+    return;
+  }
+
+  const previousName=item.name;
+  item.name=name;
+  item.updatedAt=now();
+  await put(type,item);
+  await loadData();
+  render();
+  renderManage();
+  toast(`${label.charAt(0).toUpperCase()+label.slice(1)} \u201C${previousName}\u201D rinominata in \u201C${name}\u201D.`,"success");
+}
+function deleteCategory(id){
+  const category=catById(id);if(!category)return;
+  const children=state.categories.filter(item=>item.parentId===id);
+  const removedIds=new Set([id,...children.map(child=>child.id)]);
+  const affected=state.prompts.filter(prompt=>removedIds.has(prompt.categoryId)||removedIds.has(prompt.subcategoryId));
+  const childNote=children.length?` Verranno eliminate anche ${children.length} sottocategori${children.length===1?"a":"e"}.`:"";
+  confirmAction("Elimina categoria",`${affected.length} prompt verranno spostati in \u201CSenza categoria\u201D.${childNote}`,async()=>{
+    for(const prompt of affected){
+      if(removedIds.has(prompt.categoryId))prompt.categoryId=null;
+      if(removedIds.has(prompt.subcategoryId))prompt.subcategoryId=null;
+      prompt.updatedAt=now();
+      await put("prompts",prompt);
+    }
+    for(const child of children)await remove("categories",child.id);
+    await remove("categories",id);
+    if(state.filter.type==="category"&&removedIds.has(state.filter.id))state.filter={type:"all",id:null};
+    await loadData();render();renderManage();toast(`Categoria \u201C${category.name}\u201D eliminata.`);
+  });
+}
+function deleteClient(id){
+  const client=clientById(id);if(!client)return;
+  const affected=state.prompts.filter(prompt=>prompt.clientId===id);
+  confirmAction("Elimina cliente",`${affected.length} prompt perderanno l\u2019assegnazione al cliente, ma non saranno eliminati.`,async()=>{
+    for(const prompt of affected){prompt.clientId=null;prompt.updatedAt=now();await put("prompts",prompt)}
+    await remove("clients",id);
+    if(state.filter.type==="client"&&state.filter.id===id)state.filter={type:"all",id:null};
+    await loadData();render();renderManage();toast(`Cliente \u201C${client.name}\u201D eliminato.`);
+  });
+}
+
+async function exportCurrentPrompt(){
+  const payload=editorPayload();
+  if(!payload.title||!payload.content){
+    toast("Salva o completa il prompt prima di esportarlo.");
+    return;
+  }
+  const bundle={
+    type:"prompt-studio-prompt",
+    version:17,
+    exportedAt:now(),
+    prompt:payload
+  };
+  downloadJson(bundle,`${safeFilename(payload.title)}-prompt.json`);
+  toast(`Prompt esportato con ${promptAttachmentCount(payload)} file incorporat${promptAttachmentCount(payload)===1?"o":"i"}.`);
+}
+function downloadEmbeddedFile(file){
+  if(!file?.base64){toast("Questo file non \u00E8 incorporato nel backup.");return}
+  const blob=base64ToBlob(file.base64,file.type);
+  const url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=file.name||"allegato";document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+
+
+</script>
+<script>
+/* ---------- Importazione, esportazione e backup ---------- */
+function snapshot(){
+  const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
+  return {
+    app:"Prompt Studio Standalone",version:17,exportedAt:now(),
+    includesEmbeddedFiles:true,embeddedFileCount:fileCount,
+    prompts:state.prompts,categories:state.categories,clients:state.clients
+  };
+}
+function downloadJson(data,filename){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportData(){
+  const data=snapshot();
+  downloadJson(data,`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
+  toast(`Backup esportato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`,"success");
+}
+async function createBackup(){
+  if(state.busy.has("backup")){toast("Un backup \u00E8 gi\u00E0 in corso.","warning","PS-BACKUP-BUSY");return}
+  state.busy.add("backup");
+  try{
+    const data=snapshot();await put("backups",{id:uid("backup"),createdAt:now(),data});
+    downloadJson(data,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
+    toast(`Backup completo creato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`,"success");
+  }catch(error){console.error(error);toast(`Backup non creato: ${error.message||"errore del database"}.`,"error","PS-BACKUP-FAILED")}finally{state.busy.delete("backup")}
+}
+async function importData(file){
+  if(state.busy.has("importRead")||state.busy.has("importApply")){
+    toast("Un\u2019importazione \u00E8 gi\u00E0 in corso.","warning","PS-IMPORT-BUSY");return;
+  }
+  state.busy.add("importRead");
+  try{
+    if(!file||file.size===0)throw new Error("Il file selezionato \u00E8 vuoto.");
+    if(file.size>MAX_EMBED_FILE_SIZE)throw new Error(`Il file supera il limite di ${formatBytes(MAX_EMBED_FILE_SIZE)}.`);
+    const raw=await file.text();
+    if(!raw.trim())throw new Error("Il file selezionato non contiene dati.");
+    const data=JSON.parse(raw);
+
+    if(data?.type==="prompt-studio-prompt"&&data.prompt){
+      const promptData={...data.prompt,id:uid("prompt"),createdAt:now(),updatedAt:now(),deletedAt:null};
+      await put("prompts",promptData);
+      await loadData();render();
+      toast(`Prompt importato con ${promptAttachmentCount(promptData)} file incorporat${promptAttachmentCount(promptData)===1?"o":"i"}.`,"success");
+      return;
+    }
+
+    if(!Array.isArray(data.prompts)||!Array.isArray(data.categories)||!Array.isArray(data.clients)){
+      throw new Error("Formato non riconosciuto");
+    }
+
+    choiceAction(
+      "Importa archivio",
+      "Modalit\u00E0",
+      '<option value="merge">Unisci con i dati esistenti</option><option value="replace">Sostituisci l\u2019archivio attuale</option>',
+      async mode=>{
+        const executeImport=async()=>{
+          if(state.busy.has("importApply")){toast("L\u2019archivio \u00E8 gi\u00E0 in fase di importazione.","warning","PS-IMPORT-BUSY");return}
+          state.busy.add("importApply");
+          try{
+            if(mode==="replace"){
+              for(const name of ["prompts","categories","clients"]){
+                for(const item of await getAll(name))await remove(name,item.id);
+              }
+            }
+            let categories=data.categories,clients=data.clients,prompts=data.prompts;
+            if(mode==="merge"){
+              const catMap=new Map(),clientMap=new Map();
+              categories=categories.map(item=>{if(state.categories.some(existing=>existing.id===item.id)){const id=uid("cat");catMap.set(item.id,id);return {...item,id,parentId:item.parentId}}return item});
+              categories=categories.map(item=>({...item,parentId:catMap.get(item.parentId)||item.parentId}));
+              clients=clients.map(item=>{if(state.clients.some(existing=>existing.id===item.id)){const id=uid("client");clientMap.set(item.id,id);return {...item,id}}return item});
+              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId}));
+            }
+            for(const item of categories)await put("categories",item);
+            for(const item of clients)await put("clients",item);
+            for(const item of prompts)await put("prompts",item);
+            await loadData();render();
+            const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
+            toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
+          }catch(error){
+            console.error(error);
+            toast(`Importazione non riuscita: ${error.message}. Verifica l\u2019archivio e riprova.`,"error","PS-IMPORT-APPLY");
+          }finally{state.busy.delete("importApply")}
+        };
+        if(mode==="replace"){
+          confirmAction("Conferma sostituzione","Tutti i prompt, le categorie e i clienti attuali verranno sostituiti. Crea prima un backup se devi conservarli.",executeImport);
+        }else{
+          await executeImport();
+        }
+      }
+    );
+  }catch(error){
+    console.error(error);
+    toast(`Importazione non riuscita: ${error.message}. Nessun dato \u00E8 stato modificato.`,"error","PS-IMPORT-001");
+  }finally{state.busy.delete("importRead")}
+}
+
+
+
+</script>
+<script>
+/* ---------- Eventi ---------- *//* ---------- Eventi ---------- */
+function bindEvents(){
+  $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");setFilter("all");setTimeout(()=>{$("workflow-overview")?.scrollIntoView({behavior:"smooth",block:"start"});$("workflowTitle")?.focus?.()},80)};
+  $(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
+  $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderCards()},160)};
+  $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderCards()};
+  $("newPromptBtn").onclick=()=>openEditor();
+  $("themeBtn").onclick=()=>{setTheme();$("moreMenu").classList.remove("show")};
+  $("moreBtn").onclick=event=>{event.stopPropagation();$("moreMenu").classList.toggle("show")};
+  $("menuImportBtn").onclick=()=>{$("moreMenu").classList.remove("show");$("importInput").click()};
+  $("menuExportBtn").onclick=()=>{$("moreMenu").classList.remove("show");exportData()};
+  $("menuManageBtn").onclick=()=>{$("moreMenu").classList.remove("show");renderManage();openModal("manageModal")};
+  $("menuBackupBtn").onclick=()=>{$("moreMenu").classList.remove("show");createBackup()};
+  $("menuDiagnosticsBtn").onclick=()=>{$("moreMenu").classList.remove("show");performDashboardAction("diagnostics")};
+  document.addEventListener("click",event=>{if(!event.target.closest('.more-menu-wrap'))$("moreMenu")?.classList.remove("show")});
+  $("mobileMenuBtn").onclick=()=>$("sidebar").classList.add("open");
+  $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
+  $("backupBtn").onclick=createBackup;
+  $("exportBtn").onclick=exportData;
+  $("importBtn").onclick=()=>$("importInput").click();
+  $("importInput").onchange=event=>{const file=event.target.files[0];if(file)importData(file);event.target.value=""};
+  $("sortSelect").value=state.sort;
+  $("sortSelect").onchange=event=>{state.sort=event.target.value;localStorage.setItem("ps_sort",state.sort);renderCards()};
+  $("gridBtn").onclick=()=>{state.view="grid";localStorage.setItem("ps_view","grid");renderCards()};
+  $("listBtn").onclick=()=>{state.view="list";localStorage.setItem("ps_view","list");renderCards()};
+  $("selectAllBtn").onclick=()=>{filteredPrompts().forEach(prompt=>state.selected.add(prompt.id));renderCards()};
+  $("clearSelectionBtn").onclick=()=>{state.selected.clear();renderCards()};
+  $("bulkMoveBtn").onclick=()=>choiceAction("Sposta prompt","Categoria",'<option value="">Senza categoria</option>'+state.categories.map(cat=>`<option value="${esc(cat.id)}">${esc(cat.name)}</option>`).join(""),value=>{
+    const category=catById(value);bulkUpdate(category?.parentId?{categoryId:category.parentId,subcategoryId:category.id}:{categoryId:value||null,subcategoryId:null});
+  });
+  $("bulkClientBtn").onclick=()=>choiceAction("Assegna cliente","Cliente",'<option value="">Nessun cliente</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)}</option>`).join(""),value=>bulkUpdate({clientId:value||null}));
+  $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
+  $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:now()});
+
+  $(".editor-tab").forEach(button=>button.onclick=()=>setEditorTab(button.dataset.tab));
+  $("[data-editor-mode]").forEach(button=>button.onclick=()=>{if(!state.editor.id)return;state.editor.mode=button.dataset.editorMode;$("editorModal").classList.toggle("use-mode",state.editor.mode==="use");$("[data-editor-mode]").forEach(item=>item.classList.toggle("active",item===button));$("editorTitle").textContent=state.editor.mode==="use"?"Usa prompt":"Modifica prompt";setEditorTab(state.editor.mode==="use"?"variables":"prompt")});
+  $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
+  $("editorBackdrop").onclick=event=>{if(event.target===$("editorBackdrop"))closeEditor()};
+  $("promptCategory").onchange=()=>{
+    fillSubcategories("");
+    markDirty();
+  };
+  ["promptTitle","promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
+  $("openToolBtn").onclick=async()=>{
+    if(state.busy.has("openTool"))return;
+    let url=$("promptToolUrl").value.trim();
+    if(!url){toast("Inserisci prima il link del tool.");$("promptToolUrl").focus();return}
+    if(!/^https?:\/\//i.test(url))url=`https://${url}`;
+
+    const source=$("promptContent").value.trim();
+    if(!source){toast("Inserisci prima il testo del prompt.");$("promptContent").focus();return}
+
+    refreshVariables(false);
+    const compiled=compilePrompt(source,collectVariableValues()).trim();
+    if(!compiled){toast("Il prompt compilato \u00E8 vuoto.");return}
+
+    let opened=null;
+    try{
+      new URL(url);
+      opened=window.open("about:blank","_blank");
+      if(!opened)throw new Error("Popup bloccato. Consenti i popup e riprova.");
+      state.busy.add("openTool");$("openToolBtn").disabled=true;
+
+      /* Salva prima il prompt corrente senza chiudere l'editor. */
+      const payload=editorPayload();
+      if(!payload.title)throw new Error("Inserisci il titolo del prompt prima di aprire il tool.");
+      if(!payload.content)throw new Error("Inserisci il testo del prompt prima di aprire il tool.");
+      await put("prompts",payload);
+      const stored=await getOne("prompts",payload.id);
+      if(!stored)throw new Error("Il prompt non risulta salvato nel database.");
+      await loadData();render();
+      state.editor.id=payload.id;
+      state.editor.dirty=false;
+
+      /* I browser impediscono di scrivere direttamente nei campi di siti esterni.
+         Copiare negli appunti prima dell'apertura \u00E8 il comportamento affidabile
+         per ChatGPT, Claude, Gemini e gli altri strumenti. */
+      await copyText(compiled);
+      opened.opener=null;opened.location.replace(url);
+      toast("Prompt salvato e copiato. Nel tool premi Cmd+V oppure Ctrl+V per inserirlo.","success");
+    }catch(error){
+      if(opened&&!opened.closed)opened.close();
+      console.error(error);
+      toast(error?.message||"Impossibile aprire il tool.","error","PS-TOOL-OPEN");
+    }finally{
+      state.busy.delete("openTool");$("openToolBtn").disabled=false;
+    }
+  };
+  ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
+  $("promptContent").oninput=()=>{
+    markDirty();updateCounts();clearTimeout(state.detectTimer);
+    state.detectTimer=setTimeout(()=>{refreshVariables(true)},260);
+  };
+  $("detectVariablesBtn").onclick=()=>{refreshVariables(true);toast(`${state.editor.variables.length} variabili rilevate.`)};
+  $("copyCompiledBtn").onclick=copyCompiled;
+  $("exportPromptBtn").onclick=exportCurrentPrompt;
+  $("savePromptBtn").onclick=savePrompt;
+  $("duplicateBtn").onclick=()=>state.editor.id&&duplicatePrompt(state.editor.id);
+  $("trashBtn").onclick=()=>state.editor.id&&trashPrompt(state.editor.id);
+
+  $("addCategoryBtn").onclick=async()=>{
+    const name=$("newCategoryName").value.trim().replace(/\s+/g," ");
+    if(!name){toast("Inserisci il nome della categoria.","warning");return}
+    const duplicate=state.categories.some(category=>!category.parentId&&normalize(category.name)===normalize(name));
+    if(duplicate){toast("Esiste gi\u00E0 una categoria con questo nome.","warning");return}
+    await put("categories",{id:uid("cat"),name,parentId:null,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
+    $("newCategoryName").value="";
+    await loadData();render();renderManage();toast("Categoria aggiunta.","success");
+  };
+  $("addSubcategoryBtn").onclick=async()=>{
+    const name=$("newSubcategoryName").value.trim().replace(/\s+/g," ");
+    const parentId=$("newSubcategoryParent").value||null;
+    if(!name){toast("Inserisci il nome della sottocategoria.","warning");return}
+    if(!parentId){toast("Seleziona la categoria principale.","warning");return}
+    const duplicate=state.categories.some(category=>category.parentId===parentId&&normalize(category.name)===normalize(name));
+    if(duplicate){toast("Esiste gi\u00E0 una sottocategoria con questo nome nella categoria selezionata.","warning");return}
+    await put("categories",{id:uid("cat"),name,parentId,color:categoryColor(catById(parentId)),order:state.categories.length,createdAt:now()});
+    $("newSubcategoryName").value="";
+    await loadData();render();renderManage();toast("Sottocategoria aggiunta.","success");
+  };
+  $("addClientBtn").onclick=async()=>{
+    const name=$("newClientName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome del cliente o progetto.","warning");return}
+    if(state.clients.some(client=>normalize(client.name)===normalize(name))){toast("Esiste gi\u00E0 un cliente o progetto con questo nome.","warning");return}
+    await put("clients",{id:uid("client"),name,createdAt:now()});$("newClientName").value="";await loadData();render();renderManage();toast("Cliente o progetto aggiunto.","success");
+  };
+
+  const resizer=$("sidebarResizer");
+  resizer.onmousedown=event=>{
+    event.preventDefault();resizer.classList.add("dragging");
+    const move=moveEvent=>{
+      const width=Math.max(220,Math.min(520,moveEvent.clientX));
+      document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
+      localStorage.setItem("ps_sidebar_width",String(width));
+    };
+    const up=()=>{resizer.classList.remove("dragging");document.removeEventListener("mousemove",move);document.removeEventListener("mouseup",up)};
+    document.addEventListener("mousemove",move);document.addEventListener("mouseup",up);
+  };
+  resizer.ondblclick=()=>{document.documentElement.style.setProperty("--sidebar-width","292px");localStorage.removeItem("ps_sidebar_width")};
+
+  document.addEventListener("keydown",event=>{
+    const modifier=event.metaKey||event.ctrlKey;
+    if(modifier&&event.key.toLowerCase()==="k"){event.preventDefault();$("globalSearch").focus()}
+    if(modifier&&event.key.toLowerCase()==="n"){event.preventDefault();openEditor()}
+    if(modifier&&event.key.toLowerCase()==="s"&&$("editorBackdrop").classList.contains("show")){event.preventDefault();savePrompt()}
+    if(event.key==="Escape"){
+      const modal=$(".modal-backdrop.show").at(-1);
+      if(modal)closeModal(modal.id);else if($("editorBackdrop").classList.contains("show"))closeEditor();
+    }
+  });
+  window.onbeforeunload=event=>{if(state.editor.dirty){event.preventDefault();event.returnValue=""}};
+  bindModalClose();
+}
+
+
+
+</script>
+<script>
+/* ---------- Avvio ---------- */
+async function init(){
+  setTheme(true);
+  const previousVersion=localStorage.getItem("ps_app_version");
+  const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
+  state.db=await openDatabase();await loadData();await removeLegacyDemoPrompt();await loadData();await seedData();bindEvents();render();
+  localStorage.setItem("ps_app_version",APP_VERSION);
+  if(previousVersion&&previousVersion!==APP_VERSION){
+    toast(`Applicazione aggiornata dalla versione ${previousVersion} alla ${APP_VERSION}. I dati sono stati mantenuti.`,"success");
+  }
+  const hashAction=location.hash.match(/^#step-(.+)$/)?.[1]||localStorage.getItem("ps_last_dashboard_action");
+  if(hashAction&&document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)){setTimeout(()=>{highlightDashboardCard(hashAction);document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)?.scrollIntoView({block:"center"})},100)}
+}
+init().catch(error=>{
+  console.error(error);
+  document.body.innerHTML=`<div style="padding:40px;font-family:system-ui"><h1>Errore di inizializzazione</h1><p>${esc(error.message)}</p><p>Apri il file con Chrome o Brave.</p></div>`;
+});
+
+</script>
 </body>
 </html>
 
