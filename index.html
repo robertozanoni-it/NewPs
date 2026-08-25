@@ -14,31 +14,31 @@
 <body>
 <div class="app">
   <header class="topbar">
-    <button class="btn icon mobile-menu" id="mobileMenuBtn">☰</button>
+    <button class="btn icon mobile-menu" id="mobileMenuBtn">&#9776;</button>
     <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel"></small></div></div>
     <div class="search-wrap">
-      <span>⌕</span>
-      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente…">
-      <button class="search-clear" id="clearSearch">×</button>
+      <span>&#8981;</span>
+      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente&#8230;">
+      <button class="search-clear" id="clearSearch">&#215;</button>
     </div>
     <div class="top-actions">
       <button class="btn optional" id="importBtn">Importa JSON</button>
       <button class="btn optional" id="exportBtn">Esporta archivio</button>
-      <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">＋ Nuovo prompt</button>
-      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">⋯</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuManageBtn">Gestisci categorie e clienti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
+      <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">&#65291; Nuovo prompt</button>
+      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">&#8943;</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuManageBtn">Gestisci categorie e clienti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
     </div>
   </header>
 
   <aside class="sidebar" id="sidebar">
     <section class="side-section library">
       <div class="side-title"><span>Libreria</span></div>
-      <button class="side-link" id="dashboardBtn"><span>⌂</span><span>Dashboard</span></button>
-      <button class="side-link active" data-filter="all"><span>▦</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
-      <button class="side-link" data-filter="favorites"><span>★</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
-      <button class="side-link" data-filter="recent"><span>◷</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
-      <button class="side-link" data-filter="uncategorized"><span>◇</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
-      <button class="side-link" data-filter="archived"><span>▣</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
-      <button class="side-link" data-filter="trash"><span>⌫</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
+      <button class="side-link" id="dashboardBtn"><span>&#8962;</span><span>Dashboard</span></button>
+      <button class="side-link active" data-filter="all"><span>&#9638;</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
+      <button class="side-link" data-filter="favorites"><span>&#9733;</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
+      <button class="side-link" data-filter="recent"><span>&#9719;</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
+      <button class="side-link" data-filter="uncategorized"><span>&#9671;</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
+      <button class="side-link" data-filter="archived"><span>&#9635;</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
+      <button class="side-link" data-filter="trash"><span>&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
     </section>
     <section class="side-section categories">
       <div class="side-title"><span>Categorie</span><button class="btn small" id="manageBtn">Gestisci</button></div>
@@ -49,7 +49,7 @@
       <div id="clientList"></div>
     </section>
     <section class="side-section backup">
-      <button class="side-link" id="backupBtn"><span>⇩</span><span>Crea backup completo</span></button>
+      <button class="side-link" id="backupBtn"><span>&#8681;</span><span>Crea backup completo</span></button>
       <div class="hint" style="padding:8px;color:var(--sidebar-muted)">Il backup include prompt, variabili e file caricati.</div>
     </section>
   </aside>
@@ -62,13 +62,13 @@
       <div class="toolbar">
         <button class="btn small" id="selectAllBtn">Seleziona risultati</button>
         <select id="sortSelect">
-          <option value="title_asc">Titolo 1–9 / A–Z</option>
-          <option value="title_desc">Titolo Z–A / 9–1</option>
+          <option value="title_asc">Titolo 1&#8211;9 / A&#8211;Z</option>
+          <option value="title_desc">Titolo Z&#8211;A / 9&#8211;1</option>
           <option value="updated_desc">Modificati di recente</option>
           <option value="created_desc">Creati di recente</option>
-          <option value="usage_desc">Più utilizzati</option>
+          <option value="usage_desc">Pi&#249; utilizzati</option>
         </select>
-        <div class="view-toggle"><button class="btn small" id="gridBtn">▦</button><button class="btn small" id="listBtn">☷</button></div>
+        <div class="view-toggle"><button class="btn small" id="gridBtn">&#9638;</button><button class="btn small" id="listBtn">&#9783;</button></div>
       </div>
     </div>
     <div class="bulkbar" id="bulkbar">
@@ -95,7 +95,7 @@
         <button class="editor-tab" data-tab="variables" id="variablesTab">Variabili</button>
       </div>
       <span class="spacer"></span>
-      <button class="btn icon small" id="closeEditorBtn">×</button>
+      <button class="btn icon small" id="closeEditorBtn">&#215;</button>
     </div>
     <div class="editor-body">
       <section class="editor-panel active" data-panel="prompt">
@@ -103,8 +103,8 @@
           <div class="field full"><label>Titolo</label><input id="promptTitle" type="text" placeholder="Titolo chiaro e descrittivo"></div>
           <div class="field full">
             <label>Testo del prompt</label>
-            <textarea id="promptContent" placeholder="Scrivi o incolla il prompt…"></textarea>
-            <div class="hint"><span id="wordCount">0 parole</span> · <span id="charCount">0 caratteri</span> · le variabili vengono rilevate automaticamente</div>
+            <textarea id="promptContent" placeholder="Scrivi o incolla il prompt&#8230;"></textarea>
+            <div class="hint"><span id="wordCount">0 parole</span> &#183; <span id="charCount">0 caratteri</span> &#183; le variabili vengono rilevate automaticamente</div>
           </div>
           <div class="field"><label>Categoria</label><select id="promptCategory"></select></div>
           <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
@@ -131,13 +131,13 @@
 
       <section class="editor-panel" data-panel="variables">
         <div class="variables-header">
-          <div><h3>Compila il prompt</h3><p>L’app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
-          <button class="btn" id="detectVariablesBtn">↻ Aggiorna campi</button>
+          <div><h3>Compila il prompt</h3><p>L&#8217;app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
+          <button class="btn" id="detectVariablesBtn">&#8635; Aggiorna campi</button>
         </div>
         <div class="variable-highlight-note"><strong>Come funziona:</strong> compila solo i campi che ti servono. Il pulsante <strong>Copia Prompt</strong> sostituisce le variabili valorizzate; quelle lasciate vuote restano nel testo come segnaposto e non bloccano la copia.</div>
         <div class="use-progress" id="useProgress"></div><div class="variable-summary" id="variableSummary"></div>
         <div class="variable-list" id="variableList"></div>
-        <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante l’importazione.</div>
+        <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante l&#8217;importazione.</div>
         <div class="preview-box">
           <h3>Anteprima del prompt con le variabili inserite</h3>
           <textarea id="compiledPreview" readonly></textarea>
@@ -145,7 +145,7 @@
       </section>
     </div>
     <div class="editor-footer">
-      <span class="save-status" id="saveStatus">Salvataggio in corso…</span>
+      <span class="save-status" id="saveStatus">Salvataggio in corso&#8230;</span>
       <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia prompt compilato</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
@@ -159,7 +159,7 @@
 
 <div class="modal-backdrop" id="manageModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="manageModalTitle" tabindex="-1">
-    <div class="modal-head"><h3 id="manageModalTitle">Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">×</button></div>
+    <div class="modal-head"><h3 id="manageModalTitle">Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">&#215;</button></div>
     <div class="modal-body">
       <div class="manage-grid">
         <div class="panel-box">
@@ -194,7 +194,7 @@
 
 <div class="modal-backdrop" id="choiceModal">
   <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="choiceTitle" tabindex="-1">
-    <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal">×</button></div>
+    <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal">&#215;</button></div>
     <div class="modal-body" id="choiceBody"></div>
     <div class="modal-foot" id="choiceFoot"></div>
   </div>
