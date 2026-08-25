@@ -159,7 +159,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
 .cards.list{display:flex;flex-direction:column}
 .cards.grouped{display:flex;flex-direction:column;gap:24px}
-.category-group{display:flex;flex-direction:column;gap:12px}
+.category-group{display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid color-mix(in srgb,var(--group-accent,#64748b) 34%,var(--line));border-radius:18px;background:linear-gradient(145deg,color-mix(in srgb,var(--group-accent,#64748b) 11%,var(--panel)),color-mix(in srgb,var(--group-accent,#64748b) 4%,var(--panel)) 78%)}
 .category-group-head{display:flex;align-items:center;gap:10px;padding:12px 15px;border:1px solid var(--line);border-left:7px solid var(--group-accent,#64748b);border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--group-accent,#64748b) 13%,var(--panel)),var(--panel));box-shadow:0 5px 16px color-mix(in srgb,var(--group-accent,#64748b) 10%,transparent)}
 .category-group-title{font-size:21px;font-weight:950;line-height:1.2}
 .category-group-count{margin-left:auto;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--group-accent,#64748b) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--group-accent,#64748b) 38%,var(--line));font-size:13px;font-weight:900}
@@ -372,20 +372,22 @@ textarea{resize:vertical;line-height:1.55}
 }
 @media(max-width:450px){
   .top-actions #newPromptBtn{width:42px;min-width:42px;padding:0;font-size:0}
-  .top-actions #newPromptBtn::after{content:"ï¼‹";font-size:20px}
+  .top-actions #newPromptBtn::after{content:"\FF0B ";font-size:20px}
   .search-wrap{min-width:0}.topbar{gap:6px}.logo{width:36px;height:36px}
 }
 
 /* ---------- UX 18.0 ---------- */
 .top-actions #importBtn,.top-actions #exportBtn{display:none}
 .more-menu-wrap{position:relative}.more-menu{position:absolute;right:0;top:46px;min-width:220px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;z-index:80}.more-menu.show{display:block}.more-menu .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.more-menu .btn:hover{background:var(--panel-3)}
-.stats > .home-actions{grid-column:1/-1;width:100%;min-width:0}.home-actions{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.8fr);gap:14px;margin-bottom:16px}.home-primary,.home-secondary{min-width:0;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.home-primary{background:linear-gradient(135deg,var(--primary-soft),var(--panel) 70%)}.home-primary h3,.home-secondary h3{margin:0 0 7px;font-size:22px}.home-primary p,.home-secondary p{margin:0 0 14px;color:var(--muted);line-height:1.55}.home-primary .search{height:50px;font-size:16px;background:var(--panel)}.home-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.recent-strip{display:flex;gap:8px;flex-wrap:wrap}.recent-strip .btn{justify-content:flex-start}
+.stats > .home-actions{grid-column:1/-1;width:100%;min-width:0}.home-actions{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.8fr);gap:14px;margin-bottom:16px}.home-primary,.home-secondary{min-width:0;padding:20px;border:1px solid var(--line);border-radius:18px}.home-primary{border-color:color-mix(in srgb,#2563eb 48%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#2563eb 22%,var(--panel)),color-mix(in srgb,#0e7490 9%,var(--panel)) 72%)}.home-secondary{border-color:color-mix(in srgb,#7c3aed 44%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,#7c3aed 18%,var(--panel)),color-mix(in srgb,#db2777 7%,var(--panel)) 76%)}.home-primary h3,.home-secondary h3{margin:0 0 7px;font-size:22px}.home-primary p,.home-secondary p{margin:0 0 14px;color:var(--muted);line-height:1.55}.home-primary .search{height:50px;font-size:16px;background:color-mix(in srgb,var(--panel) 90%,transparent)}.home-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.recent-strip{display:flex;gap:8px;flex-wrap:wrap}.recent-strip .btn{justify-content:flex-start}
+.workflow-overview .dashboard-intro{border-color:color-mix(in srgb,#0891b2 46%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#0891b2 18%,var(--panel)),color-mix(in srgb,#2563eb 9%,var(--panel)) 76%)}
+.workflow-overview .recommended-action{border-color:color-mix(in srgb,#ea580c 45%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,#ea580c 18%,var(--panel)),color-mix(in srgb,#b45309 8%,var(--panel)) 76%)}
 .stats.dashboard-grid .dashboard-card[data-dash-action="configure"],.stats.dashboard-grid .dashboard-card[data-dash-action="import"],.stats.dashboard-grid .dashboard-card[data-dash-action="files"],.stats.dashboard-grid .dashboard-card[data-dash-action="export"],.stats.dashboard-grid .dashboard-card[data-dash-action="diagnostics"]{display:none}
-.stats.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-.dashboard-card{min-height:180px}.workflow-legend{display:none}.dashboard-intro{padding:17px 18px}.recommended-action{padding:17px 18px}.dashboard-card .dash-next{display:none}.dashboard-card p{font-size:12.5px}.dashboard-card strong{font-size:17px}
+.stats.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr));padding:14px;border:1px solid color-mix(in srgb,#334155 65%,var(--line));border-radius:20px;background:linear-gradient(145deg,color-mix(in srgb,#334155 15%,var(--panel)),color-mix(in srgb,#0e7490 5%,var(--panel)))}
+.dashboard-card{min-height:180px;background:linear-gradient(145deg,color-mix(in srgb,var(--dash) 18%,var(--panel)),color-mix(in srgb,var(--dash) 6%,var(--panel)) 74%)}.workflow-legend{display:none}.dashboard-intro{padding:17px 18px}.recommended-action{padding:17px 18px}.dashboard-card .dash-next{display:none}.dashboard-card p{font-size:12.5px}.dashboard-card strong{font-size:17px}
 .sidebar .side-section.backup{display:none}.side-title{font-size:10px}.side-section{margin-bottom:10px}.side-link,.tree-row{min-height:36px}.tree-row.sidebar-category-color{background:rgba(255,255,255,.035);border-color:transparent;box-shadow:inset 3px 0 var(--item-color,#60a5fa)}.tree-row.sidebar-category-color:hover{background:rgba(255,255,255,.10)}
 .card{min-height:170px}.card-actions{justify-content:flex-start}.card-actions .secondary-card-action{display:none}.card .meta .chip:nth-last-child(-n+2){display:none}.use-card{font-weight:900}.card-menu{position:relative}.card-menu-panel{position:absolute;right:0;bottom:42px;min-width:170px;display:none;padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);z-index:30}.card-menu.open .card-menu-panel{display:block}.card-menu-panel .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.card-menu-panel .btn:hover{background:var(--panel-3)}
-.use-mode .editor-tab[data-tab="prompt"]{display:none}.use-mode #savePromptBtn,.use-mode #duplicateBtn,.use-mode #trashBtn,.use-mode #exportPromptBtn{display:none}.use-mode #cancelEditorBtn{margin-left:auto}.use-mode .editor-head strong::after{content:" Â· Usa";color:var(--primary);font-weight:900}.use-mode .variables-header p{max-width:760px}.use-mode .variable-highlight-note{display:none}.use-mode .variables-header #detectVariablesBtn{display:none}.use-mode .preview-box{position:sticky;bottom:0;z-index:5;box-shadow:0 -8px 24px rgba(15,23,42,.08)}.use-mode .editor-footer{position:sticky;bottom:0;z-index:10}.use-mode .copy-compiled{font-size:16px;min-height:44px}.use-progress{display:none;margin:0 0 14px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-weight:850}.use-mode .use-progress{display:block}.editor-mode-switch{display:inline-flex;gap:6px;margin-left:8px}.editor-mode-switch .btn.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-2)}
+.use-mode .editor-tab[data-tab="prompt"]{display:none}.use-mode #savePromptBtn,.use-mode #duplicateBtn,.use-mode #trashBtn,.use-mode #exportPromptBtn{display:none}.use-mode #cancelEditorBtn{margin-left:auto}.use-mode .editor-head strong::after{content:" \B7  Usa";color:var(--primary);font-weight:900}.use-mode .variables-header p{max-width:760px}.use-mode .variable-highlight-note{display:none}.use-mode .variables-header #detectVariablesBtn{display:none}.use-mode .preview-box{position:sticky;bottom:0;z-index:5;box-shadow:0 -8px 24px rgba(15,23,42,.08)}.use-mode .editor-footer{position:sticky;bottom:0;z-index:10}.use-mode .copy-compiled{font-size:16px;min-height:44px}.use-progress{display:none;margin:0 0 14px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-weight:850}.use-mode .use-progress{display:block}.editor-mode-switch{display:inline-flex;gap:6px;margin-left:8px}.editor-mode-switch .btn.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-2)}
 @media(max-width:1100px){.home-actions{grid-template-columns:1fr}}@media(max-width:900px){.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.home-actions{grid-template-columns:1fr}.card-actions .btn{flex:1 1 auto}}
 
@@ -394,31 +396,31 @@ textarea{resize:vertical;line-height:1.55}
 <body>
 <div class="app">
   <header class="topbar">
-    <button class="btn icon mobile-menu" id="mobileMenuBtn">â˜°</button>
+    <button class="btn icon mobile-menu" id="mobileMenuBtn">&#9776;</button>
     <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel"></small></div></div>
     <div class="search-wrap">
-      <span>âŒ•</span>
-      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, clienteâ€¦">
-      <button class="search-clear" id="clearSearch">Ã—</button>
+      <span>&#8981;</span>
+      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente&#8230;">
+      <button class="search-clear" id="clearSearch">&#215;</button>
     </div>
     <div class="top-actions">
       <button class="btn optional" id="importBtn">Importa JSON</button>
       <button class="btn optional" id="exportBtn">Esporta archivio</button>
-      <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">ï¼‹ Nuovo prompt</button>
-      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">â‹¯</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuManageBtn">Gestisci categorie e clienti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
+      <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">&#65291; Nuovo prompt</button>
+      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">&#8943;</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuManageBtn">Gestisci categorie e clienti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
     </div>
   </header>
 
   <aside class="sidebar" id="sidebar">
     <section class="side-section library">
       <div class="side-title"><span>Libreria</span></div>
-      <button class="side-link" id="dashboardBtn"><span>âŒ‚</span><span>Dashboard</span></button>
-      <button class="side-link active" data-filter="all"><span>â–¦</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
-      <button class="side-link" data-filter="favorites"><span>â˜…</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
-      <button class="side-link" data-filter="recent"><span>â—·</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
-      <button class="side-link" data-filter="uncategorized"><span>â—‡</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
-      <button class="side-link" data-filter="archived"><span>â–£</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
-      <button class="side-link" data-filter="trash"><span>âŒ«</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
+      <button class="side-link" id="dashboardBtn"><span>&#8962;</span><span>Dashboard</span></button>
+      <button class="side-link active" data-filter="all"><span>&#9638;</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
+      <button class="side-link" data-filter="favorites"><span>&#9733;</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
+      <button class="side-link" data-filter="recent"><span>&#9719;</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
+      <button class="side-link" data-filter="uncategorized"><span>&#9671;</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
+      <button class="side-link" data-filter="archived"><span>&#9635;</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
+      <button class="side-link" data-filter="trash"><span>&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
     </section>
     <section class="side-section categories">
       <div class="side-title"><span>Categorie</span><button class="btn small" id="manageBtn">Gestisci</button></div>
@@ -429,7 +431,7 @@ textarea{resize:vertical;line-height:1.55}
       <div id="clientList"></div>
     </section>
     <section class="side-section backup">
-      <button class="side-link" id="backupBtn"><span>â‡©</span><span>Crea backup completo</span></button>
+      <button class="side-link" id="backupBtn"><span>&#8681;</span><span>Crea backup completo</span></button>
       <div class="hint" style="padding:8px;color:var(--sidebar-muted)">Il backup include prompt, variabili e file caricati.</div>
     </section>
   </aside>
@@ -442,13 +444,13 @@ textarea{resize:vertical;line-height:1.55}
       <div class="toolbar">
         <button class="btn small" id="selectAllBtn">Seleziona risultati</button>
         <select id="sortSelect">
-          <option value="title_asc">Titolo 1â€“9 / Aâ€“Z</option>
-          <option value="title_desc">Titolo Zâ€“A / 9â€“1</option>
+          <option value="title_asc">Titolo 1&#8211;9 / A&#8211;Z</option>
+          <option value="title_desc">Titolo Z&#8211;A / 9&#8211;1</option>
           <option value="updated_desc">Modificati di recente</option>
           <option value="created_desc">Creati di recente</option>
-          <option value="usage_desc">PiÃ¹ utilizzati</option>
+          <option value="usage_desc">Pi&#249; utilizzati</option>
         </select>
-        <div class="view-toggle"><button class="btn small" id="gridBtn">â–¦</button><button class="btn small" id="listBtn">â˜·</button></div>
+        <div class="view-toggle"><button class="btn small" id="gridBtn">&#9638;</button><button class="btn small" id="listBtn">&#9783;</button></div>
       </div>
     </div>
     <div class="bulkbar" id="bulkbar">
@@ -475,7 +477,7 @@ textarea{resize:vertical;line-height:1.55}
         <button class="editor-tab" data-tab="variables" id="variablesTab">Variabili</button>
       </div>
       <span class="spacer"></span>
-      <button class="btn icon small" id="closeEditorBtn">Ã—</button>
+      <button class="btn icon small" id="closeEditorBtn">&#215;</button>
     </div>
     <div class="editor-body">
       <section class="editor-panel active" data-panel="prompt">
@@ -483,8 +485,8 @@ textarea{resize:vertical;line-height:1.55}
           <div class="field full"><label>Titolo</label><input id="promptTitle" type="text" placeholder="Titolo chiaro e descrittivo"></div>
           <div class="field full">
             <label>Testo del prompt</label>
-            <textarea id="promptContent" placeholder="Scrivi o incolla il promptâ€¦"></textarea>
-            <div class="hint"><span id="wordCount">0 parole</span> Â· <span id="charCount">0 caratteri</span> Â· le variabili vengono rilevate automaticamente</div>
+            <textarea id="promptContent" placeholder="Scrivi o incolla il prompt&#8230;"></textarea>
+            <div class="hint"><span id="wordCount">0 parole</span> &#183; <span id="charCount">0 caratteri</span> &#183; le variabili vengono rilevate automaticamente</div>
           </div>
           <div class="field"><label>Categoria</label><select id="promptCategory"></select></div>
           <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
@@ -511,13 +513,13 @@ textarea{resize:vertical;line-height:1.55}
 
       <section class="editor-panel" data-panel="variables">
         <div class="variables-header">
-          <div><h3>Compila il prompt</h3><p>Lâ€™app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
-          <button class="btn" id="detectVariablesBtn">â†» Aggiorna campi</button>
+          <div><h3>Compila il prompt</h3><p>L&#8217;app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
+          <button class="btn" id="detectVariablesBtn">&#8635; Aggiorna campi</button>
         </div>
         <div class="variable-highlight-note"><strong>Come funziona:</strong> compila solo i campi che ti servono. Il pulsante <strong>Copia Prompt</strong> sostituisce le variabili valorizzate; quelle lasciate vuote restano nel testo come segnaposto e non bloccano la copia.</div>
         <div class="use-progress" id="useProgress"></div><div class="variable-summary" id="variableSummary"></div>
         <div class="variable-list" id="variableList"></div>
-        <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante lâ€™importazione.</div>
+        <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante l&#8217;importazione.</div>
         <div class="preview-box">
           <h3>Anteprima del prompt con le variabili inserite</h3>
           <textarea id="compiledPreview" readonly></textarea>
@@ -525,7 +527,7 @@ textarea{resize:vertical;line-height:1.55}
       </section>
     </div>
     <div class="editor-footer">
-      <span class="save-status" id="saveStatus">Salvataggio in corsoâ€¦</span>
+      <span class="save-status" id="saveStatus">Salvataggio in corso&#8230;</span>
       <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia prompt compilato</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
@@ -539,7 +541,7 @@ textarea{resize:vertical;line-height:1.55}
 
 <div class="modal-backdrop" id="manageModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="manageModalTitle" tabindex="-1">
-    <div class="modal-head"><h3 id="manageModalTitle">Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">Ã—</button></div>
+    <div class="modal-head"><h3 id="manageModalTitle">Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">&#215;</button></div>
     <div class="modal-body">
       <div class="manage-grid">
         <div class="panel-box">
@@ -574,7 +576,7 @@ textarea{resize:vertical;line-height:1.55}
 
 <div class="modal-backdrop" id="choiceModal">
   <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="choiceTitle" tabindex="-1">
-    <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal">Ã—</button></div>
+    <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal">&#215;</button></div>
     <div class="modal-body" id="choiceBody"></div>
     <div class="modal-foot" id="choiceFoot"></div>
   </div>
@@ -586,9 +588,9 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.0.0";
-const APP_RELEASE_NAME="UX semplificata e modalitÃ  Usa prompt";
-document.title=`Prompt Studio v${APP_VERSION} â€” ${APP_RELEASE_NAME}`;
+const APP_VERSION="18.0.1";
+const APP_RELEASE_NAME="Codifica corretta e sezioni cromatiche";
+document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
@@ -632,7 +634,7 @@ const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&
 const normalize=value=>String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
 const titleSortData=item=>{
   const title=String(item?.title||"").trim();
-  const match=title.match(/^(?:[#â„–\s]*)?(\d+(?:[.,]\d+)?)/);
+  const match=title.match(/^(?:[#\u2116\s]*)?(\d+(?:[.,]\d+)?)/);
   return {title,hasNumber:Boolean(match),number:match?Number(match[1].replace(",",".")):Number.POSITIVE_INFINITY};
 };
 const naturalTitleCompare=(a,b)=>{
@@ -700,7 +702,7 @@ async function seedData(){
   await loadData();
 }
 
-/* ---------- UtilitÃ  UI ---------- */
+/* ---------- Utilit\u00E0 UI ---------- */
 function diagnosticEvents(){
   try{return JSON.parse(localStorage.getItem("ps_diagnostic_events")||"[]")}catch{return []}
 }
@@ -794,7 +796,7 @@ async function copyText(text){
     try{
       const copied=document.execCommand("copy");
       area.remove();
-      copied?resolve():reject(new Error("Il browser ha bloccato lâ€™accesso agli appunti."));
+      copied?resolve():reject(new Error("Il browser ha bloccato l\u2019accesso agli appunti."));
     }catch(error){
       area.remove();
       reject(error);
@@ -881,7 +883,7 @@ function filteredPrompts(){
 function filterInfo(){
   const {type,id}=state.filter;
   if(type==="all")return ["Tutti i prompt","La tua libreria completa"];
-  if(type==="favorites")return ["Preferiti","I prompt che utilizzi piÃ¹ spesso"];
+  if(type==="favorites")return ["Preferiti","I prompt che utilizzi pi\u00F9 spesso"];
   if(type==="recent")return ["Recenti","Modificati negli ultimi sette giorni"];
   if(type==="uncategorized")return ["Senza categoria","Prompt ancora da organizzare"];
   if(type==="archived")return ["Archivio","Prompt esclusi dalla libreria attiva"];
@@ -911,7 +913,7 @@ function renderSidebar(){
     const hasChildren=children.length>0;
     const isOpen=state.openCategories.has(category.id);
     const toggle=hasChildren
-      ? `<button class="tree-toggle" data-toggle-category="${esc(category.id)}" aria-expanded="${isOpen}" title="${isOpen?"Chiudi":"Apri"} sottocategorie" aria-label="${isOpen?"Chiudi":"Apri"} sottocategorie di ${esc(category.name)}">â–¶</button>`
+      ? `<button class="tree-toggle" data-toggle-category="${esc(category.id)}" aria-expanded="${isOpen}" title="${isOpen?"Chiudi":"Apri"} sottocategorie" aria-label="${isOpen?"Chiudi":"Apri"} sottocategorie di ${esc(category.name)}">\u25B6</button>`
       : `<span class="tree-toggle-placeholder" aria-hidden="true"></span>`;
     const row=`<div class="tree-row sidebar-category-color ${state.filter.type==="category"&&state.filter.id===category.id?"active":""}" style="--depth:${depth};--item-color:${esc(categoryColor(category))}" data-category="${esc(category.id)}" data-has-children="${hasChildren}" role="button" tabindex="0">
       ${toggle}<span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span><span class="tree-label">${esc(category.name)}</span><span class="count">${counts[category.id]||0}</span>
@@ -960,17 +962,17 @@ function collectProblems(){
   const missingTitle=live.filter(item=>!String(item.title||"").trim());
   if(missingTitle.length)add({id:"data-missing-title",title:"Prompt senza titolo",description:"Sono presenti record senza un titolo utilizzabile.",priority:"Alta",cause:"Dati importati o salvati in modo incompleto.",functionName:"Creazione e importazione",impact:"Ricerca, ordinamento ed esportazione possono risultare poco affidabili.",solution:"Apri i prompt coinvolti e inserisci un titolo.",mode:"Manuale",target:"library",count:missingTitle.length,itemIds:missingTitle.map(x=>x.id)});
   const missingContent=live.filter(item=>!String(item.content||"").trim());
-  if(missingContent.length)add({id:"data-missing-content",title:"Prompt senza contenuto",description:"Sono presenti prompt privi del testo principale.",priority:"Bloccante",cause:"Importazione incompleta o record danneggiato.",functionName:"Editor prompt",impact:"Il prompt non puÃ² essere compilato o utilizzato.",solution:"Apri il prompt e inserisci il contenuto obbligatorio.",mode:"Manuale",target:"library",count:missingContent.length,itemIds:missingContent.map(x=>x.id)});
+  if(missingContent.length)add({id:"data-missing-content",title:"Prompt senza contenuto",description:"Sono presenti prompt privi del testo principale.",priority:"Bloccante",cause:"Importazione incompleta o record danneggiato.",functionName:"Editor prompt",impact:"Il prompt non pu\u00F2 essere compilato o utilizzato.",solution:"Apri il prompt e inserisci il contenuto obbligatorio.",mode:"Manuale",target:"library",count:missingContent.length,itemIds:missingContent.map(x=>x.id)});
   const uncategorized=live.filter(item=>!item.categoryId&&!item.subcategoryId);
   if(uncategorized.length)add({id:"organization-uncategorized",title:"Prompt senza categoria",description:"Alcuni prompt non sono classificati.",priority:"Media",cause:"Categoria non assegnata.",functionName:"Organizzazione libreria",impact:"La ricerca per struttura e il riutilizzo risultano meno efficaci.",solution:"Assegna una categoria o sottocategoria.",mode:"Manuale",target:"organize",count:uncategorized.length,itemIds:uncategorized.map(x=>x.id)});
   const review=live.filter(item=>item.status==="review");
-  if(review.length)add({id:"verification-review",title:"Prompt da verificare",description:"Sono presenti prompt con stato â€œDa verificareâ€.",priority:"Media",cause:"Revisione non ancora conclusa.",functionName:"Verifica prompt",impact:"I contenuti potrebbero non essere pronti per lâ€™uso.",solution:"Apri i prompt, controlla anteprima e contenuto, quindi aggiorna lo stato.",mode:"Manuale",target:"verify",count:review.length,itemIds:review.map(x=>x.id)});
+  if(review.length)add({id:"verification-review",title:"Prompt da verificare",description:"Sono presenti prompt con stato \u201CDa verificare\u201D.",priority:"Media",cause:"Revisione non ancora conclusa.",functionName:"Verifica prompt",impact:"I contenuti potrebbero non essere pronti per l\u2019uso.",solution:"Apri i prompt, controlla anteprima e contenuto, quindi aggiorna lo stato.",mode:"Manuale",target:"verify",count:review.length,itemIds:review.map(x=>x.id)});
   const orphanCategory=live.filter(item=>(item.categoryId&&!catById(item.categoryId))||(item.subcategoryId&&!catById(item.subcategoryId)));
-  if(orphanCategory.length)add({id:"data-orphan-category",title:"Riferimenti a categorie mancanti",description:"Alcuni prompt puntano a categorie non piÃ¹ presenti.",priority:"Alta",cause:"Eliminazione, importazione o dati non coerenti.",functionName:"Categorie",impact:"Filtri e raggruppamenti possono mostrare risultati incoerenti.",solution:"Riassegna una categoria valida ai prompt coinvolti.",mode:"Manuale",target:"organize",count:orphanCategory.length,itemIds:orphanCategory.map(x=>x.id)});
+  if(orphanCategory.length)add({id:"data-orphan-category",title:"Riferimenti a categorie mancanti",description:"Alcuni prompt puntano a categorie non pi\u00F9 presenti.",priority:"Alta",cause:"Eliminazione, importazione o dati non coerenti.",functionName:"Categorie",impact:"Filtri e raggruppamenti possono mostrare risultati incoerenti.",solution:"Riassegna una categoria valida ai prompt coinvolti.",mode:"Manuale",target:"organize",count:orphanCategory.length,itemIds:orphanCategory.map(x=>x.id)});
   const orphanClient=live.filter(item=>item.clientId&&!clientById(item.clientId));
-  if(orphanClient.length)add({id:"data-orphan-client",title:"Riferimenti a clienti mancanti",description:"Alcuni prompt puntano a clienti o progetti non piÃ¹ presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Clienti e progetti",impact:"Il filtro per cliente non puÃ² rappresentare correttamente i dati.",solution:"Riassegna un cliente valido oppure rimuovi lâ€™associazione.",mode:"Manuale",target:"organize",count:orphanClient.length,itemIds:orphanClient.map(x=>x.id)});
+  if(orphanClient.length)add({id:"data-orphan-client",title:"Riferimenti a clienti mancanti",description:"Alcuni prompt puntano a clienti o progetti non pi\u00F9 presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Clienti e progetti",impact:"Il filtro per cliente non pu\u00F2 rappresentare correttamente i dati.",solution:"Riassegna un cliente valido oppure rimuovi l\u2019associazione.",mode:"Manuale",target:"organize",count:orphanClient.length,itemIds:orphanClient.map(x=>x.id)});
   const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
-  if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o piÃ¹ collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"Lâ€™apertura del tool puÃ² fallire o essere bloccata.",solution:"Correggi il campo â€œTool da utilizzareâ€.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
+  if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o pi\u00F9 collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L\u2019apertura del tool pu\u00F2 fallire o essere bloccata.",solution:"Correggi il campo \u201CTool da utilizzare\u201D.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
   const invalidFiles=[];
   live.forEach(prompt=>Object.values(prompt.variableFiles||{}).forEach(file=>{if(file&&(!file.base64||Number(file.size)>MAX_EMBED_FILE_SIZE))invalidFiles.push(prompt.id)}));
   if(invalidFiles.length)add({id:"file-invalid-attachment",title:"File incorporati non validi",description:"Sono presenti file senza contenuto incorporato o oltre il limite previsto.",priority:"Alta",cause:"Importazione incompleta o file superiore al limite.",functionName:"Variabili e file",impact:"Backup e ripristino del file potrebbero non funzionare.",solution:"Apri il prompt, rimuovi il file e caricalo nuovamente entro il limite.",mode:"Manuale",target:"files",count:new Set(invalidFiles).size,itemIds:[...new Set(invalidFiles)]});
@@ -983,7 +985,7 @@ function syncResolvedProblems(activeProblems){
   previous.filter(id=>!activeIds.includes(id)).forEach(id=>{
     if(!resolved.some(item=>item.id===id&&item.resolvedAt===localStorage.getItem(`ps_problem_resolved_${id}`))){
       const resolvedAt=now();localStorage.setItem(`ps_problem_resolved_${id}`,resolvedAt);
-      resolved.unshift({id,resolvedAt,mode:"Rilevamento automatico",verification:"Problema non piÃ¹ presente alla nuova lettura dei dati"});
+      resolved.unshift({id,resolvedAt,mode:"Rilevamento automatico",verification:"Problema non pi\u00F9 presente alla nuova lettura dei dati"});
     }
   });
   localStorage.setItem("ps_active_problem_ids",JSON.stringify(activeIds));
@@ -1007,12 +1009,12 @@ function workflowSnapshot(){
   return {live,configured,uncategorized,review,attachments,variables,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
 }
 function recommendedWorkflowAction(snapshot){
-  if(!snapshot.configured)return {action:"configure",icon:"âš™",title:"Completa la configurazione",reason:"Categorie, clienti o progetti non sono ancora pronti.",priority:"Alta",count:`${state.categories.length} categorie Â· ${state.clients.length} clienti`,after:"Dopo potrai organizzare correttamente i prompt."};
-  if(!snapshot.hasPrompts)return {action:"new",icon:"ï¼‹",title:"Crea o importa il primo prompt",reason:"La libreria Ã¨ vuota.",priority:"Alta",count:"0 prompt disponibili",after:"Dopo potrai compilare e verificare il contenuto."};
-  if(snapshot.blocking||snapshot.high)return {action:"problems",icon:"!",title:"Risolvi i problemi prioritari",reason:"Sono presenti anomalie che possono impedire o compromettere lâ€™utilizzo dei prompt.",priority:snapshot.blocking?"Bloccante":"Alta",count:`${snapshot.blocking} bloccanti Â· ${snapshot.high} alta prioritÃ `,after:"Dopo la modifica la dashboard rileggerÃ  i dati e verificherÃ  il problema."};
-  if(snapshot.uncategorized)return {action:"organize",icon:"ðŸ—‚",title:"Organizza i prompt non classificati",reason:"Alcuni prompt non hanno una categoria.",priority:"Media",count:`${snapshot.uncategorized} elementi coinvolti`,after:"Dopo sarÃ  piÃ¹ semplice trovarli e riutilizzarli."};
-  if(snapshot.review)return {action:"verify",icon:"âœ“",title:"Verifica i prompt in revisione",reason:"Sono presenti prompt con stato â€œDa verificareâ€.",priority:"Media",count:`${snapshot.review} elementi coinvolti`,after:"Dopo potrai utilizzarli con maggiore sicurezza."};
-  return {action:"library",icon:"âŒ•",title:"Seleziona il prompt da utilizzare",reason:"Non risultano problemi attivi o attivitÃ  organizzative pendenti.",priority:"Normale",count:`${snapshot.live.length} prompt disponibili`,after:"Apri un prompt, compila le variabili e copialo."};
+  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"Categorie, clienti o progetti non sono ancora pronti.",priority:"Alta",count:`${state.categories.length} categorie \u00B7 ${state.clients.length} clienti`,after:"Dopo potrai organizzare correttamente i prompt."};
+  if(!snapshot.hasPrompts)return {action:"new",icon:"\uFF0B",title:"Crea o importa il primo prompt",reason:"La libreria \u00E8 vuota.",priority:"Alta",count:"0 prompt disponibili",after:"Dopo potrai compilare e verificare il contenuto."};
+  if(snapshot.blocking||snapshot.high)return {action:"problems",icon:"!",title:"Risolvi i problemi prioritari",reason:"Sono presenti anomalie che possono impedire o compromettere l\u2019utilizzo dei prompt.",priority:snapshot.blocking?"Bloccante":"Alta",count:`${snapshot.blocking} bloccanti \u00B7 ${snapshot.high} alta priorit\u00E0 `,after:"Dopo la modifica la dashboard rilegger\u00E0 i dati e verificher\u00E0 il problema."};
+  if(snapshot.uncategorized)return {action:"organize",icon:"\uD83D\uDDC2",title:"Organizza i prompt non classificati",reason:"Alcuni prompt non hanno una categoria.",priority:"Media",count:`${snapshot.uncategorized} elementi coinvolti`,after:"Dopo sar\u00E0 pi\u00F9 semplice trovarli e riutilizzarli."};
+  if(snapshot.review)return {action:"verify",icon:"\u2713",title:"Verifica i prompt in revisione",reason:"Sono presenti prompt con stato \u201CDa verificare\u201D.",priority:"Media",count:`${snapshot.review} elementi coinvolti`,after:"Dopo potrai utilizzarli con maggiore sicurezza."};
+  return {action:"library",icon:"\u2315",title:"Seleziona il prompt da utilizzare",reason:"Non risultano problemi attivi o attivit\u00E0 organizzative pendenti.",priority:"Normale",count:`${snapshot.live.length} prompt disponibili`,after:"Apri un prompt, compila le variabili e copialo."};
 }
 function updateDashboardHash(action){
   const hash=`#step-${action}`;
@@ -1041,7 +1043,7 @@ function renderProblemsPanel(){
   $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn primary" id="openDiagnosticsFromProblems">Apri diagnostica</button>`;
   bindModalClose();
   $$('[data-open-problem]').forEach(button=>button.onclick=()=>{const problem=problems.find(item=>item.id===button.dataset.openProblem);if(problem){closeModal("choiceModal");openProblemTarget(problem)}});
-  $$('[data-recheck-problem]').forEach(button=>button.onclick=()=>{const id=button.dataset.recheckProblem;const stillPresent=collectProblems().some(item=>item.id===id);toast(stillPresent?"Il problema Ã¨ ancora presente. I dati non soddisfano ancora il requisito.":"Il problema non Ã¨ piÃ¹ presente dopo la nuova verifica.",stillPresent?"warning":"success",stillPresent?"PS-VERIFY-001":"");render();renderProblemsPanel()});
+  $$('[data-recheck-problem]').forEach(button=>button.onclick=()=>{const id=button.dataset.recheckProblem;const stillPresent=collectProblems().some(item=>item.id===id);toast(stillPresent?"Il problema \u00E8 ancora presente. I dati non soddisfano ancora il requisito.":"Il problema non \u00E8 pi\u00F9 presente dopo la nuova verifica.",stillPresent?"warning":"success",stillPresent?"PS-VERIFY-001":"");render();renderProblemsPanel()});
   $("openDiagnosticsFromProblems").onclick=()=>{closeModal("choiceModal");setTimeout(()=>performDashboardAction("diagnostics"),40)};
   openModal("choiceModal");setTimeout(()=>$("section-problems")?.focus(),60);
 }
@@ -1054,7 +1056,7 @@ function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prom
 function renderDiagnosticsPanel(){
   const snapshot=workflowSnapshot();const report=sanitizedDiagnosticReport();const resolved=report.resolvedProblems;
   $("choiceTitle").textContent="Diagnostica tecnica";
-  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"SÃ¬":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"SÃ¬":"No"}</td></tr><tr><th>Limite file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> Â· ${esc(event.operation)} Â· ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} Â· ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
+  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
   $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
   bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
 }
@@ -1087,7 +1089,7 @@ function performDashboardAction(action,{fromHash=false}={}){
   if(action==="diagnostics")renderDiagnosticsPanel();
 }
 function stateDescriptor(stateName){
-  const map={"Non configurato":["â—‹","warning"],"Configurazione incompleta":["â–³","warning"],"Dati mancanti":["!","error"],"Pronto":["â—","info"],"In attesa":["â—·","info"],"Operazione in corso":["â†»","info"],"Analisi completata":["âœ“","success"],"Completato con avvisi":["â–³","warning"],"Verifica necessaria":["?","warning"],"Correzione disponibile":["âœŽ","warning"],"Correzione eseguita":["âœ“","success"],"Correzione da confermare":["?","warning"],"Errore":["!","error"],"Bloccato":["â›”","error"],"Nessun risultato":["â—‹","info"],"Tutto corretto":["âœ“","success"]};return map[stateName]||["â—","info"];
+  const map={"Non configurato":["\u25CB","warning"],"Configurazione incompleta":["\u25B3","warning"],"Dati mancanti":["!","error"],"Pronto":["\u25CF","info"],"In attesa":["\u25F7","info"],"Operazione in corso":["\u21BB","info"],"Analisi completata":["\u2713","success"],"Completato con avvisi":["\u25B3","warning"],"Verifica necessaria":["?","warning"],"Correzione disponibile":["\u270E","warning"],"Correzione eseguita":["\u2713","success"],"Correzione da confermare":["?","warning"],"Errore":["!","error"],"Bloccato":["\u26D4","error"],"Nessun risultato":["\u25CB","info"],"Tutto corretto":["\u2713","success"]};return map[stateName]||["\u25CF","info"];
 }
 function renderStats(){
   const visible=state.filter.type==="all"&&!state.query;
@@ -1095,22 +1097,22 @@ function renderStats(){
   const s=workflowSnapshot(),recommendation=recommendedWorkflowAction(s);
   const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":s.problems.length?"Correzione disponibile":"Tutto corretto";
   const stepCards=[
-    {action:"configure",step:"Step 1",tone:"blue",icon:"âš™",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti e progetti.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie Â· ${state.clients.length} clienti`,next:s.configured?"Crea o importa un prompt":"Completa categorie e clienti",className:s.configured?"completed":""},
-    {action:"new",step:"Step 2",tone:"cyan",icon:"ï¼‹",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
-    {action:"import",step:"Alternativa",tone:"cyan",icon:"â‡§",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
-    {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"ðŸ—‚",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
-    {action:"problems",step:"Controllo",tone:s.blocking?"red":s.problems.length?"orange":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, prioritÃ , cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi Â· ${s.blocking} bloccanti`,next:s.problems.length?"Apri il problema e correggi i dati":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":s.problems.length?"":"completed",blocked:!s.hasPrompts},
-    {action:"library",step:"Step 4",tone:"gray",icon:"âŒ•",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
-    {action:"variables",step:"Step 5",tone:"purple",icon:"âœŽ",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
-    {action:"files",step:"Step 6",tone:s.attachments?"green":"cyan",icon:"ðŸ“Ž",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.attachments?"Analisi completata":"Verifica necessaria",count:`${s.attachments} file incorporati`,next:s.hasPrompts?"Verifica il prompt":"Richiede almeno un prompt",className:!s.hasPrompts?"blocked":s.attachments?"completed":"",blocked:!s.hasPrompts},
-    {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"âœ“",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
-    {action:"use",step:"Step 8",tone:"green",icon:"â§‰",title:"Copia e utilizza",description:"Copia il prompt compilato oppure apri il tool associato.",state:s.hasPrompts&&s.blocking===0?"Pronto":s.hasPrompts?"Bloccato":"Nessun risultato",count:s.hasPrompts?"Prompt disponibili":"Nessun prompt",next:s.blocking?"Risolvi prima i problemi bloccanti":"Salva gli eventuali aggiornamenti",className:s.hasPrompts&&s.blocking===0?"":"blocked",blocked:!s.hasPrompts||s.blocking>0},
-    {action:"export",step:"Step 9",tone:"charcoal",icon:"â‡©",title:"Esporta e crea backup",description:"Scarica lâ€™archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt Â· ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
-    {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"ðŸ› ",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per lâ€™assistenza",className:s.problems.length?"":"completed"}
+    {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti e progetti.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie \u00B7 ${state.clients.length} clienti`,next:s.configured?"Crea o importa un prompt":"Completa categorie e clienti",className:s.configured?"completed":""},
+    {action:"new",step:"Step 2",tone:"cyan",icon:"\uFF0B",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
+    {action:"import",step:"Alternativa",tone:"cyan",icon:"\u21E7",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
+    {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"\uD83D\uDDC2",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
+    {action:"problems",step:"Controllo",tone:s.blocking?"red":s.problems.length?"orange":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorit\u00E0 , cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi \u00B7 ${s.blocking} bloccanti`,next:s.problems.length?"Apri il problema e correggi i dati":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":s.problems.length?"":"completed",blocked:!s.hasPrompts},
+    {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"variables",step:"Step 5",tone:"purple",icon:"\u270E",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"files",step:"Step 6",tone:s.attachments?"green":"cyan",icon:"\uD83D\uDCCE",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.attachments?"Analisi completata":"Verifica necessaria",count:`${s.attachments} file incorporati`,next:s.hasPrompts?"Verifica il prompt":"Richiede almeno un prompt",className:!s.hasPrompts?"blocked":s.attachments?"completed":"",blocked:!s.hasPrompts},
+    {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"\u2713",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
+    {action:"use",step:"Step 8",tone:"green",icon:"\u29C9",title:"Copia e utilizza",description:"Copia il prompt compilato oppure apri il tool associato.",state:s.hasPrompts&&s.blocking===0?"Pronto":s.hasPrompts?"Bloccato":"Nessun risultato",count:s.hasPrompts?"Prompt disponibili":"Nessun prompt",next:s.blocking?"Risolvi prima i problemi bloccanti":"Salva gli eventuali aggiornamenti",className:s.hasPrompts&&s.blocking===0?"":"blocked",blocked:!s.hasPrompts||s.blocking>0},
+    {action:"export",step:"Step 9",tone:"charcoal",icon:"\u21E9",title:"Esporta e crea backup",description:"Scarica l\u2019archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt \u00B7 ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"\uD83D\uDEE0",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per l\u2019assistenza",className:s.problems.length?"":"completed"}
   ];
   const recent=s.live.slice().sort((a,b)=>new Date(b.lastUsedAt||b.updatedAt)-new Date(a.lastUsedAt||a.updatedAt)).slice(0,4);
   const recentHtml=recent.length?recent.map(item=>'<button class="btn small" type="button" data-recent-prompt="'+esc(item.id)+'">'+esc(item.title||"Senza titolo")+'</button>').join(""):'<span class="hint">Nessun prompt ancora utilizzato.</span>';
-  $("stats").innerHTML=`<div class="home-actions"><section class="home-primary"><h3>Che cosa vuoi fare?</h3><p>Cerca un prompt e usalo subito. Le funzioni di gestione restano disponibili nel menu â‹¯.</p><input class="search" id="dashboardSearch" type="search" placeholder="Cosa devi fare? Es. audit SEO, articolo, socialâ€¦"><div class="home-quick-actions"><button class="btn primary" type="button" data-home-action="search">Cerca un prompt</button><button class="btn" type="button" data-home-action="new">Crea nuovo prompt</button></div></section><section class="home-secondary"><h3>Usati di recente</h3><div class="recent-strip">${recentHtml}</div></section></div><div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali Â· ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">âœ“ ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">PrioritÃ  ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
+  $("stats").innerHTML=`<div class="home-actions"><section class="home-primary"><h3>Che cosa vuoi fare?</h3><p>Cerca un prompt e usalo subito. Le funzioni di gestione restano disponibili nel menu \u22EF.</p><input class="search" id="dashboardSearch" type="search" placeholder="Cosa devi fare? Es. audit SEO, articolo, social\u2026"><div class="home-quick-actions"><button class="btn primary" type="button" data-home-action="search">Cerca un prompt</button><button class="btn" type="button" data-home-action="new">Crea nuovo prompt</button></div></section><section class="home-secondary"><h3>Usati di recente</h3><div class="recent-strip">${recentHtml}</div></section></div><div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali \u00B7 ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">\u2713 ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorit\u00E0 ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
   $$('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));
   $('[data-recommended-action]')?.addEventListener('click',event=>performDashboardAction(event.currentTarget.dataset.recommendedAction));
   $('[data-home-action="new"]')?.addEventListener('click',()=>openEditor());
@@ -1125,7 +1127,7 @@ function cardHtml(prompt){
   const subcategory=catById(prompt.subcategoryId);
   const category=subcategory||mainCategory;
   const categoryPath=mainCategory&&subcategory
-    ? `${mainCategory.name} â€º ${subcategory.name}`
+    ? `${mainCategory.name} \u203A ${subcategory.name}`
     : (category?.name||"Senza categoria");
   const client=clientById(prompt.clientId);
   const accent=categoryColor(category);
@@ -1134,7 +1136,7 @@ function cardHtml(prompt){
   const attachmentCount=promptAttachmentCount(prompt);
   return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
-    <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">â˜…</span>':""}</div>
+    <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">\u2605</span>':""}</div>
     <div class="category-line"><span class="category-line-label">Categoria:</span><span class="category-line-value">${esc(categoryPath)}</span></div>
     <div class="excerpt">${esc(prompt.content||"Nessun contenuto")}</div>
     <div class="meta">
@@ -1145,7 +1147,7 @@ function cardHtml(prompt){
       <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
     </div>
     <div class="card-actions">
-      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">â–¶ Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">âœŽ Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">â‹¯</button><div class="card-menu-panel"><button class="btn small copy-card">Copia sorgente</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">\u25B6 Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">\u270E Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">\u22EF</button><div class="card-menu-panel"><button class="btn small copy-card">Copia sorgente</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
     </div>
   </article>`;
 }
@@ -1188,10 +1190,10 @@ function renderCards(){
   const items=filteredPrompts();
   const shouldGroup=state.filter.type==="all"&&!state.query;
   $("cards").className=`cards ${shouldGroup?"grouped":(state.view==="list"?"list":"")}`;
-  $("cards").innerHTML=items.length?(shouldGroup?groupedCardsHtml(items):items.map(cardHtml).join("")):`<div class="empty"><div class="big">âŒ•</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
+  $("cards").innerHTML=items.length?(shouldGroup?groupedCardsHtml(items):items.map(cardHtml).join("")):`<div class="empty"><div class="big">\u2315</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
   const [title,subtitle]=filterInfo();
   $("viewTitle").textContent=title;
-  $("viewSubtitle").textContent=state.query?`${items.length} risultati per â€œ${state.query}â€`:`${subtitle} Â· ${items.length} elementi`;
+  $("viewSubtitle").textContent=state.query?`${items.length} risultati per \u201C${state.query}\u201D`:`${subtitle} \u00B7 ${items.length} elementi`;
   bindCardEvents();
   updateBulkbar();
 
@@ -1256,25 +1258,25 @@ function variableSearchText(definition){
 }
 function variableIcon(definition){
   const text=variableSearchText(definition);
-  if(/\b(immagine|image|foto|screenshot)\b/.test(text))return "ðŸ–¼ï¸";
-  if(isFileVariable(definition))return "ðŸ“„";
-  if(/\b(dominio|url|sito|link)\b/.test(text))return "ðŸŒ";
-  if(/\b(lingua|paese|mercato|localita)\b/.test(text))return "ðŸŒ";
-  if(/\b(keyword|query|serp)\b/.test(text))return "ðŸ”Ž";
-  if(/\b(cliente|persona|nome)\b/.test(text))return "ðŸ‘¤";
-  if(/\b(email|mail)\b/.test(text))return "âœ‰ï¸";
-  return "âœï¸";
+  if(/\b(immagine|image|foto|screenshot)\b/.test(text))return "\uD83D\uDDBC\uFE0F";
+  if(isFileVariable(definition))return "\uD83D\uDCC4";
+  if(/\b(dominio|url|sito|link)\b/.test(text))return "\uD83C\uDF10";
+  if(/\b(lingua|paese|mercato|localita)\b/.test(text))return "\uD83C\uDF0D";
+  if(/\b(keyword|query|serp)\b/.test(text))return "\uD83D\uDD0E";
+  if(/\b(cliente|persona|nome)\b/.test(text))return "\uD83D\uDC64";
+  if(/\b(email|mail)\b/.test(text))return "\u2709\uFE0F";
+  return "\u270F\uFE0F";
 }
 function contextLabel(content,index){
   const start=content.lastIndexOf("\n",index)+1;
-  return content.slice(start,index).replace(/[*_`#>]/g,"").replace(/^[\s\-â€“â€”â€¢\d.)]+/,"").replace(/[:ï¼š\-â€“â€”]\s*$/,"").replace(/\s+/g," ").trim().toLowerCase();
+  return content.slice(start,index).replace(/[*_`#>]/g,"").replace(/^[\s\-\u2013\u2014\u2022\d.)]+/,"").replace(/[:\uFF1A\-\u2013\u2014]\s*$/,"").replace(/\s+/g," ").trim().toLowerCase();
 }
 function isFileVariable(definition){
   const text=variableSearchText(definition);
   const name=String(definition.name||"").trim();
 
   // I segnaposto tecnici usano spesso underscore, per esempio
-  // [FILE_GSC_QUERY_URL]. L'underscore Ã¨ un carattere di parola e rendeva
+  // [FILE_GSC_QUERY_URL]. L'underscore \u00E8 un carattere di parola e rendeva
   // inefficace il vecchio controllo con \b, quindi il selettore file non appariva.
   if(/^(file|files|upload|allega|allegato|attachment)(?:_|-|\s|$)/i.test(name))return true;
   if(/(?:^|_|-)(file|files|upload|allegato|attachment)(?:_|-|$)/i.test(name))return true;
@@ -1286,8 +1288,8 @@ function isOptionalVariable(definition){
   return /\b(opzionale|facoltativo|se disponibile|se presente|se noto|se noti|eventuale|eventuali)\b/.test(text);
 }
 function expectedInputType(definition){
-  // Un campo file puÃ² contenere anche "URL" nel nome, ma dopo il caricamento
-  // il valore Ã¨ un riferimento al file e non deve essere validato come URL.
+  // Un campo file pu\u00F2 contenere anche "URL" nel nome, ma dopo il caricamento
+  // il valore \u00E8 un riferimento al file e non deve essere validato come URL.
   if(definition.fileLike)return "text";
   const text=variableSearchText(definition);
   if(/\b(url|dominio|sito|link)\b/.test(text))return "url";
@@ -1356,18 +1358,18 @@ function variableCardHtml(def,index){
   const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length];
   const value=valueFor(state.editor.values,def.name);
   const file=state.editor.files[def.name];
-  const fileText=file?`${file.name} Â· ${formatBytes(file.size)}${file.base64?" Â· salvato nellâ€™app":" Â· non incorporato"}${file.textExtracted?" Â· testo importato":""}`:"Nessun file selezionato.";
+  const fileText=file?`${file.name} \u00B7 ${formatBytes(file.size)}${file.base64?" \u00B7 salvato nell\u2019app":" \u00B7 non incorporato"}${file.textExtracted?" \u00B7 testo importato":""}`:"Nessun file selezionato.";
   const recent=(state.recentValues[def.name]||[]).slice(0,5);
-  const textInput=`<textarea class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="${def.fileLike?"Oppure inserisci un URL, un percorso o una nota manualeâ€¦":`Inserisci ${esc(def.label||humanize(def.name))}â€¦`}">${esc(value)}</textarea>
+  const textInput=`<textarea class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="${def.fileLike?"Oppure inserisci un URL, un percorso o una nota manuale\u2026":`Inserisci ${esc(def.label||humanize(def.name))}\u2026`}">${esc(value)}</textarea>
       <div class="validation-error hidden" data-error-for="${esc(def.name)}"></div>`;
-  const quickValues=recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"â€¦":item)}</button>`).join("")}</div></div>`:"";
+  const quickValues=recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"\u2026":item)}</button>`).join("")}</div></div>`:"";
   const filePanel=def.fileLike?`<div class="file-panel file-panel-primary">
         <div class="file-zone">
           <div class="file-drop" data-var="${esc(def.name)}">
             <input class="variable-file" data-var="${esc(def.name)}" type="file">
-            <div class="file-drop-icon">â‡§</div>
+            <div class="file-drop-icon">\u21E7</div>
             <strong>${file?"File caricato":"Carica il file dal computer"}</strong>
-            <div class="file-drop-help">Trascinalo in questâ€™area oppure usa il pulsante.</div>
+            <div class="file-drop-help">Trascinalo in quest\u2019area oppure usa il pulsante.</div>
             <div class="file-actions">
               <button class="btn primary choose-file" type="button">${file?"Sostituisci file":"Scegli file"}</button>
               ${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica</button>`:""}
@@ -1382,11 +1384,11 @@ function variableCardHtml(def,index){
     <div class="variable-card-head">
       <span class="variable-number">${def.icon} Campo ${index+1}</span>
       <span class="variable-token">${esc(def.raw)}</span>
-      <span class="variable-badge">${def.optional?"Opzionale Â· ":""}${def.fileLike?"Caricamento file":"Campo testo"}</span>
+      <span class="variable-badge">${def.optional?"Opzionale \u00B7 ":""}${def.fileLike?"Caricamento file":"Campo testo"}</span>
     </div>
     <div class="variable-card-body">
       <h4>${def.fileLike?"Carica":"Inserisci"} ${esc(def.label||humanize(def.name))}</h4>
-      <p class="variable-help">${def.fileLike?`Il file selezionato verrÃ  associato a <strong>${esc(def.raw)}</strong> e salvato insieme al prompt.`:`Questo valore sostituirÃ  automaticamente <strong>${esc(def.raw)}</strong> nel prompt finale.`}</p>
+      <p class="variable-help">${def.fileLike?`Il file selezionato verr\u00E0 associato a <strong>${esc(def.raw)}</strong> e salvato insieme al prompt.`:`Questo valore sostituir\u00E0 automaticamente <strong>${esc(def.raw)}</strong> nel prompt finale.`}</p>
       ${filePanel}
       ${def.fileLike?'<div class="manual-file-value"><label>In alternativa, inserisci un riferimento manuale</label>':''}
       ${textInput}
@@ -1401,7 +1403,7 @@ function renderVariables(){
   const values=collectVariableValues();
   const required=definitions.filter(def=>!def.optional);
   const completedRequired=required.filter(def=>String(values[def.name]??"").trim()).length;
-  if($("useProgress"))$("useProgress").textContent=required.length?`${completedRequired} di ${required.length} campi obbligatori compilati${completedRequired===required.length?" Â· Prompt pronto":""}`:"Nessun campo obbligatorio Â· Prompt pronto";
+  if($("useProgress"))$("useProgress").textContent=required.length?`${completedRequired} di ${required.length} campi obbligatori compilati${completedRequired===required.length?" \u00B7 Prompt pronto":""}`:"Nessun campo obbligatorio \u00B7 Prompt pronto";
   $("variableSummary").textContent=definitions.length?`${definitions.length} variabil${definitions.length===1?"e rilevata":"i rilevate"} automaticamente nel prompt.`:"";
   $("variableSummary").classList.toggle("show",definitions.length>0);
   $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
@@ -1437,12 +1439,12 @@ async function processVariableFile(name,file){
   const metadata=`[File selezionato: ${file.name} | Tipo: ${file.type||"non specificato"} | Dimensione: ${formatBytes(file.size)}]`;
 
   if(file.size>MAX_EMBED_FILE_SIZE){
-    state.editor.values[name]=metadata+"\n[Il file supera 20 MB e non puÃ² essere incorporato nel backup.]";
+    state.editor.values[name]=metadata+"\n[Il file supera 20 MB e non pu\u00F2 essere incorporato nel backup.]";
     state.editor.files[name]={
       name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,
       textExtracted:false,base64:null,embedded:false,tooLarge:true
     };
-    renderVariables();markDirty();toast("File associato, ma non incorporato perchÃ© supera 20 MB.");
+    renderVariables();markDirty();toast("File associato, ma non incorporato perch\u00E9 supera 20 MB.");
     return;
   }
 
@@ -1456,7 +1458,7 @@ async function processVariableFile(name,file){
     }
   }catch(error){
     console.error(error);
-    toast("Non Ã¨ stato possibile leggere completamente il file.");
+    toast("Non \u00E8 stato possibile leggere completamente il file.");
   }
 
   state.editor.values[name]=value;
@@ -1469,7 +1471,7 @@ async function processVariableFile(name,file){
   if(input)input.value=value;
   markDirty();renderVariables();
   toast(base64
-    ?(textExtracted?"File e contenuto inseriti; il file sarÃ  incluso nel backup.":"File incluso nel backup.")
+    ?(textExtracted?"File e contenuto inseriti; il file sar\u00E0 incluso nel backup.":"File incluso nel backup.")
     :"File associato senza contenuto incorporato.");
 }
 
@@ -1488,8 +1490,8 @@ function collectVariableValues(){
 function updateCompiledPreview(){
   $("compiledPreview").value=compilePrompt($("promptContent").value,collectVariableValues());
 }
-/* La copia del prompt Ã¨ volutamente permissiva:
-   nessuna variabile vuota o formalmente non valida puÃ² bloccarla. */
+/* La copia del prompt \u00E8 volutamente permissiva:
+   nessuna variabile vuota o formalmente non valida pu\u00F2 bloccarla. */
 
 /* ---------- Editor ---------- *//* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
@@ -1672,11 +1674,11 @@ async function savePrompt(){
     }
 
     saveButton.disabled=true;
-    saveButton.textContent="Salvataggioâ€¦";
+    saveButton.textContent="Salvataggio\u2026";
     saveStatus.classList.add("show");
 
     await put("prompts",payload);
-    // Verifica reale della persistenza prima di chiudere lâ€™editor.
+    // Verifica reale della persistenza prima di chiudere l\u2019editor.
     const stored=await getOne("prompts",payload.id);
     if(!stored){
       throw new Error("Il database non ha restituito il prompt appena salvato.");
@@ -1701,7 +1703,7 @@ async function savePrompt(){
 
     closeEditor(true);
     navigateToSavedPrompt(payload);
-    toast(`Prompt salvato correttamente in â€œ${categoryName}â€.`);
+    toast(`Prompt salvato correttamente in \u201C${categoryName}\u201D.`);
   }catch(error){
     console.error(error);
     toast(`Errore nel salvataggio: ${error.message}`);
@@ -1723,14 +1725,14 @@ async function copyCompiled(){
 
   try{
     copyButton.disabled=true;
-    copyButton.textContent="Copia in corsoâ€¦";
+    copyButton.textContent="Copia in corso\u2026";
 
     /* Sincronizza i valori presenti a schermo senza applicare alcuna validazione. */
     refreshVariables(false);
 
     const source=$("promptContent").value;
     if(!source.trim()){
-      toast("Il testo del prompt Ã¨ vuoto.");
+      toast("Il testo del prompt \u00E8 vuoto.");
       setEditorTab("prompt");
       $("promptContent").focus();
       return;
@@ -1749,7 +1751,7 @@ async function copyCompiled(){
     await copyText(result);
 
     if(incomplete.length){
-      toast(`Prompt copiato. ${incomplete.length} variabil${incomplete.length===1?"e Ã¨ rimasta":"i sono rimaste"} come segnaposto.`);
+      toast(`Prompt copiato. ${incomplete.length} variabil${incomplete.length===1?"e \u00E8 rimasta":"i sono rimaste"} come segnaposto.`);
     }else{
       toast("Prompt copiato con tutte le variabili inserite.");
     }
@@ -1760,7 +1762,7 @@ async function copyCompiled(){
       if(state.editor.id){const used=state.prompts.find(item=>item.id===state.editor.id);if(used){used.usageCount=(used.usageCount||0)+1;used.lastUsedAt=now();await put("prompts",used);await loadData();}}
     }catch(error){
       console.error("Copia riuscita, ma salvataggio dei valori non completato:",error);
-      toast("Il prompt Ã¨ stato copiato, ma i valori non sono stati salvati nellâ€™archivio.");
+      toast("Il prompt \u00E8 stato copiato, ma i valori non sono stati salvati nell\u2019archivio.");
     }
   }catch(error){
     console.error("Errore durante la copia:",error);
@@ -1788,7 +1790,7 @@ async function quickCopy(id){
 
 async function duplicatePrompt(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
-  const copy={...prompt,id:uid("prompt"),title:`${prompt.title} â€” copia`,favorite:false,usageCount:0,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
+  const copy={...prompt,id:uid("prompt"),title:`${prompt.title} \u2014 copia`,favorite:false,usageCount:0,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
   await put("prompts",copy);await loadData();render();toast("Prompt duplicato.");
 }
 async function trashPrompt(id){
@@ -1801,7 +1803,7 @@ async function restorePrompt(id){
   prompt.deletedAt=null;prompt.updatedAt=now();await put("prompts",prompt);await loadData();render();toast("Prompt ripristinato.");
 }
 function deletePrompt(id){
-  confirmAction("Eliminazione definitiva","Questa operazione non puÃ² essere annullata.",async()=>{await remove("prompts",id);await loadData();render();toast("Prompt eliminato definitivamente.")});
+  confirmAction("Eliminazione definitiva","Questa operazione non pu\u00F2 essere annullata.",async()=>{await remove("prompts",id);await loadData();render();toast("Prompt eliminato definitivamente.")});
 }
 async function bulkUpdate(patch){
   const ids=[...state.selected];
@@ -1838,10 +1840,10 @@ function renderManage(){
   $("manageSubcategories").innerHTML=filteredSubcategories.map(category=>`
     <div class="manage-row">
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
-      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong><div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} Â· colore ereditato</div></div>
-      <input class="color-input" type="color" value="${esc(categoryColor(category))}" disabled title="Il colore Ã¨ ereditato dalla categoria principale">
+      <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong><div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} \u00B7 colore ereditato</div></div>
+      <input class="color-input" type="color" value="${esc(categoryColor(category))}" disabled title="Il colore \u00E8 ereditato dalla categoria principale">
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
-    </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in â€œ${esc(catById(state.manageSubcategoryFilter)?.name||"")}â€.`:'Nessuna sottocategoria presente.'}</div>`;
+    </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in \u201C${esc(catById(state.manageSubcategoryFilter)?.name||"")}\u201D.`:'Nessuna sottocategoria presente.'}</div>`;
 
   $("manageClients").innerHTML=state.clients.map(client=>`
     <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
@@ -1904,13 +1906,13 @@ function beginInlineCategoryRename(labelElement){
 
     if(!saveChanges){renderManage();return}
     if(!name){
-      toast(`Il nome della ${label} non puÃ² essere vuoto.`,"warning");
+      toast(`Il nome della ${label} non pu\u00F2 essere vuoto.`,"warning");
       renderManage();
       return;
     }
     const duplicate=state.categories.some(entry=>entry.id!==category.id&&normalize(entry.name)===normalize(name)&&(entry.parentId||null)===(category.parentId||null));
     if(duplicate){
-      toast(`Esiste giÃ  una ${label} con questo nome.`,"warning");
+      toast(`Esiste gi\u00E0 una ${label} con questo nome.`,"warning");
       renderManage();
       return;
     }
@@ -1922,7 +1924,7 @@ function beginInlineCategoryRename(labelElement){
     await loadData();
     render();
     renderManage();
-    toast(`${label.charAt(0).toUpperCase()+label.slice(1)} â€œ${originalName}â€ rinominata in â€œ${name}â€.`,"success");
+    toast(`${label.charAt(0).toUpperCase()+label.slice(1)} \u201C${originalName}\u201D rinominata in \u201C${name}\u201D.`,"success");
   };
 
   labelElement.onkeydown=event=>{
@@ -1938,7 +1940,7 @@ async function beginInlineClientRename(labelElement){
   const client=clientById(labelElement.dataset.id);if(!client||labelElement.dataset.editing==="true")return;
   labelElement.dataset.editing="true";labelElement.dataset.originalName=client.name;labelElement.contentEditable="true";labelElement.setAttribute("role","textbox");labelElement.classList.add("editing");
   requestAnimationFrame(()=>{labelElement.focus();const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(labelElement);selection.removeAllRanges();selection.addRange(range)});
-  let settled=false;const finish=async save=>{if(settled)return;settled=true;const original=labelElement.dataset.originalName||client.name;const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");labelElement.contentEditable="false";labelElement.classList.remove("editing");if(!save){renderManage();return}if(!name){toast("Il nome del cliente o progetto non puÃ² essere vuoto.","warning");renderManage();return}if(state.clients.some(item=>item.id!==client.id&&normalize(item.name)===normalize(name))){toast("Esiste giÃ  un cliente o progetto con questo nome.","warning");renderManage();return}if(name===original){renderManage();return}client.name=name;client.updatedAt=now();await put("clients",client);await loadData();render();renderManage();toast(`Cliente o progetto â€œ${original}â€ rinominato in â€œ${name}â€.`,"success")};
+  let settled=false;const finish=async save=>{if(settled)return;settled=true;const original=labelElement.dataset.originalName||client.name;const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");labelElement.contentEditable="false";labelElement.classList.remove("editing");if(!save){renderManage();return}if(!name){toast("Il nome del cliente o progetto non pu\u00F2 essere vuoto.","warning");renderManage();return}if(state.clients.some(item=>item.id!==client.id&&normalize(item.name)===normalize(name))){toast("Esiste gi\u00E0 un cliente o progetto con questo nome.","warning");renderManage();return}if(name===original){renderManage();return}client.name=name;client.updatedAt=now();await put("clients",client);await loadData();render();renderManage();toast(`Cliente o progetto \u201C${original}\u201D rinominato in \u201C${name}\u201D.`,"success")};
   labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
 }
 
@@ -1954,14 +1956,14 @@ async function renameEntity(type,id){
 
   const name=entered.trim().replace(/\s+/g," ");
   if(!name){
-    toast(`Il nome della ${label} non puÃ² essere vuoto.`,"warning");
+    toast(`Il nome della ${label} non pu\u00F2 essere vuoto.`,"warning");
     return;
   }
   if(name===item.name)return;
 
   const duplicate=collection.some(entry=>entry.id!==id&&normalize(entry.name)===normalize(name)&&(!isCategory||entry.parentId===item.parentId));
   if(duplicate){
-    toast(`Esiste giÃ  una ${label} con questo nome.`,"warning");
+    toast(`Esiste gi\u00E0 una ${label} con questo nome.`,"warning");
     return;
   }
 
@@ -1972,7 +1974,7 @@ async function renameEntity(type,id){
   await loadData();
   render();
   renderManage();
-  toast(`${label.charAt(0).toUpperCase()+label.slice(1)} â€œ${previousName}â€ rinominata in â€œ${name}â€.`,"success");
+  toast(`${label.charAt(0).toUpperCase()+label.slice(1)} \u201C${previousName}\u201D rinominata in \u201C${name}\u201D.`,"success");
 }
 function deleteCategory(id){
   const category=catById(id);if(!category)return;
@@ -1980,7 +1982,7 @@ function deleteCategory(id){
   const removedIds=new Set([id,...children.map(child=>child.id)]);
   const affected=state.prompts.filter(prompt=>removedIds.has(prompt.categoryId)||removedIds.has(prompt.subcategoryId));
   const childNote=children.length?` Verranno eliminate anche ${children.length} sottocategori${children.length===1?"a":"e"}.`:"";
-  confirmAction("Elimina categoria",`${affected.length} prompt verranno spostati in â€œSenza categoriaâ€.${childNote}`,async()=>{
+  confirmAction("Elimina categoria",`${affected.length} prompt verranno spostati in \u201CSenza categoria\u201D.${childNote}`,async()=>{
     for(const prompt of affected){
       if(removedIds.has(prompt.categoryId))prompt.categoryId=null;
       if(removedIds.has(prompt.subcategoryId))prompt.subcategoryId=null;
@@ -1990,17 +1992,17 @@ function deleteCategory(id){
     for(const child of children)await remove("categories",child.id);
     await remove("categories",id);
     if(state.filter.type==="category"&&removedIds.has(state.filter.id))state.filter={type:"all",id:null};
-    await loadData();render();renderManage();toast(`Categoria â€œ${category.name}â€ eliminata.`);
+    await loadData();render();renderManage();toast(`Categoria \u201C${category.name}\u201D eliminata.`);
   });
 }
 function deleteClient(id){
   const client=clientById(id);if(!client)return;
   const affected=state.prompts.filter(prompt=>prompt.clientId===id);
-  confirmAction("Elimina cliente",`${affected.length} prompt perderanno lâ€™assegnazione al cliente, ma non saranno eliminati.`,async()=>{
+  confirmAction("Elimina cliente",`${affected.length} prompt perderanno l\u2019assegnazione al cliente, ma non saranno eliminati.`,async()=>{
     for(const prompt of affected){prompt.clientId=null;prompt.updatedAt=now();await put("prompts",prompt)}
     await remove("clients",id);
     if(state.filter.type==="client"&&state.filter.id===id)state.filter={type:"all",id:null};
-    await loadData();render();renderManage();toast(`Cliente â€œ${client.name}â€ eliminato.`);
+    await loadData();render();renderManage();toast(`Cliente \u201C${client.name}\u201D eliminato.`);
   });
 }
 
@@ -2020,7 +2022,7 @@ async function exportCurrentPrompt(){
   toast(`Prompt esportato con ${promptAttachmentCount(payload)} file incorporat${promptAttachmentCount(payload)===1?"o":"i"}.`);
 }
 function downloadEmbeddedFile(file){
-  if(!file?.base64){toast("Questo file non Ã¨ incorporato nel backup.");return}
+  if(!file?.base64){toast("Questo file non \u00E8 incorporato nel backup.");return}
   const blob=base64ToBlob(file.base64,file.type);
   const url=URL.createObjectURL(blob),link=document.createElement("a");
   link.href=url;link.download=file.name||"allegato";document.body.appendChild(link);link.click();link.remove();
@@ -2046,7 +2048,7 @@ function exportData(){
   toast(`Backup esportato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`,"success");
 }
 async function createBackup(){
-  if(state.busy.has("backup")){toast("Un backup Ã¨ giÃ  in corso.","warning","PS-BACKUP-BUSY");return}
+  if(state.busy.has("backup")){toast("Un backup \u00E8 gi\u00E0 in corso.","warning","PS-BACKUP-BUSY");return}
   state.busy.add("backup");
   try{
     const data=snapshot();await put("backups",{id:uid("backup"),createdAt:now(),data});
@@ -2056,11 +2058,11 @@ async function createBackup(){
 }
 async function importData(file){
   if(state.busy.has("importRead")||state.busy.has("importApply")){
-    toast("Unâ€™importazione Ã¨ giÃ  in corso.","warning","PS-IMPORT-BUSY");return;
+    toast("Un\u2019importazione \u00E8 gi\u00E0 in corso.","warning","PS-IMPORT-BUSY");return;
   }
   state.busy.add("importRead");
   try{
-    if(!file||file.size===0)throw new Error("Il file selezionato Ã¨ vuoto.");
+    if(!file||file.size===0)throw new Error("Il file selezionato \u00E8 vuoto.");
     if(file.size>MAX_EMBED_FILE_SIZE)throw new Error(`Il file supera il limite di ${formatBytes(MAX_EMBED_FILE_SIZE)}.`);
     const raw=await file.text();
     if(!raw.trim())throw new Error("Il file selezionato non contiene dati.");
@@ -2080,11 +2082,11 @@ async function importData(file){
 
     choiceAction(
       "Importa archivio",
-      "ModalitÃ ",
-      '<option value="merge">Unisci con i dati esistenti</option><option value="replace">Sostituisci lâ€™archivio attuale</option>',
+      "Modalit\u00E0 ",
+      '<option value="merge">Unisci con i dati esistenti</option><option value="replace">Sostituisci l\u2019archivio attuale</option>',
       async mode=>{
         const executeImport=async()=>{
-          if(state.busy.has("importApply")){toast("Lâ€™archivio Ã¨ giÃ  in fase di importazione.","warning","PS-IMPORT-BUSY");return}
+          if(state.busy.has("importApply")){toast("L\u2019archivio \u00E8 gi\u00E0 in fase di importazione.","warning","PS-IMPORT-BUSY");return}
           state.busy.add("importApply");
           try{
             if(mode==="replace"){
@@ -2108,7 +2110,7 @@ async function importData(file){
             toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
           }catch(error){
             console.error(error);
-            toast(`Importazione non riuscita: ${error.message}. Verifica lâ€™archivio e riprova.`,"error","PS-IMPORT-APPLY");
+            toast(`Importazione non riuscita: ${error.message}. Verifica l\u2019archivio e riprova.`,"error","PS-IMPORT-APPLY");
           }finally{state.busy.delete("importApply")}
         };
         if(mode==="replace"){
@@ -2120,7 +2122,7 @@ async function importData(file){
     );
   }catch(error){
     console.error(error);
-    toast(`Importazione non riuscita: ${error.message}. Nessun dato Ã¨ stato modificato.`,"error","PS-IMPORT-001");
+    toast(`Importazione non riuscita: ${error.message}. Nessun dato \u00E8 stato modificato.`,"error","PS-IMPORT-001");
   }finally{state.busy.delete("importRead")}
 }
 
@@ -2178,7 +2180,7 @@ function bindEvents(){
 
     refreshVariables(false);
     const compiled=compilePrompt(source,collectVariableValues()).trim();
-    if(!compiled){toast("Il prompt compilato Ã¨ vuoto.");return}
+    if(!compiled){toast("Il prompt compilato \u00E8 vuoto.");return}
 
     let opened=null;
     try{
@@ -2199,7 +2201,7 @@ function bindEvents(){
       state.editor.dirty=false;
 
       /* I browser impediscono di scrivere direttamente nei campi di siti esterni.
-         Copiare negli appunti prima dell'apertura Ã¨ il comportamento affidabile
+         Copiare negli appunti prima dell'apertura \u00E8 il comportamento affidabile
          per ChatGPT, Claude, Gemini e gli altri strumenti. */
       await copyText(compiled);
       opened.opener=null;opened.location.replace(url);
@@ -2228,7 +2230,7 @@ function bindEvents(){
     const name=$("newCategoryName").value.trim().replace(/\s+/g," ");
     if(!name){toast("Inserisci il nome della categoria.","warning");return}
     const duplicate=state.categories.some(category=>!category.parentId&&normalize(category.name)===normalize(name));
-    if(duplicate){toast("Esiste giÃ  una categoria con questo nome.","warning");return}
+    if(duplicate){toast("Esiste gi\u00E0 una categoria con questo nome.","warning");return}
     await put("categories",{id:uid("cat"),name,parentId:null,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()});
     $("newCategoryName").value="";
     await loadData();render();renderManage();toast("Categoria aggiunta.","success");
@@ -2239,14 +2241,14 @@ function bindEvents(){
     if(!name){toast("Inserisci il nome della sottocategoria.","warning");return}
     if(!parentId){toast("Seleziona la categoria principale.","warning");return}
     const duplicate=state.categories.some(category=>category.parentId===parentId&&normalize(category.name)===normalize(name));
-    if(duplicate){toast("Esiste giÃ  una sottocategoria con questo nome nella categoria selezionata.","warning");return}
+    if(duplicate){toast("Esiste gi\u00E0 una sottocategoria con questo nome nella categoria selezionata.","warning");return}
     await put("categories",{id:uid("cat"),name,parentId,color:categoryColor(catById(parentId)),order:state.categories.length,createdAt:now()});
     $("newSubcategoryName").value="";
     await loadData();render();renderManage();toast("Sottocategoria aggiunta.","success");
   };
   $("addClientBtn").onclick=async()=>{
     const name=$("newClientName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome del cliente o progetto.","warning");return}
-    if(state.clients.some(client=>normalize(client.name)===normalize(name))){toast("Esiste giÃ  un cliente o progetto con questo nome.","warning");return}
+    if(state.clients.some(client=>normalize(client.name)===normalize(name))){toast("Esiste gi\u00E0 un cliente o progetto con questo nome.","warning");return}
     await put("clients",{id:uid("client"),name,createdAt:now()});$("newClientName").value="";await loadData();render();renderManage();toast("Cliente o progetto aggiunto.","success");
   };
 
@@ -2282,8 +2284,8 @@ function bindEvents(){
    - sincronizzata la versione visibile;
    - ripristino del focus dopo la chiusura delle modali;
    - protezione da operazioni duplicate per salvataggio, importazione, backup e apertura tool;
-   - conferma esplicita prima della sostituzione dellâ€™archivio;
-   - gestione piÃ¹ chiara di file vuoti, file troppo grandi ed errori di importazione;
+   - conferma esplicita prima della sostituzione dell\u2019archivio;
+   - gestione pi\u00F9 chiara di file vuoti, file troppo grandi ed errori di importazione;
    - aggiornamento immediato dei contatori dopo la copia rapida;
    - correzioni responsive per toast, modali, barra superiore e righe di gestione.
 */
