@@ -159,9 +159,6 @@ button:disabled{cursor:not-allowed;opacity:.55}
 @media(max-width:1280px){.stats.dashboard-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.workflow-overview{grid-template-columns:1fr}.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.dashboard-intro-head{flex-direction:column}.dashboard-progress-label{white-space:normal}.dashboard-card{min-height:0}.workflow-overview{gap:10px}}
-.section-flash{animation:sectionFlash 1.8s ease}@keyframes sectionFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 45%,transparent)}45%{box-shadow:0 0 0 12px transparent}100%{box-shadow:none}}
-
-
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px}
 .cards.list{display:flex;flex-direction:column}
 .cards.grouped{display:flex;flex-direction:column;gap:24px}
@@ -457,6 +454,7 @@ textarea{resize:vertical;line-height:1.55}
         <select id="sortSelect">
           <option value="title_asc">Titolo 1&#8211;9 / A&#8211;Z</option>
           <option value="title_desc">Titolo Z&#8211;A / 9&#8211;1</option>
+          <option value="category_asc">Categoria A&#8211;Z / Titolo 1&#8211;9</option>
           <option value="updated_desc">Modificati di recente</option>
           <option value="created_desc">Creati di recente</option>
           <option value="usage_desc">Pi&#249; utilizzati</option>
@@ -599,8 +597,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.1.0";
-const APP_RELEASE_NAME="Architettura modulare con build standalone";
+const APP_VERSION="18.2.1";
+const APP_RELEASE_NAME="Ordinamento naturale e variabili tra parentesi";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -614,13 +612,26 @@ const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
 const MAX_EMBED_FILE_SIZE=20*1024*1024;
-const SORT_RULE_VERSION="17.10.1";
+const SORT_RULE_VERSION="18.2.0";
+const SORT_VALUES=new Set(["title_asc","title_desc","category_asc","updated_desc","created_desc","usage_desc"]);
 const savedSortRuleVersion=localStorage.getItem("ps_sort_rule_version");
-const initialSort=savedSortRuleVersion===SORT_RULE_VERSION?(localStorage.getItem("ps_sort")||"title_asc"):"title_asc";
+const storedSort=localStorage.getItem("ps_sort");
+const initialSort=savedSortRuleVersion===SORT_RULE_VERSION&&SORT_VALUES.has(storedSort)?storedSort:"title_asc";
 if(savedSortRuleVersion!==SORT_RULE_VERSION){
   localStorage.setItem("ps_sort","title_asc");
   localStorage.setItem("ps_sort_rule_version",SORT_RULE_VERSION);
 }
+function readStoredJson(key,fallback){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(key)??JSON.stringify(fallback));
+    return parsed??fallback;
+  }catch(error){
+    console.warn(`Dato locale non valido: ${key}. Ripristino il valore predefinito.`,error);
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
+const storedOpenCategories=readStoredJson("ps_open_categories",[]);
 const state={
   db:null,prompts:[],categories:[],clients:[],
   filter:{type:"all",id:null},query:"",selected:new Set(),
@@ -629,8 +640,8 @@ const state={
   editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit"},
   searchTimer:null,detectTimer:null,
   lastSavedId:null,
-  recentValues:JSON.parse(localStorage.getItem("ps_recent_values")||"{}"),
-  openCategories:new Set(JSON.parse(localStorage.getItem("ps_open_categories")||"[]")),
+  recentValues:readStoredJson("ps_recent_values",{}),
+  openCategories:new Set(Array.isArray(storedOpenCategories)?storedOpenCategories:[]),
   manageSubcategoryFilter:null,
   busy:new Set(),modalReturnFocus:{}
 };
@@ -645,14 +656,32 @@ const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&
 const normalize=value=>String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
 const titleSortData=item=>{
   const title=String(item?.title||"").trim();
-  const match=title.match(/^(?:[#\u2116\s]*)?(\d+(?:[.,]\d+)?)/);
-  return {title,hasNumber:Boolean(match),number:match?Number(match[1].replace(",",".")):Number.POSITIVE_INFINITY};
+  // Riconosce 1, 01, 1.2, 1.10, 1-2, 1) e 1: mantenendo i titoli numerati prima degli altri.
+  const match=title.match(/^(?:[#\u2116\s]*)?(\d+(?:\s*[.\-/]\s*\d+)*)(?=\s|[.):\-\u2013\u2014]|$)/);
+  const numbers=match?match[1].split(/\s*[.\-/]\s*/).map(Number):[];
+  const label=match?title.slice(match[0].length).replace(/^[\s.):\-\u2013\u2014]+/,"").trim():title;
+  return {title,label,hasNumber:numbers.length>0,numbers};
 };
-const naturalTitleCompare=(a,b)=>{
+const compareNumberPaths=(left,right,direction=1)=>{
+  const length=Math.max(left.length,right.length);
+  for(let index=0;index<length;index++){
+    if(index>=left.length)return -1*direction;
+    if(index>=right.length)return 1*direction;
+    if(left[index]!==right[index])return (left[index]-right[index])*direction;
+  }
+  return 0;
+};
+const naturalTitleCompare=(a,b,direction=1)=>{
   const left=titleSortData(a),right=titleSortData(b);
+  // La priorit\u00E0 dei titoli numerati resta valida anche nell'ordinamento Z-A.
   if(left.hasNumber!==right.hasNumber)return left.hasNumber?-1:1;
-  if(left.hasNumber&&left.number!==right.number)return left.number-right.number;
-  return left.title.localeCompare(right.title,"it",{numeric:true,sensitivity:"base",ignorePunctuation:true});
+  if(left.hasNumber&&right.hasNumber){
+    const numberCompare=compareNumberPaths(left.numbers,right.numbers,direction);
+    if(numberCompare)return numberCompare;
+  }
+  const labelCompare=left.label.localeCompare(right.label,"it",{numeric:true,sensitivity:"base",ignorePunctuation:true});
+  if(labelCompare)return labelCompare*direction;
+  return left.title.localeCompare(right.title,"it",{numeric:true,sensitivity:"variant"})*direction;
 };
 const catById=id=>state.categories.find(item=>item.id===id);
 const clientById=id=>state.clients.find(item=>item.id===id);
@@ -735,7 +764,11 @@ function toast(message,type="info",code=""){
   if(type==="error"||type==="warning")recordDiagnosticEvent(type,"interfaccia",message,code);
   setTimeout(()=>node.remove(),5200);
 }
-function formatDate(value){return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value))}
+function dateTimestamp(value){const timestamp=new Date(value).getTime();return Number.isFinite(timestamp)?timestamp:0}
+function formatDate(value){
+  const timestamp=dateTimestamp(value);
+  return timestamp?new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(timestamp)):"Data non disponibile";
+}
 function formatBytes(bytes){
   if(!Number.isFinite(bytes))return "";
   const units=["B","KB","MB","GB"];let size=bytes,index=0;
@@ -874,7 +907,7 @@ function filteredPrompts(){
   else if(filter.type==="archived")items=items.filter(item=>!item.deletedAt&&item.status==="archived");
   else items=items.filter(item=>!item.deletedAt&&item.status!=="archived");
   if(filter.type==="favorites")items=items.filter(item=>item.favorite);
-  if(filter.type==="recent"){const limit=Date.now()-7*864e5;items=items.filter(item=>new Date(item.updatedAt).getTime()>=limit)}
+  if(filter.type==="recent"){const limit=Date.now()-7*864e5;items=items.filter(item=>dateTimestamp(item.updatedAt)>=limit)}
   if(filter.type==="uncategorized")items=items.filter(item=>!item.categoryId&&!item.subcategoryId);
   if(filter.type==="category"){
     const childIds=state.categories.filter(cat=>cat.parentId===filter.id).map(cat=>cat.id);
@@ -891,10 +924,11 @@ function filteredPrompts(){
   }
   return items.sort((a,b)=>{
     if(state.sort==="title_asc")return naturalTitleCompare(a,b);
-    if(state.sort==="title_desc")return naturalTitleCompare(b,a);
-    if(state.sort==="created_desc")return new Date(b.createdAt)-new Date(a.createdAt);
+    if(state.sort==="title_desc")return naturalTitleCompare(a,b,-1);
+    if(state.sort==="category_asc")return naturalTitleCompare(a,b);
+    if(state.sort==="created_desc")return dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt)||naturalTitleCompare(a,b);
     if(state.sort==="usage_desc")return (b.usageCount||0)-(a.usageCount||0);
-    return new Date(b.updatedAt)-new Date(a.updatedAt);
+    return dateTimestamp(b.updatedAt)-dateTimestamp(a.updatedAt)||naturalTitleCompare(a,b);
   });
 }
 function filterInfo(){
@@ -917,7 +951,7 @@ function renderSidebar(){
   const live=livePrompts(),active=activePrompts();
   $("countAll").textContent=live.length;
   $("countFavorites").textContent=live.filter(item=>item.favorite).length;
-  $("countRecent").textContent=live.filter(item=>Date.now()-new Date(item.updatedAt).getTime()<=7*864e5).length;
+  $("countRecent").textContent=live.filter(item=>{const timestamp=dateTimestamp(item.updatedAt);return timestamp>0&&Date.now()-timestamp<=7*864e5}).length;
   $("countUncategorized").textContent=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
   $("countArchived").textContent=active.filter(item=>item.status==="archived").length;
   $("countTrash").textContent=state.prompts.filter(item=>item.deletedAt).length;
@@ -1000,9 +1034,9 @@ function collectProblems(){
   return problems.sort((a,b)=>problemPriorityRank(a.priority)-problemPriorityRank(b.priority)||a.title.localeCompare(b.title,"it"));
 }
 function syncResolvedProblems(activeProblems){
-  const previous=JSON.parse(localStorage.getItem("ps_active_problem_ids")||"[]");
+  const previous=readStoredJson("ps_active_problem_ids",[]);
   const activeIds=activeProblems.map(item=>item.id);
-  const resolved=JSON.parse(localStorage.getItem("ps_resolved_problems")||"[]");
+  const resolved=readStoredJson("ps_resolved_problems",[]);
   previous.filter(id=>!activeIds.includes(id)).forEach(id=>{
     if(!resolved.some(item=>item.id===id&&item.resolvedAt===localStorage.getItem(`ps_problem_resolved_${id}`))){
       const resolvedAt=now();localStorage.setItem(`ps_problem_resolved_${id}`,resolvedAt);
@@ -1070,7 +1104,7 @@ function renderProblemsPanel(){
 }
 function sanitizedDiagnosticReport(){
   const snapshot=workflowSnapshot();
-  const resolved=JSON.parse(localStorage.getItem("ps_resolved_problems")||"[]");
+  const resolved=readStoredJson("ps_resolved_problems",[]);
   return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,attachments:snapshot.attachments,variables:snapshot.variables,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
 }
 function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prompt-studio-diagnostica-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Report diagnostico esportato senza contenuti completi o credenziali.","success")}
@@ -1133,7 +1167,7 @@ function renderStats(){
     {action:"export",step:"Step 9",tone:"charcoal",icon:"\u21E9",title:"Esporta e crea backup",description:"Scarica l\u2019archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt \u00B7 ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"\uD83D\uDEE0",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per l\u2019assistenza",className:s.problems.length?"":"completed"}
   ];
-  const recent=s.live.slice().sort((a,b)=>new Date(b.lastUsedAt||b.updatedAt)-new Date(a.lastUsedAt||a.updatedAt)).slice(0,4);
+  const recent=s.live.slice().sort((a,b)=>dateTimestamp(b.lastUsedAt||b.updatedAt)-dateTimestamp(a.lastUsedAt||a.updatedAt)||naturalTitleCompare(a,b)).slice(0,4);
   const recentHtml=recent.length?recent.map(item=>'<button class="btn small" type="button" data-recent-prompt="'+esc(item.id)+'">'+esc(item.title||"Senza titolo")+'</button>').join(""):'<span class="hint">Nessun prompt ancora utilizzato.</span>';
   $("stats").innerHTML=`<div class="home-actions"><section class="home-primary"><h3>Che cosa vuoi fare?</h3><p>Cerca un prompt e usalo subito. Le funzioni di gestione restano disponibili nel menu \u22EF.</p><input class="search" id="dashboardSearch" type="search" placeholder="Cosa devi fare? Es. audit SEO, articolo, social\u2026"><div class="home-quick-actions"><button class="btn primary" type="button" data-home-action="search">Cerca un prompt</button><button class="btn" type="button" data-home-action="new">Crea nuovo prompt</button></div></section><section class="home-secondary"><h3>Usati di recente</h3><div class="recent-strip">${recentHtml}</div></section></div><div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali \u00B7 ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">\u2713 ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorit\u00E0 ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
   $$('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));
@@ -1213,7 +1247,9 @@ function groupedCardsHtml(items){
 }
 function renderCards(){
   const items=filteredPrompts();
-  const shouldGroup=state.filter.type==="all"&&!state.query;
+  // Il raggruppamento per categoria viene applicato solo quando richiesto:
+  // in questo modo le opzioni Titolo A-Z/Z-A ordinano davvero l'intera libreria.
+  const shouldGroup=state.filter.type==="all"&&!state.query&&state.sort==="category_asc";
   $("cards").className=`cards ${shouldGroup?"grouped":(state.view==="list"?"list":"")}`;
   $("cards").innerHTML=items.length?(shouldGroup?groupedCardsHtml(items):items.map(cardHtml).join("")):`<div class="empty"><div class="big">\u2315</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
   const [title,subtitle]=filterInfo();
@@ -1262,12 +1298,14 @@ function updateBulkbar(){
 
 /* ---------- Motore delle variabili ---------- */
 function variableRegex(){
-  // Supporta anche segnaposto descrittivi come [ALLEGA FILE, SE DISPONIBILE].
-  return /{{\s*([^{}\n]{1,120}?)\s*}}|\[\s*([^\]\n]{2,120}?)\s*\]|%\s*([^%\n]{2,120}?)\s*%|<\s*([^<>\n]{2,120}?)\s*>/g;
+  // Supporta anche segnaposto descrittivi come [ALLEGA FILE, SE DISPONIBILE]
+  // e (NOME CLIENTE). Nelle parentesi tonde esclude frasi con punteggiatura finale
+  // per ridurre i falsi positivi generati dalle normali note tra parentesi.
+  return /{{\s*([^{}\n]{1,120}?)\s*}}|\[\s*([^\]\n]{2,120}?)\s*\]|%\s*([^%\n]{2,120}?)\s*%|<\s*([^<>\n]{2,120}?)\s*>|\(\s*([^()\n.!?;]{2,120}?)\s*\)/g;
 }
-function variableName(value){return String(value||"").replace(/{{|}}|\[|\]|%|<|>/g,"").trim().replace(/\s+/g,"_")}
+function variableName(value){return String(value||"").replace(/{{|}}|[\[\]()%<>]/g,"").trim().replace(/\s+/g,"_")}
 function humanize(value){
-  let text=String(value||"").replace(/{{|}}|\[|\]|%|<|>/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
+  let text=String(value||"").replace(/{{|}}|[\[\]()%<>]/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
   const map={
     "dominio sito":"dominio del sito","lingua":"lingua principale","paese o mercato":"paese o mercato",
     "keyword":"keyword","keyword principale":"keyword principale","url":"URL","url pagina":"URL della pagina",
@@ -1327,12 +1365,12 @@ function extractVariables(content){
   const text=String(content||""),definitions=[],seen=new Set(),regex=variableRegex();
   let match;
   while((match=regex.exec(text))){
-    const rawName=match[1]??match[2]??match[3]??match[4];
+    const rawName=match[1]??match[2]??match[3]??match[4]??match[5];
     const name=variableName(rawName),key=name.toLowerCase();
     if(!name||seen.has(key))continue;
     seen.add(key);
     const context=contextLabel(text,match.index);
-    const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":"angle"};
+    const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":match[4]!==undefined?"angle":"round"};
     definition.fileLike=isFileVariable(definition);
     definition.optional=isOptionalVariable(definition);
     definition.inputType=expectedInputType(definition);
@@ -1347,8 +1385,8 @@ function valueFor(values,name){
   return key?values[key]:"";
 }
 function compilePrompt(content,values){
-  return String(content||"").replace(variableRegex(),(match,curly,square,percent,angle)=>{
-    const name=variableName(curly??square??percent??angle),value=valueFor(values,name);
+  return String(content||"").replace(variableRegex(),(match,curly,square,percent,angle,round)=>{
+    const name=variableName(curly??square??percent??angle??round),value=valueFor(values,name);
     return String(value??"").trim()?value:match;
   });
 }
@@ -1433,7 +1471,7 @@ function renderVariables(){
   if($("useProgress"))$("useProgress").textContent=required.length?`${completedRequired} di ${required.length} campi obbligatori compilati${completedRequired===required.length?" \u00B7 Prompt pronto":""}`:"Nessun campo obbligatorio \u00B7 Prompt pronto";
   $("variableSummary").textContent=definitions.length?`${definitions.length} variabil${definitions.length===1?"e rilevata":"i rilevate"} automaticamente nel prompt.`:"";
   $("variableSummary").classList.toggle("show",definitions.length>0);
-  $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>[LINGUA]</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
+  $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>(LINGUA)</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
   $$("#variableList .variable-input").forEach(input=>input.addEventListener("input",()=>{
     state.editor.values[input.dataset.var]=input.value;
     const error=$(`[data-error-for="${CSS.escape(input.dataset.var)}"]`);
@@ -2163,7 +2201,7 @@ async function importData(file){
 
 
 
-/* ---------- Eventi ---------- *//* ---------- Eventi ---------- */
+/* ---------- Eventi ---------- */
 function bindEvents(){
   $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");setFilter("all");setTimeout(()=>{$("workflow-overview")?.scrollIntoView({behavior:"smooth",block:"start"});$("workflowTitle")?.focus?.()},80)};
   $$(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
