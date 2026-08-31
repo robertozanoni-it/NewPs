@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="18.15.0">
+<meta name="application-version" content="18.16.0">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -450,7 +450,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">&#9776;</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 18.15.0</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 18.16.0</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente, GPTSites, progetto o SEO&#8230;">
@@ -518,7 +518,7 @@ textarea{resize:vertical;line-height:1.55}
       <div class="side-title"><span>Gestione</span></div>
       <button class="side-link" id="manageBtn"><span>&#9881;</span><span>Gestisci elementi</span></button>
     </section>
-    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 18.15.0</div>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 18.16.0</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -541,7 +541,9 @@ textarea{resize:vertical;line-height:1.55}
     </div>
     <div class="bulkbar" id="bulkbar">
       <strong><span id="selectedCount">0</span> selezionati</strong>
-      <button class="btn small" id="bulkMoveBtn">Sposta</button>
+      <button class="btn small" id="bulkMoveBtn">Sposta categoria</button>
+      <button class="btn small" id="bulkTransferBtn">Sposta tra sezioni</button>
+      <button class="btn small" id="bulkCopyTransferBtn">Copia tra sezioni</button>
       <button class="btn small" id="bulkClientBtn">Assegna cliente</button>
       <button class="btn small" id="bulkGptSiteBtn">Assegna GPTSites</button>
       <button class="btn small" id="bulkProjectBtn">Assegna progetto</button>
@@ -718,8 +720,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.15.0";
-const APP_RELEASE_NAME="SEO e scambio completo";
+const APP_VERSION="18.16.0";
+const APP_RELEASE_NAME="Sposta e copia prompt tra sezioni";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -730,8 +732,8 @@ console.info(`Prompt Studio v${APP_VERSION} avviato`);
 /* ---------- Configurazione e stato ---------- */
 const DB_NAME="PromptStudioStandalone";
 const DB_VERSION=6;
-const ARCHIVE_SCHEMA_VERSION=22;
-const PROMPT_BUNDLE_SCHEMA_VERSION=22;
+const ARCHIVE_SCHEMA_VERSION=23;
+const PROMPT_BUNDLE_SCHEMA_VERSION=23;
 const STORES=["prompts","categories","clients","projects","gptsites","seo","settings","backups","versions"];
 const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
@@ -1775,7 +1777,7 @@ function cardHtml(prompt){
       <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
     </div>
     <div class="card-actions">
-      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">\u25B6 Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">\u270E Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">\u22EF</button><div class="card-menu-panel"><button class="btn small copy-card">Copia sorgente</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">\u25B6 Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">\u270E Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">\u22EF</button><div class="card-menu-panel"><button class="btn small copy-card">Copia sorgente</button><button class="btn small move-prompt-card">Sposta tra sezioni</button><button class="btn small copy-prompt-card">Copia tra sezioni</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
     </div>
   </article>`;
 }
@@ -1852,6 +1854,8 @@ function bindCardEvents(){
     card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
     card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();event.currentTarget.closest('.card-menu').classList.toggle('open')});
     card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopy(id));
+    card.querySelector(".move-prompt-card")?.addEventListener("click",()=>openPromptTransferDialog([id],"move"));
+    card.querySelector(".copy-prompt-card")?.addEventListener("click",()=>openPromptTransferDialog([id],"copy"));
     card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
     card.querySelector(".trash-card")?.addEventListener("click",()=>trashPrompt(id));
     card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
@@ -2589,6 +2593,156 @@ async function bulkUpdate(patch){
     await transactionDone(tx);
     state.selected.clear();await loadData();render();toast(`${changed} prompt aggiornati.`,"success");
   }catch(error){console.error(error);toast(`Aggiornamento multiplo non riuscito: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-BULK-001")}
+}
+
+
+function promptSectionValue(prompt,type){
+  if(type==="category")return prompt.subcategoryId||prompt.categoryId||"";
+  const definition=ENTITY_DEFINITIONS[type];
+  return definition?prompt[definition.field]||"":"";
+}
+
+function promptSectionOptions(type){
+  if(type==="category"){
+    return '<option value="">Senza categoria</option>'+categoriesHierarchicalAlphabetical().map(item=>{
+      const label=item.parentId?`${catById(item.parentId)?.name||""} › ${item.name}`:item.name;
+      return `<option value="${esc(item.id)}">${esc(label)}</option>`;
+    }).join("");
+  }
+  return '<option value="">Nessuna assegnazione</option>'+entityCollection(type)
+    .slice()
+    .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true}))
+    .map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+}
+
+function transferSectionLabel(type){
+  return ENTITY_DEFINITIONS[type]?.label||"Sezione";
+}
+
+function openPromptTransferDialog(ids,mode="move"){
+  const promptIds=[...new Set((ids||[]).filter(id=>state.prompts.some(item=>item.id===id&&!item.deletedAt)))];
+  if(!promptIds.length){toast("Nessun prompt disponibile per questa operazione.","warning");return}
+
+  const sectionOptions=Object.entries(ENTITY_DEFINITIONS)
+    .map(([type,definition])=>`<option value="${esc(type)}">${esc(definition.label)}</option>`).join("");
+  const verb=mode==="copy"?"Copia":"Sposta";
+  $("choiceTitle").textContent=`${verb} ${promptIds.length===1?"prompt":`${promptIds.length} prompt`} tra sezioni`;
+  $("choiceBody").innerHTML=`
+    <div class="field">
+      <label>Sezione di destinazione</label>
+      <select id="promptTransferType">${sectionOptions}</select>
+    </div>
+    <div class="field">
+      <label>Destinazione</label>
+      <select id="promptTransferTarget"></select>
+    </div>
+    <div class="hint" style="margin-top:10px">
+      ${mode==="copy"
+        ?"Il prompt verrà duplicato mantenendo contenuto, variabili, allegati e metadati. La copia riceverà la nuova assegnazione."
+        :"Il prompt originale verrà mantenuto: cambia soltanto l’assegnazione della sezione scelta. Le altre associazioni restano invariate."}
+    </div>`;
+  $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Annulla</button><button class="btn primary" id="choiceConfirm">${verb}</button>`;
+  bindModalClose();
+
+  const refreshTarget=()=>{
+    const type=$("promptTransferType").value;
+    $("promptTransferTarget").innerHTML=promptSectionOptions(type);
+  };
+  $("promptTransferType").onchange=refreshTarget;
+  refreshTarget();
+
+  $("choiceConfirm").onclick=()=>{
+    const type=$("promptTransferType").value;
+    const targetId=$("promptTransferTarget").value||null;
+    closeModal("choiceModal");
+    transferPromptsAcrossSections(promptIds,type,targetId,mode);
+  };
+  openModal("choiceModal");
+}
+
+async function transferPromptsAcrossSections(ids,targetType,targetId,mode="move"){
+  if(!ENTITY_DEFINITIONS[targetType])return;
+  const promptIds=[...new Set(ids||[])];
+  const prompts=promptIds.map(id=>state.prompts.find(item=>item.id===id)).filter(Boolean);
+  if(!prompts.length)return;
+
+  let categoryId=null,subcategoryId=null;
+  if(targetType==="category"&&targetId){
+    const category=catById(targetId);
+    if(!category){toast("Categoria di destinazione non valida.","error","PS-PROMPT-TRANSFER-TARGET");return}
+    if(category.parentId){categoryId=category.parentId;subcategoryId=category.id}
+    else categoryId=category.id;
+  }
+
+  try{
+    const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts");
+    const stamp=now();
+    let changed=0;
+
+    for(const prompt of prompts){
+      if(mode==="copy"){
+        const copy={
+          ...prompt,
+          id:uid("prompt"),
+          title:`${prompt.title} — copia`,
+          favorite:false,
+          usageCount:0,
+          lastUsedAt:null,
+          version:1,
+          createdAt:stamp,
+          updatedAt:stamp,
+          deletedAt:null,
+          variableValues:{...(prompt.variableValues||{})},
+          variableFiles:{...(prompt.variableFiles||{})}
+        };
+        if(targetType==="category"){
+          copy.categoryId=categoryId;
+          copy.subcategoryId=subcategoryId;
+        }else{
+          copy[ENTITY_DEFINITIONS[targetType].field]=targetId;
+        }
+        if(normalizedIntroSource(copy)==="auto"){
+          copy.intro=generatePromptIntro(copy);
+          copy.introSource="auto";
+          copy.introGeneratedAt=stamp;
+          copy.introUpdatedAt=stamp;
+        }
+        promptStore.put(copy);
+      }else{
+        const updated={...prompt,updatedAt:stamp};
+        if(targetType==="category"){
+          updated.categoryId=categoryId;
+          updated.subcategoryId=subcategoryId;
+        }else{
+          updated[ENTITY_DEFINITIONS[targetType].field]=targetId;
+        }
+        promptStore.put(updated);
+      }
+      changed++;
+    }
+
+    await transactionDone(tx);
+    state.selected.clear();
+    await loadData();
+
+    if(targetId){
+      state.filter={type:targetType,id:targetId};
+    }else{
+      state.filter={type:"all",id:null};
+    }
+    render();
+
+    const action=mode==="copy"?"copiati":"spostati";
+    const destination=targetId
+      ?(targetType==="category"
+          ?catById(targetId)?.name
+          :entityByType(targetType,targetId)?.name)
+      :"nessuna assegnazione";
+    toast(`${changed} prompt ${action} in ${transferSectionLabel(targetType)}${destination?` · ${destination}`:""}.`,"success");
+  }catch(error){
+    console.error(error);
+    toast(`${mode==="copy"?"Copia":"Spostamento"} non riuscito: ${error.message||"errore del database"}.`,"error","PS-PROMPT-TRANSFER");
+  }
 }
 
 
@@ -3338,6 +3492,8 @@ function bindEvents(){
   $("bulkMoveBtn").onclick=()=>choiceAction("Sposta prompt","Categoria",'<option value="">Senza categoria</option>'+state.categories.map(cat=>`<option value="${esc(cat.id)}">${esc(cat.name)}</option>`).join(""),value=>{
     const category=catById(value);bulkUpdate(category?.parentId?{categoryId:category.parentId,subcategoryId:category.id}:{categoryId:value||null,subcategoryId:null});
   });
+  $("bulkTransferBtn").onclick=()=>openPromptTransferDialog([...state.selected],"move");
+  $("bulkCopyTransferBtn").onclick=()=>openPromptTransferDialog([...state.selected],"copy");
   $("bulkClientBtn").onclick=()=>choiceAction("Assegna cliente","Cliente",'<option value="">Nessun cliente</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)}</option>`).join(""),value=>bulkUpdate({clientId:value||null}));
   $("bulkProjectBtn").onclick=()=>choiceAction("Assegna progetto","Progetto",'<option value="">Nessun progetto</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)}</option>`).join(""),value=>bulkUpdate({projectId:value||null}));
   $("bulkGptSiteBtn").onclick=()=>choiceAction("Assegna GPTSites","Sito GPTSites",'<option value="">Nessun sito GPTSites</option>'+state.gptsites.map(site=>`<option value="${esc(site.id)}">${esc(site.name)}</option>`).join(""),value=>bulkUpdate({gptSiteId:value||null}));
