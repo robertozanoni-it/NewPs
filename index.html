@@ -249,9 +249,12 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .chip.accent{font-weight:850;color:color-mix(in srgb,var(--accent) 75%,var(--text));background:color-mix(in srgb,var(--accent) 15%,var(--panel));border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
 .card-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
 .card-actions .btn.small{font-size:15px;min-height:38px;padding:8px 12px}
-.category-line{display:flex;align-items:center;gap:8px;margin:10px 0 2px;font-size:15px;line-height:1.4;font-weight:800;color:var(--text)}
-.category-line-label{color:var(--muted);font-weight:750}
-.category-line-value{color:color-mix(in srgb,var(--accent) 78%,var(--text));overflow-wrap:anywhere}
+.prompt-origin{display:flex;align-items:flex-start;gap:9px;margin:10px 0 4px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--accent) 6%,var(--panel));font-size:13px;line-height:1.35}
+.prompt-origin-label{flex:0 0 auto;color:var(--muted);font-weight:850}
+.prompt-origin-items{display:flex;flex-wrap:wrap;gap:5px;min-width:0}
+.prompt-origin-item{display:inline-flex;align-items:center;gap:4px;max-width:100%;padding:3px 7px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-weight:750;overflow-wrap:anywhere}
+.prompt-origin-item.category{color:color-mix(in srgb,var(--accent) 78%,var(--text));border-color:color-mix(in srgb,var(--accent) 36%,var(--line))}
+.prompt-origin-item.empty{color:var(--muted);font-weight:650}
 .cards.list .meta{display:none}
 .cards.list .card-actions{margin:0;padding:0;border:0}
 .empty{padding:70px 20px;text-align:center;color:var(--muted)}
@@ -471,7 +474,7 @@ textarea{resize:vertical;line-height:1.55}
     <section class="side-section categories">
       <div class="side-title"><span>Categorie</span></div>
       <div class="category-menu-shell" id="categoryMenuShell">
-        <button class="category-menu-trigger" id="categoryPicker" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="categoryMenu"><span class="picker-value" id="categoryPickerValue">Tutte le categorie</span><span class="category-caret" aria-hidden="true"></span></button>
+        <button class="category-menu-trigger" id="categoryPicker" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="categoryMenu"><span class="picker-value" id="categoryPickerValue">Categorie</span><span class="category-caret" aria-hidden="true"></span></button>
         <div class="category-menu" id="categoryMenu" role="menu" hidden></div>
       </div>
     </section>
@@ -670,8 +673,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.12.0";
-const APP_RELEASE_NAME="Sottocategorie in popup";
+const APP_VERSION="18.13.0";
+const APP_RELEASE_NAME="Origine visibile nei risultati";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -1428,12 +1431,8 @@ function renderSidebar(){
     if(item.subcategoryId)counts[item.subcategoryId]=(counts[item.subcategoryId]||0)+1;
   });
   const activeCategory=state.filter.type==="category"?catById(state.filter.id):null;
-  const activeRoot=activeCategory?.parentId?catById(activeCategory.parentId):activeCategory;
-  $("categoryPickerValue").textContent=activeCategory
-    ?`${activeRoot?.name||"Categoria"}${activeCategory.parentId?` \u203A ${activeCategory.name}`:""}`
-    :"Tutte le categorie";
+  $("categoryPickerValue").textContent="Categorie";
   $("categoryMenu").innerHTML=`
-    <button class="category-menu-all ${state.filter.type!=="category"?"active":""}" type="button" role="menuitem" data-category-id="all"><span>Tutte le categorie</span><span class="category-menu-count">${live.length}</span></button>
     ${rootCategoriesAlphabetical().map(root=>{
       const children=childCategoriesAlphabetical(root.id);
       return `<div class="category-menu-group">
@@ -1443,8 +1442,8 @@ function renderSidebar(){
         </div>
       </div>`;
     }).join("")}`;
-  $("clientPicker").innerHTML='<option value="all">Tutti i clienti</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)} (${live.filter(item=>item.clientId===client.id).length})</option>`).join("");
-  $("projectPicker").innerHTML='<option value="all">Tutti i progetti</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)} (${live.filter(item=>item.projectId===project.id).length})</option>`).join("");
+  $("clientPicker").innerHTML='<option value="all">Clienti</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)} (${live.filter(item=>item.clientId===client.id).length})</option>`).join("");
+  $("projectPicker").innerHTML='<option value="all">Progetti</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)} (${live.filter(item=>item.projectId===project.id).length})</option>`).join("");
   $("clientPicker").value=state.filter.type==="client"?state.filter.id:"all";
   $("projectPicker").value=state.filter.type==="project"?state.filter.id:"all";
   $("categoryMenu").hidden=true;
@@ -1682,13 +1681,18 @@ function cardHtml(prompt){
   const client=clientById(prompt.clientId);
   const project=projectById(prompt.projectId);
   const accent=categoryColor(category);
+  const origins=[];
+  if(category)origins.push(`<span class="prompt-origin-item category">Categoria: ${esc(categoryPath)}</span>`);
+  if(client)origins.push(`<span class="prompt-origin-item">Cliente: ${esc(client.name)}</span>`);
+  if(project)origins.push(`<span class="prompt-origin-item">Progetto: ${esc(project.name)}</span>`);
+  if(!origins.length)origins.push('<span class="prompt-origin-item empty">Non assegnato</span>');
   const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
   const variableCount=extractVariables(prompt.content).length;
   const attachmentCount=promptAttachmentCount(prompt);
   return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
     <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">\u2605</span>':""}</div>
-    <div class="category-line"><span class="category-line-label">Categoria:</span><span class="category-line-value">${esc(categoryPath)}</span></div>
+    <div class="prompt-origin" aria-label="Origine del prompt"><span class="prompt-origin-label">Origine:</span><div class="prompt-origin-items">${origins.join("")}</div></div>
     <div class="prompt-intro-card"><strong>Cosa fa questo prompt <span class="intro-card-badge">${normalizedIntroSource(prompt)==="auto"?"AUTO":"PERSONALE"}</span></strong>${esc(promptIntroText(prompt))}</div>
     <div class="excerpt">${esc(prompt.content||"Nessun contenuto")}</div>
     <div class="meta">
