@@ -205,6 +205,19 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .card-title{font-size:20px;font-weight:900;line-height:1.3;margin-right:auto;overflow-wrap:anywhere}
 .star{color:#f59e0b;font-size:18px}
 .excerpt{color:var(--muted);font-size:16px;line-height:1.65;margin:13px 0;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.prompt-intro-card{margin:11px 0 4px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));border-radius:11px;background:color-mix(in srgb,var(--accent) 8%,var(--panel));font-size:14px;line-height:1.5;color:var(--text)}
+.prompt-intro-card strong{display:block;margin-bottom:3px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:color-mix(in srgb,var(--accent) 78%,var(--text))}
+.prompt-purpose-note{margin:0 0 14px;padding:13px 15px;border:1px solid color-mix(in srgb,var(--primary) 32%,var(--line));border-left:5px solid var(--primary);border-radius:13px;background:linear-gradient(135deg,var(--primary-soft),var(--panel));line-height:1.55}
+.prompt-purpose-note strong{display:block;margin-bottom:4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--primary-2)}
+.intro-tools{display:flex;align-items:center;gap:7px;justify-content:space-between;flex-wrap:wrap}
+.intro-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.intro-source-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);font-size:11px;font-weight:900;color:var(--muted)}
+.intro-source-badge.auto{color:var(--primary-2);border-color:color-mix(in srgb,var(--primary) 38%,var(--line));background:color-mix(in srgb,var(--primary) 9%,var(--panel))}
+.intro-source-badge.manual{color:var(--success);border-color:color-mix(in srgb,var(--success) 34%,var(--line));background:color-mix(in srgb,var(--success) 8%,var(--panel))}
+.intro-sync-note{display:flex;align-items:flex-start;gap:7px;margin-top:7px;padding:8px 10px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);font-size:12px;line-height:1.45;color:var(--muted)}
+.intro-sync-note strong{color:var(--text)}
+.prompt-intro-card .intro-card-badge{display:inline-flex;margin-left:6px;padding:2px 6px;border-radius:999px;border:1px solid color-mix(in srgb,var(--accent) 32%,var(--line));font-size:9px;font-weight:900;vertical-align:1px;color:color-mix(in srgb,var(--accent) 78%,var(--text));background:var(--panel)}
+#promptIntro{min-height:86px}
 .cards.list .excerpt{margin:0;-webkit-line-clamp:2}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
 .chip{font-size:14px;padding:6px 10px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);line-height:1.25}
@@ -415,7 +428,7 @@ textarea{resize:vertical;line-height:1.55}
       <button class="btn optional" id="importBtn">Importa JSON</button>
       <button class="btn optional" id="exportBtn">Esporta archivio</button>
       <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">&#65291; Nuovo prompt</button>
-      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">&#8943;</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuManageBtn">Gestisci categorie e clienti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
+      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">&#8943;</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuGenerateIntrosBtn">Genera note mancanti</button><button class="btn" id="menuRefreshAutoIntrosBtn">Aggiorna note automatiche</button><button class="btn" id="menuManageBtn">Gestisci categorie e clienti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
     </div>
   </header>
 
@@ -497,6 +510,18 @@ textarea{resize:vertical;line-height:1.55}
             <textarea id="promptContent" placeholder="Scrivi o incolla il prompt&#8230;"></textarea>
             <div class="hint"><span id="wordCount">0 parole</span> &#183; <span id="charCount">0 caratteri</span> &#183; le variabili vengono rilevate automaticamente</div>
           </div>
+          <div class="field full">
+            <div class="intro-tools">
+              <label>Nota introduttiva &#8212; cosa fa questo prompt</label>
+              <div class="intro-actions">
+                <span class="intro-source-badge auto" id="introSourceBadge">&#8635; Automatica</span>
+                <button class="btn small" id="generateIntroBtn" type="button">&#10024; Rigenera</button>
+                <button class="btn small hidden" id="restoreAutoIntroBtn" type="button">&#8635; Torna automatica</button>
+              </div>
+            </div>
+            <textarea id="promptIntro" placeholder="Breve spiegazione per capire subito a cosa serve il prompt. Se lasci vuoto, viene generata automaticamente analizzando il contenuto."></textarea>
+            <div class="intro-sync-note" id="introSyncNote"><span>&#9432;</span><span><strong>Modalità automatica:</strong> la nota viene rigenerata quando cambia il titolo o il contenuto del prompt. Se modifichi direttamente questo campo diventa personalizzata e non verrà sovrascritta.</span></div>
+          </div>
           <div class="field"><label>Categoria</label><select id="promptCategory"></select></div>
           <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
           <div class="field"><label>Cliente o progetto</label><select id="promptClient"></select></div>
@@ -521,6 +546,7 @@ textarea{resize:vertical;line-height:1.55}
       </section>
 
       <section class="editor-panel" data-panel="variables">
+        <div class="prompt-purpose-note" id="promptPurposeNote"><strong>Cosa fa questo prompt</strong><span id="promptPurposeText"></span></div>
         <div class="variables-header">
           <div><h3>Compila il prompt</h3><p>L&#8217;app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
           <button class="btn" id="detectVariablesBtn">&#8635; Aggiorna campi</button>
@@ -597,8 +623,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.2.1";
-const APP_RELEASE_NAME="Ordinamento naturale e variabili tra parentesi";
+const APP_VERSION="18.6.0";
+const APP_RELEASE_NAME="Stabilità, import sicuro e variabili affidabili";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -612,6 +638,9 @@ const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
 const MAX_EMBED_FILE_SIZE=20*1024*1024;
+const MAX_IMPORT_ARCHIVE_SIZE=200*1024*1024;
+const MAX_INTERNAL_BACKUPS=3;
+const INTRO_DEBOUNCE_MS=220;
 const SORT_RULE_VERSION="18.2.0";
 const SORT_VALUES=new Set(["title_asc","title_desc","category_asc","updated_desc","created_desc","usage_desc"]);
 const savedSortRuleVersion=localStorage.getItem("ps_sort_rule_version");
@@ -637,8 +666,8 @@ const state={
   filter:{type:"all",id:null},query:"",selected:new Set(),
   sort:initialSort,
   view:localStorage.getItem("ps_view")||"grid",
-  editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit"},
-  searchTimer:null,detectTimer:null,
+  editor:{id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit",introSource:"auto"},
+  searchTimer:null,detectTimer:null,introTimer:null,
   lastSavedId:null,
   recentValues:readStoredJson("ps_recent_values",{}),
   openCategories:new Set(Array.isArray(storedOpenCategories)?storedOpenCategories:[]),
@@ -685,6 +714,12 @@ const naturalTitleCompare=(a,b,direction=1)=>{
 };
 const catById=id=>state.categories.find(item=>item.id===id);
 const clientById=id=>state.clients.find(item=>item.id===id);
+function promptCategorySortLabel(prompt){
+  const direct=catById(prompt?.categoryId),sub=catById(prompt?.subcategoryId);
+  const root=direct?.parentId?catById(direct.parentId)||direct:direct||(sub?.parentId?catById(sub.parentId):null);
+  const leaf=sub||(direct?.parentId?direct:null);
+  return `${root?.name||"Senza categoria"} ${leaf?.name||""}`.trim();
+}
 const livePrompts=()=>state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
 const activePrompts=()=>state.prompts.filter(item=>!item.deletedAt);
 
@@ -707,21 +742,29 @@ function getAll(name){return new Promise((resolve,reject)=>{const request=store(
 function getOne(name,id){return new Promise((resolve,reject)=>{const request=store(name).get(id);request.onsuccess=()=>resolve(request.result||null);request.onerror=()=>reject(request.error)})}
 function put(name,value){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").put(value);request.onsuccess=()=>resolve(value);request.onerror=()=>reject(request.error)})}
 function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
+function transactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error||new Error("Transazione annullata"));tx.onerror=()=>reject(tx.error||new Error("Errore nella transazione"))})}
 async function loadData(){
   [state.prompts,state.categories,state.clients]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients")]);
   state.categories.sort(categoryAlphabeticalCompare);
   state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
 }
 async function removeLegacyDemoPrompt(){
+  if(localStorage.getItem("ps_legacy_demo_cleanup")==="1")return;
   const demo=state.prompts.find(item=>
     item.title==="Esempio di prompt con variabili" &&
     Array.isArray(item.tags) && item.tags.length===1 && item.tags[0]==="esempio" &&
     String(item.content||"").includes("DOMINIO: [DOMINIO_SITO]")
   );
   if(demo)await remove("prompts",demo.id);
+  localStorage.setItem("ps_legacy_demo_cleanup","1");
 }
 async function seedData(){
-  if(!state.categories.length){
+  const firstRun=
+    localStorage.getItem("ps_initialized")!=="1" &&
+    !localStorage.getItem("ps_app_version") &&
+    !state.prompts.length && !state.categories.length && !state.clients.length;
+
+  if(firstRun){
     const seeds=[
       ["SEO",null],["Audit SEO","SEO"],["Contenuti SEO","SEO"],["Local SEO","SEO"],["SEO tecnica","SEO"],
       ["WordPress",null],["Social media",null],["Immagini",null],["Copywriting",null],["Sviluppo web",null]
@@ -734,13 +777,12 @@ async function seedData(){
       if(!parentName)roots[name]=id;
       await put("categories",{id,name,parentId,color:CATEGORY_COLORS[index%CATEGORY_COLORS.length],order:index,createdAt:now()});
     }
-  }
-  if(!state.clients.length){
     for(const name of ["Roberto Zanoni","Studio Dentistico Zirafa","Yoga Buena Onda","Pilates Buena Onda","Trova Esperti Digitali"]){
       await put("clients",{id:uid("client"),name,createdAt:now()});
     }
   }
-  /* La libreria dei prompt parte vuota: non vengono creati prompt dimostrativi. */
+  /* I dati iniziali vengono creati una sola volta: categorie o clienti eliminati dall'utente non ricompaiono al riavvio. */
+  localStorage.setItem("ps_initialized","1");
   await loadData();
 }
 
@@ -792,9 +834,168 @@ function base64ToBlob(base64,mimeType="application/octet-stream"){
 function safeFilename(value){
   return String(value||"prompt").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)||"prompt";
 }
+const INTRO_MAX_LENGTH=250;
+const INTRO_ACTION_RE=/^(?:analizza|cerca|crea|genera|scrivi|progetta|trasforma|migliora|ottimizza|verifica|confronta|individua|trova|sviluppa|costruisci|valuta|estrai|riordina|correggi|prepara|definisci|studia|esamina|seleziona|realizza|produci|riscrivi|organizza|monitora|controlla|identifica|elabora|restituisci|fornisci|proponi|dammi|ricerca)\b/i;
+const INTRO_RESULT_RE=/\b(?:produci|restituisci|fornisci|proponi|crea|genera|dammi|elenca|seleziona|priorit|correzion|raccomandaz|piano|report|lista|output|risultato|soluzion|strategia|struttura)\w*/i;
+function introVariableReplacement(raw){
+  const name=variableName(raw).toLowerCase().replace(/_/g," ");
+  if(/dominio|sito|url|link/.test(name))return "il sito o URL indicato";
+  if(/focus|settore|argomento|tema|nicchia/.test(name))return "il focus indicato";
+  if(/(?:nome.*file|file.*nome)/.test(name))return "indicato";
+  if(/file|documento|pdf|csv|dataset|alleg|screenshot|immagine/.test(name))return "il materiale fornito";
+  if(/cliente|azienda|brand|nome/.test(name))return "il soggetto indicato";
+  if(/keyword|query|termine/.test(name))return "la keyword indicata";
+  if(/lingua|paese|mercato|localit|area geografica/.test(name))return "il contesto indicato";
+  if(/numero|max|quantit/.test(name))return "la quantità indicata";
+  if(/esclusion/.test(name))return "le esclusioni indicate";
+  return "il valore indicato";
+}
+function cleanIntroSourceLine(line){
+  let text=String(line||"")
+    .replace(/```[\s\S]*?```/g," ")
+    .replace(/`([^`]+)`/g,"$1")
+    .replace(/\*\*|__|~~/g,"")
+    .replace(/^\s{0,3}#{1,6}\s*/,"")
+    .replace(/^\s*(?:[-*+•]|\d+[.)])\s+/,"")
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g,"$1")
+    .replace(/https?:\/\/\S+/g,"il sito o URL indicato")
+    .replace(variableRegex(),(match,curly,square,percent,angle,round)=>isLikelyVariableMatch(match,curly,square,percent,angle,round)?introVariableReplacement(match):match)
+    .replace(/\s+/g," ")
+    .trim();
+  text=text
+    .replace(/\bsettore\s+il focus indicato\b/gi,"settore indicato")
+    .replace(/\bsito\s+il sito o URL indicato\b/gi,"sito o URL indicato")
+    .replace(/\b(?:URL|link)\s+il sito o URL indicato\b/gi,"sito o URL indicato")
+    .replace(/\bkeyword\s+la keyword indicata\b/gi,"keyword indicata")
+    .replace(/\bcliente\s+il soggetto indicato\b/gi,"cliente indicato")
+    .replace(/\bfile\s+indicato\b/gi,"file indicato")
+    .replace(/\b(?:il sito o URL indicato)(?:\s*[,;:]?\s*il sito o URL indicato)+\b/gi,"il sito o URL indicato")
+    .replace(/^(?:obiettivo|scopo|task|compito|istruzione|istruzioni|richiesta|finalit[aà])\s*[:\-–—]\s*/i,"")
+    .replace(/\s+([,.;:!?])/g,"$1")
+    .replace(/([,;:]){2,}/g,"$1");
+  return text.trim();
+}
+function truncateIntro(text,max=INTRO_MAX_LENGTH){
+  let value=String(text||"").replace(/\s+/g," ").trim();
+  if(value.length<=max)return value;
+  let cut=value.slice(0,max+1);
+  const boundaries=[cut.lastIndexOf(". "),cut.lastIndexOf("; "),cut.lastIndexOf(", "),cut.lastIndexOf(" ")];
+  const boundary=Math.max(...boundaries);
+  if(boundary>Math.floor(max*.66))cut=cut.slice(0,boundary);
+  else cut=cut.slice(0,max);
+  return cut.replace(/[,:;\-–—\s]+$/g,"").trim()+"…";
+}
+function introLineScore(raw,index){
+  const line=cleanIntroSourceLine(raw);
+  if(!line||line.length<18)return -999;
+  const stripped=String(raw||"").replace(/^\s{0,3}#{1,6}\s*/,"").trim();
+  let score=Math.max(0,8-index*.35);
+  if(INTRO_ACTION_RE.test(line))score+=12;
+  if(INTRO_RESULT_RE.test(line))score+=5;
+  if(/^(?:obiettivo|scopo|finalit[aà])\b/i.test(stripped))score+=9;
+  if(/\b(?:devi|voglio|l'obiettivo|obiettivo è|serve a|serve per)\b/i.test(line))score+=4;
+  if(line.length>=45&&line.length<=220)score+=4;
+  else if(line.length>220&&line.length<=380)score+=2;
+  if(/^(?:variabili|input|output|regole|requisiti|vincoli|contesto|note|formato|esclusioni|procedura|workflow|checklist|esempi?|istruzioni?)\s*:?$/i.test(stripped))score-=20;
+  if(/^(?:esempio|nota|variabile|input|output)\b/i.test(line))score-=7;
+  if(/^\[?[^\]]+\]?\s*=/.test(stripped))score-=10;
+  if((stripped.match(/[A-ZÀ-Ý]/g)||[]).length>Math.max(18,stripped.length*.72)&&stripped.length<100)score-=5;
+  return score;
+}
+function introDistinct(a,b){
+  const left=normalize(a).replace(/\b(il|lo|la|i|gli|le|un|una|di|del|della|e|o|per|con|su|da|in)\b/g," ").replace(/\s+/g," ").trim();
+  const right=normalize(b).replace(/\b(il|lo|la|i|gli|le|un|una|di|del|della|e|o|per|con|su|da|in)\b/g," ").replace(/\s+/g," ").trim();
+  if(!left||!right)return true;
+  if(left.includes(right)||right.includes(left))return false;
+  const aWords=new Set(left.split(" ").filter(w=>w.length>3));
+  const bWords=new Set(right.split(" ").filter(w=>w.length>3));
+  const overlap=[...aWords].filter(w=>bWords.has(w)).length;
+  const denom=Math.max(1,Math.min(aWords.size,bWords.size));
+  return overlap/denom<.72;
+}
+function normalizeIntroSentence(text){
+  let value=String(text||"").trim()
+    .replace(/^(?:questo prompt\s+)?(?:serve a|serve per|consente di|permette di)\s+/i,"")
+    .replace(/^ti chiede di\s+/i,"")
+    .replace(/\s+/g," ")
+    .replace(/\.{2,}/g,".");
+  if(!value)return "";
+  value=value.charAt(0).toUpperCase()+value.slice(1);
+  value=truncateIntro(value,INTRO_MAX_LENGTH);
+  if(!/[.!?…]$/.test(value))value+=".";
+  return value;
+}
+function generatePromptIntro(prompt){
+  const title=cleanIntroSourceLine(prompt?.title||"");
+  const content=String(prompt?.content||"").replace(/\r/g,"");
+  const rawLines=content.split("\n").map(line=>line.trim()).filter(Boolean);
+  if(!rawLines.length)return normalizeIntroSentence(title)||"Descrive l'obiettivo operativo del prompt e il risultato che deve produrre.";
+  const candidates=rawLines.slice(0,90).map((raw,index)=>({raw,text:cleanIntroSourceLine(raw),score:introLineScore(raw,index),index})).filter(item=>item.score>-50&&item.text);
+  const ranked=[...candidates].sort((a,b)=>b.score-a.score||a.index-b.index);
+  // La prima istruzione operativa è quasi sempre lo scopo principale; le righe successive descrivono risultati o vincoli.
+  const primary=candidates.find(item=>INTRO_ACTION_RE.test(item.text)&&item.score>=8)||ranked[0];
+  let base=primary?.text||title;
+  if(!base)return "Descrive l'obiettivo operativo del prompt e il risultato che deve produrre.";
+  const secondary=ranked.find(item=>item!==primary&&item.score>=5&&INTRO_RESULT_RE.test(item.text)&&introDistinct(base,item.text));
+  if(secondary){
+    const second=secondary.text.trim();
+    const combined=`${base.replace(/[.!?…]+$/,'')}. ${second}`;
+    if(combined.length<=INTRO_MAX_LENGTH+25)base=combined;
+  }
+  if(base.length<55&&title&&introDistinct(base,title)){
+    const combined=`${base.replace(/[.!?…]+$/,'')}. ${title}`;
+    if(combined.length<=INTRO_MAX_LENGTH)base=combined;
+  }
+  return normalizeIntroSentence(base);
+}
+function promptIntroText(prompt){
+  const custom=String(prompt?.intro||"").trim();
+  return custom||generatePromptIntro(prompt);
+}
+function normalizedIntroSource(prompt){
+  const source=String(prompt?.introSource||"").toLowerCase();
+  if(source==="auto"||source==="manual")return source;
+  return String(prompt?.intro||"").trim()?"manual":"auto";
+}
+async function generateMissingPromptIntros({silent=false}={}){return regeneratePromptIntros({mode:"missing",silent})}
+async function refreshAutomaticPromptIntros({silent=false}={}){return regeneratePromptIntros({mode:"auto",silent})}
+async function regeneratePromptIntros({mode="missing",silent=false}={}){
+  if(state.busy.has("generateIntros"))return 0;
+  state.busy.add("generateIntros");
+  try{
+    const updates=[];
+    for(const prompt of state.prompts){
+      const hasIntro=Boolean(String(prompt?.intro||"").trim());
+      const source=normalizedIntroSource(prompt);
+      if(mode==="missing"&&hasIntro)continue;
+      if(mode==="auto"&&source!=="auto")continue;
+      const intro=generatePromptIntro(prompt);
+      if(!intro||(prompt.intro===intro&&hasIntro))continue;
+      updates.push({...prompt,intro,introSource:"auto",introGeneratedAt:now(),introUpdatedAt:now(),updatedAt:prompt.updatedAt||now()});
+    }
+    if(updates.length){
+      const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts");
+      updates.forEach(prompt=>promptStore.put(prompt));
+      await transactionDone(tx);await loadData();render();
+    }
+    if(!silent){
+      if(mode==="auto")toast(updates.length?`${updates.length} note automatiche aggiornate dal contenuto dei prompt.`:"Le note automatiche sono già aggiornate.","success");
+      else toast(updates.length?`${updates.length} note introduttive mancanti generate dai prompt esistenti.`:"Tutti i prompt hanno già una nota introduttiva.","success");
+    }
+    return updates.length;
+  }catch(error){console.error(error);if(!silent)toast(`Generazione note non riuscita: ${error.message||"errore locale"}.`,"error","PS-INTRO-001");return 0}
+  finally{state.busy.delete("generateIntros")}
+}
 function promptAttachmentCount(prompt){
   return Object.values(prompt?.variableFiles||{}).filter(file=>file&&file.base64).length;
 }
+function requiredFileDefinitions(prompt){return extractVariables(prompt?.content||"").filter(def=>def.fileLike&&!def.optional)}
+function fileVariableSatisfied(prompt,definition){
+  const file=prompt?.variableFiles?.[definition.name];
+  const value=valueFor(prompt?.variableValues||{},definition.name);
+  return Boolean(file?.base64||String(value||"").trim());
+}
+function missingRequiredFileDefinitions(prompt){return requiredFileDefinitions(prompt).filter(def=>!fileVariableSatisfied(prompt,def))}
 function categoryAlphabeticalCompare(a,b){
   return String(a?.name||"").localeCompare(String(b?.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true});
 }
@@ -918,16 +1119,21 @@ function filteredPrompts(){
   if(query){
     const words=query.split(" ").filter(Boolean);
     items=items.filter(item=>{
-      const text=normalize([item.title,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name].join(" "));
+      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name].join(" "));
       return words.every(word=>text.includes(word));
     });
   }
   return items.sort((a,b)=>{
     if(state.sort==="title_asc")return naturalTitleCompare(a,b);
     if(state.sort==="title_desc")return naturalTitleCompare(a,b,-1);
-    if(state.sort==="category_asc")return naturalTitleCompare(a,b);
+    if(state.sort==="category_asc"){
+      const aCategorized=Boolean(a.categoryId||a.subcategoryId),bCategorized=Boolean(b.categoryId||b.subcategoryId);
+      if(aCategorized!==bCategorized)return aCategorized?-1:1;
+      const categoryCompare=promptCategorySortLabel(a).localeCompare(promptCategorySortLabel(b),"it",{numeric:true,sensitivity:"base"});
+      return categoryCompare||naturalTitleCompare(a,b);
+    }
     if(state.sort==="created_desc")return dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt)||naturalTitleCompare(a,b);
-    if(state.sort==="usage_desc")return (b.usageCount||0)-(a.usageCount||0);
+    if(state.sort==="usage_desc")return (b.usageCount||0)-(a.usageCount||0)||dateTimestamp(b.lastUsedAt)-dateTimestamp(a.lastUsedAt)||naturalTitleCompare(a,b);
     return dateTimestamp(b.updatedAt)-dateTimestamp(a.updatedAt)||naturalTitleCompare(a,b);
   });
 }
@@ -1005,10 +1211,14 @@ function renderSidebar(){
 }
 
 
-function validHttpUrl(value){
-  if(!String(value||"").trim())return true;
-  try{const url=new URL(String(value).trim());return ["http:","https:"].includes(url.protocol)}catch{return false}
+function normalizeHttpUrl(value){
+  const raw=String(value||"").trim();
+  if(!raw)return "";
+  if(/^[a-z][a-z0-9+.-]*:/i.test(raw)&&!/^https?:/i.test(raw))return null;
+  const candidate=/^https?:\/\//i.test(raw)?raw:`https://${raw}`;
+  try{const url=new URL(candidate);return ["http:","https:"].includes(url.protocol)&&url.hostname?url.href:null}catch{return null}
 }
+function validHttpUrl(value){return !String(value||"").trim()||Boolean(normalizeHttpUrl(value))}
 function problemPriorityRank(priority){return {Bloccante:0,Alta:1,Media:2,Bassa:3,Informativa:4}[priority]??9}
 function collectProblems(){
   const live=livePrompts();
@@ -1028,31 +1238,38 @@ function collectProblems(){
   if(orphanClient.length)add({id:"data-orphan-client",title:"Riferimenti a clienti mancanti",description:"Alcuni prompt puntano a clienti o progetti non pi\u00F9 presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Clienti e progetti",impact:"Il filtro per cliente non pu\u00F2 rappresentare correttamente i dati.",solution:"Riassegna un cliente valido oppure rimuovi l\u2019associazione.",mode:"Manuale",target:"organize",count:orphanClient.length,itemIds:orphanClient.map(x=>x.id)});
   const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
   if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o pi\u00F9 collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L\u2019apertura del tool pu\u00F2 fallire o essere bloccata.",solution:"Correggi il campo \u201CTool da utilizzare\u201D.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
-  const invalidFiles=[];
-  live.forEach(prompt=>Object.values(prompt.variableFiles||{}).forEach(file=>{if(file&&(!file.base64||Number(file.size)>MAX_EMBED_FILE_SIZE))invalidFiles.push(prompt.id)}));
-  if(invalidFiles.length)add({id:"file-invalid-attachment",title:"File incorporati non validi",description:"Sono presenti file senza contenuto incorporato o oltre il limite previsto.",priority:"Alta",cause:"Importazione incompleta o file superiore al limite.",functionName:"Variabili e file",impact:"Backup e ripristino del file potrebbero non funzionare.",solution:"Apri il prompt, rimuovi il file e caricalo nuovamente entro il limite.",mode:"Manuale",target:"files",count:new Set(invalidFiles).size,itemIds:[...new Set(invalidFiles)]});
+  const invalidFiles=[],oversizedFiles=[];
+  live.forEach(prompt=>Object.values(prompt.variableFiles||{}).forEach(file=>{
+    if(!file)return;
+    if(file.tooLarge&&!file.base64){oversizedFiles.push(prompt.id);return}
+    if(!file.base64||(Number(file.size)>MAX_EMBED_FILE_SIZE&&file.base64))invalidFiles.push(prompt.id);
+  }));
+  if(invalidFiles.length)add({id:"file-invalid-attachment",title:"File incorporati non validi",description:"Sono presenti file che avrebbero dovuto essere incorporati ma non contengono dati ripristinabili.",priority:"Alta",cause:"Lettura del file non riuscita, importazione incompleta o archivio danneggiato.",functionName:"Variabili e file",impact:"Backup e ripristino del file potrebbero non funzionare.",solution:"Apri il prompt, rimuovi il file e caricalo nuovamente entro il limite.",mode:"Manuale",target:"files",count:new Set(invalidFiles).size,itemIds:[...new Set(invalidFiles)]});
+  if(oversizedFiles.length)add({id:"file-backup-excluded",title:"File esclusi dal backup incorporato",description:"Alcuni file superano 20 MB e sono conservati solo come riferimento manuale, come previsto dall'app.",priority:"Informativa",cause:"Il file supera il limite massimo per l'incorporamento Base64.",functionName:"Variabili e file",impact:"Il backup JSON non contiene i byte di questi file e dovrai conservarli separatamente.",solution:"Conserva i file originali separatamente oppure usa una versione più piccola entro 20 MB.",mode:"Manuale",target:"files",count:new Set(oversizedFiles).size,itemIds:[...new Set(oversizedFiles)]});
+  const missingRequiredFiles=live.filter(prompt=>missingRequiredFileDefinitions(prompt).length>0);
+  if(missingRequiredFiles.length)add({id:"file-required-missing",title:"File obbligatori mancanti",description:"Alcuni prompt contengono variabili file obbligatorie che non hanno ancora un file o un riferimento manuale.",priority:"Media",cause:"Il prompt richiede un allegato ma il relativo campo non è stato compilato.",functionName:"Variabili e file",impact:"Il prompt può essere copiato con segnaposto irrisolti o senza il materiale necessario.",solution:"Apri il prompt e carica il file richiesto oppure inserisci un riferimento manuale nel relativo campo.",mode:"Manuale",target:"files",count:missingRequiredFiles.length,itemIds:missingRequiredFiles.map(x=>x.id)});
   return problems.sort((a,b)=>problemPriorityRank(a.priority)-problemPriorityRank(b.priority)||a.title.localeCompare(b.title,"it"));
 }
 function syncResolvedProblems(activeProblems){
   const previous=readStoredJson("ps_active_problem_ids",[]);
   const activeIds=activeProblems.map(item=>item.id);
   const resolved=readStoredJson("ps_resolved_problems",[]);
+  // Registra ogni vera transizione attivo -> risolto, anche se lo stesso problema ricompare e viene risolto di nuovo in futuro.
   previous.filter(id=>!activeIds.includes(id)).forEach(id=>{
-    if(!resolved.some(item=>item.id===id&&item.resolvedAt===localStorage.getItem(`ps_problem_resolved_${id}`))){
-      const resolvedAt=now();localStorage.setItem(`ps_problem_resolved_${id}`,resolvedAt);
-      resolved.unshift({id,resolvedAt,mode:"Rilevamento automatico",verification:"Problema non pi\u00F9 presente alla nuova lettura dei dati"});
-    }
+    resolved.unshift({id,resolvedAt:now(),mode:"Rilevamento automatico",verification:"Problema non pi\u00F9 presente alla nuova lettura dei dati"});
   });
   localStorage.setItem("ps_active_problem_ids",JSON.stringify(activeIds));
   localStorage.setItem("ps_resolved_problems",JSON.stringify(resolved.slice(0,30)));
 }
 function workflowSnapshot(){
   const live=livePrompts();
-  const configured=state.categories.length>0&&state.clients.length>0;
+  const configured=state.categories.length>0;
   const uncategorized=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
   const review=live.filter(item=>item.status==="review").length;
   const attachments=live.reduce((sum,item)=>sum+promptAttachmentCount(item),0);
   const variables=live.reduce((sum,item)=>sum+extractVariables(item.content).length,0);
+  const requiredFiles=live.reduce((sum,item)=>sum+requiredFileDefinitions(item).length,0);
+  const missingRequiredFiles=live.reduce((sum,item)=>sum+missingRequiredFileDefinitions(item).length,0);
   const hasPrompts=live.length>0;
   const problems=collectProblems();syncResolvedProblems(problems);
   const blocking=problems.filter(item=>item.priority==="Bloccante").length;
@@ -1061,15 +1278,17 @@ function workflowSnapshot(){
   const completed=[configured,hasPrompts,hasPrompts&&uncategorized===0,hasPrompts,hasPrompts&&review===0,hasPrompts&&blocking===0].filter(Boolean).length;
   const total=6;
   const percent=Math.round(completed/total*100);
-  return {live,configured,uncategorized,review,attachments,variables,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
+  return {live,configured,uncategorized,review,attachments,variables,requiredFiles,missingRequiredFiles,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
 }
 function recommendedWorkflowAction(snapshot){
-  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"Categorie, clienti o progetti non sono ancora pronti.",priority:"Alta",count:`${state.categories.length} categorie \u00B7 ${state.clients.length} clienti`,after:"Dopo potrai organizzare correttamente i prompt."};
+  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"La struttura delle categorie non è ancora pronta.",priority:"Alta",count:`${state.categories.length} categorie \u00B7 ${state.clients.length} clienti`,after:"Dopo potrai organizzare correttamente i prompt."};
   if(!snapshot.hasPrompts)return {action:"new",icon:"\uFF0B",title:"Crea o importa il primo prompt",reason:"La libreria \u00E8 vuota.",priority:"Alta",count:"0 prompt disponibili",after:"Dopo potrai compilare e verificare il contenuto."};
   if(snapshot.blocking||snapshot.high)return {action:"problems",icon:"!",title:"Risolvi i problemi prioritari",reason:"Sono presenti anomalie che possono impedire o compromettere l\u2019utilizzo dei prompt.",priority:snapshot.blocking?"Bloccante":"Alta",count:`${snapshot.blocking} bloccanti \u00B7 ${snapshot.high} alta priorit\u00E0 `,after:"Dopo la modifica la dashboard rilegger\u00E0 i dati e verificher\u00E0 il problema."};
   if(snapshot.uncategorized)return {action:"organize",icon:"\uD83D\uDDC2",title:"Organizza i prompt non classificati",reason:"Alcuni prompt non hanno una categoria.",priority:"Media",count:`${snapshot.uncategorized} elementi coinvolti`,after:"Dopo sar\u00E0 pi\u00F9 semplice trovarli e riutilizzarli."};
   if(snapshot.review)return {action:"verify",icon:"\u2713",title:"Verifica i prompt in revisione",reason:"Sono presenti prompt con stato \u201CDa verificare\u201D.",priority:"Media",count:`${snapshot.review} elementi coinvolti`,after:"Dopo potrai utilizzarli con maggiore sicurezza."};
-  return {action:"library",icon:"\u2315",title:"Seleziona il prompt da utilizzare",reason:"Non risultano problemi attivi o attivit\u00E0 organizzative pendenti.",priority:"Normale",count:`${snapshot.live.length} prompt disponibili`,after:"Apri un prompt, compila le variabili e copialo."};
+  const actionable=snapshot.problems.find(problem=>problem.priority!=="Informativa");
+  if(actionable)return {action:"problems",icon:"!",title:"Risolvi le anomalie ancora attive",reason:actionable.description,priority:actionable.priority,count:`${snapshot.problems.filter(problem=>problem.priority!=="Informativa").length} problemi da gestire`,after:"Apri il problema prioritario e verifica la correzione."};
+  return {action:"library",icon:"\u2315",title:"Seleziona il prompt da utilizzare",reason:snapshot.problems.length?"Restano solo avvisi informativi che non bloccano l'utilizzo.":"Non risultano problemi attivi o attivit\u00E0 organizzative pendenti.",priority:"Normale",count:`${snapshot.live.length} prompt disponibili`,after:"Apri un prompt, compila le variabili e copialo."};
 }
 function updateDashboardHash(action){
   const hash=`#step-${action}`;
@@ -1105,20 +1324,20 @@ function renderProblemsPanel(){
 function sanitizedDiagnosticReport(){
   const snapshot=workflowSnapshot();
   const resolved=readStoredJson("ps_resolved_problems",[]);
-  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,attachments:snapshot.attachments,variables:snapshot.variables,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
+  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE,importArchiveLimitBytes:MAX_IMPORT_ARCHIVE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,attachments:snapshot.attachments,variables:snapshot.variables,requiredFiles:snapshot.requiredFiles,missingRequiredFiles:snapshot.missingRequiredFiles,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
 }
 function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prompt-studio-diagnostica-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Report diagnostico esportato senza contenuti completi o credenziali.","success")}
 function renderDiagnosticsPanel(){
   const snapshot=workflowSnapshot();const report=sanitizedDiagnosticReport();const resolved=report.resolvedProblems;
   $("choiceTitle").textContent="Diagnostica tecnica";
-  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
+  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite singolo file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr><tr><th>Limite archivio import</th><td>${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
   $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
   bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
 }
 function promptForAction(action,snapshot){
   if(!snapshot.hasPrompts)return null;
   if(action==="verify")return snapshot.live.find(item=>item.status==="review")||snapshot.live[0];
-  if(action==="files")return snapshot.live.find(item=>extractVariables(item.content).some(def=>def.fileLike&&!def.optional&&!promptAttachmentCount(item)))||snapshot.live[0];
+  if(action==="files")return snapshot.live.find(item=>missingRequiredFileDefinitions(item).length>0)||snapshot.live.find(item=>extractVariables(item.content).some(def=>def.fileLike))||snapshot.live[0];
   if(action==="variables")return snapshot.live.find(item=>extractVariables(item.content).length>0)||snapshot.live[0];
   return snapshot.live[0];
 }
@@ -1152,28 +1371,29 @@ function renderStats(){
   const visible=state.filter.type==="all"&&!state.query;
   $("stats").classList.toggle("hidden",!visible);$("stats").classList.toggle("dashboard-grid",visible);if(!visible)return;
   const s=workflowSnapshot(),recommendation=recommendedWorkflowAction(s);
-  const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":s.problems.length?"Correzione disponibile":"Tutto corretto";
+  const actionableProblemCount=s.problems.filter(problem=>problem.priority!=="Informativa").length;
+  const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":actionableProblemCount?"Correzione disponibile":s.problems.length?"Completato con avvisi":"Tutto corretto";
   const stepCards=[
     {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti e progetti.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie \u00B7 ${state.clients.length} clienti`,next:s.configured?"Crea o importa un prompt":"Completa categorie e clienti",className:s.configured?"completed":""},
     {action:"new",step:"Step 2",tone:"cyan",icon:"\uFF0B",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
     {action:"import",step:"Alternativa",tone:"cyan",icon:"\u21E7",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
     {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"\uD83D\uDDC2",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
-    {action:"problems",step:"Controllo",tone:s.blocking?"red":s.problems.length?"orange":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorit\u00E0 , cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi \u00B7 ${s.blocking} bloccanti`,next:s.problems.length?"Apri il problema e correggi i dati":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":s.problems.length?"":"completed",blocked:!s.hasPrompts},
+    {action:"problems",step:"Controllo",tone:s.blocking?"red":actionableProblemCount?"orange":s.problems.length?"yellow":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorit\u00E0, cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi \u00B7 ${s.blocking} bloccanti`,next:actionableProblemCount?"Apri il problema e correggi i dati":s.problems.length?"Consulta gli avvisi informativi":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":actionableProblemCount?"":"completed",blocked:!s.hasPrompts},
     {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"variables",step:"Step 5",tone:"purple",icon:"\u270E",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
-    {action:"files",step:"Step 6",tone:s.attachments?"green":"cyan",icon:"\uD83D\uDCCE",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.attachments?"Analisi completata":"Verifica necessaria",count:`${s.attachments} file incorporati`,next:s.hasPrompts?"Verifica il prompt":"Richiede almeno un prompt",className:!s.hasPrompts?"blocked":s.attachments?"completed":"",blocked:!s.hasPrompts},
+    {action:"files",step:"Step 6",tone:s.missingRequiredFiles?"orange":s.requiredFiles?"green":"cyan",icon:"\uD83D\uDCCE",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.missingRequiredFiles?"Verifica necessaria":s.requiredFiles?"Tutto corretto":"Pronto",count:s.requiredFiles?`${s.requiredFiles-s.missingRequiredFiles}/${s.requiredFiles} file obbligatori compilati`:`${s.attachments} file incorporati`,next:!s.hasPrompts?"Richiede almeno un prompt":s.missingRequiredFiles?"Completa i file obbligatori":"Verifica il prompt",className:!s.hasPrompts?"blocked":s.missingRequiredFiles?"":"completed",blocked:!s.hasPrompts},
     {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"\u2713",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
     {action:"use",step:"Step 8",tone:"green",icon:"\u29C9",title:"Copia e utilizza",description:"Copia il prompt compilato oppure apri il tool associato.",state:s.hasPrompts&&s.blocking===0?"Pronto":s.hasPrompts?"Bloccato":"Nessun risultato",count:s.hasPrompts?"Prompt disponibili":"Nessun prompt",next:s.blocking?"Risolvi prima i problemi bloccanti":"Salva gli eventuali aggiornamenti",className:s.hasPrompts&&s.blocking===0?"":"blocked",blocked:!s.hasPrompts||s.blocking>0},
     {action:"export",step:"Step 9",tone:"charcoal",icon:"\u21E9",title:"Esporta e crea backup",description:"Scarica l\u2019archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt \u00B7 ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"\uD83D\uDEE0",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per l\u2019assistenza",className:s.problems.length?"":"completed"}
   ];
-  const recent=s.live.slice().sort((a,b)=>dateTimestamp(b.lastUsedAt||b.updatedAt)-dateTimestamp(a.lastUsedAt||a.updatedAt)||naturalTitleCompare(a,b)).slice(0,4);
+  const recent=s.live.filter(item=>dateTimestamp(item.lastUsedAt)>0).sort((a,b)=>dateTimestamp(b.lastUsedAt)-dateTimestamp(a.lastUsedAt)||naturalTitleCompare(a,b)).slice(0,4);
   const recentHtml=recent.length?recent.map(item=>'<button class="btn small" type="button" data-recent-prompt="'+esc(item.id)+'">'+esc(item.title||"Senza titolo")+'</button>').join(""):'<span class="hint">Nessun prompt ancora utilizzato.</span>';
   $("stats").innerHTML=`<div class="home-actions"><section class="home-primary"><h3>Che cosa vuoi fare?</h3><p>Cerca un prompt e usalo subito. Le funzioni di gestione restano disponibili nel menu \u22EF.</p><input class="search" id="dashboardSearch" type="search" placeholder="Cosa devi fare? Es. audit SEO, articolo, social\u2026"><div class="home-quick-actions"><button class="btn primary" type="button" data-home-action="search">Cerca un prompt</button><button class="btn" type="button" data-home-action="new">Crea nuovo prompt</button></div></section><section class="home-secondary"><h3>Usati di recente</h3><div class="recent-strip">${recentHtml}</div></section></div><div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali \u00B7 ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">\u2713 ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorit\u00E0 ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
   $$('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));
   $('[data-recommended-action]')?.addEventListener('click',event=>performDashboardAction(event.currentTarget.dataset.recommendedAction));
   $('[data-home-action="new"]')?.addEventListener('click',()=>openEditor());
-  $('[data-home-action="search"]')?.addEventListener('click',()=>{const q=$('dashboardSearch')?.value||'';$('globalSearch').value=q;state.query=q;renderCards();setTimeout(()=>$('cards').scrollIntoView({behavior:'smooth',block:'start'}),40)});
+  $('[data-home-action="search"]')?.addEventListener('click',()=>{const q=$('dashboardSearch')?.value||'';$('globalSearch').value=q;state.query=q;renderStats();renderCards();setTimeout(()=>$('cards').scrollIntoView({behavior:'smooth',block:'start'}),40)});
   $('dashboardSearch')?.addEventListener('keydown',event=>{if(event.key==='Enter')$('[data-home-action="search"]')?.click()});
   $$('[data-recent-prompt]').forEach(button=>button.onclick=()=>openEditor(button.dataset.recentPrompt,'variables','use'));
   const hashAction=location.hash.match(/^#step-(.+)$/)?.[1];if(hashAction)highlightDashboardCard(hashAction);
@@ -1197,6 +1417,7 @@ function cardHtml(prompt){
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
     <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">\u2605</span>':""}</div>
     <div class="category-line"><span class="category-line-label">Categoria:</span><span class="category-line-value">${esc(categoryPath)}</span></div>
+    <div class="prompt-intro-card"><strong>Cosa fa questo prompt <span class="intro-card-badge">${normalizedIntroSource(prompt)==="auto"?"AUTO":"PERSONALE"}</span></strong>${esc(promptIntroText(prompt))}</div>
     <div class="excerpt">${esc(prompt.content||"Nessun contenuto")}</div>
     <div class="meta">
       ${category?`<span class="chip accent">${esc(category.name)}</span>`:'<span class="chip">Senza categoria</span>'}
@@ -1277,7 +1498,7 @@ function bindCardEvents(){
       if(event.target.closest("button,input"))return;
       openEditor(id);
     };
-    card.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
+    card.onkeydown=event=>{if(event.target.closest("button,input,select,textarea,a"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
     card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=extractVariables(prompt.content);if(!vars.length){quickCopy(id)}else openEditor(id,"variables","use")});
     card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
@@ -1298,12 +1519,30 @@ function updateBulkbar(){
 
 /* ---------- Motore delle variabili ---------- */
 function variableRegex(){
-  // Supporta anche segnaposto descrittivi come [ALLEGA FILE, SE DISPONIBILE]
-  // e (NOME CLIENTE). Nelle parentesi tonde esclude frasi con punteggiatura finale
-  // per ridurre i falsi positivi generati dalle normali note tra parentesi.
+  // La regex individua i candidati; isLikelyVariableMatch filtra poi parentesi normali,
+  // percentuali e tag HTML per evitare falsi campi nell'editor.
   return /{{\s*([^{}\n]{1,120}?)\s*}}|\[\s*([^\]\n]{2,120}?)\s*\]|%\s*([^%\n]{2,120}?)\s*%|<\s*([^<>\n]{2,120}?)\s*>|\(\s*([^()\n.!?;]{2,120}?)\s*\)/g;
 }
 function variableName(value){return String(value||"").replace(/{{|}}|[\[\]()%<>]/g,"").trim().replace(/\s+/g,"_")}
+const PLACEHOLDER_HINT_RE=/\b(?:nome|dominio|sito|url|link|keyword|query|focus|settore|argomento|tema|nicchia|file|documento|pdf|csv|dataset|allegato|cliente|azienda|brand|lingua|paese|mercato|localit[aà]|area|target|tono|email|titolo|descrizione|testo|contenuto|numero|quantit[aà]|esclusioni?|data|formato)\b/i;
+function looksLikePlaceholderToken(value){
+  const text=String(value||"").trim();
+  if(!text||text.length>120||/[\r\n]/.test(text))return false;
+  if(/_/.test(text))return true;
+  if(/[A-ZÀ-Ý]/.test(text)&&text===text.toUpperCase())return true;
+  return PLACEHOLDER_HINT_RE.test(text)&&text.split(/\s+/).length<=10;
+}
+function isLikelyVariableMatch(match,curly,square,percent,angle,round){
+  if(curly!==undefined||square!==undefined)return true;
+  if(percent!==undefined)return looksLikePlaceholderToken(percent)&&!/^[\d\s.,+-]+$/.test(percent);
+  if(angle!==undefined){
+    const token=String(angle||"").trim();
+    if(/^\/?[a-z][a-z0-9:-]*(?:\s+[^>]*)?$/i.test(token)&&token===token.toLowerCase())return false;
+    return looksLikePlaceholderToken(token);
+  }
+  if(round!==undefined)return looksLikePlaceholderToken(round);
+  return false;
+}
 function humanize(value){
   let text=String(value||"").replace(/{{|}}|[\[\]()%<>]/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
   const map={
@@ -1366,6 +1605,7 @@ function extractVariables(content){
   let match;
   while((match=regex.exec(text))){
     const rawName=match[1]??match[2]??match[3]??match[4]??match[5];
+    if(!isLikelyVariableMatch(match[0],match[1],match[2],match[3],match[4],match[5]))continue;
     const name=variableName(rawName),key=name.toLowerCase();
     if(!name||seen.has(key))continue;
     seen.add(key);
@@ -1386,6 +1626,7 @@ function valueFor(values,name){
 }
 function compilePrompt(content,values){
   return String(content||"").replace(variableRegex(),(match,curly,square,percent,angle,round)=>{
+    if(!isLikelyVariableMatch(match,curly,square,percent,angle,round))return match;
     const name=variableName(curly??square??percent??angle??round),value=valueFor(values,name);
     return String(value??"").trim()?value:match;
   });
@@ -1400,10 +1641,7 @@ function rememberValue(name,value){
 function validateValue(def,value){
   const clean=String(value||"").trim();
   if(!clean)return def.optional?"":"Campo obbligatorio";
-  if(def.inputType==="url"){
-    const normalized=/^https?:\/\//i.test(clean)?clean:`https://${clean}`;
-    try{new URL(normalized)}catch{return "Inserisci un URL o dominio valido"}
-  }
+  if(def.inputType==="url"&&!normalizeHttpUrl(clean))return "Inserisci un URL o dominio HTTP/HTTPS valido";
   if(def.inputType==="email"&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean))return "Inserisci un indirizzo email valido";
   return "";
 }
@@ -1474,9 +1712,11 @@ function renderVariables(){
   $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>(LINGUA)</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
   $$("#variableList .variable-input").forEach(input=>input.addEventListener("input",()=>{
     state.editor.values[input.dataset.var]=input.value;
+    const definition=state.editor.variables.find(def=>def.name===input.dataset.var);
+    const validationMessage=definition&&String(input.value||"").trim()?validateValue(definition,input.value):"";
     const error=$(`[data-error-for="${CSS.escape(input.dataset.var)}"]`);
-    if(error){error.textContent="";error.classList.add("hidden")}
-    input.classList.remove("missing");
+    if(error){error.textContent=validationMessage;error.classList.toggle("hidden",!validationMessage)}
+    input.classList.toggle("missing",Boolean(validationMessage));
     markDirty();updateCompiledPreview();
   }));
   $$("#variableList .quick-value-chip").forEach(button=>button.onclick=()=>{
@@ -1576,6 +1816,7 @@ function fillSubcategories(selected=""){
   $("promptSubcategory").value=selected;
 }
 function openEditor(id=null,preferredTab=null,mode=null){
+  clearTimeout(state.detectTimer);clearTimeout(state.introTimer);
   state.modalReturnFocus.editorBackdrop=document.activeElement;
   const prompt=id?state.prompts.find(item=>item.id===id):null;
 
@@ -1588,6 +1829,7 @@ function openEditor(id=null,preferredTab=null,mode=null){
       status:"draft",
       tags:[],
       notes:"",
+      intro:"",
       toolUrl:"",
       favorite:false,
       variableValues:{},
@@ -1616,7 +1858,8 @@ function openEditor(id=null,preferredTab=null,mode=null){
     values:{...(initialPrompt?.variableValues||{})},
     files:{...(initialPrompt?.variableFiles||{})},
     toolUrl:initialPrompt?.toolUrl||"",
-    mode:mode||(prompt?"edit":"edit")
+    mode:mode||(prompt?"edit":"edit"),
+    introSource:prompt?normalizedIntroSource(initialPrompt):"auto"
   };
 
   $("editorTitle").textContent=prompt?(state.editor.mode==="use"?"Usa prompt":"Modifica prompt"):"Nuovo prompt";
@@ -1625,7 +1868,9 @@ function openEditor(id=null,preferredTab=null,mode=null){
   $("editorModeSwitch").classList.toggle("hidden",!prompt);
   $("promptTitle").value=prompt?.title||"";
   $("promptContent").value=prompt?.content||"";
+  $("promptIntro").value=initialPrompt?.intro||generatePromptIntro(initialPrompt);
   $("promptStatus").value=initialPrompt?.status||"draft";
+  updateIntroSourceUI();
   $("promptTags").value=(initialPrompt?.tags||[]).join(", ");
   $("promptNotes").value=initialPrompt?.notes||"";
   $("promptToolUrl").value=initialPrompt?.toolUrl||"";
@@ -1637,10 +1882,18 @@ function openEditor(id=null,preferredTab=null,mode=null){
   refreshVariables(false);
   renderVariables();
   updateCounts();
+  updatePromptPurposeNote();
   setEditorTab(state.editor.mode==="use"?"variables":(preferredTab||(state.editor.variables.length?"variables":"prompt")));
   $("editorBackdrop").classList.add("show");
 
-  setTimeout(()=>{(prompt?$("promptContent"):$("promptTitle")).focus()},120);
+  setTimeout(()=>{
+    if(state.editor.mode==="use"){
+      const target=$("variableList")?.querySelector(".variable-input,.choose-file,button")||$("copyCompiledBtn");
+      target?.focus({preventScroll:true});
+    }else{
+      (prompt?$("promptContent"):$("promptTitle"))?.focus({preventScroll:true});
+    }
+  },120);
 }
 function setEditorTab(name){
   $$(".editor-tab").forEach(button=>button.classList.toggle("active",button.dataset.tab===name));
@@ -1653,7 +1906,8 @@ function closeEditor(force=false){
     return;
   }
   $("editorBackdrop").classList.remove("show");
-  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit"};
+  clearTimeout(state.detectTimer);clearTimeout(state.introTimer);
+  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit",introSource:"auto"};
   const previous=state.modalReturnFocus.editorBackdrop;delete state.modalReturnFocus.editorBackdrop;
   if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
 }
@@ -1662,6 +1916,37 @@ function updateCounts(){
   const text=$("promptContent").value;
   $("charCount").textContent=`${text.length} caratteri`;
   $("wordCount").textContent=`${text.trim()?text.trim().split(/\s+/).length:0} parole`;
+}
+function updateIntroSourceUI(){
+  const source=state.editor.introSource==="manual"?"manual":"auto";
+  const badge=$("introSourceBadge");
+  if(badge){badge.className=`intro-source-badge ${source}`;badge.innerHTML=source==="auto"?"&#8635; Automatica":"&#9998; Personalizzata"}
+  $("restoreAutoIntroBtn")?.classList.toggle("hidden",source!=="manual");
+  const note=$("introSyncNote");
+  if(note)note.innerHTML=source==="auto"
+    ?'<span>&#9432;</span><span><strong>Modalità automatica:</strong> la nota viene rigenerata quando cambia il titolo o il contenuto del prompt. Se modifichi direttamente questo campo diventa personalizzata e non verrà sovrascritta.</span>'
+    :'<span>&#9432;</span><span><strong>Modalità personalizzata:</strong> questa nota è protetta dalla rigenerazione globale. Usa “Torna automatica” per riallinearla al contenuto del prompt.</span>';
+}
+function setAutomaticIntro({markDirtyChange=true}={}){
+  state.editor.introSource="auto";
+  const generated=generatePromptIntro({title:$("promptTitle")?.value||"",content:$("promptContent")?.value||""});
+  if($("promptIntro"))$("promptIntro").value=generated;
+  updateIntroSourceUI();updatePromptPurposeNote();if(markDirtyChange)markDirty();
+}
+function scheduleAutomaticIntroUpdate(){
+  if(state.editor.introSource!=="auto")return;
+  clearTimeout(state.introTimer);
+  state.introTimer=setTimeout(()=>{
+    if(state.editor.introSource!=="auto"||!$("editorBackdrop")?.classList.contains("show"))return;
+    $("promptIntro").value=generatePromptIntro({title:$("promptTitle").value,content:$("promptContent").value});
+    updatePromptPurposeNote();
+  },INTRO_DEBOUNCE_MS);
+}
+function updatePromptPurposeNote(){
+  const manual=state.editor.introSource==="manual";
+  const draft={title:$("promptTitle")?.value||"",content:$("promptContent")?.value||"",intro:manual?($("promptIntro")?.value||""):""};
+  const text=promptIntroText(draft);
+  if($("promptPurposeText"))$("promptPurposeText").textContent=text;
 }
 function editorPayload(){
   refreshVariables(false);
@@ -1679,6 +1964,12 @@ function editorPayload(){
     id:existing?.id||uid("prompt"),
     title:$("promptTitle").value.trim(),
     content:$("promptContent").value.trim(),
+    intro:(state.editor.introSource==="manual"&&$("promptIntro").value.trim())
+      ?$("promptIntro").value.trim()
+      :generatePromptIntro({title:$("promptTitle").value.trim(),content:$("promptContent").value.trim()}),
+    introSource:(state.editor.introSource==="manual"&&$("promptIntro").value.trim())?"manual":"auto",
+    introGeneratedAt:(state.editor.introSource==="manual"&&$("promptIntro").value.trim())?(existing?.introGeneratedAt||null):now(),
+    introUpdatedAt:now(),
     categoryId:selectedCategoryId,
     subcategoryId:validSubcategoryId,
     clientId:$("promptClient").value||null,
@@ -1698,6 +1989,8 @@ function editorPayload(){
 }
 function navigateToSavedPrompt(prompt){
   state.lastSavedId=prompt.id;
+  // Dopo il salvataggio il prompt deve restare visibile anche se titolo/contenuto non corrispondono più alla ricerca precedente.
+  state.query="";if($("globalSearch"))$("globalSearch").value="";
 
   if(prompt.subcategoryId){
     setFilter("category",prompt.subcategoryId);
@@ -1773,7 +2066,7 @@ async function savePrompt(){
     toast(`Prompt salvato correttamente in \u201C${categoryName}\u201D.`);
   }catch(error){
     console.error(error);
-    toast(`Errore nel salvataggio: ${error.message}`);
+    toast(`Errore nel salvataggio: ${error.message}`,"error","PS-SAVE-001");
   }finally{
     state.busy.delete("savePrompt");
     saveButton.disabled=false;
@@ -1781,11 +2074,18 @@ async function savePrompt(){
     saveStatus.classList.remove("show");
   }
 }
-async function persistEditorVariables(){
+async function persistEditorVariables({renderAfter=true}={}){
   if(!state.editor.id)return;
   const prompt=state.prompts.find(item=>item.id===state.editor.id);if(!prompt)return;
-  prompt.variableValues=collectVariableValues();prompt.variableFiles={...state.editor.files};prompt.toolUrl=$("promptToolUrl").value.trim();prompt.updatedAt=now();
-  await put("prompts",prompt);await loadData();render();
+  const updated={...prompt,variableValues:collectVariableValues(),variableFiles:{...state.editor.files},toolUrl:$("promptToolUrl").value.trim(),updatedAt:now()};
+  await put("prompts",updated);
+  if(renderAfter){await loadData();render()}
+}
+async function recordPromptUse(id,{renderAfter=true}={}){
+  if(!id)return;
+  const prompt=state.prompts.find(item=>item.id===id)||await getOne("prompts",id);if(!prompt)return;
+  const updated={...prompt,usageCount:(prompt.usageCount||0)+1,lastUsedAt:now()};
+  await put("prompts",updated);await loadData();if(renderAfter)render();
 }
 async function copyCompiled(){
   const copyButton=$("copyCompiledBtn");
@@ -1807,6 +2107,11 @@ async function copyCompiled(){
 
     const values=collectVariableValues();
     const incomplete=state.editor.variables.filter(def=>!String(values[def.name]??"").trim());
+    const invalid=state.editor.variables.filter(def=>String(values[def.name]??"").trim()&&validateValue(def,values[def.name]));
+    invalid.forEach(def=>{
+      const input=$(`#variableList .variable-input[data-var="${CSS.escape(def.name)}"]`),error=$(`[data-error-for="${CSS.escape(def.name)}"]`),message=validateValue(def,values[def.name]);
+      input?.classList.add("missing");if(error){error.textContent=message;error.classList.remove("hidden")}
+    });
 
     Object.entries(values).forEach(([name,value])=>rememberValue(name,value));
 
@@ -1817,16 +2122,20 @@ async function copyCompiled(){
     /* Copia sempre: i campi vuoti restano nel testo come [SEGNAPOSTO]. */
     await copyText(result);
 
-    if(incomplete.length){
-      toast(`Prompt copiato. ${incomplete.length} variabil${incomplete.length===1?"e \u00E8 rimasta":"i sono rimaste"} come segnaposto.`);
+    const hasBinaryAttachments=Object.values(state.editor.files||{}).some(file=>file?.base64&&!file?.textExtracted);
+    if(incomplete.length||invalid.length){
+      const details=[incomplete.length?`${incomplete.length} variabil${incomplete.length===1?"e è rimasta":"i sono rimaste"} come segnaposto`:"",invalid.length?`${invalid.length} valor${invalid.length===1?"e non è formalmente valido":"i non sono formalmente validi"}`:""].filter(Boolean).join(" · ");
+      toast(`Prompt copiato. ${details}.${hasBinaryAttachments?" Gli allegati binari vanno caricati manualmente nel tool.":""}`,"warning");
+    }else if(hasBinaryAttachments){
+      toast("Prompt copiato con tutte le variabili inserite. Ricorda di caricare manualmente nel tool anche gli allegati binari.","warning");
     }else{
-      toast("Prompt copiato con tutte le variabili inserite.");
+      toast("Prompt copiato con tutte le variabili inserite.","success");
     }
 
     /* Un eventuale errore di persistenza non deve annullare una copia riuscita. */
     try{
-      await persistEditorVariables();
-      if(state.editor.id){const used=state.prompts.find(item=>item.id===state.editor.id);if(used){used.usageCount=(used.usageCount||0)+1;used.lastUsedAt=now();await put("prompts",used);await loadData();}}
+      await persistEditorVariables({renderAfter:false});
+      if(state.editor.id)await recordPromptUse(state.editor.id,{renderAfter:true});
     }catch(error){
       console.error("Copia riuscita, ma salvataggio dei valori non completato:",error);
       toast("Il prompt \u00E8 stato copiato, ma i valori non sono stati salvati nell\u2019archivio.");
@@ -1847,9 +2156,7 @@ async function quickCopy(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
   try{
     await copyText(prompt.content||"");
-    prompt.usageCount=(prompt.usageCount||0)+1;
-    await put("prompts",prompt);
-    await loadData();render();
+    await recordPromptUse(prompt.id,{renderAfter:true});
     toast("Prompt copiato.","success");
   }catch(error){
     console.error("Errore durante la copia rapida:",error);
@@ -1859,28 +2166,37 @@ async function quickCopy(id){
 
 async function duplicatePrompt(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
-  const copy={...prompt,id:uid("prompt"),title:`${prompt.title} \u2014 copia`,favorite:false,usageCount:0,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
+  const copy={...prompt,id:uid("prompt"),title:`${prompt.title} \u2014 copia`,favorite:false,usageCount:0,lastUsedAt:null,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
+  if(normalizedIntroSource(prompt)==="auto"){
+    copy.intro=generatePromptIntro(copy);copy.introSource="auto";copy.introGeneratedAt=now();copy.introUpdatedAt=now();
+  }
   await put("prompts",copy);await loadData();render();toast("Prompt duplicato.");
 }
 async function trashPrompt(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
-  prompt.deletedAt=now();prompt.updatedAt=now();await put("prompts",prompt);await loadData();render();
-  if(state.editor.id===id)closeEditor(true);toast("Prompt spostato nel cestino.");
+  try{await put("prompts",{...prompt,deletedAt:now(),updatedAt:now()});await loadData();render();if(state.editor.id===id)closeEditor(true);toast("Prompt spostato nel cestino.","success")}
+  catch(error){console.error(error);toast(`Impossibile spostare il prompt nel cestino: ${error.message||"errore del database"}.`,"error","PS-TRASH-001")}
 }
 async function restorePrompt(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
-  prompt.deletedAt=null;prompt.updatedAt=now();await put("prompts",prompt);await loadData();render();toast("Prompt ripristinato.");
+  try{await put("prompts",{...prompt,deletedAt:null,updatedAt:now()});await loadData();render();toast("Prompt ripristinato.","success")}
+  catch(error){console.error(error);toast(`Impossibile ripristinare il prompt: ${error.message||"errore del database"}.`,"error","PS-RESTORE-001")}
 }
 function deletePrompt(id){
   confirmAction("Eliminazione definitiva","Questa operazione non pu\u00F2 essere annullata.",async()=>{await remove("prompts",id);await loadData();render();toast("Prompt eliminato definitivamente.")});
 }
 async function bulkUpdate(patch){
-  const ids=[...state.selected];
-  for(const id of ids){
-    const prompt=state.prompts.find(item=>item.id===id);if(!prompt)continue;
-    Object.assign(prompt,patch,{updatedAt:now()});await put("prompts",prompt);
-  }
-  state.selected.clear();await loadData();render();toast(`${ids.length} prompt aggiornati.`);
+  const ids=[...state.selected];if(!ids.length)return;
+  try{
+    const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts");
+    const stamp=now();let changed=0;
+    for(const id of ids){
+      const prompt=state.prompts.find(item=>item.id===id);if(!prompt)continue;
+      promptStore.put({...prompt,...patch,updatedAt:stamp});changed++;
+    }
+    await transactionDone(tx);
+    state.selected.clear();await loadData();render();toast(`${changed} prompt aggiornati.`,"success");
+  }catch(error){console.error(error);toast(`Aggiornamento multiplo non riuscito: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-BULK-001")}
 }
 
 
@@ -2053,27 +2369,36 @@ function deleteCategory(id){
   const removedIds=new Set([id,...children.map(child=>child.id)]);
   const affected=state.prompts.filter(prompt=>removedIds.has(prompt.categoryId)||removedIds.has(prompt.subcategoryId));
   const childNote=children.length?` Verranno eliminate anche ${children.length} sottocategori${children.length===1?"a":"e"}.`:"";
-  confirmAction("Elimina categoria",`${affected.length} prompt verranno spostati in \u201CSenza categoria\u201D.${childNote}`,async()=>{
-    for(const prompt of affected){
-      if(removedIds.has(prompt.categoryId))prompt.categoryId=null;
-      if(removedIds.has(prompt.subcategoryId))prompt.subcategoryId=null;
-      prompt.updatedAt=now();
-      await put("prompts",prompt);
-    }
-    for(const child of children)await remove("categories",child.id);
-    await remove("categories",id);
-    if(state.filter.type==="category"&&removedIds.has(state.filter.id))state.filter={type:"all",id:null};
-    await loadData();render();renderManage();toast(`Categoria \u201C${category.name}\u201D eliminata.`);
+  const destinationNote=category.parentId
+    ?`${affected.length} prompt perderanno questa sottocategoria ma manterranno, quando presente, la categoria principale.`
+    :`${affected.length} prompt verranno spostati in \u201CSenza categoria\u201D.`;
+  confirmAction("Elimina categoria",`${destinationNote}${childNote}`,async()=>{
+    try{
+      const tx=state.db.transaction(["prompts","categories"],"readwrite"),promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories");
+      for(const prompt of affected){
+        const updated={...prompt,updatedAt:now()};
+        if(removedIds.has(updated.categoryId))updated.categoryId=null;
+        if(removedIds.has(updated.subcategoryId))updated.subcategoryId=null;
+        promptStore.put(updated);
+      }
+      children.forEach(child=>categoryStore.delete(child.id));categoryStore.delete(id);
+      await transactionDone(tx);
+      if(state.filter.type==="category"&&removedIds.has(state.filter.id))state.filter={type:"all",id:null};
+      await loadData();render();renderManage();toast(`Categoria \u201C${category.name}\u201D eliminata.`,"success");
+    }catch(error){console.error(error);toast(`Eliminazione categoria non riuscita: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-CAT-DELETE")}
   });
 }
 function deleteClient(id){
   const client=clientById(id);if(!client)return;
   const affected=state.prompts.filter(prompt=>prompt.clientId===id);
   confirmAction("Elimina cliente",`${affected.length} prompt perderanno l\u2019assegnazione al cliente, ma non saranno eliminati.`,async()=>{
-    for(const prompt of affected){prompt.clientId=null;prompt.updatedAt=now();await put("prompts",prompt)}
-    await remove("clients",id);
-    if(state.filter.type==="client"&&state.filter.id===id)state.filter={type:"all",id:null};
-    await loadData();render();renderManage();toast(`Cliente \u201C${client.name}\u201D eliminato.`);
+    try{
+      const tx=state.db.transaction(["prompts","clients"],"readwrite"),promptStore=tx.objectStore("prompts"),clientStore=tx.objectStore("clients");
+      affected.forEach(prompt=>promptStore.put({...prompt,clientId:null,updatedAt:now()}));clientStore.delete(id);
+      await transactionDone(tx);
+      if(state.filter.type==="client"&&state.filter.id===id)state.filter={type:"all",id:null};
+      await loadData();render();renderManage();toast(`Cliente \u201C${client.name}\u201D eliminato.`,"success");
+    }catch(error){console.error(error);toast(`Eliminazione cliente non riuscita: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-CLIENT-DELETE")}
   });
 }
 
@@ -2085,7 +2410,7 @@ async function exportCurrentPrompt(){
   }
   const bundle={
     type:"prompt-studio-prompt",
-    version:17,
+    version:19,
     exportedAt:now(),
     prompt:payload
   };
@@ -2093,11 +2418,13 @@ async function exportCurrentPrompt(){
   toast(`Prompt esportato con ${promptAttachmentCount(payload)} file incorporat${promptAttachmentCount(payload)===1?"o":"i"}.`);
 }
 function downloadEmbeddedFile(file){
-  if(!file?.base64){toast("Questo file non \u00E8 incorporato nel backup.");return}
-  const blob=base64ToBlob(file.base64,file.type);
-  const url=URL.createObjectURL(blob),link=document.createElement("a");
-  link.href=url;link.download=file.name||"allegato";document.body.appendChild(link);link.click();link.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  if(!file?.base64){toast("Questo file non \u00E8 incorporato nel backup.","warning");return}
+  try{
+    const blob=base64ToBlob(file.base64,file.type);
+    const url=URL.createObjectURL(blob),link=document.createElement("a");
+    link.href=url;link.download=file.name||"allegato";document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(error){console.error(error);toast("Il file incorporato è danneggiato o non può essere ricostruito.","error","PS-FILE-DECODE")}
 }
 
 
@@ -2105,9 +2432,10 @@ function downloadEmbeddedFile(file){
 /* ---------- Importazione, esportazione e backup ---------- */
 function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
+  const excludedFileCount=state.prompts.reduce((sum,prompt)=>sum+Object.values(prompt?.variableFiles||{}).filter(file=>file?.tooLarge&&!file?.base64).length,0);
   return {
-    app:"Prompt Studio Standalone",version:17,exportedAt:now(),
-    includesEmbeddedFiles:true,embeddedFileCount:fileCount,
+    app:"Prompt Studio Standalone",version:19,exportedAt:now(),
+    includesEmbeddedFiles:true,embeddedFileCount:fileCount,excludedFileCount,
     prompts:state.prompts,categories:state.categories,clients:state.clients
   };
 }
@@ -2118,16 +2446,49 @@ function downloadJson(data,filename){
 function exportData(){
   const data=snapshot();
   downloadJson(data,`prompt-studio-backup-${new Date().toISOString().slice(0,10)}.json`);
-  toast(`Backup esportato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`,"success");
+  toast(`Backup esportato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}${data.excludedFileCount?` · ${data.excludedFileCount} file oltre 20 MB da conservare separatamente`:""}.`,data.excludedFileCount?"warning":"success");
+}
+async function pruneInternalBackups(keep=MAX_INTERNAL_BACKUPS){
+  const backups=(await getAll("backups")).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt));
+  for(const backup of backups.slice(Math.max(0,keep)))await remove("backups",backup.id);
 }
 async function createBackup(){
   if(state.busy.has("backup")){toast("Un backup \u00E8 gi\u00E0 in corso.","warning","PS-BACKUP-BUSY");return}
   state.busy.add("backup");
   try{
-    const data=snapshot();await put("backups",{id:uid("backup"),createdAt:now(),data});
+    const data=snapshot();let internalStored=true;
+    try{
+      await pruneInternalBackups(Math.max(0,MAX_INTERNAL_BACKUPS-1));
+      await put("backups",{id:uid("backup"),createdAt:now(),data});
+    }catch(error){internalStored=false;console.warn("Backup interno non salvato, procedo comunque con il download.",error)}
     downloadJson(data,`prompt-studio-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);
-    toast(`Backup completo creato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}.`,"success");
-  }catch(error){console.error(error);toast(`Backup non creato: ${error.message||"errore del database"}.`,"error","PS-BACKUP-FAILED")}finally{state.busy.delete("backup")}
+    const warnings=[];
+    if(data.excludedFileCount)warnings.push(`${data.excludedFileCount} file oltre 20 MB esclusi dal JSON`);
+    if(!internalStored)warnings.push("copia interna nel browser non salvata");
+    toast(`Backup scaricato con ${data.embeddedFileCount} file incorporat${data.embeddedFileCount===1?"o":"i"}${warnings.length?` · ${warnings.join(" · ")}`:""}.`,warnings.length?"warning":"success");
+  }catch(error){console.error(error);toast(`Backup non creato: ${error.message||"errore del browser"}.`,"error","PS-BACKUP-FAILED")}finally{state.busy.delete("backup")}
+}
+function validateImportItems(items,label){
+  if(!Array.isArray(items))throw new Error(`${label}: elenco non valido.`);
+  const seen=new Set();
+  for(const [index,item] of items.entries()){
+    if(!item||typeof item!=="object"||Array.isArray(item))throw new Error(`${label}: elemento ${index+1} non valido.`);
+    const id=String(item.id||"").trim();
+    if(!id)throw new Error(`${label}: elemento ${index+1} senza ID.`);
+    if(seen.has(id))throw new Error(`${label}: ID duplicato ${id}.`);
+    seen.add(id);
+  }
+}
+function validateArchiveData(data){
+  if(!data||typeof data!=="object")throw new Error("Archivio JSON non valido.");
+  validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Categorie");validateImportItems(data.clients,"Clienti");
+}
+async function writeCoreDataAtomic({mode,categories,clients,prompts}){
+  const tx=state.db.transaction(["prompts","categories","clients"],"readwrite");
+  const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),clientStore=tx.objectStore("clients");
+  if(mode==="replace"){promptStore.clear();categoryStore.clear();clientStore.clear()}
+  categories.forEach(item=>categoryStore.put(item));clients.forEach(item=>clientStore.put(item));prompts.forEach(item=>promptStore.put(item));
+  await transactionDone(tx);
 }
 async function importData(file){
   if(state.busy.has("importRead")||state.busy.has("importApply")){
@@ -2136,15 +2497,17 @@ async function importData(file){
   state.busy.add("importRead");
   try{
     if(!file||file.size===0)throw new Error("Il file selezionato \u00E8 vuoto.");
-    if(file.size>MAX_EMBED_FILE_SIZE)throw new Error(`Il file supera il limite di ${formatBytes(MAX_EMBED_FILE_SIZE)}.`);
+    if(file.size>MAX_IMPORT_ARCHIVE_SIZE)throw new Error(`L'archivio supera il limite di sicurezza di ${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}.`);
     const raw=await file.text();
     if(!raw.trim())throw new Error("Il file selezionato non contiene dati.");
     const data=JSON.parse(raw);
 
     if(data?.type==="prompt-studio-prompt"&&data.prompt){
+      if(typeof data.prompt!=="object"||!String(data.prompt.title||"").trim()||!String(data.prompt.content||"").trim())throw new Error("Il prompt importato deve contenere titolo e testo.");
       const promptData={...data.prompt,id:uid("prompt"),createdAt:now(),updatedAt:now(),deletedAt:null};
+      if(normalizedIntroSource(promptData)==="auto"){promptData.intro=generatePromptIntro(promptData);promptData.introSource="auto";promptData.introGeneratedAt=now();promptData.introUpdatedAt=now()}
       await put("prompts",promptData);
-      await loadData();render();
+      await loadData();await generateMissingPromptIntros({silent:true});render();
       toast(`Prompt importato con ${promptAttachmentCount(promptData)} file incorporat${promptAttachmentCount(promptData)===1?"o":"i"}.`,"success");
       return;
     }
@@ -2152,6 +2515,7 @@ async function importData(file){
     if(!Array.isArray(data.prompts)||!Array.isArray(data.categories)||!Array.isArray(data.clients)){
       throw new Error("Formato non riconosciuto");
     }
+    validateArchiveData(data);
 
     choiceAction(
       "Importa archivio",
@@ -2162,12 +2526,7 @@ async function importData(file){
           if(state.busy.has("importApply")){toast("L\u2019archivio \u00E8 gi\u00E0 in fase di importazione.","warning","PS-IMPORT-BUSY");return}
           state.busy.add("importApply");
           try{
-            if(mode==="replace"){
-              for(const name of ["prompts","categories","clients"]){
-                for(const item of await getAll(name))await remove(name,item.id);
-              }
-            }
-            let categories=data.categories,clients=data.clients,prompts=data.prompts;
+            let categories=data.categories.map(item=>({...item})),clients=data.clients.map(item=>({...item})),prompts=data.prompts.map(item=>({...item}));
             if(mode==="merge"){
               const catMap=new Map(),clientMap=new Map();
               categories=categories.map(item=>{if(state.categories.some(existing=>existing.id===item.id)){const id=uid("cat");catMap.set(item.id,id);return {...item,id,parentId:item.parentId}}return item});
@@ -2175,15 +2534,17 @@ async function importData(file){
               clients=clients.map(item=>{if(state.clients.some(existing=>existing.id===item.id)){const id=uid("client");clientMap.set(item.id,id);return {...item,id}}return item});
               prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId}));
             }
-            for(const item of categories)await put("categories",item);
-            for(const item of clients)await put("clients",item);
-            for(const item of prompts)await put("prompts",item);
-            await loadData();render();
+            prompts=prompts.map(prompt=>{
+              if(normalizedIntroSource(prompt)!=="auto")return prompt;
+              return {...prompt,intro:generatePromptIntro(prompt),introSource:"auto",introGeneratedAt:now(),introUpdatedAt:now()};
+            });
+            await writeCoreDataAtomic({mode,categories,clients,prompts});
+            await loadData();await generateMissingPromptIntros({silent:true});render();
             const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
             toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
           }catch(error){
             console.error(error);
-            toast(`Importazione non riuscita: ${error.message}. Verifica l\u2019archivio e riprova.`,"error","PS-IMPORT-APPLY");
+            toast(`Importazione non riuscita: ${error.message}. La transazione è stata annullata e l'archivio precedente è rimasto invariato.`,"error","PS-IMPORT-APPLY");
           }finally{state.busy.delete("importApply")}
         };
         if(mode==="replace"){
@@ -2203,19 +2564,24 @@ async function importData(file){
 
 /* ---------- Eventi ---------- */
 function bindEvents(){
-  $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");setFilter("all");setTimeout(()=>{$("workflow-overview")?.scrollIntoView({behavior:"smooth",block:"start"});$("workflowTitle")?.focus?.()},80)};
+  $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");state.query="";$("globalSearch").value="";setFilter("all");setTimeout(()=>{$("workflow-overview")?.scrollIntoView({behavior:"smooth",block:"start"});$("workflowTitle")?.focus?.()},80)};
   $$(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
-  $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderCards()},160)};
-  $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderCards()};
+  $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderStats();renderCards()},160)};
+  $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderStats();renderCards()};
   $("newPromptBtn").onclick=()=>openEditor();
   $("themeBtn").onclick=()=>{setTheme();$("moreMenu").classList.remove("show")};
   $("moreBtn").onclick=event=>{event.stopPropagation();$("moreMenu").classList.toggle("show")};
   $("menuImportBtn").onclick=()=>{$("moreMenu").classList.remove("show");$("importInput").click()};
   $("menuExportBtn").onclick=()=>{$("moreMenu").classList.remove("show");exportData()};
+  $("menuGenerateIntrosBtn").onclick=()=>{$("moreMenu").classList.remove("show");generateMissingPromptIntros()};
+  $("menuRefreshAutoIntrosBtn").onclick=()=>{$("moreMenu").classList.remove("show");refreshAutomaticPromptIntros()};
   $("menuManageBtn").onclick=()=>{$("moreMenu").classList.remove("show");renderManage();openModal("manageModal")};
   $("menuBackupBtn").onclick=()=>{$("moreMenu").classList.remove("show");createBackup()};
   $("menuDiagnosticsBtn").onclick=()=>{$("moreMenu").classList.remove("show");performDashboardAction("diagnostics")};
-  document.addEventListener("click",event=>{if(!event.target.closest('.more-menu-wrap'))$("moreMenu")?.classList.remove("show")});
+  document.addEventListener("click",event=>{
+    if(!event.target.closest('.more-menu-wrap'))$("moreMenu")?.classList.remove("show");
+    if($("sidebar")?.classList.contains("open")&&!event.target.closest("#sidebar,#mobileMenuBtn"))$("sidebar").classList.remove("open");
+  });
   $("mobileMenuBtn").onclick=()=>$("sidebar").classList.add("open");
   $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
   $("backupBtn").onclick=createBackup;
@@ -2243,12 +2609,17 @@ function bindEvents(){
     fillSubcategories("");
     markDirty();
   };
-  ["promptTitle","promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
+  ["promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
+  $("promptTitle").oninput=()=>{markDirty();scheduleAutomaticIntroUpdate()};
+  $("promptIntro").oninput=()=>{if(state.editor.introSource!=="manual"){state.editor.introSource="manual";updateIntroSourceUI()}markDirty();updatePromptPurposeNote()};
+  $("generateIntroBtn").onclick=()=>{setAutomaticIntro();toast("Nota rigenerata e impostata come automatica.","success")};
+  $("restoreAutoIntroBtn").onclick=()=>{setAutomaticIntro();toast("Nota riportata in modalità automatica.","success")};
   $("openToolBtn").onclick=async()=>{
     if(state.busy.has("openTool"))return;
     let url=$("promptToolUrl").value.trim();
     if(!url){toast("Inserisci prima il link del tool.");$("promptToolUrl").focus();return}
-    if(!/^https?:\/\//i.test(url))url=`https://${url}`;
+    url=normalizeHttpUrl(url);
+    if(!url){toast("Inserisci un URL HTTP/HTTPS valido per il tool.","warning","PS-TOOL-URL");$("promptToolUrl").focus();return}
 
     const source=$("promptContent").value.trim();
     if(!source){toast("Inserisci prima il testo del prompt.");$("promptContent").focus();return}
@@ -2271,7 +2642,7 @@ function bindEvents(){
       await put("prompts",payload);
       const stored=await getOne("prompts",payload.id);
       if(!stored)throw new Error("Il prompt non risulta salvato nel database.");
-      await loadData();render();
+      await loadData();
       state.editor.id=payload.id;
       state.editor.dirty=false;
 
@@ -2279,8 +2650,10 @@ function bindEvents(){
          Copiare negli appunti prima dell'apertura \u00E8 il comportamento affidabile
          per ChatGPT, Claude, Gemini e gli altri strumenti. */
       await copyText(compiled);
+      await recordPromptUse(payload.id,{renderAfter:true});
       opened.opener=null;opened.location.replace(url);
-      toast("Prompt salvato e copiato. Nel tool premi Cmd+V oppure Ctrl+V per inserirlo.","success");
+      const hasBinaryAttachments=Object.values(state.editor.files||{}).some(file=>file?.base64&&!file?.textExtracted);
+      toast(`Prompt salvato, copiato e registrato tra gli ultimi utilizzati. Nel tool premi Cmd+V oppure Ctrl+V per inserirlo.${hasBinaryAttachments?" Ricorda di caricare manualmente anche gli allegati binari.":""}`,hasBinaryAttachments?"warning":"success");
     }catch(error){
       if(opened&&!opened.closed)opened.close();
       console.error(error);
@@ -2292,6 +2665,7 @@ function bindEvents(){
   ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
   $("promptContent").oninput=()=>{
     markDirty();updateCounts();clearTimeout(state.detectTimer);
+    if(state.editor.introSource==="auto")scheduleAutomaticIntroUpdate();else updatePromptPurposeNote();
     state.detectTimer=setTimeout(()=>{refreshVariables(true)},260);
   };
   $("detectVariablesBtn").onclick=()=>{refreshVariables(true);toast(`${state.editor.variables.length} variabili rilevate.`)};
@@ -2346,6 +2720,7 @@ function bindEvents(){
     if(modifier&&event.key.toLowerCase()==="n"){event.preventDefault();openEditor()}
     if(modifier&&event.key.toLowerCase()==="s"&&$("editorBackdrop").classList.contains("show")){event.preventDefault();savePrompt()}
     if(event.key==="Escape"){
+      $("moreMenu")?.classList.remove("show");$("sidebar")?.classList.remove("open");
       const modal=$$(".modal-backdrop.show").at(-1);
       if(modal)closeModal(modal.id);else if($("editorBackdrop").classList.contains("show"))closeEditor();
     }
@@ -2362,9 +2737,13 @@ async function init(){
   const previousVersion=localStorage.getItem("ps_app_version");
   const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);
   state.db=await openDatabase();await loadData();await removeLegacyDemoPrompt();await loadData();await seedData();bindEvents();render();
+  const generatedIntros=await generateMissingPromptIntros({silent:true});
+  const refreshedIntros=previousVersion&&previousVersion!==APP_VERSION?await refreshAutomaticPromptIntros({silent:true}):0;
   localStorage.setItem("ps_app_version",APP_VERSION);
   if(previousVersion&&previousVersion!==APP_VERSION){
-    toast(`Applicazione aggiornata dalla versione ${previousVersion} alla ${APP_VERSION}. I dati sono stati mantenuti.`,"success");
+    toast(`Applicazione aggiornata dalla versione ${previousVersion} alla ${APP_VERSION}. I dati sono stati mantenuti.${generatedIntros?` Generate ${generatedIntros} note mancanti.`:""}${refreshedIntros?` Aggiornate ${refreshedIntros} note automatiche.`:""}`,"success");
+  }else if(generatedIntros){
+    toast(`Generate automaticamente ${generatedIntros} note introduttive mancanti dai prompt esistenti.`,"success");
   }
   const hashAction=location.hash.match(/^#step-(.+)$/)?.[1]||localStorage.getItem("ps_last_dashboard_action");
   if(hashAction&&document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)){setTimeout(()=>{highlightDashboardCard(hashAction);document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`)?.scrollIntoView({block:"center"})},100)}
