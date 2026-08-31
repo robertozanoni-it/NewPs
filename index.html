@@ -85,7 +85,9 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .side-section.categories{--section-accent:#7c3aed}
 .side-section.clients{--section-accent:#0891b2}
 .side-section.projects{--section-accent:#8b5cf6}
+.side-section.management{--section-accent:#f59e0b}
 .sidebar-picker{width:100%;min-height:40px;padding:8px 34px 8px 10px;border:1px solid rgba(255,255,255,.20);border-radius:10px;background:rgba(255,255,255,.09);color:var(--sidebar-text);font-weight:750}
+.sidebar-picker+.sidebar-picker{margin-top:8px}
 .sidebar-picker option{background:var(--sidebar);color:var(--sidebar-text)}
 .side-section.backup{--section-accent:#059669}
 .side-title{display:flex;align-items:center;justify-content:space-between;padding:1px 6px 9px;color:#fff;font-size:11px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
@@ -447,8 +449,9 @@ textarea{resize:vertical;line-height:1.55}
       <button class="side-link" data-filter="trash"><span>&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
     </section>
     <section class="side-section categories">
-      <div class="side-title"><span>Categorie</span><button class="btn small" id="manageBtn">Gestisci</button></div>
+      <div class="side-title"><span>Categorie</span></div>
       <select class="sidebar-picker" id="categoryPicker" aria-label="Scegli categoria"></select>
+      <select class="sidebar-picker" id="subcategoryPicker" aria-label="Scegli sottocategoria"></select>
     </section>
     <section class="side-section clients">
       <div class="side-title"><span>Clienti</span></div>
@@ -457,6 +460,10 @@ textarea{resize:vertical;line-height:1.55}
     <section class="side-section projects">
       <div class="side-title"><span>Progetti</span></div>
       <select class="sidebar-picker" id="projectPicker" aria-label="Scegli progetto"></select>
+    </section>
+    <section class="side-section management">
+      <div class="side-title"><span>Gestione</span></div>
+      <button class="side-link" id="manageBtn"><span>&#9881;</span><span>Gestisci elementi</span></button>
     </section>
     <section class="side-section backup">
       <button class="side-link" id="backupBtn"><span>&#8681;</span><span>Crea backup completo</span></button>
@@ -641,8 +648,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.9.0";
-const APP_RELEASE_NAME="Categorie, clienti e progetti separati";
+const APP_VERSION="18.10.0";
+const APP_RELEASE_NAME="Sottocategorie e gestione avanzata";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -1398,17 +1405,31 @@ function renderSidebar(){
     if(item.categoryId)counts[item.categoryId]=(counts[item.categoryId]||0)+1;
     if(item.subcategoryId)counts[item.subcategoryId]=(counts[item.subcategoryId]||0)+1;
   });
-  const categoryOptions=rootCategoriesAlphabetical().flatMap(root=>[
-    `<option value="${esc(root.id)}">${esc(root.name)} (${counts[root.id]||0})</option>`,
-    ...childCategoriesAlphabetical(root.id).map(child=>`<option value="${esc(child.id)}">${esc(root.name)} \u203A ${esc(child.name)} (${counts[child.id]||0})</option>`)
-  ]).join("");
+  const activeCategory=state.filter.type==="category"?catById(state.filter.id):null;
+  const activeRoot=activeCategory?.parentId?catById(activeCategory.parentId):activeCategory;
+  const selectedRootId=activeRoot?.id||"all";
+  const categoryOptions=rootCategoriesAlphabetical().map(root=>`<option value="${esc(root.id)}">${esc(root.name)} (${counts[root.id]||0})</option>`).join("");
+  const subcategoryOptions=state.categories.filter(item=>item.parentId).sort((a,b)=>{
+    const parentCompare=String(catById(a.parentId)?.name||"").localeCompare(String(catById(b.parentId)?.name||""),"it",{sensitivity:"base"});
+    return parentCompare||categoryAlphabeticalCompare(a,b);
+  }).map(child=>{
+    const parent=catById(child.parentId);
+    return `<option value="${esc(child.id)}">${esc(parent?.name||"")} \u203A ${esc(child.name)} (${counts[child.id]||0})</option>`;
+  }).join("");
   $("categoryPicker").innerHTML='<option value="all">Tutte le categorie</option>'+categoryOptions;
+  $("subcategoryPicker").innerHTML='<option value="all">Tutte le sottocategorie</option>'+subcategoryOptions;
   $("clientPicker").innerHTML='<option value="all">Tutti i clienti</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)} (${live.filter(item=>item.clientId===client.id).length})</option>`).join("");
   $("projectPicker").innerHTML='<option value="all">Tutti i progetti</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)} (${live.filter(item=>item.projectId===project.id).length})</option>`).join("");
-  $("categoryPicker").value=state.filter.type==="category"?state.filter.id:"all";
+  $("categoryPicker").value=selectedRootId;
+  $("subcategoryPicker").value=activeCategory?.parentId?activeCategory.id:"all";
   $("clientPicker").value=state.filter.type==="client"?state.filter.id:"all";
   $("projectPicker").value=state.filter.type==="project"?state.filter.id:"all";
   $("categoryPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("category",event.target.value);
+  $("subcategoryPicker").onchange=event=>{
+    if(event.target.value!=="all"){setFilter("category",event.target.value);return}
+    const rootId=$("categoryPicker").value;
+    rootId==="all"?setFilter("all"):setFilter("category",rootId);
+  };
   $("clientPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("client",event.target.value);
   $("projectPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("project",event.target.value);
 }
@@ -2450,6 +2471,8 @@ function renderManage(){
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
       <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong></div>
       <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}">
+      <button class="btn small move-category-client" data-id="${esc(category.id)}">In Clienti</button>
+      <button class="btn small move-category-project" data-id="${esc(category.id)}">In Progetti</button>
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("")||'<div class="hint">Nessuna categoria presente.</div>';
 
@@ -2458,13 +2481,15 @@ function renderManage(){
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
       <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong><div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} \u00B7 colore ereditato</div></div>
       <input class="color-input" type="color" value="${esc(categoryColor(category))}" disabled title="Il colore \u00E8 ereditato dalla categoria principale">
+      <button class="btn small move-category-client" data-id="${esc(category.id)}">In Clienti</button>
+      <button class="btn small move-category-project" data-id="${esc(category.id)}">In Progetti</button>
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in \u201C${esc(catById(state.manageSubcategoryFilter)?.name||"")}\u201D.`:'Nessuna sottocategoria presente.'}</div>`;
 
   $("manageClients").innerHTML=state.clients.map(client=>`
-    <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div><button class="btn small move-client-project" data-id="${esc(client.id)}">Sposta in Progetti</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
+    <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div><button class="btn small move-client-category" data-id="${esc(client.id)}">In Categorie</button><button class="btn small move-client-project" data-id="${esc(client.id)}">In Progetti</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
   $("manageProjects").innerHTML=state.projects.map(project=>`
-    <div class="manage-row"><div class="grow"><strong class="project-name-editable category-name-editable" data-id="${esc(project.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(project.name)}</strong></div><button class="btn small move-project-client" data-id="${esc(project.id)}">Sposta in Clienti</button><button class="btn small danger delete-project" data-id="${esc(project.id)}">Elimina</button></div>`).join("");
+    <div class="manage-row"><div class="grow"><strong class="project-name-editable category-name-editable" data-id="${esc(project.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(project.name)}</strong></div><button class="btn small move-project-category" data-id="${esc(project.id)}">In Categorie</button><button class="btn small move-project-client" data-id="${esc(project.id)}">In Clienti</button><button class="btn small danger delete-project" data-id="${esc(project.id)}">Elimina</button></div>`).join("");
 
   $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
 
@@ -2491,7 +2516,11 @@ function renderManage(){
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
   $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
   $$(".delete-project").forEach(button=>button.onclick=()=>deleteProject(button.dataset.id));
+  $$(".move-category-client").forEach(button=>button.onclick=()=>moveCategoryToEntity(button.dataset.id,"client"));
+  $$(".move-category-project").forEach(button=>button.onclick=()=>moveCategoryToEntity(button.dataset.id,"project"));
+  $$(".move-client-category").forEach(button=>button.onclick=()=>moveClientToCategory(button.dataset.id));
   $$(".move-client-project").forEach(button=>button.onclick=()=>moveClientToProjects(button.dataset.id));
+  $$(".move-project-category").forEach(button=>button.onclick=()=>moveProjectToCategory(button.dataset.id));
   $$(".move-project-client").forEach(button=>button.onclick=()=>moveProjectToClients(button.dataset.id));
 }
 function beginInlineCategoryRename(labelElement){
@@ -2658,6 +2687,64 @@ function deleteProject(id){
     }catch(error){console.error(error);toast(`Eliminazione progetto non riuscita: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-PROJECT-DELETE")}
   });
 }
+async function moveCategoryToEntity(id,targetType){
+  const category=catById(id);if(!category)return;
+  const isClient=targetType==="client";
+  const targetCollection=isClient?state.clients:state.projects;
+  const targetStoreName=isClient?"clients":"projects";
+  const targetField=isClient?"clientId":"projectId";
+  const targetLabel=isClient?"Clienti":"Progetti";
+  const existing=targetCollection.find(item=>normalize(item.name)===normalize(category.name));
+  const target=existing||{id:uid(isClient?"client":"project"),name:category.name,createdAt:now()};
+  const children=category.parentId?[]:state.categories.filter(item=>item.parentId===id);
+  const removedIds=new Set([id,...children.map(child=>child.id)]);
+  const affected=state.prompts.filter(prompt=>removedIds.has(prompt.categoryId)||removedIds.has(prompt.subcategoryId));
+  try{
+    const tx=state.db.transaction(["prompts","categories",targetStoreName],"readwrite");
+    const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),targetStore=tx.objectStore(targetStoreName);
+    targetStore.put(target);
+    affected.forEach(prompt=>{
+      const updated={...prompt,[targetField]:prompt[targetField]||target.id,updatedAt:now()};
+      if(category.parentId){
+        if(updated.categoryId===category.id)updated.categoryId=category.parentId;
+        if(updated.subcategoryId===category.id)updated.subcategoryId=null;
+      }else{
+        if(removedIds.has(updated.categoryId))updated.categoryId=null;
+        if(removedIds.has(updated.subcategoryId))updated.subcategoryId=null;
+      }
+      promptStore.put(updated);
+    });
+    children.forEach(child=>categoryStore.delete(child.id));
+    categoryStore.delete(category.id);
+    await transactionDone(tx);
+    await loadData();state.filter={type:targetType,id:target.id};render();renderManage();
+    toast(`“${category.name}” spostata in ${targetLabel}.${children.length?` Incluse ${children.length} sottocategorie.`:""}`,"success");
+  }catch(error){console.error(error);toast(`Spostamento non riuscito: ${error.message||"errore del database"}.`,"error","PS-CATEGORY-MOVE")}
+}
+async function moveEntityToCategory(sourceType,id){
+  const isClient=sourceType==="client";
+  const source=isClient?clientById(id):projectById(id);if(!source)return;
+  const sourceStoreName=isClient?"clients":"projects";
+  const sourceField=isClient?"clientId":"projectId";
+  const sourceLabel=isClient?"Cliente":"Progetto";
+  const existing=rootCategoriesAlphabetical().find(item=>normalize(item.name)===normalize(source.name));
+  const category=existing||{id:uid("cat"),name:source.name,parentId:null,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()};
+  try{
+    const tx=state.db.transaction(["prompts","categories",sourceStoreName],"readwrite");
+    const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),sourceStore=tx.objectStore(sourceStoreName);
+    categoryStore.put(category);
+    state.prompts.filter(prompt=>prompt[sourceField]===id).forEach(prompt=>{
+      const updated={...prompt,[sourceField]:null,updatedAt:now()};
+      if(!updated.categoryId){updated.categoryId=category.id;updated.subcategoryId=null}
+      promptStore.put(updated);
+    });
+    sourceStore.delete(id);
+    await transactionDone(tx);
+    await loadData();state.filter={type:"category",id:category.id};render();renderManage();toast(`${sourceLabel} “${source.name}” spostato in Categorie.`,"success");
+  }catch(error){console.error(error);toast(`Spostamento non riuscito: ${error.message||"errore del database"}.`,"error","PS-ENTITY-TO-CATEGORY")}
+}
+function moveClientToCategory(id){return moveEntityToCategory("client",id)}
+function moveProjectToCategory(id){return moveEntityToCategory("project",id)}
 async function moveClientToProjects(id){
   const client=clientById(id);if(!client)return;
   const existing=state.projects.find(item=>normalize(item.name)===normalize(client.name));
