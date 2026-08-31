@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
+<meta name="application-version" content="18.15.0">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -86,7 +87,9 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .side-section.clients{--section-accent:#0891b2}
 .side-section.projects{--section-accent:#8b5cf6}
 .side-section.gptsites{--section-accent:#ec4899}
+.side-section.seo{--section-accent:#16a34a}
 .side-section.management{--section-accent:#f59e0b}
+.sidebar-version{margin:12px 8px 0;padding:9px 10px;border-top:1px solid rgba(255,255,255,.14);color:var(--sidebar-muted);font-size:11px;font-weight:800;text-align:center;letter-spacing:.03em}
 .sidebar-picker{width:100%;min-height:40px;padding:8px 34px 8px 10px;border:1px solid rgba(255,255,255,.20);border-radius:10px;background:rgba(255,255,255,.09);color:var(--sidebar-text);font-weight:750}
 .sidebar-picker option{background:var(--sidebar);color:var(--sidebar-text)}
 .category-menu-shell{position:relative}
@@ -425,7 +428,7 @@ textarea{resize:vertical;line-height:1.55}
 
 /* ---------- UX 18.0 ---------- */
 .top-actions #importBtn,.top-actions #exportBtn{display:none}
-.more-menu-wrap{position:relative}.more-menu{position:absolute;right:0;top:46px;min-width:220px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;z-index:80}.more-menu.show{display:block}.more-menu .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.more-menu .btn:hover{background:var(--panel-3)}
+.more-menu-wrap{position:relative}.more-menu{position:absolute;right:0;top:46px;min-width:270px;padding:9px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);display:none;z-index:80}.more-menu.show{display:flex;flex-direction:column;gap:3px}.more-menu .btn{width:100%;min-height:42px;padding:8px 10px;display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:8px;justify-content:stretch;border:0;background:transparent;text-align:left;font-weight:750}.more-menu .btn:hover{background:var(--panel-3)}.more-menu .menu-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--panel-3);color:var(--primary);font-size:16px;font-weight:900}.more-menu .menu-section-start{margin-top:5px;padding-top:10px;border-top:1px solid var(--line);border-radius:0 0 10px 10px}
 .stats > .home-actions{grid-column:1/-1;width:100%;min-width:0}.home-actions{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.8fr);gap:14px;margin-bottom:16px}.home-primary,.home-secondary{min-width:0;padding:20px;border:1px solid var(--line);border-radius:18px}.home-primary{border-color:color-mix(in srgb,#2563eb 48%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#2563eb 22%,var(--panel)),color-mix(in srgb,#0e7490 9%,var(--panel)) 72%)}.home-secondary{border-color:color-mix(in srgb,#7c3aed 44%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,#7c3aed 18%,var(--panel)),color-mix(in srgb,#db2777 7%,var(--panel)) 76%)}.home-primary h3,.home-secondary h3{margin:0 0 7px;font-size:22px}.home-primary p,.home-secondary p{margin:0 0 14px;color:var(--muted);line-height:1.55}.home-primary .search{height:50px;font-size:16px;background:color-mix(in srgb,var(--panel) 90%,transparent)}.home-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.recent-strip{display:flex;gap:8px;flex-wrap:wrap}.recent-strip .btn{justify-content:flex-start}
 .workflow-overview .dashboard-intro{border-color:color-mix(in srgb,#0891b2 46%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#0891b2 18%,var(--panel)),color-mix(in srgb,#2563eb 9%,var(--panel)) 76%)}
 .workflow-overview .recommended-action{border-color:color-mix(in srgb,#ea580c 45%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,#ea580c 18%,var(--panel)),color-mix(in srgb,#b45309 8%,var(--panel)) 76%)}
@@ -447,17 +450,29 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">&#9776;</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel"></small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 18.15.0</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
-      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente o progetto&#8230;">
+      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente, GPTSites, progetto o SEO&#8230;">
       <button class="search-clear" id="clearSearch">&#215;</button>
     </div>
     <div class="top-actions">
       <button class="btn optional" id="importBtn">Importa JSON</button>
       <button class="btn optional" id="exportBtn">Esporta archivio</button>
       <button class="btn primary" id="newPromptBtn" aria-label="Crea un nuovo prompt">&#65291; Nuovo prompt</button>
-      <div class="more-menu-wrap"><button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">&#8943;</button><div class="more-menu" id="moreMenu"><button class="btn" id="menuImportBtn">Importa JSON</button><button class="btn" id="menuExportBtn">Esporta archivio</button><button class="btn" id="menuGenerateIntrosBtn">Genera note mancanti</button><button class="btn" id="menuRefreshAutoIntrosBtn">Aggiorna note automatiche</button><button class="btn" id="menuManageBtn">Gestisci categorie, clienti e progetti</button><button class="btn" id="menuBackupBtn">Crea backup</button><button class="btn" id="menuDiagnosticsBtn">Diagnostica</button><button class="btn" id="themeBtn" title="Tema">Cambia tema</button></div></div>
+      <div class="more-menu-wrap">
+        <button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">&#8943;</button>
+        <div class="more-menu" id="moreMenu">
+          <button class="btn" id="menuImportBtn"><span class="menu-icon" aria-hidden="true">&#8679;</span><span>Importa JSON</span></button>
+          <button class="btn" id="menuExportBtn"><span class="menu-icon" aria-hidden="true">&#8681;</span><span>Esporta archivio</span></button>
+          <button class="btn" id="menuGenerateIntrosBtn"><span class="menu-icon" aria-hidden="true">&#10022;</span><span>Genera note mancanti</span></button>
+          <button class="btn" id="menuRefreshAutoIntrosBtn"><span class="menu-icon" aria-hidden="true">&#8635;</span><span>Aggiorna note automatiche</span></button>
+          <button class="btn menu-section-start" id="menuBackupBtn"><span class="menu-icon" aria-hidden="true">&#128190;</span><span>Crea backup</span></button>
+          <button class="btn" id="menuDiagnosticsBtn"><span class="menu-icon" aria-hidden="true">&#128736;</span><span>Diagnostica</span></button>
+          <button class="btn" id="themeBtn" title="Tema"><span class="menu-icon" aria-hidden="true">&#9680;</span><span>Cambia tema</span></button>
+          <button class="btn menu-section-start" id="menuManageBtn"><span class="menu-icon" aria-hidden="true">&#9881;</span><span>Gestisci struttura</span></button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -483,22 +498,27 @@ textarea{resize:vertical;line-height:1.55}
       <div class="side-title"><span>Clienti</span></div>
       <select class="sidebar-picker" id="clientPicker" aria-label="Scegli cliente"></select>
     </section>
-    <section class="side-section projects">
-      <div class="side-title"><span>Progetti</span></div>
-      <select class="sidebar-picker" id="projectPicker" aria-label="Scegli progetto"></select>
-    </section>
     <section class="side-section gptsites">
       <div class="side-title"><span>GPTSites</span></div>
       <select class="sidebar-picker" id="gptSitePicker" aria-label="Scegli sito GPTSites"></select>
     </section>
-    <section class="side-section management">
-      <div class="side-title"><span>Gestione</span></div>
-      <button class="side-link" id="manageBtn"><span>&#9881;</span><span>Gestisci elementi</span></button>
+    <section class="side-section projects">
+      <div class="side-title"><span>Progetti</span></div>
+      <select class="sidebar-picker" id="projectPicker" aria-label="Scegli progetto"></select>
+    </section>
+    <section class="side-section seo">
+      <div class="side-title"><span>SEO</span></div>
+      <select class="sidebar-picker" id="seoPicker" aria-label="Scegli elemento SEO"></select>
     </section>
     <section class="side-section backup">
       <button class="side-link" id="backupBtn"><span>&#8681;</span><span>Crea backup completo</span></button>
       <div class="hint" style="padding:8px;color:var(--sidebar-muted)">Il backup include prompt, variabili e file caricati.</div>
     </section>
+    <section class="side-section management">
+      <div class="side-title"><span>Gestione</span></div>
+      <button class="side-link" id="manageBtn"><span>&#9881;</span><span>Gestisci elementi</span></button>
+    </section>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 18.15.0</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -523,8 +543,9 @@ textarea{resize:vertical;line-height:1.55}
       <strong><span id="selectedCount">0</span> selezionati</strong>
       <button class="btn small" id="bulkMoveBtn">Sposta</button>
       <button class="btn small" id="bulkClientBtn">Assegna cliente</button>
-      <button class="btn small" id="bulkProjectBtn">Assegna progetto</button>
       <button class="btn small" id="bulkGptSiteBtn">Assegna GPTSites</button>
+      <button class="btn small" id="bulkProjectBtn">Assegna progetto</button>
+      <button class="btn small" id="bulkSeoBtn">Assegna SEO</button>
       <button class="btn small" id="bulkArchiveBtn">Archivia</button>
       <button class="btn small danger" id="bulkTrashBtn">Cestina</button>
       <button class="btn small" id="clearSelectionBtn">Annulla</button>
@@ -573,6 +594,7 @@ textarea{resize:vertical;line-height:1.55}
           <div class="field"><label>Cliente</label><select id="promptClient"></select></div>
           <div class="field"><label>Progetto</label><select id="promptProject"></select></div>
           <div class="field"><label>GPTSites</label><select id="promptGptSite"></select></div>
+          <div class="field"><label>SEO</label><select id="promptSeo"></select></div>
           <div class="field"><label>Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
           <div class="field full tool-box">
             <div class="tool-box-head">
@@ -669,6 +691,14 @@ textarea{resize:vertical;line-height:1.55}
             <button class="btn primary small" id="addGptSiteBtn">Aggiungi</button>
           </div>
         </div>
+        <div class="panel-box">
+          <h4>SEO</h4><div class="hint" style="margin-bottom:10px">Gestisci gli elementi SEO e spostali verso tutte le altre sezioni.</div>
+          <div class="manage-list" id="manageSeo"></div>
+          <div class="inline-form" style="grid-template-columns:1fr auto">
+            <input id="newSeoName" type="text" placeholder="Nome elemento SEO">
+            <button class="btn primary small" id="addSeoBtn">Aggiungi</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -688,19 +718,21 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.14.0";
-const APP_RELEASE_NAME="GPTSites nella sidebar";
+const APP_VERSION="18.15.0";
+const APP_RELEASE_NAME="SEO e scambio completo";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
-if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
+if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
+const sidebarVersionLabel=document.getElementById("sidebarVersionLabel");
+if(sidebarVersionLabel)sidebarVersionLabel.textContent=`Prompt Studio · Versione ${APP_VERSION}`;
 console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
 const DB_NAME="PromptStudioStandalone";
-const DB_VERSION=5;
-const ARCHIVE_SCHEMA_VERSION=21;
-const PROMPT_BUNDLE_SCHEMA_VERSION=21;
-const STORES=["prompts","categories","clients","projects","gptsites","settings","backups","versions"];
+const DB_VERSION=6;
+const ARCHIVE_SCHEMA_VERSION=22;
+const PROMPT_BUNDLE_SCHEMA_VERSION=22;
+const STORES=["prompts","categories","clients","projects","gptsites","seo","settings","backups","versions"];
 const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
@@ -729,7 +761,7 @@ function readStoredJson(key,fallback){
 }
 const storedOpenCategories=readStoredJson("ps_open_categories",[]);
 const state={
-  db:null,prompts:[],categories:[],clients:[],projects:[],gptsites:[],
+  db:null,prompts:[],categories:[],clients:[],projects:[],gptsites:[],seo:[],
   filter:{type:"all",id:null},query:"",selected:new Set(),
   sort:initialSort,
   view:localStorage.getItem("ps_view")||"grid",
@@ -783,6 +815,7 @@ const catById=id=>state.categories.find(item=>item.id===id);
 const clientById=id=>state.clients.find(item=>item.id===id);
 const projectById=id=>state.projects.find(item=>item.id===id);
 const gptSiteById=id=>state.gptsites.find(item=>item.id===id);
+const seoById=id=>state.seo.find(item=>item.id===id);
 function promptCategorySortLabel(prompt){
   const direct=catById(prompt?.categoryId),sub=catById(prompt?.subcategoryId);
   const root=direct?.parentId?catById(direct.parentId)||direct:direct||(sub?.parentId?catById(sub.parentId):null);
@@ -813,11 +846,12 @@ function put(name,value){return new Promise((resolve,reject)=>{const request=sto
 function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
 function transactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error||new Error("Transazione annullata"));tx.onerror=()=>reject(tx.error||new Error("Errore nella transazione"))})}
 async function loadData(){
-  [state.prompts,state.categories,state.clients,state.projects,state.gptsites]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients"),getAll("projects"),getAll("gptsites")]);
+  [state.prompts,state.categories,state.clients,state.projects,state.gptsites,state.seo]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients"),getAll("projects"),getAll("gptsites"),getAll("seo")]);
   state.categories.sort(categoryAlphabeticalCompare);
   state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
   state.projects.sort((a,b)=>a.name.localeCompare(b.name,"it"));
   state.gptsites.sort((a,b)=>a.name.localeCompare(b.name,"it"));
+  state.seo.sort((a,b)=>a.name.localeCompare(b.name,"it"));
 }
 async function removeLegacyDemoPrompt(){
   if(localStorage.getItem("ps_legacy_demo_cleanup")==="1")return;
@@ -833,7 +867,7 @@ async function seedData(){
   const firstRun=
     localStorage.getItem("ps_initialized")!=="1" &&
     !localStorage.getItem("ps_app_version") &&
-    !state.prompts.length && !state.categories.length && !state.clients.length && !state.projects.length && !state.gptsites.length;
+    !state.prompts.length && !state.categories.length && !state.clients.length && !state.projects.length && !state.gptsites.length && !state.seo.length;
 
   if(firstRun){
     const seeds=[
@@ -1395,11 +1429,12 @@ function filteredPrompts(){
   if(filter.type==="client")items=items.filter(item=>item.clientId===filter.id);
   if(filter.type==="project")items=items.filter(item=>item.projectId===filter.id);
   if(filter.type==="gptsite")items=items.filter(item=>item.gptSiteId===filter.id);
+  if(filter.type==="seo")items=items.filter(item=>item.seoId===filter.id);
   const query=normalize(state.query);
   if(query){
     const words=query.split(" ").filter(Boolean);
     items=items.filter(item=>{
-      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name,projectById(item.projectId)?.name,gptSiteById(item.gptSiteId)?.name].join(" "));
+      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name,projectById(item.projectId)?.name,gptSiteById(item.gptSiteId)?.name,seoById(item.seoId)?.name].join(" "));
       return words.every(word=>text.includes(word));
     });
   }
@@ -1429,6 +1464,7 @@ function filterInfo(){
   if(type==="client")return [clientById(id)?.name||"Cliente","Prompt assegnati al cliente selezionato"];
   if(type==="project")return [projectById(id)?.name||"Progetto","Prompt assegnati al progetto selezionato"];
   if(type==="gptsite")return [gptSiteById(id)?.name||"GPTSites","Prompt assegnati al sito GPTSites selezionato"];
+  if(type==="seo")return [seoById(id)?.name||"SEO","Prompt assegnati all’elemento SEO selezionato"];
   return ["Prompt",""];
 }
 
@@ -1464,9 +1500,11 @@ function renderSidebar(){
   $("clientPicker").innerHTML='<option value="all">Clienti</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)} (${live.filter(item=>item.clientId===client.id).length})</option>`).join("");
   $("projectPicker").innerHTML='<option value="all">Progetti</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)} (${live.filter(item=>item.projectId===project.id).length})</option>`).join("");
   $("gptSitePicker").innerHTML='<option value="all">GPTSites</option>'+state.gptsites.map(site=>`<option value="${esc(site.id)}">${esc(site.name)} (${live.filter(item=>item.gptSiteId===site.id).length})</option>`).join("");
+  $("seoPicker").innerHTML='<option value="all">SEO</option>'+state.seo.map(item=>`<option value="${esc(item.id)}">${esc(item.name)} (${live.filter(prompt=>prompt.seoId===item.id).length})</option>`).join("");
   $("clientPicker").value=state.filter.type==="client"?state.filter.id:"all";
   $("projectPicker").value=state.filter.type==="project"?state.filter.id:"all";
   $("gptSitePicker").value=state.filter.type==="gptsite"?state.filter.id:"all";
+  $("seoPicker").value=state.filter.type==="seo"?state.filter.id:"all";
   $("categoryMenu").hidden=true;
   $("categoryPicker").setAttribute("aria-expanded","false");
   $("categoryPicker").onclick=()=>{
@@ -1479,6 +1517,7 @@ function renderSidebar(){
   $("clientPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("client",event.target.value);
   $("projectPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("project",event.target.value);
   $("gptSitePicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("gptsite",event.target.value);
+  $("seoPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("seo",event.target.value);
 }
 
 function openSubcategoryPopup(rootId){
@@ -1530,6 +1569,8 @@ function collectProblems(){
   if(orphanProject.length)add({id:"data-orphan-project",title:"Riferimenti a progetti mancanti",description:"Alcuni prompt puntano a progetti non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Progetti",impact:"Il filtro per progetto non può rappresentare correttamente i dati.",solution:"Riassegna un progetto valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanProject.length,itemIds:orphanProject.map(x=>x.id)});
   const orphanGptSite=live.filter(item=>item.gptSiteId&&!gptSiteById(item.gptSiteId));
   if(orphanGptSite.length)add({id:"data-orphan-gptsite",title:"Riferimenti a GPTSites mancanti",description:"Alcuni prompt puntano a siti GPTSites non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"GPTSites",impact:"Il filtro GPTSites non può rappresentare correttamente i dati.",solution:"Riassegna un sito GPTSites valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanGptSite.length,itemIds:orphanGptSite.map(x=>x.id)});
+  const orphanSeo=live.filter(item=>item.seoId&&!seoById(item.seoId));
+  if(orphanSeo.length)add({id:"data-orphan-seo",title:"Riferimenti SEO mancanti",description:"Alcuni prompt puntano a elementi SEO non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"SEO",impact:"Il filtro SEO non può rappresentare correttamente i dati.",solution:"Riassegna un elemento SEO valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanSeo.length,itemIds:orphanSeo.map(x=>x.id)});
   const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
   if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o pi\u00F9 collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L\u2019apertura del tool pu\u00F2 fallire o essere bloccata.",solution:"Correggi il campo \u201CTool da utilizzare\u201D.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
   const invalidFiles=[],oversizedFiles=[];
@@ -1575,7 +1616,7 @@ function workflowSnapshot(){
   return {live,configured,uncategorized,review,attachments,variables,requiredFiles,missingRequiredFiles,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
 }
 function recommendedWorkflowAction(snapshot){
-  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"La struttura delle categorie non è ancora pronta.",priority:"Alta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.projects.length} progetti · ${state.gptsites.length} GPTSites`,after:"Dopo potrai organizzare correttamente i prompt."};
+  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"La struttura delle categorie non è ancora pronta.",priority:"Alta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.gptsites.length} GPTSites · ${state.projects.length} progetti · ${state.seo.length} SEO`,after:"Dopo potrai organizzare correttamente i prompt."};
   if(!snapshot.hasPrompts)return {action:"new",icon:"\uFF0B",title:"Crea o importa il primo prompt",reason:"La libreria \u00E8 vuota.",priority:"Alta",count:"0 prompt disponibili",after:"Dopo potrai compilare e verificare il contenuto."};
   if(snapshot.blocking||snapshot.high)return {action:"problems",icon:"!",title:"Risolvi i problemi prioritari",reason:"Sono presenti anomalie che possono impedire o compromettere l\u2019utilizzo dei prompt.",priority:snapshot.blocking?"Bloccante":"Alta",count:`${snapshot.blocking} bloccanti \u00B7 ${snapshot.high} alta priorit\u00E0 `,after:"Dopo la modifica la dashboard rilegger\u00E0 i dati e verificher\u00E0 il problema."};
   if(snapshot.uncategorized)return {action:"organize",icon:"\uD83D\uDDC2",title:"Organizza i prompt non classificati",reason:"Alcuni prompt non hanno una categoria.",priority:"Media",count:`${snapshot.uncategorized} elementi coinvolti`,after:"Dopo sar\u00E0 pi\u00F9 semplice trovarli e riutilizzarli."};
@@ -1618,13 +1659,13 @@ function renderProblemsPanel(){
 function sanitizedDiagnosticReport(){
   const snapshot=workflowSnapshot();
   const resolved=readStoredJson("ps_resolved_problems",[]);
-  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE,importArchiveLimitBytes:MAX_IMPORT_ARCHIVE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,projects:state.projects.length,gptsites:state.gptsites.length,attachments:snapshot.attachments,variables:snapshot.variables,requiredFiles:snapshot.requiredFiles,missingRequiredFiles:snapshot.missingRequiredFiles,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
+  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE,importArchiveLimitBytes:MAX_IMPORT_ARCHIVE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,projects:state.projects.length,gptsites:state.gptsites.length,seo:state.seo.length,attachments:snapshot.attachments,variables:snapshot.variables,requiredFiles:snapshot.requiredFiles,missingRequiredFiles:snapshot.missingRequiredFiles,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
 }
 function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prompt-studio-diagnostica-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Report diagnostico esportato senza contenuti completi o credenziali.","success")}
 function renderDiagnosticsPanel(){
   const snapshot=workflowSnapshot();const report=sanitizedDiagnosticReport();const resolved=report.resolvedProblems;
   $("choiceTitle").textContent="Diagnostica tecnica";
-  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite singolo file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr><tr><th>Limite archivio import</th><td>${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
+  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite singolo file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr><tr><th>Limite archivio import</th><td>${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>GPTSites</th><td>${state.gptsites.length}</td></tr><tr><th>Progetti</th><td>${state.projects.length}</td></tr><tr><th>SEO</th><td>${state.seo.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
   $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
   bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
 }
@@ -1668,12 +1709,12 @@ function renderStats(){
   const actionableProblemCount=s.problems.filter(problem=>problem.priority!=="Informativa").length;
   const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":actionableProblemCount?"Correzione disponibile":s.problems.length?"Completato con avvisi":"Tutto corretto";
   const stepCards=[
-    {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti, progetti e GPTSites.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.projects.length} progetti · ${state.gptsites.length} GPTSites`,next:s.configured?"Crea o importa un prompt":"Completa la struttura",className:s.configured?"completed":""},
+    {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti, GPTSites, progetti e SEO.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.gptsites.length} GPTSites · ${state.projects.length} progetti · ${state.seo.length} SEO`,next:s.configured?"Crea o importa un prompt":"Completa la struttura",className:s.configured?"completed":""},
     {action:"new",step:"Step 2",tone:"cyan",icon:"\uFF0B",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
     {action:"import",step:"Alternativa",tone:"cyan",icon:"\u21E7",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
     {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"\uD83D\uDDC2",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
     {action:"problems",step:"Controllo",tone:s.blocking?"red":actionableProblemCount?"orange":s.problems.length?"yellow":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorit\u00E0, cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi \u00B7 ${s.blocking} bloccanti`,next:actionableProblemCount?"Apri il problema e correggi i dati":s.problems.length?"Consulta gli avvisi informativi":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":actionableProblemCount?"":"completed",blocked:!s.hasPrompts},
-    {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente, progetto, GPTSites o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente, GPTSites, progetto, SEO o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"variables",step:"Step 5",tone:"purple",icon:"\u270E",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"files",step:"Step 6",tone:s.missingRequiredFiles?"orange":s.requiredFiles?"green":"cyan",icon:"\uD83D\uDCCE",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.missingRequiredFiles?"Verifica necessaria":s.requiredFiles?"Tutto corretto":"Pronto",count:s.requiredFiles?`${s.requiredFiles-s.missingRequiredFiles}/${s.requiredFiles} file obbligatori compilati`:`${s.attachments} file incorporati`,next:!s.hasPrompts?"Richiede almeno un prompt":s.missingRequiredFiles?"Completa i file obbligatori":"Verifica il prompt",className:!s.hasPrompts?"blocked":s.missingRequiredFiles?"":"completed",blocked:!s.hasPrompts},
     {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"\u2713",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
@@ -1705,12 +1746,14 @@ function cardHtml(prompt){
   const client=clientById(prompt.clientId);
   const project=projectById(prompt.projectId);
   const gptSite=gptSiteById(prompt.gptSiteId);
+  const seoItem=seoById(prompt.seoId);
   const accent=categoryColor(category);
   const origins=[];
   if(category)origins.push(`<span class="prompt-origin-item category">Categoria: ${esc(categoryPath)}</span>`);
   if(client)origins.push(`<span class="prompt-origin-item">Cliente: ${esc(client.name)}</span>`);
   if(project)origins.push(`<span class="prompt-origin-item">Progetto: ${esc(project.name)}</span>`);
   if(gptSite)origins.push(`<span class="prompt-origin-item">GPTSites: ${esc(gptSite.name)}</span>`);
+  if(seoItem)origins.push(`<span class="prompt-origin-item">SEO: ${esc(seoItem.name)}</span>`);
   if(!origins.length)origins.push('<span class="prompt-origin-item empty">Non assegnato</span>');
   const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
   const variableCount=extractVariables(prompt.content).length;
@@ -1726,6 +1769,7 @@ function cardHtml(prompt){
       ${client?`<span class="chip">Cliente: ${esc(client.name)}</span>`:""}
       ${project?`<span class="chip">Progetto: ${esc(project.name)}</span>`:""}
       ${gptSite?`<span class="chip">GPTSites: ${esc(gptSite.name)}</span>`:""}
+      ${seoItem?`<span class="chip">SEO: ${esc(seoItem.name)}</span>`:""}
       ${variableCount?`<span class="chip">${variableCount} variabil${variableCount===1?"e":"i"}</span>`:""}
       ${attachmentCount?`<span class="chip">${attachmentCount} file allegat${attachmentCount===1?"o":"i"}</span>`:""}
       <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
@@ -2120,11 +2164,13 @@ function fillEditorSelects(prompt){
   $("promptClient").innerHTML='<option value="">Nessun cliente</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptProject").innerHTML='<option value="">Nessun progetto</option>'+state.projects.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptGptSite").innerHTML='<option value="">Nessun sito GPTSites</option>'+state.gptsites.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptSeo").innerHTML='<option value="">Nessun elemento SEO</option>'+state.seo.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptCategory").value=prompt?.categoryId||"";
   fillSubcategories(prompt?.subcategoryId||"");
   $("promptClient").value=prompt?.clientId||"";
   $("promptProject").value=prompt?.projectId||"";
   $("promptGptSite").value=prompt?.gptSiteId||"";
+  $("promptSeo").value=prompt?.seoId||"";
 }
 function fillSubcategories(selected=""){
   const parent=$("promptCategory").value;
@@ -2145,6 +2191,7 @@ function openEditor(id=null,preferredTab=null,mode=null){
       clientId:null,
       projectId:null,
       gptSiteId:null,
+      seoId:null,
       status:"draft",
       tags:[],
       notes:"",
@@ -2173,6 +2220,9 @@ function openEditor(id=null,preferredTab=null,mode=null){
     }
     if(state.filter.type==="gptsite"&&state.filter.id){
       initialPrompt.gptSiteId=state.filter.id;
+    }
+    if(state.filter.type==="seo"&&state.filter.id){
+      initialPrompt.seoId=state.filter.id;
     }
   }
 
@@ -2301,6 +2351,7 @@ function editorPayload(){
     clientId:$("promptClient").value||null,
     projectId:$("promptProject").value||null,
     gptSiteId:$("promptGptSite").value||null,
+    seoId:$("promptSeo").value||null,
     status:$("promptStatus").value,
     tags:$("promptTags").value.split(",").map(item=>item.trim()).filter(Boolean),
     notes:$("promptNotes").value.trim(),
@@ -2340,6 +2391,10 @@ function navigateToSavedPrompt(prompt){
   }
   if(prompt.gptSiteId){
     setFilter("gptsite",prompt.gptSiteId);
+    return;
+  }
+  if(prompt.seoId){
+    setFilter("seo",prompt.seoId);
     return;
   }
 
@@ -2538,7 +2593,7 @@ async function bulkUpdate(patch){
 
 
 
-/* ---------- Gestione categorie, clienti e progetti ---------- */
+/* ---------- Gestione e scambio fra tutte le sezioni ---------- */
 function renderManage(){
   const roots=rootCategoriesAlphabetical();
   const allSubcategories=state.categories.filter(item=>item.parentId).sort((a,b)=>{
@@ -2550,6 +2605,7 @@ function renderManage(){
   const filteredSubcategories=state.manageSubcategoryFilter
     ? allSubcategories.filter(item=>item.parentId===state.manageSubcategoryFilter)
     : allSubcategories;
+  const moveButton=(sourceType,id)=>`<button class="btn small move-entity" data-source-type="${esc(sourceType)}" data-id="${esc(id)}">Sposta in…</button>`;
 
   $("newSubcategoryParent").innerHTML='<option value="">Tutte le categorie</option>'+roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(item.name)}</option>`).join("");
 
@@ -2558,8 +2614,7 @@ function renderManage(){
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
       <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong></div>
       <input class="color-input category-color" data-id="${esc(category.id)}" type="color" value="${esc(categoryColor(category))}">
-      <button class="btn small move-category-client" data-id="${esc(category.id)}">In Clienti</button>
-      <button class="btn small move-category-project" data-id="${esc(category.id)}">In Progetti</button>
+      ${moveButton("category",category.id)}
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("")||'<div class="hint">Nessuna categoria presente.</div>';
 
@@ -2568,17 +2623,18 @@ function renderManage(){
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
       <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong><div class="hint">Sotto: ${esc(catById(category.parentId)?.name||"")} \u00B7 colore ereditato</div></div>
       <input class="color-input" type="color" value="${esc(categoryColor(category))}" disabled title="Il colore \u00E8 ereditato dalla categoria principale">
-      <button class="btn small move-category-client" data-id="${esc(category.id)}">In Clienti</button>
-      <button class="btn small move-category-project" data-id="${esc(category.id)}">In Progetti</button>
+      ${moveButton("category",category.id)}
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in \u201C${esc(catById(state.manageSubcategoryFilter)?.name||"")}\u201D.`:'Nessuna sottocategoria presente.'}</div>`;
 
   $("manageClients").innerHTML=state.clients.map(client=>`
-    <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div><button class="btn small move-client-category" data-id="${esc(client.id)}">In Categorie</button><button class="btn small move-client-project" data-id="${esc(client.id)}">In Progetti</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
+    <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div>${moveButton("client",client.id)}<button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun cliente presente.</div>';
   $("manageProjects").innerHTML=state.projects.map(project=>`
-    <div class="manage-row"><div class="grow"><strong class="project-name-editable category-name-editable" data-id="${esc(project.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(project.name)}</strong></div><button class="btn small move-project-category" data-id="${esc(project.id)}">In Categorie</button><button class="btn small move-project-client" data-id="${esc(project.id)}">In Clienti</button><button class="btn small danger delete-project" data-id="${esc(project.id)}">Elimina</button></div>`).join("");
+    <div class="manage-row"><div class="grow"><strong class="project-name-editable category-name-editable" data-id="${esc(project.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(project.name)}</strong></div>${moveButton("project",project.id)}<button class="btn small danger delete-project" data-id="${esc(project.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun progetto presente.</div>';
   $("manageGptSites").innerHTML=state.gptsites.map(site=>`
-    <div class="manage-row"><div class="grow"><strong class="gptsite-name-editable category-name-editable" data-id="${esc(site.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(site.name)}</strong></div><button class="btn small danger delete-gptsite" data-id="${esc(site.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun sito GPTSites presente.</div>';
+    <div class="manage-row"><div class="grow"><strong class="gptsite-name-editable category-name-editable" data-id="${esc(site.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(site.name)}</strong></div>${moveButton("gptsite",site.id)}<button class="btn small danger delete-gptsite" data-id="${esc(site.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun sito GPTSites presente.</div>';
+  $("manageSeo").innerHTML=state.seo.map(item=>`
+    <div class="manage-row"><div class="grow"><strong class="seo-name-editable category-name-editable" data-id="${esc(item.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(item.name)}</strong></div>${moveButton("seo",item.id)}<button class="btn small danger delete-seo" data-id="${esc(item.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun elemento SEO presente.</div>';
 
   $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
 
@@ -2603,16 +2659,13 @@ function renderManage(){
   $$(".client-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineClientRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineClientRename(label)}}});
   $$(".project-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineProjectRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineProjectRename(label)}}});
   $$(".gptsite-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineGptSiteRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineGptSiteRename(label)}}});
+  $$(".seo-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineSeoRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineSeoRename(label)}}});
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
   $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
   $$(".delete-project").forEach(button=>button.onclick=()=>deleteProject(button.dataset.id));
   $$(".delete-gptsite").forEach(button=>button.onclick=()=>deleteGptSite(button.dataset.id));
-  $$(".move-category-client").forEach(button=>button.onclick=()=>moveCategoryToEntity(button.dataset.id,"client"));
-  $$(".move-category-project").forEach(button=>button.onclick=()=>moveCategoryToEntity(button.dataset.id,"project"));
-  $$(".move-client-category").forEach(button=>button.onclick=()=>moveClientToCategory(button.dataset.id));
-  $$(".move-client-project").forEach(button=>button.onclick=()=>moveClientToProjects(button.dataset.id));
-  $$(".move-project-category").forEach(button=>button.onclick=()=>moveProjectToCategory(button.dataset.id));
-  $$(".move-project-client").forEach(button=>button.onclick=()=>moveProjectToClients(button.dataset.id));
+  $$(".delete-seo").forEach(button=>button.onclick=()=>deleteSeo(button.dataset.id));
+  $$(".move-entity").forEach(button=>button.onclick=()=>openMoveEntityDialog(button.dataset.sourceType,button.dataset.id));
 }
 function beginInlineCategoryRename(labelElement){
   const category=catById(labelElement.dataset.id);
@@ -2699,6 +2752,14 @@ async function beginInlineGptSiteRename(labelElement){
   labelElement.dataset.editing="true";labelElement.dataset.originalName=site.name;labelElement.contentEditable="true";labelElement.setAttribute("role","textbox");labelElement.classList.add("editing");
   requestAnimationFrame(()=>{labelElement.focus();const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(labelElement);selection.removeAllRanges();selection.addRange(range)});
   let settled=false;const finish=async save=>{if(settled)return;settled=true;const original=labelElement.dataset.originalName||site.name;const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");labelElement.contentEditable="false";labelElement.classList.remove("editing");if(!save){renderManage();return}if(!name){toast("Il nome del sito GPTSites non può essere vuoto.","warning");renderManage();return}if(state.gptsites.some(item=>item.id!==site.id&&normalize(item.name)===normalize(name))){toast("Esiste già un sito GPTSites con questo nome.","warning");renderManage();return}if(name===original){renderManage();return}site.name=name;site.updatedAt=now();await put("gptsites",site);await loadData();render();renderManage();toast(`Sito GPTSites “${original}” rinominato in “${name}”.`,"success")};
+  labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
+}
+
+async function beginInlineSeoRename(labelElement){
+  const item=seoById(labelElement.dataset.id);if(!item||labelElement.dataset.editing==="true")return;
+  labelElement.dataset.editing="true";labelElement.dataset.originalName=item.name;labelElement.contentEditable="true";labelElement.setAttribute("role","textbox");labelElement.classList.add("editing");
+  requestAnimationFrame(()=>{labelElement.focus();const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(labelElement);selection.removeAllRanges();selection.addRange(range)});
+  let settled=false;const finish=async save=>{if(settled)return;settled=true;const original=labelElement.dataset.originalName||item.name;const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");labelElement.contentEditable="false";labelElement.classList.remove("editing");if(!save){renderManage();return}if(!name){toast("Il nome dell’elemento SEO non può essere vuoto.","warning");renderManage();return}if(state.seo.some(entry=>entry.id!==item.id&&normalize(entry.name)===normalize(name))){toast("Esiste già un elemento SEO con questo nome.","warning");renderManage();return}if(name===original){renderManage();return}item.name=name;item.updatedAt=now();await put("seo",item);await loadData();render();renderManage();toast(`Elemento SEO “${original}” rinominato in “${name}”.`,"success")};
   labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
 }
 
@@ -2799,6 +2860,19 @@ function deleteGptSite(id){
     }catch(error){console.error(error);toast(`Eliminazione del sito GPTSites non riuscita: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-GPTSITES-DELETE")}
   });
 }
+function deleteSeo(id){
+  const item=seoById(id);if(!item)return;
+  const affected=state.prompts.filter(prompt=>prompt.seoId===id);
+  confirmAction("Elimina elemento SEO",`${affected.length} prompt perderanno l’assegnazione SEO, ma non saranno eliminati.`,async()=>{
+    try{
+      const tx=state.db.transaction(["prompts","seo"],"readwrite"),promptStore=tx.objectStore("prompts"),seoStore=tx.objectStore("seo");
+      affected.forEach(prompt=>promptStore.put({...prompt,seoId:null,updatedAt:now()}));seoStore.delete(id);
+      await transactionDone(tx);
+      if(state.filter.type==="seo"&&state.filter.id===id)state.filter={type:"all",id:null};
+      await loadData();render();renderManage();toast(`Elemento SEO “${item.name}” eliminato.`,"success");
+    }catch(error){console.error(error);toast(`Eliminazione dell’elemento SEO non riuscita: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-SEO-DELETE")}
+  });
+}
 async function moveCategoryToEntity(id,targetType){
   const category=catById(id);if(!category)return;
   const isClient=targetType==="client";
@@ -2880,6 +2954,84 @@ async function moveProjectToClients(id){
   }catch(error){console.error(error);toast(`Spostamento non riuscito: ${error.message||"errore del database"}.`,"error","PS-PROJECT-TO-CLIENT")}
 }
 
+const ENTITY_DEFINITIONS={
+  category:{label:"Categorie",singular:"Categoria",store:"categories",field:"categoryId",prefix:"cat"},
+  client:{label:"Clienti",singular:"Cliente",store:"clients",field:"clientId",prefix:"client"},
+  gptsite:{label:"GPTSites",singular:"GPTSites",store:"gptsites",field:"gptSiteId",prefix:"gptsite"},
+  project:{label:"Progetti",singular:"Progetto",store:"projects",field:"projectId",prefix:"project"},
+  seo:{label:"SEO",singular:"SEO",store:"seo",field:"seoId",prefix:"seo"}
+};
+function entityCollection(type){
+  if(type==="category")return state.categories;
+  if(type==="client")return state.clients;
+  if(type==="gptsite")return state.gptsites;
+  if(type==="project")return state.projects;
+  if(type==="seo")return state.seo;
+  return [];
+}
+function entityByType(type,id){
+  if(type==="category")return catById(id);
+  if(type==="client")return clientById(id);
+  if(type==="gptsite")return gptSiteById(id);
+  if(type==="project")return projectById(id);
+  if(type==="seo")return seoById(id);
+  return null;
+}
+function openMoveEntityDialog(sourceType,id){
+  const source=entityByType(sourceType,id),sourceDefinition=ENTITY_DEFINITIONS[sourceType];
+  if(!source||!sourceDefinition)return;
+  const options=Object.entries(ENTITY_DEFINITIONS)
+    .filter(([type])=>type!==sourceType)
+    .map(([type,definition])=>`<option value="${esc(type)}">${esc(definition.label)}</option>`).join("");
+  choiceAction(`Sposta “${source.name}”`,`Destinazione`,options,targetType=>moveEntityAcrossSections(sourceType,id,targetType));
+}
+async function moveEntityAcrossSections(sourceType,id,targetType){
+  if(sourceType===targetType)return;
+  const source=entityByType(sourceType,id),sourceDefinition=ENTITY_DEFINITIONS[sourceType],targetDefinition=ENTITY_DEFINITIONS[targetType];
+  if(!source||!sourceDefinition||!targetDefinition)return;
+
+  const targetCollection=entityCollection(targetType);
+  const targetExisting=targetCollection.find(item=>(targetType!=="category"||!item.parentId)&&normalize(item.name)===normalize(source.name));
+  const target=targetExisting||(targetType==="category"
+    ?{id:uid("cat"),name:source.name,parentId:null,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()}
+    :{id:uid(targetDefinition.prefix),name:source.name,createdAt:now()});
+
+  const children=sourceType==="category"&&!source.parentId?state.categories.filter(item=>item.parentId===id):[];
+  const removedIds=new Set([id,...children.map(child=>child.id)]);
+  const affected=sourceType==="category"
+    ?state.prompts.filter(prompt=>removedIds.has(prompt.categoryId)||removedIds.has(prompt.subcategoryId))
+    :state.prompts.filter(prompt=>prompt[sourceDefinition.field]===id);
+
+  try{
+    const storeNames=[...new Set(["prompts",sourceDefinition.store,targetDefinition.store])];
+    const tx=state.db.transaction(storeNames,"readwrite"),promptStore=tx.objectStore("prompts"),sourceStore=tx.objectStore(sourceDefinition.store),targetStore=tx.objectStore(targetDefinition.store);
+    targetStore.put(target);
+    affected.forEach(prompt=>{
+      const updated={...prompt,updatedAt:now()};
+      if(sourceType==="category"){
+        if(source.parentId){
+          if(updated.categoryId===source.id)updated.categoryId=source.parentId;
+          if(updated.subcategoryId===source.id)updated.subcategoryId=null;
+        }else{
+          if(removedIds.has(updated.categoryId))updated.categoryId=null;
+          if(removedIds.has(updated.subcategoryId))updated.subcategoryId=null;
+        }
+      }else updated[sourceDefinition.field]=null;
+
+      if(targetType==="category"){
+        updated.categoryId=target.id;
+        updated.subcategoryId=null;
+      }else updated[targetDefinition.field]=target.id;
+      promptStore.put(updated);
+    });
+    children.forEach(child=>sourceStore.delete(child.id));
+    sourceStore.delete(source.id);
+    await transactionDone(tx);
+    await loadData();state.filter={type:targetType,id:target.id};render();renderManage();
+    toast(`“${source.name}” spostato da ${sourceDefinition.label} a ${targetDefinition.label}.${children.length?` Incluse ${children.length} sottocategorie.`:""}`,"success");
+  }catch(error){console.error(error);toast(`Spostamento non riuscito: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-ENTITY-MOVE")}
+}
+
 async function exportCurrentPrompt(){
   const payload=editorPayload();
   if(!payload.title||!payload.content){
@@ -2891,6 +3043,7 @@ async function exportCurrentPrompt(){
   const client=clientById(payload.clientId);
   const project=projectById(payload.projectId);
   const gptSite=gptSiteById(payload.gptSiteId);
+  const seoItem=seoById(payload.seoId);
   const bundle={
     type:"prompt-studio-prompt",
     version:PROMPT_BUNDLE_SCHEMA_VERSION,
@@ -2902,7 +3055,8 @@ async function exportCurrentPrompt(){
       subcategory:subcategory?{name:subcategory.name,parentName:mainCategory?.name||null}:null,
       client:client?{name:client.name}:null,
       project:project?{name:project.name}:null,
-      gptsite:gptSite?{name:gptSite.name}:null
+      gptsite:gptSite?{name:gptSite.name}:null,
+      seo:seoItem?{name:seoItem.name}:null
     },
     prompt:payload
   };
@@ -2928,7 +3082,7 @@ function snapshot(){
   return {
     app:"Prompt Studio Standalone",version:ARCHIVE_SCHEMA_VERSION,schemaVersion:ARCHIVE_SCHEMA_VERSION,appVersion:APP_VERSION,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,excludedFileCount,
-    prompts:state.prompts,categories:state.categories,clients:state.clients,projects:state.projects,gptsites:state.gptsites
+    prompts:state.prompts,categories:state.categories,clients:state.clients,gptsites:state.gptsites,projects:state.projects,seo:state.seo
   };
 }
 function downloadJson(data,filename){
@@ -2975,11 +3129,11 @@ function validateArchiveData(data){
   if(!data||typeof data!=="object")throw new Error("Archivio JSON non valido.");
   const schema=Number(data.schemaVersion??data.version);
   if(Number.isFinite(schema)&&schema>ARCHIVE_SCHEMA_VERSION)throw new Error(`Archivio creato con un formato più recente (v${schema}). Aggiorna Prompt Studio prima di importarlo.`);
-  validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Categorie");validateImportItems(data.clients,"Clienti");validateImportItems(data.projects||[],"Progetti");validateImportItems(data.gptsites||[],"GPTSites");
+  validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Categorie");validateImportItems(data.clients,"Clienti");validateImportItems(data.gptsites||[],"GPTSites");validateImportItems(data.projects||[],"Progetti");validateImportItems(data.seo||[],"SEO");
 }
 async function resolveImportedPromptOrganization(bundle,prompt){
   const organization=bundle?.organization||{};
-  let categoryId=null,subcategoryId=null,clientId=null,projectId=null,gptSiteId=null;
+  let categoryId=null,subcategoryId=null,clientId=null,projectId=null,gptSiteId=null,seoId=null;
 
   const sourceCategory=catById(prompt?.categoryId);
   if(sourceCategory&&!sourceCategory.parentId)categoryId=sourceCategory.id;
@@ -3042,13 +3196,23 @@ async function resolveImportedPromptOrganization(bundle,prompt){
     gptSiteId=site.id;
   }
 
-  return {...prompt,categoryId,subcategoryId,clientId,projectId,gptSiteId};
+  if(prompt?.seoId&&seoById(prompt.seoId))seoId=prompt.seoId;
+  if(!seoId&&organization.seo?.name){
+    let item=state.seo.find(entry=>normalize(entry.name)===normalize(organization.seo.name));
+    if(!item){
+      item={id:uid("seo"),name:String(organization.seo.name).trim(),createdAt:now()};
+      await put("seo",item);await loadData();
+    }
+    seoId=item.id;
+  }
+
+  return {...prompt,categoryId,subcategoryId,clientId,projectId,gptSiteId,seoId};
 }
-async function writeCoreDataAtomic({mode,categories,clients,projects,gptsites,prompts}){
-  const tx=state.db.transaction(["prompts","categories","clients","projects","gptsites"],"readwrite");
-  const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),clientStore=tx.objectStore("clients"),projectStore=tx.objectStore("projects"),gptSiteStore=tx.objectStore("gptsites");
-  if(mode==="replace"){promptStore.clear();categoryStore.clear();clientStore.clear();projectStore.clear();gptSiteStore.clear()}
-  categories.forEach(item=>categoryStore.put(item));clients.forEach(item=>clientStore.put(item));projects.forEach(item=>projectStore.put(item));gptsites.forEach(item=>gptSiteStore.put(item));prompts.forEach(item=>promptStore.put(item));
+async function writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,prompts}){
+  const tx=state.db.transaction(["prompts","categories","clients","gptsites","projects","seo"],"readwrite");
+  const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),clientStore=tx.objectStore("clients"),gptSiteStore=tx.objectStore("gptsites"),projectStore=tx.objectStore("projects"),seoStore=tx.objectStore("seo");
+  if(mode==="replace"){promptStore.clear();categoryStore.clear();clientStore.clear();gptSiteStore.clear();projectStore.clear();seoStore.clear()}
+  categories.forEach(item=>categoryStore.put(item));clients.forEach(item=>clientStore.put(item));gptsites.forEach(item=>gptSiteStore.put(item));projects.forEach(item=>projectStore.put(item));seo.forEach(item=>seoStore.put(item));prompts.forEach(item=>promptStore.put(item));
   await transactionDone(tx);
 }
 async function importData(file){
@@ -3090,21 +3254,22 @@ async function importData(file){
           if(state.busy.has("importApply")){toast("L\u2019archivio \u00E8 gi\u00E0 in fase di importazione.","warning","PS-IMPORT-BUSY");return}
           state.busy.add("importApply");
           try{
-            let categories=data.categories.map(item=>({...item})),clients=data.clients.map(item=>({...item})),projects=(data.projects||[]).map(item=>({...item})),gptsites=(data.gptsites||[]).map(item=>({...item})),prompts=data.prompts.map(item=>({...item}));
+            let categories=data.categories.map(item=>({...item})),clients=data.clients.map(item=>({...item})),gptsites=(data.gptsites||[]).map(item=>({...item})),projects=(data.projects||[]).map(item=>({...item})),seo=(data.seo||[]).map(item=>({...item})),prompts=data.prompts.map(item=>({...item}));
             if(mode==="merge"){
-              const catMap=new Map(),clientMap=new Map(),projectMap=new Map(),gptSiteMap=new Map();
+              const catMap=new Map(),clientMap=new Map(),gptSiteMap=new Map(),projectMap=new Map(),seoMap=new Map();
               categories=categories.map(item=>{if(state.categories.some(existing=>existing.id===item.id)){const id=uid("cat");catMap.set(item.id,id);return {...item,id,parentId:item.parentId}}return item});
               categories=categories.map(item=>({...item,parentId:catMap.get(item.parentId)||item.parentId}));
               clients=clients.map(item=>{if(state.clients.some(existing=>existing.id===item.id)){const id=uid("client");clientMap.set(item.id,id);return {...item,id}}return item});
               projects=projects.map(item=>{if(state.projects.some(existing=>existing.id===item.id)){const id=uid("project");projectMap.set(item.id,id);return {...item,id}}return item});
               gptsites=gptsites.map(item=>{if(state.gptsites.some(existing=>existing.id===item.id)){const id=uid("gptsite");gptSiteMap.set(item.id,id);return {...item,id}}return item});
-              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,projectId:projectMap.get(item.projectId)||item.projectId,gptSiteId:gptSiteMap.get(item.gptSiteId)||item.gptSiteId}));
+              seo=seo.map(item=>{if(state.seo.some(existing=>existing.id===item.id)){const id=uid("seo");seoMap.set(item.id,id);return {...item,id}}return item});
+              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,gptSiteId:gptSiteMap.get(item.gptSiteId)||item.gptSiteId,projectId:projectMap.get(item.projectId)||item.projectId,seoId:seoMap.get(item.seoId)||item.seoId}));
             }
             prompts=prompts.map(prompt=>{
               if(normalizedIntroSource(prompt)!=="auto")return prompt;
               return {...prompt,intro:generatePromptIntro(prompt),introSource:"auto",introGeneratedAt:now(),introUpdatedAt:now()};
             });
-            await writeCoreDataAtomic({mode,categories,clients,projects,gptsites,prompts});
+            await writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,prompts});
             await loadData();await generateMissingPromptIntros({silent:true});render();
             const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
             toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
@@ -3114,7 +3279,7 @@ async function importData(file){
           }finally{state.busy.delete("importApply")}
         };
         if(mode==="replace"){
-          confirmAction("Conferma sostituzione","Tutti i prompt, le categorie, i clienti, i progetti e i GPTSites attuali verranno sostituiti. Crea prima un backup se devi conservarli.",executeImport);
+          confirmAction("Conferma sostituzione","Tutti i prompt, le categorie, i clienti, i GPTSites, i progetti e gli elementi SEO attuali verranno sostituiti. Crea prima un backup se devi conservarli.",executeImport);
         }else{
           await executeImport();
         }
@@ -3176,6 +3341,7 @@ function bindEvents(){
   $("bulkClientBtn").onclick=()=>choiceAction("Assegna cliente","Cliente",'<option value="">Nessun cliente</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)}</option>`).join(""),value=>bulkUpdate({clientId:value||null}));
   $("bulkProjectBtn").onclick=()=>choiceAction("Assegna progetto","Progetto",'<option value="">Nessun progetto</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)}</option>`).join(""),value=>bulkUpdate({projectId:value||null}));
   $("bulkGptSiteBtn").onclick=()=>choiceAction("Assegna GPTSites","Sito GPTSites",'<option value="">Nessun sito GPTSites</option>'+state.gptsites.map(site=>`<option value="${esc(site.id)}">${esc(site.name)}</option>`).join(""),value=>bulkUpdate({gptSiteId:value||null}));
+  $("bulkSeoBtn").onclick=()=>choiceAction("Assegna SEO","Elemento SEO",'<option value="">Nessun elemento SEO</option>'+state.seo.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join(""),value=>bulkUpdate({seoId:value||null}));
   $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
   $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:now()});
 
@@ -3242,7 +3408,7 @@ function bindEvents(){
       state.busy.delete("openTool");$("openToolBtn").disabled=false;$("openToolUseBtn").disabled=false;
     }
   };
-  ["promptSubcategory","promptClient","promptProject","promptGptSite","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
+  ["promptSubcategory","promptClient","promptProject","promptGptSite","promptSeo","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
   $("promptContent").oninput=()=>{
     markDirty();updateCounts();clearTimeout(state.detectTimer);
     if(state.editor.introSource==="auto")scheduleAutomaticIntroUpdate();else updatePromptPurposeNote();
@@ -3289,6 +3455,11 @@ function bindEvents(){
     const name=$("newGptSiteName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome del sito GPTSites.","warning");return}
     if(state.gptsites.some(site=>normalize(site.name)===normalize(name))){toast("Esiste già un sito GPTSites con questo nome.","warning");return}
     await put("gptsites",{id:uid("gptsite"),name,createdAt:now()});$("newGptSiteName").value="";await loadData();render();renderManage();toast("Sito GPTSites aggiunto.","success");
+  };
+  $("addSeoBtn").onclick=async()=>{
+    const name=$("newSeoName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome dell’elemento SEO.","warning");return}
+    if(state.seo.some(item=>normalize(item.name)===normalize(name))){toast("Esiste già un elemento SEO con questo nome.","warning");return}
+    await put("seo",{id:uid("seo"),name,createdAt:now()});$("newSeoName").value="";await loadData();render();renderManage();toast("Elemento SEO aggiunto.","success");
   };
 
   const resizer=$("sidebarResizer");
