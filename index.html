@@ -85,6 +85,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .side-section.categories{--section-accent:#7c3aed}
 .side-section.clients{--section-accent:#0891b2}
 .side-section.projects{--section-accent:#8b5cf6}
+.side-section.gptsites{--section-accent:#ec4899}
 .side-section.management{--section-accent:#f59e0b}
 .sidebar-picker{width:100%;min-height:40px;padding:8px 34px 8px 10px;border:1px solid rgba(255,255,255,.20);border-radius:10px;background:rgba(255,255,255,.09);color:var(--sidebar-text);font-weight:750}
 .sidebar-picker option{background:var(--sidebar);color:var(--sidebar-text)}
@@ -486,6 +487,10 @@ textarea{resize:vertical;line-height:1.55}
       <div class="side-title"><span>Progetti</span></div>
       <select class="sidebar-picker" id="projectPicker" aria-label="Scegli progetto"></select>
     </section>
+    <section class="side-section gptsites">
+      <div class="side-title"><span>GPTSites</span></div>
+      <select class="sidebar-picker" id="gptSitePicker" aria-label="Scegli sito GPTSites"></select>
+    </section>
     <section class="side-section management">
       <div class="side-title"><span>Gestione</span></div>
       <button class="side-link" id="manageBtn"><span>&#9881;</span><span>Gestisci elementi</span></button>
@@ -519,6 +524,7 @@ textarea{resize:vertical;line-height:1.55}
       <button class="btn small" id="bulkMoveBtn">Sposta</button>
       <button class="btn small" id="bulkClientBtn">Assegna cliente</button>
       <button class="btn small" id="bulkProjectBtn">Assegna progetto</button>
+      <button class="btn small" id="bulkGptSiteBtn">Assegna GPTSites</button>
       <button class="btn small" id="bulkArchiveBtn">Archivia</button>
       <button class="btn small danger" id="bulkTrashBtn">Cestina</button>
       <button class="btn small" id="clearSelectionBtn">Annulla</button>
@@ -566,6 +572,7 @@ textarea{resize:vertical;line-height:1.55}
           <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
           <div class="field"><label>Cliente</label><select id="promptClient"></select></div>
           <div class="field"><label>Progetto</label><select id="promptProject"></select></div>
+          <div class="field"><label>GPTSites</label><select id="promptGptSite"></select></div>
           <div class="field"><label>Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
           <div class="field full tool-box">
             <div class="tool-box-head">
@@ -654,6 +661,14 @@ textarea{resize:vertical;line-height:1.55}
             <button class="btn primary small" id="addProjectBtn">Aggiungi</button>
           </div>
         </div>
+        <div class="panel-box">
+          <h4>GPTSites</h4><div class="hint" style="margin-bottom:10px">Gestisci i siti GPTSites separatamente da categorie, clienti e progetti.</div>
+          <div class="manage-list" id="manageGptSites"></div>
+          <div class="inline-form" style="grid-template-columns:1fr auto">
+            <input id="newGptSiteName" type="text" placeholder="Nome sito GPTSites">
+            <button class="btn primary small" id="addGptSiteBtn">Aggiungi</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -673,8 +688,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.13.0";
-const APP_RELEASE_NAME="Origine visibile nei risultati";
+const APP_VERSION="18.14.0";
+const APP_RELEASE_NAME="GPTSites nella sidebar";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -682,10 +697,10 @@ console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
 const DB_NAME="PromptStudioStandalone";
-const DB_VERSION=4;
-const ARCHIVE_SCHEMA_VERSION=20;
-const PROMPT_BUNDLE_SCHEMA_VERSION=20;
-const STORES=["prompts","categories","clients","projects","settings","backups","versions"];
+const DB_VERSION=5;
+const ARCHIVE_SCHEMA_VERSION=21;
+const PROMPT_BUNDLE_SCHEMA_VERSION=21;
+const STORES=["prompts","categories","clients","projects","gptsites","settings","backups","versions"];
 const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
 const TEXT_FILE_EXTENSIONS=new Set(["txt","md","csv","json","xml","html","htm","css","js","ts","jsx","tsx","php","py","sql","log","yaml","yml","svg"]);
@@ -714,7 +729,7 @@ function readStoredJson(key,fallback){
 }
 const storedOpenCategories=readStoredJson("ps_open_categories",[]);
 const state={
-  db:null,prompts:[],categories:[],clients:[],projects:[],
+  db:null,prompts:[],categories:[],clients:[],projects:[],gptsites:[],
   filter:{type:"all",id:null},query:"",selected:new Set(),
   sort:initialSort,
   view:localStorage.getItem("ps_view")||"grid",
@@ -767,6 +782,7 @@ const naturalTitleCompare=(a,b,direction=1)=>{
 const catById=id=>state.categories.find(item=>item.id===id);
 const clientById=id=>state.clients.find(item=>item.id===id);
 const projectById=id=>state.projects.find(item=>item.id===id);
+const gptSiteById=id=>state.gptsites.find(item=>item.id===id);
 function promptCategorySortLabel(prompt){
   const direct=catById(prompt?.categoryId),sub=catById(prompt?.subcategoryId);
   const root=direct?.parentId?catById(direct.parentId)||direct:direct||(sub?.parentId?catById(sub.parentId):null);
@@ -797,10 +813,11 @@ function put(name,value){return new Promise((resolve,reject)=>{const request=sto
 function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
 function transactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error||new Error("Transazione annullata"));tx.onerror=()=>reject(tx.error||new Error("Errore nella transazione"))})}
 async function loadData(){
-  [state.prompts,state.categories,state.clients,state.projects]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients"),getAll("projects")]);
+  [state.prompts,state.categories,state.clients,state.projects,state.gptsites]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients"),getAll("projects"),getAll("gptsites")]);
   state.categories.sort(categoryAlphabeticalCompare);
   state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
   state.projects.sort((a,b)=>a.name.localeCompare(b.name,"it"));
+  state.gptsites.sort((a,b)=>a.name.localeCompare(b.name,"it"));
 }
 async function removeLegacyDemoPrompt(){
   if(localStorage.getItem("ps_legacy_demo_cleanup")==="1")return;
@@ -816,7 +833,7 @@ async function seedData(){
   const firstRun=
     localStorage.getItem("ps_initialized")!=="1" &&
     !localStorage.getItem("ps_app_version") &&
-    !state.prompts.length && !state.categories.length && !state.clients.length && !state.projects.length;
+    !state.prompts.length && !state.categories.length && !state.clients.length && !state.projects.length && !state.gptsites.length;
 
   if(firstRun){
     const seeds=[
@@ -1377,11 +1394,12 @@ function filteredPrompts(){
   }
   if(filter.type==="client")items=items.filter(item=>item.clientId===filter.id);
   if(filter.type==="project")items=items.filter(item=>item.projectId===filter.id);
+  if(filter.type==="gptsite")items=items.filter(item=>item.gptSiteId===filter.id);
   const query=normalize(state.query);
   if(query){
     const words=query.split(" ").filter(Boolean);
     items=items.filter(item=>{
-      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name,projectById(item.projectId)?.name].join(" "));
+      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name,projectById(item.projectId)?.name,gptSiteById(item.gptSiteId)?.name].join(" "));
       return words.every(word=>text.includes(word));
     });
   }
@@ -1410,6 +1428,7 @@ function filterInfo(){
   if(type==="category")return [catById(id)?.name||"Categoria","Prompt della categoria selezionata"];
   if(type==="client")return [clientById(id)?.name||"Cliente","Prompt assegnati al cliente selezionato"];
   if(type==="project")return [projectById(id)?.name||"Progetto","Prompt assegnati al progetto selezionato"];
+  if(type==="gptsite")return [gptSiteById(id)?.name||"GPTSites","Prompt assegnati al sito GPTSites selezionato"];
   return ["Prompt",""];
 }
 
@@ -1444,8 +1463,10 @@ function renderSidebar(){
     }).join("")}`;
   $("clientPicker").innerHTML='<option value="all">Clienti</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)} (${live.filter(item=>item.clientId===client.id).length})</option>`).join("");
   $("projectPicker").innerHTML='<option value="all">Progetti</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)} (${live.filter(item=>item.projectId===project.id).length})</option>`).join("");
+  $("gptSitePicker").innerHTML='<option value="all">GPTSites</option>'+state.gptsites.map(site=>`<option value="${esc(site.id)}">${esc(site.name)} (${live.filter(item=>item.gptSiteId===site.id).length})</option>`).join("");
   $("clientPicker").value=state.filter.type==="client"?state.filter.id:"all";
   $("projectPicker").value=state.filter.type==="project"?state.filter.id:"all";
+  $("gptSitePicker").value=state.filter.type==="gptsite"?state.filter.id:"all";
   $("categoryMenu").hidden=true;
   $("categoryPicker").setAttribute("aria-expanded","false");
   $("categoryPicker").onclick=()=>{
@@ -1457,6 +1478,7 @@ function renderSidebar(){
   $$("#categoryMenu .category-submenu-toggle").forEach(button=>button.onclick=()=>openSubcategoryPopup(button.dataset.submenuId));
   $("clientPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("client",event.target.value);
   $("projectPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("project",event.target.value);
+  $("gptSitePicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("gptsite",event.target.value);
 }
 
 function openSubcategoryPopup(rootId){
@@ -1506,6 +1528,8 @@ function collectProblems(){
   if(orphanClient.length)add({id:"data-orphan-client",title:"Riferimenti a clienti mancanti",description:"Alcuni prompt puntano a clienti non pi\u00F9 presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Clienti",impact:"Il filtro per cliente non pu\u00F2 rappresentare correttamente i dati.",solution:"Riassegna un cliente valido oppure rimuovi l\u2019associazione.",mode:"Manuale",target:"organize",count:orphanClient.length,itemIds:orphanClient.map(x=>x.id)});
   const orphanProject=live.filter(item=>item.projectId&&!projectById(item.projectId));
   if(orphanProject.length)add({id:"data-orphan-project",title:"Riferimenti a progetti mancanti",description:"Alcuni prompt puntano a progetti non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Progetti",impact:"Il filtro per progetto non può rappresentare correttamente i dati.",solution:"Riassegna un progetto valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanProject.length,itemIds:orphanProject.map(x=>x.id)});
+  const orphanGptSite=live.filter(item=>item.gptSiteId&&!gptSiteById(item.gptSiteId));
+  if(orphanGptSite.length)add({id:"data-orphan-gptsite",title:"Riferimenti a GPTSites mancanti",description:"Alcuni prompt puntano a siti GPTSites non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"GPTSites",impact:"Il filtro GPTSites non può rappresentare correttamente i dati.",solution:"Riassegna un sito GPTSites valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanGptSite.length,itemIds:orphanGptSite.map(x=>x.id)});
   const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
   if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o pi\u00F9 collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L\u2019apertura del tool pu\u00F2 fallire o essere bloccata.",solution:"Correggi il campo \u201CTool da utilizzare\u201D.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
   const invalidFiles=[],oversizedFiles=[];
@@ -1551,7 +1575,7 @@ function workflowSnapshot(){
   return {live,configured,uncategorized,review,attachments,variables,requiredFiles,missingRequiredFiles,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
 }
 function recommendedWorkflowAction(snapshot){
-  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"La struttura delle categorie non è ancora pronta.",priority:"Alta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.projects.length} progetti`,after:"Dopo potrai organizzare correttamente i prompt."};
+  if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"La struttura delle categorie non è ancora pronta.",priority:"Alta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.projects.length} progetti · ${state.gptsites.length} GPTSites`,after:"Dopo potrai organizzare correttamente i prompt."};
   if(!snapshot.hasPrompts)return {action:"new",icon:"\uFF0B",title:"Crea o importa il primo prompt",reason:"La libreria \u00E8 vuota.",priority:"Alta",count:"0 prompt disponibili",after:"Dopo potrai compilare e verificare il contenuto."};
   if(snapshot.blocking||snapshot.high)return {action:"problems",icon:"!",title:"Risolvi i problemi prioritari",reason:"Sono presenti anomalie che possono impedire o compromettere l\u2019utilizzo dei prompt.",priority:snapshot.blocking?"Bloccante":"Alta",count:`${snapshot.blocking} bloccanti \u00B7 ${snapshot.high} alta priorit\u00E0 `,after:"Dopo la modifica la dashboard rilegger\u00E0 i dati e verificher\u00E0 il problema."};
   if(snapshot.uncategorized)return {action:"organize",icon:"\uD83D\uDDC2",title:"Organizza i prompt non classificati",reason:"Alcuni prompt non hanno una categoria.",priority:"Media",count:`${snapshot.uncategorized} elementi coinvolti`,after:"Dopo sar\u00E0 pi\u00F9 semplice trovarli e riutilizzarli."};
@@ -1594,7 +1618,7 @@ function renderProblemsPanel(){
 function sanitizedDiagnosticReport(){
   const snapshot=workflowSnapshot();
   const resolved=readStoredJson("ps_resolved_problems",[]);
-  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE,importArchiveLimitBytes:MAX_IMPORT_ARCHIVE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,projects:state.projects.length,attachments:snapshot.attachments,variables:snapshot.variables,requiredFiles:snapshot.requiredFiles,missingRequiredFiles:snapshot.missingRequiredFiles,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
+  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE,importArchiveLimitBytes:MAX_IMPORT_ARCHIVE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,projects:state.projects.length,gptsites:state.gptsites.length,attachments:snapshot.attachments,variables:snapshot.variables,requiredFiles:snapshot.requiredFiles,missingRequiredFiles:snapshot.missingRequiredFiles,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
 }
 function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prompt-studio-diagnostica-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Report diagnostico esportato senza contenuti completi o credenziali.","success")}
 function renderDiagnosticsPanel(){
@@ -1644,12 +1668,12 @@ function renderStats(){
   const actionableProblemCount=s.problems.filter(problem=>problem.priority!=="Informativa").length;
   const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":actionableProblemCount?"Correzione disponibile":s.problems.length?"Completato con avvisi":"Tutto corretto";
   const stepCards=[
-    {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti e progetti.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.projects.length} progetti`,next:s.configured?"Crea o importa un prompt":"Completa la struttura",className:s.configured?"completed":""},
+    {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti, progetti e GPTSites.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.projects.length} progetti · ${state.gptsites.length} GPTSites`,next:s.configured?"Crea o importa un prompt":"Completa la struttura",className:s.configured?"completed":""},
     {action:"new",step:"Step 2",tone:"cyan",icon:"\uFF0B",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
     {action:"import",step:"Alternativa",tone:"cyan",icon:"\u21E7",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
     {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"\uD83D\uDDC2",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
     {action:"problems",step:"Controllo",tone:s.blocking?"red":actionableProblemCount?"orange":s.problems.length?"yellow":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorit\u00E0, cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi \u00B7 ${s.blocking} bloccanti`,next:actionableProblemCount?"Apri il problema e correggi i dati":s.problems.length?"Consulta gli avvisi informativi":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":actionableProblemCount?"":"completed",blocked:!s.hasPrompts},
-    {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
+    {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, cliente, progetto, GPTSites o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"variables",step:"Step 5",tone:"purple",icon:"\u270E",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
     {action:"files",step:"Step 6",tone:s.missingRequiredFiles?"orange":s.requiredFiles?"green":"cyan",icon:"\uD83D\uDCCE",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.missingRequiredFiles?"Verifica necessaria":s.requiredFiles?"Tutto corretto":"Pronto",count:s.requiredFiles?`${s.requiredFiles-s.missingRequiredFiles}/${s.requiredFiles} file obbligatori compilati`:`${s.attachments} file incorporati`,next:!s.hasPrompts?"Richiede almeno un prompt":s.missingRequiredFiles?"Completa i file obbligatori":"Verifica il prompt",className:!s.hasPrompts?"blocked":s.missingRequiredFiles?"":"completed",blocked:!s.hasPrompts},
     {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"\u2713",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
@@ -1680,11 +1704,13 @@ function cardHtml(prompt){
     : (category?.name||"Senza categoria");
   const client=clientById(prompt.clientId);
   const project=projectById(prompt.projectId);
+  const gptSite=gptSiteById(prompt.gptSiteId);
   const accent=categoryColor(category);
   const origins=[];
   if(category)origins.push(`<span class="prompt-origin-item category">Categoria: ${esc(categoryPath)}</span>`);
   if(client)origins.push(`<span class="prompt-origin-item">Cliente: ${esc(client.name)}</span>`);
   if(project)origins.push(`<span class="prompt-origin-item">Progetto: ${esc(project.name)}</span>`);
+  if(gptSite)origins.push(`<span class="prompt-origin-item">GPTSites: ${esc(gptSite.name)}</span>`);
   if(!origins.length)origins.push('<span class="prompt-origin-item empty">Non assegnato</span>');
   const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
   const variableCount=extractVariables(prompt.content).length;
@@ -1699,6 +1725,7 @@ function cardHtml(prompt){
       ${category?`<span class="chip accent">${esc(category.name)}</span>`:'<span class="chip">Senza categoria</span>'}
       ${client?`<span class="chip">Cliente: ${esc(client.name)}</span>`:""}
       ${project?`<span class="chip">Progetto: ${esc(project.name)}</span>`:""}
+      ${gptSite?`<span class="chip">GPTSites: ${esc(gptSite.name)}</span>`:""}
       ${variableCount?`<span class="chip">${variableCount} variabil${variableCount===1?"e":"i"}</span>`:""}
       ${attachmentCount?`<span class="chip">${attachmentCount} file allegat${attachmentCount===1?"o":"i"}</span>`:""}
       <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
@@ -2092,10 +2119,12 @@ function fillEditorSelects(prompt){
   $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptClient").innerHTML='<option value="">Nessun cliente</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptProject").innerHTML='<option value="">Nessun progetto</option>'+state.projects.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptGptSite").innerHTML='<option value="">Nessun sito GPTSites</option>'+state.gptsites.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptCategory").value=prompt?.categoryId||"";
   fillSubcategories(prompt?.subcategoryId||"");
   $("promptClient").value=prompt?.clientId||"";
   $("promptProject").value=prompt?.projectId||"";
+  $("promptGptSite").value=prompt?.gptSiteId||"";
 }
 function fillSubcategories(selected=""){
   const parent=$("promptCategory").value;
@@ -2115,6 +2144,7 @@ function openEditor(id=null,preferredTab=null,mode=null){
       subcategoryId:null,
       clientId:null,
       projectId:null,
+      gptSiteId:null,
       status:"draft",
       tags:[],
       notes:"",
@@ -2140,6 +2170,9 @@ function openEditor(id=null,preferredTab=null,mode=null){
     }
     if(state.filter.type==="project"&&state.filter.id){
       initialPrompt.projectId=state.filter.id;
+    }
+    if(state.filter.type==="gptsite"&&state.filter.id){
+      initialPrompt.gptSiteId=state.filter.id;
     }
   }
 
@@ -2267,6 +2300,7 @@ function editorPayload(){
     subcategoryId:validSubcategoryId,
     clientId:$("promptClient").value||null,
     projectId:$("promptProject").value||null,
+    gptSiteId:$("promptGptSite").value||null,
     status:$("promptStatus").value,
     tags:$("promptTags").value.split(",").map(item=>item.trim()).filter(Boolean),
     notes:$("promptNotes").value.trim(),
@@ -2302,6 +2336,10 @@ function navigateToSavedPrompt(prompt){
   }
   if(prompt.projectId){
     setFilter("project",prompt.projectId);
+    return;
+  }
+  if(prompt.gptSiteId){
+    setFilter("gptsite",prompt.gptSiteId);
     return;
   }
 
@@ -2539,6 +2577,8 @@ function renderManage(){
     <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div><button class="btn small move-client-category" data-id="${esc(client.id)}">In Categorie</button><button class="btn small move-client-project" data-id="${esc(client.id)}">In Progetti</button><button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("");
   $("manageProjects").innerHTML=state.projects.map(project=>`
     <div class="manage-row"><div class="grow"><strong class="project-name-editable category-name-editable" data-id="${esc(project.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(project.name)}</strong></div><button class="btn small move-project-category" data-id="${esc(project.id)}">In Categorie</button><button class="btn small move-project-client" data-id="${esc(project.id)}">In Clienti</button><button class="btn small danger delete-project" data-id="${esc(project.id)}">Elimina</button></div>`).join("");
+  $("manageGptSites").innerHTML=state.gptsites.map(site=>`
+    <div class="manage-row"><div class="grow"><strong class="gptsite-name-editable category-name-editable" data-id="${esc(site.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(site.name)}</strong></div><button class="btn small danger delete-gptsite" data-id="${esc(site.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun sito GPTSites presente.</div>';
 
   $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
 
@@ -2562,9 +2602,11 @@ function renderManage(){
 
   $$(".client-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineClientRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineClientRename(label)}}});
   $$(".project-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineProjectRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineProjectRename(label)}}});
+  $$(".gptsite-name-editable").forEach(label=>{label.onclick=event=>{event.stopPropagation();beginInlineGptSiteRename(label)};label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginInlineGptSiteRename(label)}}});
   $$(".delete-category").forEach(button=>button.onclick=()=>deleteCategory(button.dataset.id));
   $$(".delete-client").forEach(button=>button.onclick=()=>deleteClient(button.dataset.id));
   $$(".delete-project").forEach(button=>button.onclick=()=>deleteProject(button.dataset.id));
+  $$(".delete-gptsite").forEach(button=>button.onclick=()=>deleteGptSite(button.dataset.id));
   $$(".move-category-client").forEach(button=>button.onclick=()=>moveCategoryToEntity(button.dataset.id,"client"));
   $$(".move-category-project").forEach(button=>button.onclick=()=>moveCategoryToEntity(button.dataset.id,"project"));
   $$(".move-client-category").forEach(button=>button.onclick=()=>moveClientToCategory(button.dataset.id));
@@ -2652,6 +2694,14 @@ async function beginInlineProjectRename(labelElement){
   labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
 }
 
+async function beginInlineGptSiteRename(labelElement){
+  const site=gptSiteById(labelElement.dataset.id);if(!site||labelElement.dataset.editing==="true")return;
+  labelElement.dataset.editing="true";labelElement.dataset.originalName=site.name;labelElement.contentEditable="true";labelElement.setAttribute("role","textbox");labelElement.classList.add("editing");
+  requestAnimationFrame(()=>{labelElement.focus();const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(labelElement);selection.removeAllRanges();selection.addRange(range)});
+  let settled=false;const finish=async save=>{if(settled)return;settled=true;const original=labelElement.dataset.originalName||site.name;const name=String(labelElement.textContent||"").trim().replace(/\s+/g," ");labelElement.contentEditable="false";labelElement.classList.remove("editing");if(!save){renderManage();return}if(!name){toast("Il nome del sito GPTSites non può essere vuoto.","warning");renderManage();return}if(state.gptsites.some(item=>item.id!==site.id&&normalize(item.name)===normalize(name))){toast("Esiste già un sito GPTSites con questo nome.","warning");renderManage();return}if(name===original){renderManage();return}site.name=name;site.updatedAt=now();await put("gptsites",site);await loadData();render();renderManage();toast(`Sito GPTSites “${original}” rinominato in “${name}”.`,"success")};
+  labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
+}
+
 async function renameEntity(type,id){
   const collection=type==="categories"?state.categories:type==="projects"?state.projects:state.clients;
   const item=collection.find(entry=>entry.id===id);
@@ -2734,6 +2784,19 @@ function deleteProject(id){
       if(state.filter.type==="project"&&state.filter.id===id)state.filter={type:"all",id:null};
       await loadData();render();renderManage();toast(`Progetto “${project.name}” eliminato.`,"success");
     }catch(error){console.error(error);toast(`Eliminazione progetto non riuscita: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-PROJECT-DELETE")}
+  });
+}
+function deleteGptSite(id){
+  const site=gptSiteById(id);if(!site)return;
+  const affected=state.prompts.filter(prompt=>prompt.gptSiteId===id);
+  confirmAction("Elimina sito GPTSites",`${affected.length} prompt perderanno l’assegnazione al sito GPTSites, ma non saranno eliminati.`,async()=>{
+    try{
+      const tx=state.db.transaction(["prompts","gptsites"],"readwrite"),promptStore=tx.objectStore("prompts"),gptSiteStore=tx.objectStore("gptsites");
+      affected.forEach(prompt=>promptStore.put({...prompt,gptSiteId:null,updatedAt:now()}));gptSiteStore.delete(id);
+      await transactionDone(tx);
+      if(state.filter.type==="gptsite"&&state.filter.id===id)state.filter={type:"all",id:null};
+      await loadData();render();renderManage();toast(`Sito GPTSites “${site.name}” eliminato.`,"success");
+    }catch(error){console.error(error);toast(`Eliminazione del sito GPTSites non riuscita: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-GPTSITES-DELETE")}
   });
 }
 async function moveCategoryToEntity(id,targetType){
@@ -2827,6 +2890,7 @@ async function exportCurrentPrompt(){
   const subcategory=catById(payload.subcategoryId);
   const client=clientById(payload.clientId);
   const project=projectById(payload.projectId);
+  const gptSite=gptSiteById(payload.gptSiteId);
   const bundle={
     type:"prompt-studio-prompt",
     version:PROMPT_BUNDLE_SCHEMA_VERSION,
@@ -2837,7 +2901,8 @@ async function exportCurrentPrompt(){
       category:mainCategory?{name:mainCategory.name,color:categoryColor(mainCategory)}:null,
       subcategory:subcategory?{name:subcategory.name,parentName:mainCategory?.name||null}:null,
       client:client?{name:client.name}:null,
-      project:project?{name:project.name}:null
+      project:project?{name:project.name}:null,
+      gptsite:gptSite?{name:gptSite.name}:null
     },
     prompt:payload
   };
@@ -2863,7 +2928,7 @@ function snapshot(){
   return {
     app:"Prompt Studio Standalone",version:ARCHIVE_SCHEMA_VERSION,schemaVersion:ARCHIVE_SCHEMA_VERSION,appVersion:APP_VERSION,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,excludedFileCount,
-    prompts:state.prompts,categories:state.categories,clients:state.clients,projects:state.projects
+    prompts:state.prompts,categories:state.categories,clients:state.clients,projects:state.projects,gptsites:state.gptsites
   };
 }
 function downloadJson(data,filename){
@@ -2910,11 +2975,11 @@ function validateArchiveData(data){
   if(!data||typeof data!=="object")throw new Error("Archivio JSON non valido.");
   const schema=Number(data.schemaVersion??data.version);
   if(Number.isFinite(schema)&&schema>ARCHIVE_SCHEMA_VERSION)throw new Error(`Archivio creato con un formato più recente (v${schema}). Aggiorna Prompt Studio prima di importarlo.`);
-  validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Categorie");validateImportItems(data.clients,"Clienti");validateImportItems(data.projects||[],"Progetti");
+  validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Categorie");validateImportItems(data.clients,"Clienti");validateImportItems(data.projects||[],"Progetti");validateImportItems(data.gptsites||[],"GPTSites");
 }
 async function resolveImportedPromptOrganization(bundle,prompt){
   const organization=bundle?.organization||{};
-  let categoryId=null,subcategoryId=null,clientId=null,projectId=null;
+  let categoryId=null,subcategoryId=null,clientId=null,projectId=null,gptSiteId=null;
 
   const sourceCategory=catById(prompt?.categoryId);
   if(sourceCategory&&!sourceCategory.parentId)categoryId=sourceCategory.id;
@@ -2967,13 +3032,23 @@ async function resolveImportedPromptOrganization(bundle,prompt){
     projectId=project.id;
   }
 
-  return {...prompt,categoryId,subcategoryId,clientId,projectId};
+  if(prompt?.gptSiteId&&gptSiteById(prompt.gptSiteId))gptSiteId=prompt.gptSiteId;
+  if(!gptSiteId&&organization.gptsite?.name){
+    let site=state.gptsites.find(item=>normalize(item.name)===normalize(organization.gptsite.name));
+    if(!site){
+      site={id:uid("gptsite"),name:String(organization.gptsite.name).trim(),createdAt:now()};
+      await put("gptsites",site);await loadData();
+    }
+    gptSiteId=site.id;
+  }
+
+  return {...prompt,categoryId,subcategoryId,clientId,projectId,gptSiteId};
 }
-async function writeCoreDataAtomic({mode,categories,clients,projects,prompts}){
-  const tx=state.db.transaction(["prompts","categories","clients","projects"],"readwrite");
-  const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),clientStore=tx.objectStore("clients"),projectStore=tx.objectStore("projects");
-  if(mode==="replace"){promptStore.clear();categoryStore.clear();clientStore.clear();projectStore.clear()}
-  categories.forEach(item=>categoryStore.put(item));clients.forEach(item=>clientStore.put(item));projects.forEach(item=>projectStore.put(item));prompts.forEach(item=>promptStore.put(item));
+async function writeCoreDataAtomic({mode,categories,clients,projects,gptsites,prompts}){
+  const tx=state.db.transaction(["prompts","categories","clients","projects","gptsites"],"readwrite");
+  const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),clientStore=tx.objectStore("clients"),projectStore=tx.objectStore("projects"),gptSiteStore=tx.objectStore("gptsites");
+  if(mode==="replace"){promptStore.clear();categoryStore.clear();clientStore.clear();projectStore.clear();gptSiteStore.clear()}
+  categories.forEach(item=>categoryStore.put(item));clients.forEach(item=>clientStore.put(item));projects.forEach(item=>projectStore.put(item));gptsites.forEach(item=>gptSiteStore.put(item));prompts.forEach(item=>promptStore.put(item));
   await transactionDone(tx);
 }
 async function importData(file){
@@ -3015,20 +3090,21 @@ async function importData(file){
           if(state.busy.has("importApply")){toast("L\u2019archivio \u00E8 gi\u00E0 in fase di importazione.","warning","PS-IMPORT-BUSY");return}
           state.busy.add("importApply");
           try{
-            let categories=data.categories.map(item=>({...item})),clients=data.clients.map(item=>({...item})),projects=(data.projects||[]).map(item=>({...item})),prompts=data.prompts.map(item=>({...item}));
+            let categories=data.categories.map(item=>({...item})),clients=data.clients.map(item=>({...item})),projects=(data.projects||[]).map(item=>({...item})),gptsites=(data.gptsites||[]).map(item=>({...item})),prompts=data.prompts.map(item=>({...item}));
             if(mode==="merge"){
-              const catMap=new Map(),clientMap=new Map(),projectMap=new Map();
+              const catMap=new Map(),clientMap=new Map(),projectMap=new Map(),gptSiteMap=new Map();
               categories=categories.map(item=>{if(state.categories.some(existing=>existing.id===item.id)){const id=uid("cat");catMap.set(item.id,id);return {...item,id,parentId:item.parentId}}return item});
               categories=categories.map(item=>({...item,parentId:catMap.get(item.parentId)||item.parentId}));
               clients=clients.map(item=>{if(state.clients.some(existing=>existing.id===item.id)){const id=uid("client");clientMap.set(item.id,id);return {...item,id}}return item});
               projects=projects.map(item=>{if(state.projects.some(existing=>existing.id===item.id)){const id=uid("project");projectMap.set(item.id,id);return {...item,id}}return item});
-              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,projectId:projectMap.get(item.projectId)||item.projectId}));
+              gptsites=gptsites.map(item=>{if(state.gptsites.some(existing=>existing.id===item.id)){const id=uid("gptsite");gptSiteMap.set(item.id,id);return {...item,id}}return item});
+              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,projectId:projectMap.get(item.projectId)||item.projectId,gptSiteId:gptSiteMap.get(item.gptSiteId)||item.gptSiteId}));
             }
             prompts=prompts.map(prompt=>{
               if(normalizedIntroSource(prompt)!=="auto")return prompt;
               return {...prompt,intro:generatePromptIntro(prompt),introSource:"auto",introGeneratedAt:now(),introUpdatedAt:now()};
             });
-            await writeCoreDataAtomic({mode,categories,clients,projects,prompts});
+            await writeCoreDataAtomic({mode,categories,clients,projects,gptsites,prompts});
             await loadData();await generateMissingPromptIntros({silent:true});render();
             const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
             toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
@@ -3038,7 +3114,7 @@ async function importData(file){
           }finally{state.busy.delete("importApply")}
         };
         if(mode==="replace"){
-          confirmAction("Conferma sostituzione","Tutti i prompt, le categorie, i clienti e i progetti attuali verranno sostituiti. Crea prima un backup se devi conservarli.",executeImport);
+          confirmAction("Conferma sostituzione","Tutti i prompt, le categorie, i clienti, i progetti e i GPTSites attuali verranno sostituiti. Crea prima un backup se devi conservarli.",executeImport);
         }else{
           await executeImport();
         }
@@ -3099,6 +3175,7 @@ function bindEvents(){
   });
   $("bulkClientBtn").onclick=()=>choiceAction("Assegna cliente","Cliente",'<option value="">Nessun cliente</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)}</option>`).join(""),value=>bulkUpdate({clientId:value||null}));
   $("bulkProjectBtn").onclick=()=>choiceAction("Assegna progetto","Progetto",'<option value="">Nessun progetto</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)}</option>`).join(""),value=>bulkUpdate({projectId:value||null}));
+  $("bulkGptSiteBtn").onclick=()=>choiceAction("Assegna GPTSites","Sito GPTSites",'<option value="">Nessun sito GPTSites</option>'+state.gptsites.map(site=>`<option value="${esc(site.id)}">${esc(site.name)}</option>`).join(""),value=>bulkUpdate({gptSiteId:value||null}));
   $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
   $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:now()});
 
@@ -3165,7 +3242,7 @@ function bindEvents(){
       state.busy.delete("openTool");$("openToolBtn").disabled=false;$("openToolUseBtn").disabled=false;
     }
   };
-  ["promptSubcategory","promptClient","promptProject","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
+  ["promptSubcategory","promptClient","promptProject","promptGptSite","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
   $("promptContent").oninput=()=>{
     markDirty();updateCounts();clearTimeout(state.detectTimer);
     if(state.editor.introSource==="auto")scheduleAutomaticIntroUpdate();else updatePromptPurposeNote();
@@ -3207,6 +3284,11 @@ function bindEvents(){
     const name=$("newProjectName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome del progetto.","warning");return}
     if(state.projects.some(project=>normalize(project.name)===normalize(name))){toast("Esiste già un progetto con questo nome.","warning");return}
     await put("projects",{id:uid("project"),name,createdAt:now()});$("newProjectName").value="";await loadData();render();renderManage();toast("Progetto aggiunto.","success");
+  };
+  $("addGptSiteBtn").onclick=async()=>{
+    const name=$("newGptSiteName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome del sito GPTSites.","warning");return}
+    if(state.gptsites.some(site=>normalize(site.name)===normalize(name))){toast("Esiste già un sito GPTSites con questo nome.","warning");return}
+    await put("gptsites",{id:uid("gptsite"),name,createdAt:now()});$("newGptSiteName").value="";await loadData();render();renderManage();toast("Sito GPTSites aggiunto.","success");
   };
 
   const resizer=$("sidebarResizer");
