@@ -405,7 +405,7 @@ textarea{resize:vertical;line-height:1.55}
 .dashboard-card{min-height:180px;background:linear-gradient(145deg,color-mix(in srgb,var(--dash) 18%,var(--panel)),color-mix(in srgb,var(--dash) 6%,var(--panel)) 74%)}.workflow-legend{display:none}.dashboard-intro{padding:17px 18px}.recommended-action{padding:17px 18px}.dashboard-card .dash-next{display:none}.dashboard-card p{font-size:12.5px}.dashboard-card strong{font-size:17px}
 .sidebar .side-section.backup{display:none}.side-title{font-size:10px}.side-section{margin-bottom:10px}.side-link,.tree-row{min-height:36px}.tree-row.sidebar-category-color{background:rgba(255,255,255,.035);border-color:transparent;box-shadow:inset 3px 0 var(--item-color,#60a5fa)}.tree-row.sidebar-category-color:hover{background:rgba(255,255,255,.10)}
 .card{min-height:170px}.card-actions{justify-content:flex-start}.card-actions .secondary-card-action{display:none}.card .meta .chip:nth-last-child(-n+2){display:none}.use-card{font-weight:900}.card-menu{position:relative}.card-menu-panel{position:absolute;right:0;bottom:42px;min-width:170px;display:none;padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);z-index:30}.card-menu.open .card-menu-panel{display:block}.card-menu-panel .btn{width:100%;justify-content:flex-start;border:0;background:transparent}.card-menu-panel .btn:hover{background:var(--panel-3)}
-.use-mode .editor-tab[data-tab="prompt"]{display:none}.use-mode #savePromptBtn,.use-mode #duplicateBtn,.use-mode #trashBtn,.use-mode #exportPromptBtn{display:none}.use-mode #cancelEditorBtn{margin-left:auto}.use-mode .editor-head strong::after{content:" \B7  Usa";color:var(--primary);font-weight:900}.use-mode .variables-header p{max-width:760px}.use-mode .variable-highlight-note{display:none}.use-mode .variables-header #detectVariablesBtn{display:none}.use-mode .preview-box{position:sticky;bottom:0;z-index:5;box-shadow:0 -8px 24px rgba(15,23,42,.08)}.use-mode .editor-footer{position:sticky;bottom:0;z-index:10}.use-mode .copy-compiled{font-size:16px;min-height:44px}.use-progress{display:none;margin:0 0 14px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-weight:850}.use-mode .use-progress{display:block}.editor-mode-switch{display:inline-flex;gap:6px;margin-left:8px}.editor-mode-switch .btn.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-2)}
+.use-mode .editor-tab[data-tab="prompt"]{display:none}.use-mode #savePromptBtn,.use-mode #duplicateBtn,.use-mode #trashBtn,.use-mode #exportPromptBtn{display:none}.use-mode #cancelEditorBtn{margin-left:auto}.use-mode .editor-head strong::after{content:" \B7  Usa";color:var(--primary);font-weight:900}.use-mode .variables-header p{max-width:760px}.use-mode .variable-highlight-note{display:none}.use-mode .variables-header #detectVariablesBtn{display:none}.use-mode .preview-box{position:sticky;bottom:0;z-index:5;box-shadow:0 -8px 24px rgba(15,23,42,.08)}.use-mode .editor-footer{position:sticky;bottom:0;z-index:10}.use-tool-action{display:none}.use-mode .use-tool-action:not(.hidden){display:inline-flex}.use-mode .copy-compiled{font-size:16px;min-height:44px}.use-progress{display:none;margin:0 0 14px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-weight:850}.use-mode .use-progress{display:block}.editor-mode-switch{display:inline-flex;gap:6px;margin-left:8px}.editor-mode-switch .btn.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-2)}
 @media(max-width:1100px){.home-actions{grid-template-columns:1fr}}@media(max-width:900px){.stats.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.stats.dashboard-grid{grid-template-columns:1fr}.home-actions{grid-template-columns:1fr}.card-actions .btn{flex:1 1 auto}}
 
@@ -564,6 +564,7 @@ textarea{resize:vertical;line-height:1.55}
     <div class="editor-footer">
       <span class="save-status" id="saveStatus">Salvataggio in corso&#8230;</span>
       <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia prompt compilato</button>
+      <button class="btn primary use-tool-action hidden" id="openToolUseBtn" type="button">Copia e apri il tool</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
       <button class="btn danger" id="trashBtn">Cestina</button>
@@ -623,8 +624,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.6.0";
-const APP_RELEASE_NAME="Stabilità, import sicuro e variabili affidabili";
+const APP_VERSION="18.8.1";
+const APP_RELEASE_NAME="Obiettivi reali, uso tool corretto e maggiore robustezza";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -633,6 +634,8 @@ console.info(`Prompt Studio v${APP_VERSION} avviato`);
 /* ---------- Configurazione e stato ---------- */
 const DB_NAME="PromptStudioStandalone";
 const DB_VERSION=3;
+const ARCHIVE_SCHEMA_VERSION=19;
+const PROMPT_BUNDLE_SCHEMA_VERSION=19;
 const STORES=["prompts","categories","clients","settings","backups","versions"];
 const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
@@ -834,9 +837,13 @@ function base64ToBlob(base64,mimeType="application/octet-stream"){
 function safeFilename(value){
   return String(value||"prompt").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)||"prompt";
 }
-const INTRO_MAX_LENGTH=250;
-const INTRO_ACTION_RE=/^(?:analizza|cerca|crea|genera|scrivi|progetta|trasforma|migliora|ottimizza|verifica|confronta|individua|trova|sviluppa|costruisci|valuta|estrai|riordina|correggi|prepara|definisci|studia|esamina|seleziona|realizza|produci|riscrivi|organizza|monitora|controlla|identifica|elabora|restituisci|fornisci|proponi|dammi|ricerca)\b/i;
-const INTRO_RESULT_RE=/\b(?:produci|restituisci|fornisci|proponi|crea|genera|dammi|elenca|seleziona|priorit|correzion|raccomandaz|piano|report|lista|output|risultato|soluzion|strategia|struttura)\w*/i;
+const INTRO_MAX_LENGTH=200;
+const INTRO_ACTION_RE=/^(?:analizza|cerca|crea|genera|scrivi|progetta|trasforma|migliora|ottimizza|verifica|confronta|individua|trova|sviluppa|costruisci|valuta|estrai|riordina|correggi|prepara|definisci|studia|esamina|seleziona|realizza|produci|riscrivi|organizza|monitora|controlla|identifica|elabora|restituisci|fornisci|proponi|dammi|ricerca|replica|riproduci|pubblica|migra|integra|configura|risolvi|automatizza|aumenta|riduci|porta|ottieni)\b/i;
+const INTRO_RESULT_RE=/\b(?:produci|restituisci|fornisci|proponi|crea|genera|dammi|elenca|seleziona|priorit|correzion|raccomandaz|piano|report|lista|output|risultato|soluzion|strategia|struttura|versione|handoff|roadmap|benchmark|conversion|contatt|lead|prenotaz|vendit|posizion|traffico|file)\w*/i;
+const INTRO_OBJECTIVE_HEADING_RE=/^(?:obiettivo(?: principale)?|scopo|finalit[aà]|goal|risultato atteso|cosa deve fare|task principale|missione)\s*:?\s*$/i;
+const INTRO_SECTION_HEADING_RE=/^(?:variabili|input|output|regole|requisiti|vincoli|contesto|note|formato|esclusioni|procedura|workflow|checklist|esempi?|istruzioni?|priorit[aà]|criteri|deliverable|metodo|fasi|step|verifica|controlli|fonti|struttura|includi|non includere|regola fondamentale)\s*:?\s*$/i;
+const INTRO_EXPLICIT_GOAL_RE=/^(?:l['’]obiettivo(?: principale)?\s+(?:è|e')|obiettivo(?: principale)?\s*[:\-–—]|scopo\s*[:\-–—]|finalit[aà]\s*[:\-–—]|voglio(?: che)?|devi|il risultato atteso\s+(?:è|e')|serve a|serve per)\s*/i;
+
 function introVariableReplacement(raw){
   const name=variableName(raw).toLowerCase().replace(/_/g," ");
   if(/dominio|sito|url|link/.test(name))return "il sito o URL indicato";
@@ -848,8 +855,11 @@ function introVariableReplacement(raw){
   if(/lingua|paese|mercato|localit|area geografica/.test(name))return "il contesto indicato";
   if(/numero|max|quantit/.test(name))return "la quantità indicata";
   if(/esclusion/.test(name))return "le esclusioni indicate";
+  if(/target|pubblico|utente/.test(name))return "il pubblico indicato";
+  if(/tono|stile/.test(name))return "lo stile indicato";
   return "il valore indicato";
 }
+
 function cleanIntroSourceLine(line){
   let text=String(line||"")
     .replace(/```[\s\S]*?```/g," ")
@@ -870,38 +880,37 @@ function cleanIntroSourceLine(line){
     .replace(/\bcliente\s+il soggetto indicato\b/gi,"cliente indicato")
     .replace(/\bfile\s+indicato\b/gi,"file indicato")
     .replace(/\b(?:il sito o URL indicato)(?:\s*[,;:]?\s*il sito o URL indicato)+\b/gi,"il sito o URL indicato")
-    .replace(/^(?:obiettivo|scopo|task|compito|istruzione|istruzioni|richiesta|finalit[aà])\s*[:\-–—]\s*/i,"")
+    .replace(/^(?:obiettivo(?: principale)?|scopo|task|compito|istruzione|istruzioni|richiesta|finalit[aà]|risultato atteso)\s*[:\-–—]\s*/i,"")
     .replace(/\s+([,.;:!?])/g,"$1")
     .replace(/([,;:]){2,}/g,"$1");
   return text.trim();
 }
+
 function truncateIntro(text,max=INTRO_MAX_LENGTH){
   let value=String(text||"").replace(/\s+/g," ").trim();
   if(value.length<=max)return value;
   let cut=value.slice(0,max+1);
   const boundaries=[cut.lastIndexOf(". "),cut.lastIndexOf("; "),cut.lastIndexOf(", "),cut.lastIndexOf(" ")];
   const boundary=Math.max(...boundaries);
-  if(boundary>Math.floor(max*.66))cut=cut.slice(0,boundary);
+  if(boundary>Math.floor(max*.68))cut=cut.slice(0,boundary);
   else cut=cut.slice(0,max);
   return cut.replace(/[,:;\-–—\s]+$/g,"").trim()+"…";
 }
-function introLineScore(raw,index){
-  const line=cleanIntroSourceLine(raw);
-  if(!line||line.length<18)return -999;
-  const stripped=String(raw||"").replace(/^\s{0,3}#{1,6}\s*/,"").trim();
-  let score=Math.max(0,8-index*.35);
-  if(INTRO_ACTION_RE.test(line))score+=12;
-  if(INTRO_RESULT_RE.test(line))score+=5;
-  if(/^(?:obiettivo|scopo|finalit[aà])\b/i.test(stripped))score+=9;
-  if(/\b(?:devi|voglio|l'obiettivo|obiettivo è|serve a|serve per)\b/i.test(line))score+=4;
-  if(line.length>=45&&line.length<=220)score+=4;
-  else if(line.length>220&&line.length<=380)score+=2;
-  if(/^(?:variabili|input|output|regole|requisiti|vincoli|contesto|note|formato|esclusioni|procedura|workflow|checklist|esempi?|istruzioni?)\s*:?$/i.test(stripped))score-=20;
-  if(/^(?:esempio|nota|variabile|input|output)\b/i.test(line))score-=7;
-  if(/^\[?[^\]]+\]?\s*=/.test(stripped))score-=10;
-  if((stripped.match(/[A-ZÀ-Ý]/g)||[]).length>Math.max(18,stripped.length*.72)&&stripped.length<100)score-=5;
-  return score;
+
+function normalizeIntroSentence(text){
+  let value=String(text||"").trim()
+    .replace(/^(?:questo prompt\s+)?(?:serve a|serve per|consente di|permette di)\s+/i,"")
+    .replace(/^ti chiede di\s+/i,"")
+    .replace(/\s+/g," ")
+    .replace(/\.{2,}/g,".")
+    .replace(/\s*[:;]\s*$/,"");
+  if(!value)return "";
+  value=value.charAt(0).toUpperCase()+value.slice(1);
+  value=truncateIntro(value,INTRO_MAX_LENGTH);
+  if(!/[.!?…]$/.test(value))value+=".";
+  return value;
 }
+
 function introDistinct(a,b){
   const left=normalize(a).replace(/\b(il|lo|la|i|gli|le|un|una|di|del|della|e|o|per|con|su|da|in)\b/g," ").replace(/\s+/g," ").trim();
   const right=normalize(b).replace(/\b(il|lo|la|i|gli|le|un|una|di|del|della|e|o|per|con|su|da|in)\b/g," ").replace(/\s+/g," ").trim();
@@ -913,39 +922,240 @@ function introDistinct(a,b){
   const denom=Math.max(1,Math.min(aWords.size,bWords.size));
   return overlap/denom<.72;
 }
-function normalizeIntroSentence(text){
-  let value=String(text||"").trim()
-    .replace(/^(?:questo prompt\s+)?(?:serve a|serve per|consente di|permette di)\s+/i,"")
-    .replace(/^ti chiede di\s+/i,"")
-    .replace(/\s+/g," ")
-    .replace(/\.{2,}/g,".");
-  if(!value)return "";
-  value=value.charAt(0).toUpperCase()+value.slice(1);
-  value=truncateIntro(value,INTRO_MAX_LENGTH);
-  if(!/[.!?…]$/.test(value))value+=".";
-  return value;
+
+function introRawLines(prompt){
+  return String(prompt?.content||"").replace(/\r/g,"").split("\n").map(line=>line.trim()).filter(Boolean);
 }
+
+function looksLikeSectionHeading(raw){
+  const source=String(raw||"").trim();
+  const stripped=source.replace(/^\s{0,3}#{1,6}\s*/,"").replace(/\*\*|__/g,"").trim();
+  if(INTRO_OBJECTIVE_HEADING_RE.test(stripped)||INTRO_SECTION_HEADING_RE.test(stripped))return true;
+  if(/^#{1,6}\s+\S/.test(source))return true;
+  return stripped.length<=75 && /:$/.test(stripped) && !INTRO_ACTION_RE.test(stripped);
+}
+
+function compactObjectiveText(text){
+  let value=cleanIntroSourceLine(text);
+
+  // Converte formule colloquiali di desiderio in un obiettivo operativo leggibile.
+  if(/^voglio\s+che\s+/i.test(value)){
+    value=value.replace(/^voglio\s+che\s+/i,"Fare in modo che ");
+  }else if(/^voglio\s+/i.test(value)){
+    const wanted=value.replace(/^voglio\s+/i,"").trim();
+    if(/^(?:più\s+)?(?:contatti|lead)\b/i.test(wanted))value=`Ottenere ${wanted}`;
+    else if(/^(?:più\s+)?conversioni\b/i.test(wanted))value=`Aumentare le ${wanted.replace(/^più\s+/i,"")}`;
+    else if(/^(?:più\s+)?prenotazioni\b/i.test(wanted))value=`Aumentare le ${wanted.replace(/^più\s+/i,"")}`;
+    else if(/^(?:più\s+)?vendite\b/i.test(wanted))value=`Aumentare le ${wanted.replace(/^più\s+/i,"")}`;
+    else value=`Ottenere ${wanted}`;
+  }
+
+  value=value
+    .replace(INTRO_EXPLICIT_GOAL_RE,"")
+    .replace(/^(?:quello di|di)\s+/i,"")
+    .replace(/\b(?:con particolare attenzione a|tenendo conto di)\b.*$/i,"")
+    .replace(/\s+(?:e|,)\s+(?:includendo|escludendo)\b.*$/i,"")
+    .replace(/\s+/g," ")
+    .trim();
+
+  // Evita note che iniziano con formule meta anziché con il risultato reale.
+  value=value
+    .replace(/^(?:agisci come|sei un|comportati come)\b[^.]{0,140}[.;:]\s*/i,"")
+    .replace(/^(?:usa|utilizza)\s+(?:questo|il)\s+(?:prompt|modello|schema)\s+(?:per|al fine di)\s+/i,"");
+
+  const sentences=value.split(/(?<=[.!?])\s+/).filter(Boolean);
+  if(sentences.length>1 && sentences[0].length<45 && !INTRO_ACTION_RE.test(sentences[0])){
+    value=sentences.slice(1).join(" ");
+  }
+  return truncateIntro(value,INTRO_MAX_LENGTH);
+}
+
+function extractExplicitObjective(prompt){
+  const lines=introRawLines(prompt);
+
+  // 1) OBIETTIVO: testo sulla stessa riga.
+  for(const raw of lines){
+    const stripped=String(raw||"").replace(/^\s{0,3}#{1,6}\s*/,"").replace(/\*\*|__/g,"").trim();
+    const inline=stripped.match(/^(?:obiettivo(?: principale)?|scopo|finalit[aà]|goal|risultato atteso)\s*[:\-–—]\s*(.+)$/i);
+    if(inline?.[1]){
+      const compact=compactObjectiveText(inline[1]);
+      if(compact.length>=18)return compact;
+    }
+  }
+
+  // 2) Sezione OBIETTIVO autonoma: raccoglie solo le prime righe realmente descrittive.
+  for(let index=0;index<lines.length;index++){
+    const stripped=String(lines[index]||"").replace(/^\s{0,3}#{1,6}\s*/,"").replace(/\*\*|__/g,"").trim();
+    if(!INTRO_OBJECTIVE_HEADING_RE.test(stripped))continue;
+    const parts=[];
+    for(let i=index+1;i<Math.min(lines.length,index+7);i++){
+      if(looksLikeSectionHeading(lines[i]))break;
+      const candidate=compactObjectiveText(lines[i]);
+      if(!candidate||candidate.length<10)continue;
+      parts.push(candidate.replace(/[.!?…]+$/,""));
+      if(parts.join(". ").length>=145||parts.length>=2)break;
+    }
+    const objective=parts.join(". ");
+    if(objective.length>=18)return objective;
+  }
+
+  // 3) Dichiarazioni esplicite di risultato: "Voglio...", "L'obiettivo è...".
+  const explicit=[];
+  lines.slice(0,100).forEach((raw,index)=>{
+    const cleaned=cleanIntroSourceLine(raw);
+    if(!cleaned)return;
+    let score=0;
+    if(/^(?:l['’]obiettivo|obiettivo|scopo|finalit[aà]|il risultato atteso)\b/i.test(cleaned))score+=18;
+    if(/^voglio(?: che)?\b/i.test(cleaned))score+=16;
+    if(/\b(?:ottenere|aumentare|ridurre|portare|raggiungere|generare|vendere|convertire|posizionare|risolvere)\b/i.test(cleaned))score+=8;
+    score-=index*.12;
+    if(score>0)explicit.push({text:compactObjectiveText(cleaned),score,index});
+  });
+  explicit.sort((a,b)=>b.score-a.score||a.index-b.index);
+  return explicit.find(item=>item.score>=12&&item.text.length>=18)?.text||"";
+}
+
+function introCorpus(prompt){
+  return normalize([prompt?.title||"",prompt?.content||""].join("\n"));
+}
+
+function inferPromptIntent(prompt){
+  const corpus=introCorpus(prompt);
+  const title=normalize(prompt?.title||"");
+  const first=normalize(String(prompt?.content||"").slice(0,700));
+  const scores={benchmark:0,seoAudit:0,conversion:0,bugfix:0,webDesign:0,handoff:0,promptEngineering:0,monetization:0,social:0,automation:0,comparison:0,content:0};
+  const add=(intent,re,weight=1,source=corpus)=>{if(re.test(source))scores[intent]+=weight};
+
+  // Istruzioni meta sul prompt hanno precedenza, ma solo se compaiono nel titolo o all'inizio.
+  add("promptEngineering",/\b(?:migliora|riscrivi|ottimizza|raffina|correggi|crea|genera)\b.{0,45}\bprompt\b/,10,`${title} ${first}`);
+  add("promptEngineering",/\bprompt\b.{0,45}\b(?:migliora|riscrivi|ottimizza|raffina|correggi)\b/,8,`${title} ${first}`);
+
+  add("benchmark",/\b(?:benchmark|migliori siti|siti internazionali|awwwards)\b/,7);
+  add("benchmark",/\b(?:css|ui\/ux|art direction|web design|layout innovativ)\b/,3);
+  add("benchmark",/\b(?:cerca|ricerca|seleziona|trova)\b/,2);
+
+  add("seoAudit",/\b(?:seo|serp|search console|canonical|sitemap|indicizzazione|keyword|crawl|on page|on-page)\b/,5);
+  add("seoAudit",/\b(?:audit|analizza|verifica|critic|ottimizz|posizion)\b/,3);
+
+  add("conversion",/\b(?:conversion|contatti|lead|richiest|vendit|cta|funnel|prenotaz)\b/,6);
+  add("conversion",/\b(?:aumenta|crescere|ottenere|generare)\b/,3);
+
+  add("bugfix",/\b(?:bug|errori|difetti|regression|crash|non funziona|errore 500|cors)\b/,7);
+  add("bugfix",/\b(?:trova|individua|correggi|ripara|risolvi|debug)\b/,3);
+
+  add("webDesign",/\b(?:restyling|homepage|home page|layout|sito web|pagina web|ui|ux)\b/,4);
+  add("webDesign",/\b(?:progetta|rifai|trasforma|migliora|replica|riproduci|moderno|design)\b/,3);
+
+  add("handoff",/\b(?:handoff|storico)\b/,9);
+  add("handoff",/\b(?:estrai|riassumi|sintetizza)\b.{0,50}\b(?:conversazione|chat|documento|file|informazioni)\b/,5);
+
+  add("monetization",/\b(?:monetizz|affiliazion|ricavi|revenue|business model|guadagn)\b/,8);
+  add("social",/\b(?:instagram|facebook|linkedin|social|post|caption|contenuti social)\b/,5);
+  add("social",/\b(?:calendario editoriale|piano editoriale|pubblica)\b/,4);
+  add("automation",/\b(?:automatizz|scheduler|github actions|n8n|workflow automatic|pubblicazione automatica)\b/,8);
+  add("comparison",/\b(?:confronta|comparazione|differenze|versus|\bvs\b)\b/,7);
+  add("content",/\b(?:articolo|blog|copy|testo|contenuto|headline|meta title|meta description)\b/,4);
+  add("content",/\b(?:scrivi|crea|genera|riscrivi|ottimizza)\b/,2);
+
+  const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const [intent,score]=ranked[0]||["generic",0];
+  return score>=6?intent:"generic";
+}
+
+function semanticIntroTemplate(prompt,intent){
+  const corpus=introCorpus(prompt);
+  const templates={
+    benchmark:"Trova benchmark web realmente pertinenti al focus indicato e seleziona gli esempi più innovativi per CSS, layout, UI/UX e art direction.",
+    seoAudit:"Analizza il sito o il materiale indicato per individuare criticità SEO reali, priorità e interventi utili a migliorare visibilità e posizionamento.",
+    conversion:"Individua gli interventi più efficaci per aumentare contatti e conversioni del sito o della pagina indicata, lavorando su struttura, UX, copy e CTA.",
+    bugfix:"Trova errori, bug e difetti reali nel materiale fornito, correggili senza compromettere le funzioni valide e verifica che le anomalie siano risolte.",
+    webDesign:"Progetta o migliora il sito indicato affinché struttura, layout, gerarchie e interazioni rispondano in modo coerente all'obiettivo del progetto.",
+    handoff:"Estrai dal materiale fornito solo le informazioni pertinenti al progetto indicato e organizzale in un handoff operativo, verificabile e riutilizzabile.",
+    promptEngineering:"Rendi il prompt più preciso e affidabile, chiarendone l'obiettivo, eliminando ambiguità e difetti e migliorando la qualità dell'output richiesto.",
+    monetization:"Individua le strategie di monetizzazione più adatte al progetto indicato, ordinandole per fattibilità, potenziale economico e priorità operativa.",
+    social:"Crea o pianifica contenuti social coerenti con obiettivo, pubblico e canale indicati, ottimizzando messaggio, formato e call to action.",
+    automation:"Progetta o verifica un'automazione affidabile del processo indicato, riducendo attività manuali, duplicazioni ed errori e prevedendo controlli operativi.",
+    comparison:"Confronta le opzioni indicate sui criteri realmente rilevanti e restituisci differenze, vantaggi, limiti e una conclusione utile alla decisione.",
+    content:"Crea o migliora il contenuto richiesto in funzione di obiettivo, pubblico e canale, rendendolo chiaro, efficace e direttamente utilizzabile."
+  };
+  return templates[intent]||"";
+}
+
+function introLineScore(raw,index){
+  const line=cleanIntroSourceLine(raw);
+  if(!line||line.length<14)return -999;
+  const stripped=String(raw||"").replace(/^\s{0,3}#{1,6}\s*/,"").replace(/\*\*|__/g,"").trim();
+  let score=Math.max(0,9-index*.18);
+  if(INTRO_ACTION_RE.test(line))score+=13;
+  if(INTRO_RESULT_RE.test(line))score+=5;
+  if(/\b(?:obiettivo|serve a|serve per|risultato|voglio|devi)\b/i.test(line))score+=7;
+  if(/\b(?:aumentare|ridurre|ottenere|raggiungere|vendere|convertire|posizionare|risolvere)\b/i.test(line))score+=6;
+  if(line.length>=35&&line.length<=220)score+=5;
+  if(INTRO_SECTION_HEADING_RE.test(stripped)||looksLikeSectionHeading(raw))score-=24;
+  if(/^(?:esempio|nota|variabile|input|output|regola|vincolo)\b/i.test(line))score-=9;
+  if(/^\[?[^\]]+\]?\s*=/.test(stripped))score-=12;
+  return score;
+}
+
+function extractPrimaryInstruction(prompt){
+  const lines=introRawLines(prompt);
+  const candidates=lines.slice(0,140).map((raw,index)=>({
+    raw,
+    text:compactObjectiveText(raw),
+    score:introLineScore(raw,index),
+    index
+  })).filter(item=>item.text&&item.score>-40);
+
+  candidates.sort((a,b)=>b.score-a.score||a.index-b.index);
+  return candidates.find(item=>item.score>=8)?.text||"";
+}
+
+function extractSecondaryOutcome(prompt,primary){
+  const lines=introRawLines(prompt);
+  const candidates=lines.slice(0,140).map((raw,index)=>({
+    text:compactObjectiveText(raw),
+    score:introLineScore(raw,index)+(INTRO_RESULT_RE.test(cleanIntroSourceLine(raw))?7:0),
+    index
+  })).filter(item=>item.text&&item.score>=8&&introDistinct(primary,item.text));
+  candidates.sort((a,b)=>b.score-a.score||a.index-b.index);
+  return candidates[0]?.text||"";
+}
+
 function generatePromptIntro(prompt){
-  const title=cleanIntroSourceLine(prompt?.title||"");
-  const content=String(prompt?.content||"").replace(/\r/g,"");
-  const rawLines=content.split("\n").map(line=>line.trim()).filter(Boolean);
-  if(!rawLines.length)return normalizeIntroSentence(title)||"Descrive l'obiettivo operativo del prompt e il risultato che deve produrre.";
-  const candidates=rawLines.slice(0,90).map((raw,index)=>({raw,text:cleanIntroSourceLine(raw),score:introLineScore(raw,index),index})).filter(item=>item.score>-50&&item.text);
-  const ranked=[...candidates].sort((a,b)=>b.score-a.score||a.index-b.index);
-  // La prima istruzione operativa è quasi sempre lo scopo principale; le righe successive descrivono risultati o vincoli.
-  const primary=candidates.find(item=>INTRO_ACTION_RE.test(item.text)&&item.score>=8)||ranked[0];
-  let base=primary?.text||title;
-  if(!base)return "Descrive l'obiettivo operativo del prompt e il risultato che deve produrre.";
-  const secondary=ranked.find(item=>item!==primary&&item.score>=5&&INTRO_RESULT_RE.test(item.text)&&introDistinct(base,item.text));
-  if(secondary){
-    const second=secondary.text.trim();
-    const combined=`${base.replace(/[.!?…]+$/,'')}. ${second}`;
-    if(combined.length<=INTRO_MAX_LENGTH+25)base=combined;
+  const title=compactObjectiveText(prompt?.title||"");
+  const rawLines=introRawLines(prompt);
+  if(!rawLines.length){
+    return normalizeIntroSentence(title)||"Descrive in modo sintetico l'obiettivo operativo del prompt e il risultato che deve produrre.";
   }
-  if(base.length<55&&title&&introDistinct(base,title)){
-    const combined=`${base.replace(/[.!?…]+$/,'')}. ${title}`;
-    if(combined.length<=INTRO_MAX_LENGTH)base=combined;
+
+  // Regola fondamentale: un obiettivo dichiarato esplicitamente prevale sempre
+  // su classificazioni, keyword, esempi e istruzioni secondarie.
+  const explicitObjective=extractExplicitObjective(prompt);
+  if(explicitObjective){
+    return normalizeIntroSentence(explicitObjective);
   }
+
+  const primary=extractPrimaryInstruction(prompt);
+  const intent=inferPromptIntent(prompt);
+  const semantic=semanticIntroTemplate(prompt,intent);
+
+  // Se l'istruzione principale è specifica, la nota nasce da quella; il template
+  // semantico è solo un fallback, non sostituisce più il vero obiettivo del prompt.
+  let base=primary||semantic||title;
+  if(!base)return "Descrive in modo sintetico l'obiettivo operativo del prompt e il risultato che deve produrre.";
+
+  // Le istruzioni troppo generiche vengono completate con l'outcome richiesto.
+  const tooGeneric=/^(?:analizza|cerca|crea|genera|migliora|verifica|confronta|trova|prepara|sviluppa|costruisci|valuta|correggi|progetta|estrai)\b.{0,55}$/i.test(base);
+  if(tooGeneric){
+    const secondary=extractSecondaryOutcome(prompt,base);
+    if(secondary){
+      const combined=`${base.replace(/[.!?…]+$/,"")}. ${secondary.replace(/[.!?…]+$/,"")}`;
+      if(combined.length<=INTRO_MAX_LENGTH)base=combined;
+    }else if(semantic&&introDistinct(base,semantic)){
+      base=semantic;
+    }
+  }
+
   return normalizeIntroSentence(base);
 }
 function promptIntroText(prompt){
@@ -1500,7 +1710,7 @@ function bindCardEvents(){
     };
     card.onkeydown=event=>{if(event.target.closest("button,input,select,textarea,a"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
-    card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=extractVariables(prompt.content);if(!vars.length){quickCopy(id)}else openEditor(id,"variables","use")});
+    card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=extractVariables(prompt.content);if(!vars.length&&!normalizeHttpUrl(prompt.toolUrl||"")){quickCopy(id)}else openEditor(id,"variables","use")});
     card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
     card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();event.currentTarget.closest('.card-menu').classList.toggle('open')});
     card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopy(id));
@@ -1528,12 +1738,15 @@ const PLACEHOLDER_HINT_RE=/\b(?:nome|dominio|sito|url|link|keyword|query|focus|s
 function looksLikePlaceholderToken(value){
   const text=String(value||"").trim();
   if(!text||text.length>120||/[\r\n]/.test(text))return false;
+  // Nomi file, percorsi e frammenti simili non diventano variabili solo perché sono tra parentesi.
+  if(/[.\\/]/.test(text)&&!PLACEHOLDER_HINT_RE.test(text))return false;
   if(/_/.test(text))return true;
   if(/[A-ZÀ-Ý]/.test(text)&&text===text.toUpperCase())return true;
   return PLACEHOLDER_HINT_RE.test(text)&&text.split(/\s+/).length<=10;
 }
 function isLikelyVariableMatch(match,curly,square,percent,angle,round){
-  if(curly!==undefined||square!==undefined)return true;
+  if(curly!==undefined)return true;
+  if(square!==undefined)return looksLikePlaceholderToken(square);
   if(percent!==undefined)return looksLikePlaceholderToken(percent)&&!/^[\d\s.,+-]+$/.test(percent);
   if(angle!==undefined){
     const token=String(angle||"").trim();
@@ -1588,7 +1801,7 @@ function isFileVariable(definition){
   return /\b(file|files|allega|allegare|allegato|allegati|attachment|documento|documenti|pdf|csv|excel|xlsx|xls|docx|doc|immagine|image|foto|upload|carica|caricare|caricamento|dataset|sitemap|report|zip|screenshot|esportazione|export)\b/.test(text);
 }
 function isOptionalVariable(definition){
-  const text=variableSearchText(definition);
+  const text=`${variableSearchText(definition)} ${normalize(definition?.nearby||"")}`;
   return /\b(opzionale|facoltativo|se disponibile|se presente|se noto|se noti|eventuale|eventuali)\b/.test(text);
 }
 function expectedInputType(definition){
@@ -1605,12 +1818,18 @@ function extractVariables(content){
   let match;
   while((match=regex.exec(text))){
     const rawName=match[1]??match[2]??match[3]??match[4]??match[5];
+    // [testo](url) è un link Markdown, non una variabile.
+    if(match[2]!==undefined&&text.charAt(regex.lastIndex)==="(")continue;
     if(!isLikelyVariableMatch(match[0],match[1],match[2],match[3],match[4],match[5]))continue;
     const name=variableName(rawName),key=name.toLowerCase();
     if(!name||seen.has(key))continue;
     seen.add(key);
     const context=contextLabel(text,match.index);
-    const definition={name,raw:match[0],label:context||humanize(name),context,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":match[4]!==undefined?"angle":"round"};
+    const lineStart=text.lastIndexOf("\n",match.index)+1;
+    const lineEndRaw=text.indexOf("\n",match.index+match[0].length);
+    const lineEnd=lineEndRaw===-1?text.length:lineEndRaw;
+    const nearby=text.slice(lineStart,lineEnd).replace(/[*_`#>]/g," ").replace(/\s+/g," ").trim();
+    const definition={name,raw:match[0],label:context||humanize(name),context,nearby,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":match[4]!==undefined?"angle":"round"};
     definition.fileLike=isFileVariable(definition);
     definition.optional=isOptionalVariable(definition);
     definition.inputType=expectedInputType(definition);
@@ -1800,7 +2019,7 @@ function updateCompiledPreview(){
 
 
 
-/* ---------- Editor ---------- *//* ---------- Editor ---------- */
+/* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
   const roots=rootCategoriesAlphabetical();
   $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
@@ -1874,6 +2093,7 @@ function openEditor(id=null,preferredTab=null,mode=null){
   $("promptTags").value=(initialPrompt?.tags||[]).join(", ");
   $("promptNotes").value=initialPrompt?.notes||"";
   $("promptToolUrl").value=initialPrompt?.toolUrl||"";
+  $("openToolUseBtn")?.classList.toggle("hidden",!normalizeHttpUrl(initialPrompt?.toolUrl||""));
   $("promptFavorite").checked=!!initialPrompt?.favorite;
   $("duplicateBtn").classList.toggle("hidden",!prompt);
   $("trashBtn").classList.toggle("hidden",!prompt);
@@ -2145,13 +2365,13 @@ async function copyCompiled(){
     toast(`Impossibile copiare: ${error.message||"errore del browser"}`);
   }finally{
     copyButton.disabled=false;
-    copyButton.textContent="Copia Prompt";
+    copyButton.textContent="Copia prompt compilato";
   }
 }
 
 
 
-/* ---------- Azioni sui prompt ---------- *//* ---------- Azioni sui prompt ---------- */
+/* ---------- Azioni sui prompt ---------- */
 async function quickCopy(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
   try{
@@ -2377,7 +2597,8 @@ function deleteCategory(id){
       const tx=state.db.transaction(["prompts","categories"],"readwrite"),promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories");
       for(const prompt of affected){
         const updated={...prompt,updatedAt:now()};
-        if(removedIds.has(updated.categoryId))updated.categoryId=null;
+        if(category.parentId&&updated.categoryId===category.id)updated.categoryId=category.parentId;
+        else if(removedIds.has(updated.categoryId))updated.categoryId=null;
         if(removedIds.has(updated.subcategoryId))updated.subcategoryId=null;
         promptStore.put(updated);
       }
@@ -2408,10 +2629,20 @@ async function exportCurrentPrompt(){
     toast("Salva o completa il prompt prima di esportarlo.");
     return;
   }
+  const mainCategory=catById(payload.categoryId);
+  const subcategory=catById(payload.subcategoryId);
+  const client=clientById(payload.clientId);
   const bundle={
     type:"prompt-studio-prompt",
-    version:19,
+    version:PROMPT_BUNDLE_SCHEMA_VERSION,
+    schemaVersion:PROMPT_BUNDLE_SCHEMA_VERSION,
+    appVersion:APP_VERSION,
     exportedAt:now(),
+    organization:{
+      category:mainCategory?{name:mainCategory.name,color:categoryColor(mainCategory)}:null,
+      subcategory:subcategory?{name:subcategory.name,parentName:mainCategory?.name||null}:null,
+      client:client?{name:client.name}:null
+    },
     prompt:payload
   };
   downloadJson(bundle,`${safeFilename(payload.title)}-prompt.json`);
@@ -2434,7 +2665,7 @@ function snapshot(){
   const fileCount=state.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
   const excludedFileCount=state.prompts.reduce((sum,prompt)=>sum+Object.values(prompt?.variableFiles||{}).filter(file=>file?.tooLarge&&!file?.base64).length,0);
   return {
-    app:"Prompt Studio Standalone",version:19,exportedAt:now(),
+    app:"Prompt Studio Standalone",version:ARCHIVE_SCHEMA_VERSION,schemaVersion:ARCHIVE_SCHEMA_VERSION,appVersion:APP_VERSION,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,excludedFileCount,
     prompts:state.prompts,categories:state.categories,clients:state.clients
   };
@@ -2481,7 +2712,56 @@ function validateImportItems(items,label){
 }
 function validateArchiveData(data){
   if(!data||typeof data!=="object")throw new Error("Archivio JSON non valido.");
+  const schema=Number(data.schemaVersion??data.version);
+  if(Number.isFinite(schema)&&schema>ARCHIVE_SCHEMA_VERSION)throw new Error(`Archivio creato con un formato più recente (v${schema}). Aggiorna Prompt Studio prima di importarlo.`);
   validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Categorie");validateImportItems(data.clients,"Clienti");
+}
+async function resolveImportedPromptOrganization(bundle,prompt){
+  const organization=bundle?.organization||{};
+  let categoryId=null,subcategoryId=null,clientId=null;
+
+  const sourceCategory=catById(prompt?.categoryId);
+  if(sourceCategory&&!sourceCategory.parentId)categoryId=sourceCategory.id;
+  else if(sourceCategory?.parentId&&catById(sourceCategory.parentId)){
+    categoryId=sourceCategory.parentId;
+    subcategoryId=sourceCategory.id;
+  }
+
+  const sourceSubcategory=catById(prompt?.subcategoryId);
+  if(sourceSubcategory?.parentId&&catById(sourceSubcategory.parentId)){
+    categoryId=sourceSubcategory.parentId;
+    subcategoryId=sourceSubcategory.id;
+  }
+
+  if(!categoryId&&organization.category?.name){
+    let category=state.categories.find(item=>!item.parentId&&normalize(item.name)===normalize(organization.category.name));
+    if(!category){
+      category={id:uid("cat"),name:String(organization.category.name).trim(),parentId:null,color:organization.category.color||CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()};
+      await put("categories",category);await loadData();
+    }
+    categoryId=category.id;
+  }
+
+  if(categoryId&&organization.subcategory?.name){
+    let subcategory=state.categories.find(item=>item.parentId===categoryId&&normalize(item.name)===normalize(organization.subcategory.name));
+    if(!subcategory){
+      subcategory={id:uid("cat"),name:String(organization.subcategory.name).trim(),parentId:categoryId,color:categoryColor(catById(categoryId)),order:state.categories.length,createdAt:now()};
+      await put("categories",subcategory);await loadData();
+    }
+    subcategoryId=subcategory.id;
+  }
+
+  if(prompt?.clientId&&clientById(prompt.clientId))clientId=prompt.clientId;
+  if(!clientId&&organization.client?.name){
+    let client=state.clients.find(item=>normalize(item.name)===normalize(organization.client.name));
+    if(!client){
+      client={id:uid("client"),name:String(organization.client.name).trim(),createdAt:now()};
+      await put("clients",client);await loadData();
+    }
+    clientId=client.id;
+  }
+
+  return {...prompt,categoryId,subcategoryId,clientId};
 }
 async function writeCoreDataAtomic({mode,categories,clients,prompts}){
   const tx=state.db.transaction(["prompts","categories","clients"],"readwrite");
@@ -2503,12 +2783,15 @@ async function importData(file){
     const data=JSON.parse(raw);
 
     if(data?.type==="prompt-studio-prompt"&&data.prompt){
+      const schema=Number(data.schemaVersion??data.version);
+      if(Number.isFinite(schema)&&schema>PROMPT_BUNDLE_SCHEMA_VERSION)throw new Error(`Prompt creato con un formato più recente (v${schema}). Aggiorna Prompt Studio prima di importarlo.`);
       if(typeof data.prompt!=="object"||!String(data.prompt.title||"").trim()||!String(data.prompt.content||"").trim())throw new Error("Il prompt importato deve contenere titolo e testo.");
-      const promptData={...data.prompt,id:uid("prompt"),createdAt:now(),updatedAt:now(),deletedAt:null};
+      let promptData={...data.prompt,id:uid("prompt"),createdAt:now(),updatedAt:now(),deletedAt:null};
+      promptData=await resolveImportedPromptOrganization(data,promptData);
       if(normalizedIntroSource(promptData)==="auto"){promptData.intro=generatePromptIntro(promptData);promptData.introSource="auto";promptData.introGeneratedAt=now();promptData.introUpdatedAt=now()}
       await put("prompts",promptData);
       await loadData();await generateMissingPromptIntros({silent:true});render();
-      toast(`Prompt importato con ${promptAttachmentCount(promptData)} file incorporat${promptAttachmentCount(promptData)===1?"o":"i"}.`,"success");
+      toast(`Prompt importato con ${promptAttachmentCount(promptData)} file incorporat${promptAttachmentCount(promptData)===1?"o":"i"} e riferimenti organizzativi verificati.`,"success");
       return;
     }
 
@@ -2609,11 +2892,13 @@ function bindEvents(){
     fillSubcategories("");
     markDirty();
   };
-  ["promptTags","promptNotes","promptToolUrl"].forEach(id=>$(id).oninput=markDirty);
+  ["promptTags","promptNotes"].forEach(id=>$(id).oninput=markDirty);
+  $("promptToolUrl").oninput=()=>{markDirty();$("openToolUseBtn")?.classList.toggle("hidden",!normalizeHttpUrl($("promptToolUrl").value))};
   $("promptTitle").oninput=()=>{markDirty();scheduleAutomaticIntroUpdate()};
   $("promptIntro").oninput=()=>{if(state.editor.introSource!=="manual"){state.editor.introSource="manual";updateIntroSourceUI()}markDirty();updatePromptPurposeNote()};
   $("generateIntroBtn").onclick=()=>{setAutomaticIntro();toast("Nota rigenerata e impostata come automatica.","success")};
   $("restoreAutoIntroBtn").onclick=()=>{setAutomaticIntro();toast("Nota riportata in modalità automatica.","success")};
+  $("openToolUseBtn").onclick=()=>$("openToolBtn").click();
   $("openToolBtn").onclick=async()=>{
     if(state.busy.has("openTool"))return;
     let url=$("promptToolUrl").value.trim();
@@ -2633,7 +2918,7 @@ function bindEvents(){
       new URL(url);
       opened=window.open("about:blank","_blank");
       if(!opened)throw new Error("Popup bloccato. Consenti i popup e riprova.");
-      state.busy.add("openTool");$("openToolBtn").disabled=true;
+      state.busy.add("openTool");$("openToolBtn").disabled=true;$("openToolUseBtn").disabled=true;
 
       /* Salva prima il prompt corrente senza chiudere l'editor. */
       const payload=editorPayload();
@@ -2659,7 +2944,7 @@ function bindEvents(){
       console.error(error);
       toast(error?.message||"Impossibile aprire il tool.","error","PS-TOOL-OPEN");
     }finally{
-      state.busy.delete("openTool");$("openToolBtn").disabled=false;
+      state.busy.delete("openTool");$("openToolBtn").disabled=false;$("openToolUseBtn").disabled=false;
     }
   };
   ["promptSubcategory","promptClient","promptStatus","promptFavorite"].forEach(id=>$(id).onchange=markDirty);
