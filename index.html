@@ -95,18 +95,20 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .category-caret{width:8px;height:8px;margin-left:auto;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .16s;flex:0 0 8px}
 .category-menu-trigger[aria-expanded="true"] .category-caret{transform:rotate(225deg) translate(-2px,-2px)}
 .category-menu{position:absolute;z-index:30;top:calc(100% + 6px);left:0;width:100%;max-height:min(420px,60vh);overflow:auto;padding:6px;border:1px solid rgba(255,255,255,.20);border-radius:12px;background:#172033;box-shadow:0 18px 38px rgba(0,0,0,.34)}
-.category-menu[hidden],.category-submenu[hidden]{display:none}
-.category-menu-all,.category-parent-choice,.category-subchoice{width:100%;min-height:36px;border:0;border-radius:8px;background:transparent;color:var(--sidebar-text);padding:7px 8px;display:flex;align-items:center;gap:7px;text-align:left;font:inherit;font-size:13px;font-weight:750}
-.category-menu-all:hover,.category-parent-choice:hover,.category-subchoice:hover,.category-menu button.active{background:rgba(124,58,237,.28);color:#fff}
+.category-menu[hidden]{display:none}
+.category-menu-all,.category-parent-choice{width:100%;min-height:36px;border:0;border-radius:8px;background:transparent;color:var(--sidebar-text);padding:7px 8px;display:flex;align-items:center;gap:7px;text-align:left;font:inherit;font-size:13px;font-weight:750}
+.category-menu-all:hover,.category-parent-choice:hover,.category-menu button.active{background:rgba(124,58,237,.28);color:#fff}
 .category-menu-count{margin-left:auto;color:var(--sidebar-muted);font-size:11px}
 .category-parent-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:3px;margin-top:3px}
 .category-parent-row.single{grid-template-columns:1fr}
 .category-submenu-toggle{width:34px;min-height:36px;border:0;border-radius:8px;background:rgba(255,255,255,.04);color:var(--sidebar-text);display:grid;place-items:center}
 .category-submenu-toggle:hover{background:rgba(255,255,255,.13)}
 .category-submenu-toggle .category-caret{margin:0;transform:rotate(-45deg)}
-.category-submenu-toggle[aria-expanded="true"] .category-caret{transform:rotate(45deg)}
-.category-submenu{margin:3px 0 5px 12px;padding:3px 0 3px 8px;border-left:2px solid rgba(167,139,250,.44)}
-.category-subchoice{min-height:34px;font-size:12px;font-weight:700}
+.subcategory-popup-list{display:flex;flex-direction:column;gap:8px}
+.subcategory-popup-button{width:100%;min-height:46px;padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text);display:flex;align-items:center;gap:9px;text-align:left;font:inherit;font-weight:800}
+.subcategory-popup-button:hover,.subcategory-popup-button.active{border-color:var(--primary);background:var(--primary-soft)}
+.subcategory-popup-button .tree-dot{width:9px;height:9px;flex:0 0 9px}
+.subcategory-popup-button .count{margin-left:auto;color:var(--muted)}
 .side-section.backup{--section-accent:#059669}
 .side-title{display:flex;align-items:center;justify-content:space-between;padding:1px 6px 9px;color:#fff;font-size:11px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
 .side-title::before{content:"";width:7px;height:7px;border-radius:50%;margin-right:7px;background:var(--section-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--section-accent) 23%,transparent)}
@@ -668,8 +670,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.11.0";
-const APP_RELEASE_NAME="Menu categorie con sottocategorie";
+const APP_VERSION="18.12.0";
+const APP_RELEASE_NAME="Sottocategorie in popup";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -1434,13 +1436,11 @@ function renderSidebar(){
     <button class="category-menu-all ${state.filter.type!=="category"?"active":""}" type="button" role="menuitem" data-category-id="all"><span>Tutte le categorie</span><span class="category-menu-count">${live.length}</span></button>
     ${rootCategoriesAlphabetical().map(root=>{
       const children=childCategoriesAlphabetical(root.id);
-      const submenuOpen=activeRoot?.id===root.id&&Boolean(activeCategory?.parentId);
       return `<div class="category-menu-group">
         <div class="category-parent-row ${children.length?"":"single"}">
           <button class="category-parent-choice ${activeCategory?.id===root.id?"active":""}" type="button" role="menuitem" data-category-id="${esc(root.id)}"><span>${esc(root.name)}</span><span class="category-menu-count">${counts[root.id]||0}</span></button>
-          ${children.length?`<button class="category-submenu-toggle" type="button" aria-label="Mostra sottocategorie di ${esc(root.name)}" aria-expanded="${submenuOpen}" data-submenu-id="${esc(root.id)}"><span class="category-caret" aria-hidden="true"></span></button>`:""}
+          ${children.length?`<button class="category-submenu-toggle" type="button" aria-label="Apri le sottocategorie di ${esc(root.name)}" aria-haspopup="dialog" data-submenu-id="${esc(root.id)}"><span class="category-caret" aria-hidden="true"></span></button>`:""}
         </div>
-        ${children.length?`<div class="category-submenu" id="category-submenu-${esc(root.id)}" ${submenuOpen?"":"hidden"}>${children.map(child=>`<button class="category-subchoice ${activeCategory?.id===child.id?"active":""}" type="button" role="menuitem" data-category-id="${esc(child.id)}"><span>${esc(child.name)}</span><span class="category-menu-count">${counts[child.id]||0}</span></button>`).join("")}</div>`:""}
       </div>`;
     }).join("")}`;
   $("clientPicker").innerHTML='<option value="all">Tutti i clienti</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)} (${live.filter(item=>item.clientId===client.id).length})</option>`).join("");
@@ -1455,14 +1455,28 @@ function renderSidebar(){
     $("categoryPicker").setAttribute("aria-expanded",String(willOpen));
   };
   $$("#categoryMenu [data-category-id]").forEach(button=>button.onclick=()=>button.dataset.categoryId==="all"?setFilter("all"):setFilter("category",button.dataset.categoryId));
-  $$("#categoryMenu .category-submenu-toggle").forEach(button=>button.onclick=()=>{
-    const submenu=$(`category-submenu-${button.dataset.submenuId}`);
-    const willOpen=submenu.hidden;
-    submenu.hidden=!willOpen;
-    button.setAttribute("aria-expanded",String(willOpen));
-  });
+  $$("#categoryMenu .category-submenu-toggle").forEach(button=>button.onclick=()=>openSubcategoryPopup(button.dataset.submenuId));
   $("clientPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("client",event.target.value);
   $("projectPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("project",event.target.value);
+}
+
+function openSubcategoryPopup(rootId){
+  const root=catById(rootId);if(!root)return;
+  const children=childCategoriesAlphabetical(root.id);
+  const live=livePrompts();
+  $("categoryMenu").hidden=true;
+  $("categoryPicker").setAttribute("aria-expanded","false");
+  $("choiceTitle").textContent=`Sottocategorie di ${root.name}`;
+  $("choiceBody").innerHTML=children.length
+    ?`<div class="subcategory-popup-list">${children.map(child=>`<button class="subcategory-popup-button ${state.filter.type==="category"&&state.filter.id===child.id?"active":""}" type="button" data-subcategory-id="${esc(child.id)}"><span class="tree-dot" style="--dot:${esc(categoryColor(child))}"></span><span>${esc(child.name)}</span><span class="count">${live.filter(prompt=>prompt.subcategoryId===child.id).length}</span></button>`).join("")}</div>`
+    :'<div class="hint">Questa categoria non contiene sottocategorie.</div>';
+  $("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';
+  bindModalClose();
+  $$("#choiceBody [data-subcategory-id]").forEach(button=>button.onclick=()=>{
+    closeModal("choiceModal");
+    setFilter("category",button.dataset.subcategoryId);
+  });
+  openModal("choiceModal");
 }
 
 
