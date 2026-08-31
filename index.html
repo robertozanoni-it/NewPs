@@ -87,8 +87,26 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .side-section.projects{--section-accent:#8b5cf6}
 .side-section.management{--section-accent:#f59e0b}
 .sidebar-picker{width:100%;min-height:40px;padding:8px 34px 8px 10px;border:1px solid rgba(255,255,255,.20);border-radius:10px;background:rgba(255,255,255,.09);color:var(--sidebar-text);font-weight:750}
-.sidebar-picker+.sidebar-picker{margin-top:8px}
 .sidebar-picker option{background:var(--sidebar);color:var(--sidebar-text)}
+.category-menu-shell{position:relative}
+.category-menu-trigger{width:100%;min-height:42px;padding:8px 10px;border:1px solid rgba(255,255,255,.20);border-radius:10px;background:rgba(255,255,255,.09);color:var(--sidebar-text);display:flex;align-items:center;gap:8px;text-align:left;font:inherit;font-weight:800}
+.category-menu-trigger:hover,.category-menu-trigger[aria-expanded="true"]{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.32)}
+.category-menu-trigger .picker-value{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.category-caret{width:8px;height:8px;margin-left:auto;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .16s;flex:0 0 8px}
+.category-menu-trigger[aria-expanded="true"] .category-caret{transform:rotate(225deg) translate(-2px,-2px)}
+.category-menu{position:absolute;z-index:30;top:calc(100% + 6px);left:0;width:100%;max-height:min(420px,60vh);overflow:auto;padding:6px;border:1px solid rgba(255,255,255,.20);border-radius:12px;background:#172033;box-shadow:0 18px 38px rgba(0,0,0,.34)}
+.category-menu[hidden],.category-submenu[hidden]{display:none}
+.category-menu-all,.category-parent-choice,.category-subchoice{width:100%;min-height:36px;border:0;border-radius:8px;background:transparent;color:var(--sidebar-text);padding:7px 8px;display:flex;align-items:center;gap:7px;text-align:left;font:inherit;font-size:13px;font-weight:750}
+.category-menu-all:hover,.category-parent-choice:hover,.category-subchoice:hover,.category-menu button.active{background:rgba(124,58,237,.28);color:#fff}
+.category-menu-count{margin-left:auto;color:var(--sidebar-muted);font-size:11px}
+.category-parent-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:3px;margin-top:3px}
+.category-parent-row.single{grid-template-columns:1fr}
+.category-submenu-toggle{width:34px;min-height:36px;border:0;border-radius:8px;background:rgba(255,255,255,.04);color:var(--sidebar-text);display:grid;place-items:center}
+.category-submenu-toggle:hover{background:rgba(255,255,255,.13)}
+.category-submenu-toggle .category-caret{margin:0;transform:rotate(-45deg)}
+.category-submenu-toggle[aria-expanded="true"] .category-caret{transform:rotate(45deg)}
+.category-submenu{margin:3px 0 5px 12px;padding:3px 0 3px 8px;border-left:2px solid rgba(167,139,250,.44)}
+.category-subchoice{min-height:34px;font-size:12px;font-weight:700}
 .side-section.backup{--section-accent:#059669}
 .side-title{display:flex;align-items:center;justify-content:space-between;padding:1px 6px 9px;color:#fff;font-size:11px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
 .side-title::before{content:"";width:7px;height:7px;border-radius:50%;margin-right:7px;background:var(--section-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--section-accent) 23%,transparent)}
@@ -450,8 +468,10 @@ textarea{resize:vertical;line-height:1.55}
     </section>
     <section class="side-section categories">
       <div class="side-title"><span>Categorie</span></div>
-      <select class="sidebar-picker" id="categoryPicker" aria-label="Scegli categoria"></select>
-      <select class="sidebar-picker" id="subcategoryPicker" aria-label="Scegli sottocategoria"></select>
+      <div class="category-menu-shell" id="categoryMenuShell">
+        <button class="category-menu-trigger" id="categoryPicker" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="categoryMenu"><span class="picker-value" id="categoryPickerValue">Tutte le categorie</span><span class="category-caret" aria-hidden="true"></span></button>
+        <div class="category-menu" id="categoryMenu" role="menu" hidden></div>
+      </div>
     </section>
     <section class="side-section clients">
       <div class="side-title"><span>Clienti</span></div>
@@ -648,8 +668,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.10.0";
-const APP_RELEASE_NAME="Sottocategorie e gestione avanzata";
+const APP_VERSION="18.11.0";
+const APP_RELEASE_NAME="Menu categorie con sottocategorie";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`${APP_RELEASE_NAME} v${APP_VERSION}`;
@@ -1407,29 +1427,40 @@ function renderSidebar(){
   });
   const activeCategory=state.filter.type==="category"?catById(state.filter.id):null;
   const activeRoot=activeCategory?.parentId?catById(activeCategory.parentId):activeCategory;
-  const selectedRootId=activeRoot?.id||"all";
-  const categoryOptions=rootCategoriesAlphabetical().map(root=>`<option value="${esc(root.id)}">${esc(root.name)} (${counts[root.id]||0})</option>`).join("");
-  const subcategoryOptions=state.categories.filter(item=>item.parentId).sort((a,b)=>{
-    const parentCompare=String(catById(a.parentId)?.name||"").localeCompare(String(catById(b.parentId)?.name||""),"it",{sensitivity:"base"});
-    return parentCompare||categoryAlphabeticalCompare(a,b);
-  }).map(child=>{
-    const parent=catById(child.parentId);
-    return `<option value="${esc(child.id)}">${esc(parent?.name||"")} \u203A ${esc(child.name)} (${counts[child.id]||0})</option>`;
-  }).join("");
-  $("categoryPicker").innerHTML='<option value="all">Tutte le categorie</option>'+categoryOptions;
-  $("subcategoryPicker").innerHTML='<option value="all">Tutte le sottocategorie</option>'+subcategoryOptions;
+  $("categoryPickerValue").textContent=activeCategory
+    ?`${activeRoot?.name||"Categoria"}${activeCategory.parentId?` \u203A ${activeCategory.name}`:""}`
+    :"Tutte le categorie";
+  $("categoryMenu").innerHTML=`
+    <button class="category-menu-all ${state.filter.type!=="category"?"active":""}" type="button" role="menuitem" data-category-id="all"><span>Tutte le categorie</span><span class="category-menu-count">${live.length}</span></button>
+    ${rootCategoriesAlphabetical().map(root=>{
+      const children=childCategoriesAlphabetical(root.id);
+      const submenuOpen=activeRoot?.id===root.id&&Boolean(activeCategory?.parentId);
+      return `<div class="category-menu-group">
+        <div class="category-parent-row ${children.length?"":"single"}">
+          <button class="category-parent-choice ${activeCategory?.id===root.id?"active":""}" type="button" role="menuitem" data-category-id="${esc(root.id)}"><span>${esc(root.name)}</span><span class="category-menu-count">${counts[root.id]||0}</span></button>
+          ${children.length?`<button class="category-submenu-toggle" type="button" aria-label="Mostra sottocategorie di ${esc(root.name)}" aria-expanded="${submenuOpen}" data-submenu-id="${esc(root.id)}"><span class="category-caret" aria-hidden="true"></span></button>`:""}
+        </div>
+        ${children.length?`<div class="category-submenu" id="category-submenu-${esc(root.id)}" ${submenuOpen?"":"hidden"}>${children.map(child=>`<button class="category-subchoice ${activeCategory?.id===child.id?"active":""}" type="button" role="menuitem" data-category-id="${esc(child.id)}"><span>${esc(child.name)}</span><span class="category-menu-count">${counts[child.id]||0}</span></button>`).join("")}</div>`:""}
+      </div>`;
+    }).join("")}`;
   $("clientPicker").innerHTML='<option value="all">Tutti i clienti</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)} (${live.filter(item=>item.clientId===client.id).length})</option>`).join("");
   $("projectPicker").innerHTML='<option value="all">Tutti i progetti</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)} (${live.filter(item=>item.projectId===project.id).length})</option>`).join("");
-  $("categoryPicker").value=selectedRootId;
-  $("subcategoryPicker").value=activeCategory?.parentId?activeCategory.id:"all";
   $("clientPicker").value=state.filter.type==="client"?state.filter.id:"all";
   $("projectPicker").value=state.filter.type==="project"?state.filter.id:"all";
-  $("categoryPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("category",event.target.value);
-  $("subcategoryPicker").onchange=event=>{
-    if(event.target.value!=="all"){setFilter("category",event.target.value);return}
-    const rootId=$("categoryPicker").value;
-    rootId==="all"?setFilter("all"):setFilter("category",rootId);
+  $("categoryMenu").hidden=true;
+  $("categoryPicker").setAttribute("aria-expanded","false");
+  $("categoryPicker").onclick=()=>{
+    const willOpen=$("categoryMenu").hidden;
+    $("categoryMenu").hidden=!willOpen;
+    $("categoryPicker").setAttribute("aria-expanded",String(willOpen));
   };
+  $$("#categoryMenu [data-category-id]").forEach(button=>button.onclick=()=>button.dataset.categoryId==="all"?setFilter("all"):setFilter("category",button.dataset.categoryId));
+  $$("#categoryMenu .category-submenu-toggle").forEach(button=>button.onclick=()=>{
+    const submenu=$(`category-submenu-${button.dataset.submenuId}`);
+    const willOpen=submenu.hidden;
+    submenu.hidden=!willOpen;
+    button.setAttribute("aria-expanded",String(willOpen));
+  });
   $("clientPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("client",event.target.value);
   $("projectPicker").onchange=event=>event.target.value==="all"?setFilter("all"):setFilter("project",event.target.value);
 }
@@ -3021,7 +3052,17 @@ function bindEvents(){
   $("menuDiagnosticsBtn").onclick=()=>{$("moreMenu").classList.remove("show");performDashboardAction("diagnostics")};
   document.addEventListener("click",event=>{
     if(!event.target.closest('.more-menu-wrap'))$("moreMenu")?.classList.remove("show");
+    if(!event.target.closest("#categoryMenuShell")){
+      if($("categoryMenu"))$("categoryMenu").hidden=true;
+      $("categoryPicker")?.setAttribute("aria-expanded","false");
+    }
     if($("sidebar")?.classList.contains("open")&&!event.target.closest("#sidebar,#mobileMenuBtn"))$("sidebar").classList.remove("open");
+  });
+  document.addEventListener("keydown",event=>{
+    if(event.key!=="Escape"||$("categoryMenu")?.hidden)return;
+    $("categoryMenu").hidden=true;
+    $("categoryPicker").setAttribute("aria-expanded","false");
+    $("categoryPicker").focus();
   });
   $("mobileMenuBtn").onclick=()=>$("sidebar").classList.add("open");
   $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
