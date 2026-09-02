@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="18.16.0">
+<meta name="application-version" content="18.17.0">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -450,7 +450,7 @@ textarea{resize:vertical;line-height:1.55}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn">&#9776;</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 18.16.0</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 18.17.0</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
       <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, cliente, GPTSites, progetto o SEO&#8230;">
@@ -518,7 +518,7 @@ textarea{resize:vertical;line-height:1.55}
       <div class="side-title"><span>Gestione</span></div>
       <button class="side-link" id="manageBtn"><span>&#9881;</span><span>Gestisci elementi</span></button>
     </section>
-    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 18.16.0</div>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 18.17.0</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -620,7 +620,7 @@ textarea{resize:vertical;line-height:1.55}
       <section class="editor-panel" data-panel="variables">
         <div class="prompt-purpose-note" id="promptPurposeNote"><strong>Cosa fa questo prompt</strong><span id="promptPurposeText"></span></div>
         <div class="variables-header">
-          <div><h3>Compila il prompt</h3><p>L&#8217;app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>[VARIABILE]</strong>, <strong>{{VARIABILE}}</strong>, <strong>%VARIABILE%</strong> e <strong>&lt;VARIABILE&gt;</strong>.</p></div>
+          <div><h3>Compila il prompt</h3><p>L&#8217;app rileva automaticamente le variabili, crea un campo leggibile per ciascuna e prepara il prompt finale. Puoi usare formati come <strong>{VARIABILE}</strong>, <strong>{{VARIABILE}}</strong>, <strong>[VARIABILE]</strong>, <strong>%VARIABILE%</strong>, <strong>&lt;VARIABILE&gt;</strong> e <strong>(VARIABILE)</strong>.</p></div>
           <button class="btn" id="detectVariablesBtn">&#8635; Aggiorna campi</button>
         </div>
         <div class="variable-highlight-note"><strong>Come funziona:</strong> compila solo i campi che ti servono. Il pulsante <strong>Copia Prompt</strong> sostituisce le variabili valorizzate; quelle lasciate vuote restano nel testo come segnaposto e non bloccano la copia.</div>
@@ -720,7 +720,7 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="18.16.0";
+const APP_VERSION="18.17.0";
 const APP_RELEASE_NAME="Sposta e copia prompt tra sezioni";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
@@ -973,7 +973,7 @@ function cleanIntroSourceLine(line){
     .replace(/^\s*(?:[-*+•]|\d+[.)])\s+/,"")
     .replace(/\[([^\]]+)\]\([^\)]+\)/g,"$1")
     .replace(/https?:\/\/\S+/g,"il sito o URL indicato")
-    .replace(variableRegex(),(match,curly,square,percent,angle,round)=>isLikelyVariableMatch(match,curly,square,percent,angle,round)?introVariableReplacement(match):match)
+    .replace(variableRegex(),(match,doubleCurly,singleCurly,square,percent,angle,round)=>isLikelyVariableMatch(match,doubleCurly,singleCurly,square,percent,angle,round)?introVariableReplacement(match):match)
     .replace(/\s+/g," ")
     .trim();
   text=text
@@ -1871,11 +1871,11 @@ function updateBulkbar(){
 
 /* ---------- Motore delle variabili ---------- */
 function variableRegex(){
-  // La regex individua i candidati; isLikelyVariableMatch filtra poi parentesi normali,
-  // percentuali e tag HTML per evitare falsi campi nell'editor.
-  return /{{\s*([^{}\n]{1,120}?)\s*}}|\[\s*([^\]\n]{2,120}?)\s*\]|%\s*([^%\n]{2,120}?)\s*%|<\s*([^<>\n]{2,120}?)\s*>|\(\s*([^()\n.!?;]{2,120}?)\s*\)/g;
+  // La regex individua i candidati; isLikelyVariableMatch filtra poi graffe singole,
+  // parentesi normali, percentuali e tag HTML per evitare falsi campi nell'editor.
+  return /{{\s*([^{}\n]{1,120}?)\s*}}|{\s*([^{}\n]{2,120}?)\s*}|\[\s*([^\]\n]{2,120}?)\s*\]|%\s*([^%\n]{2,120}?)\s*%|<\s*([^<>\n]{2,120}?)\s*>|\(\s*([^()\n.!?;]{2,120}?)\s*\)/g;
 }
-function variableName(value){return String(value||"").replace(/{{|}}|[\[\]()%<>]/g,"").trim().replace(/\s+/g,"_")}
+function variableName(value){return String(value||"").replace(/{{|}}|[{}\[\]()%<>]/g,"").trim().replace(/\s+/g,"_")}
 const PLACEHOLDER_HINT_RE=/\b(?:nome|dominio|sito|url|link|keyword|query|focus|settore|argomento|tema|nicchia|file|documento|pdf|csv|dataset|allegato|cliente|azienda|brand|lingua|paese|mercato|localit[aà]|area|target|tono|email|titolo|descrizione|testo|contenuto|numero|quantit[aà]|esclusioni?|data|formato)\b/i;
 function looksLikePlaceholderToken(value){
   const text=String(value||"").trim();
@@ -1886,8 +1886,9 @@ function looksLikePlaceholderToken(value){
   if(/[A-ZÀ-Ý]/.test(text)&&text===text.toUpperCase())return true;
   return PLACEHOLDER_HINT_RE.test(text)&&text.split(/\s+/).length<=10;
 }
-function isLikelyVariableMatch(match,curly,square,percent,angle,round){
-  if(curly!==undefined)return true;
+function isLikelyVariableMatch(match,doubleCurly,singleCurly,square,percent,angle,round){
+  if(doubleCurly!==undefined)return true;
+  if(singleCurly!==undefined)return looksLikePlaceholderToken(singleCurly);
   if(square!==undefined)return looksLikePlaceholderToken(square);
   if(percent!==undefined)return looksLikePlaceholderToken(percent)&&!/^[\d\s.,+-]+$/.test(percent);
   if(angle!==undefined){
@@ -1899,7 +1900,7 @@ function isLikelyVariableMatch(match,curly,square,percent,angle,round){
   return false;
 }
 function humanize(value){
-  let text=String(value||"").replace(/{{|}}|[\[\]()%<>]/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
+  let text=String(value||"").replace(/{{|}}|[{}\[\]()%<>]/g,"").replace(/_/g," ").replace(/\s+/g," ").trim().toLowerCase();
   const map={
     "dominio sito":"dominio del sito","lingua":"lingua principale","paese o mercato":"paese o mercato",
     "keyword":"keyword","keyword principale":"keyword principale","url":"URL","url pagina":"URL della pagina",
@@ -1959,10 +1960,10 @@ function extractVariables(content){
   const text=String(content||""),definitions=[],seen=new Set(),regex=variableRegex();
   let match;
   while((match=regex.exec(text))){
-    const rawName=match[1]??match[2]??match[3]??match[4]??match[5];
+    const rawName=match[1]??match[2]??match[3]??match[4]??match[5]??match[6];
     // [testo](url) è un link Markdown, non una variabile.
-    if(match[2]!==undefined&&text.charAt(regex.lastIndex)==="(")continue;
-    if(!isLikelyVariableMatch(match[0],match[1],match[2],match[3],match[4],match[5]))continue;
+    if(match[3]!==undefined&&text.charAt(regex.lastIndex)==="(")continue;
+    if(!isLikelyVariableMatch(match[0],match[1],match[2],match[3],match[4],match[5],match[6]))continue;
     const name=variableName(rawName),key=name.toLowerCase();
     if(!name||seen.has(key))continue;
     seen.add(key);
@@ -1971,7 +1972,7 @@ function extractVariables(content){
     const lineEndRaw=text.indexOf("\n",match.index+match[0].length);
     const lineEnd=lineEndRaw===-1?text.length:lineEndRaw;
     const nearby=text.slice(lineStart,lineEnd).replace(/[*_`#>]/g," ").replace(/\s+/g," ").trim();
-    const definition={name,raw:match[0],label:context||humanize(name),context,nearby,syntax:match[1]!==undefined?"curly":match[2]!==undefined?"square":match[3]!==undefined?"percent":match[4]!==undefined?"angle":"round"};
+    const definition={name,raw:match[0],label:context||humanize(name),context,nearby,syntax:match[1]!==undefined?"double-curly":match[2]!==undefined?"curly":match[3]!==undefined?"square":match[4]!==undefined?"percent":match[5]!==undefined?"angle":"round"};
     definition.fileLike=isFileVariable(definition);
     definition.optional=isOptionalVariable(definition);
     definition.inputType=expectedInputType(definition);
@@ -1986,9 +1987,9 @@ function valueFor(values,name){
   return key?values[key]:"";
 }
 function compilePrompt(content,values){
-  return String(content||"").replace(variableRegex(),(match,curly,square,percent,angle,round)=>{
-    if(!isLikelyVariableMatch(match,curly,square,percent,angle,round))return match;
-    const name=variableName(curly??square??percent??angle??round),value=valueFor(values,name);
+  return String(content||"").replace(variableRegex(),(match,doubleCurly,singleCurly,square,percent,angle,round)=>{
+    if(!isLikelyVariableMatch(match,doubleCurly,singleCurly,square,percent,angle,round))return match;
+    const name=variableName(doubleCurly??singleCurly??square??percent??angle??round),value=valueFor(values,name);
     return String(value??"").trim()?value:match;
   });
 }
@@ -2070,7 +2071,7 @@ function renderVariables(){
   if($("useProgress"))$("useProgress").textContent=required.length?`${completedRequired} di ${required.length} campi obbligatori compilati${completedRequired===required.length?" \u00B7 Prompt pronto":""}`:"Nessun campo obbligatorio \u00B7 Prompt pronto";
   $("variableSummary").textContent=definitions.length?`${definitions.length} variabil${definitions.length===1?"e rilevata":"i rilevate"} automaticamente nel prompt.`:"";
   $("variableSummary").classList.toggle("show",definitions.length>0);
-  $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>[DOMINIO_SITO]</code>, <code>(LINGUA)</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>{{nome_cliente}}</code>.</div>`;
+  $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>{DOMINIO_SITO}</code>, <code>{{nome_cliente}}</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>(LINGUA)</code>.</div>`;
   $$("#variableList .variable-input").forEach(input=>input.addEventListener("input",()=>{
     state.editor.values[input.dataset.var]=input.value;
     const definition=state.editor.variables.find(def=>def.name===input.dataset.var);
