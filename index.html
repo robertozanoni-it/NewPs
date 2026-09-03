@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="19.1.0">
+<meta name="application-version" content="20.0.0">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -450,6 +450,40 @@ textarea{resize:vertical;line-height:1.55}
 
 
 
+
+/* ---------- Workspace avanzato 20.0 ---------- */
+.side-section.collections{--section-accent:#0f766e}.side-section.workflows{--section-accent:#9333ea}
+.sidebar-mini-add{margin-left:auto;width:24px;height:24px;border:1px solid rgba(255,255,255,.18);border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font-weight:900}
+.sidebar-mini-add:hover{background:rgba(255,255,255,.18)}
+.type-management-row{grid-template-columns:38px minmax(150px,1fr) 42px auto auto auto auto auto auto!important}.type-icon-input{width:38px;height:34px;text-align:center;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}.mini-toggle{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--text)}
+.advanced-filter-bar{display:flex;align-items:end;gap:9px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}.advanced-filter-bar[hidden]{display:none}.filter-field{min-width:150px}.filter-field label{display:block;margin-bottom:4px}.filter-field select{height:36px;padding:5px 30px 5px 8px}.filter-check{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 9px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.prompt-table{width:100%;border-collapse:collapse;min-width:980px}.prompt-table th,.prompt-table td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.prompt-table th{position:sticky;top:0;z-index:2;background:var(--panel-2);font-size:12px;color:var(--muted)}.prompt-table tr:hover td{background:var(--panel-3)}.table-title-btn{border:0;background:transparent;color:var(--text);font-weight:850;text-align:left;padding:0}.table-actions{white-space:nowrap}
+.kanban-board{display:grid;grid-template-columns:repeat(5,minmax(240px,1fr));gap:12px;overflow:auto;align-items:start}.kanban-column{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:10px;min-height:240px}.kanban-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;font-weight:900}.kanban-card{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel);margin-bottom:8px;cursor:grab}.kanban-card:active{cursor:grabbing}.kanban-card small{display:block;margin-top:5px;color:var(--muted)}
+.command-backdrop{position:fixed;inset:0;z-index:500;background:rgba(2,6,23,.64);display:none;align-items:flex-start;justify-content:center;padding-top:12vh}.command-backdrop.show{display:flex}.command-box{width:min(720px,92vw);max-height:70vh;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}.command-input{width:100%;height:58px;border:0;border-bottom:1px solid var(--line);padding:0 18px;background:var(--panel);color:var(--text);font-size:18px;outline:none}.command-results{max-height:52vh;overflow:auto;padding:8px}.command-item{width:100%;border:0;border-radius:10px;background:transparent;color:var(--text);display:flex;align-items:center;gap:10px;padding:10px;text-align:left}.command-item:hover,.command-item.active{background:var(--panel-3)}.command-item small{margin-left:auto;color:var(--muted)}
+.entity-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}.entity-overview .stat{min-height:74px}.relation-list{display:flex;flex-direction:column;gap:7px}.relation-row{display:flex;align-items:center;gap:8px;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.inline-create-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}.inline-create-row select{min-width:0}.inline-create-btn{width:38px;padding:0}
+.duplicate-alert{margin:10px 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--warning) 45%,var(--line));border-left:5px solid var(--warning);border-radius:11px;background:color-mix(in srgb,var(--warning) 9%,var(--panel));font-size:12px}.similarity-badge{padding:3px 7px;border-radius:999px;background:color-mix(in srgb,var(--warning) 12%,var(--panel));border:1px solid color-mix(in srgb,var(--warning) 38%,var(--line));font-size:11px;font-weight:850}
+.autosave-indicator{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}.autosave-indicator.saving{color:var(--warning)}.autosave-indicator.saved{color:var(--success)}
+.version-list{display:flex;flex-direction:column;gap:8px}.version-row{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:grid;grid-template-columns:1fr auto;gap:8px}.version-diff{white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px;background:var(--panel-2);padding:10px;border-radius:8px;margin-top:8px}
+.collection-chip,.workflow-chip-link{display:flex;align-items:center;gap:7px;width:100%;min-height:34px;border:1px solid transparent;border-radius:9px;background:rgba(255,255,255,.035);color:var(--sidebar-text);padding:6px 8px;text-align:left;margin-top:4px}.collection-chip:hover,.workflow-chip-link:hover{background:rgba(255,255,255,.10)}.collection-chip .count,.workflow-chip-link .count{margin-left:auto}
+.analytics-strip{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:4px}.analytics-mini{padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}.analytics-mini strong{display:block;font-size:20px}.analytics-mini span{font-size:11px;color:var(--muted)}
+@media(max-width:980px){.type-management-row{grid-template-columns:38px 1fr 42px!important}.type-management-row>*:nth-child(n+4){grid-column:auto}.entity-overview,.analytics-strip{grid-template-columns:1fr 1fr}.kanban-board{grid-template-columns:repeat(5,260px)}}
+@media(max-width:600px){.advanced-filter-bar{padding:9px 12px}.filter-field{min-width:calc(50% - 5px);flex:1}.entity-overview,.analytics-strip{grid-template-columns:1fr}.command-backdrop{padding-top:5vh}.command-box{width:96vw}}
+
+.toolbar{max-width:min(920px,72vw)} .toolbar #sortSelect{min-width:210px;max-width:320px;flex:0 1 320px}.toolbar .view-toggle{display:flex;gap:5px}.toolbar .view-toggle .btn{width:38px;padding:0}.main-head{align-items:center}.main-title{min-width:220px}
+.side-section.sidebar-collapsed>*:not(.side-title){display:none}.side-title{cursor:pointer}.side-title .sidebar-mini-add,.side-title button{cursor:pointer}.pin-card.active{background:var(--primary-soft);color:var(--primary-2);border-color:var(--primary)}
+
+/* ---------- Agentic Prompt Router 21.0 ---------- */
+.agent-router{grid-column:1/-1;margin:0 0 16px;padding:18px;border:1px solid color-mix(in srgb,#7c3aed 45%,var(--line));border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,#7c3aed 16%,var(--panel)),color-mix(in srgb,#2563eb 8%,var(--panel)) 72%);box-shadow:0 10px 28px rgba(15,23,42,.07)}
+.agent-router-head{display:flex;align-items:flex-start;gap:14px;justify-content:space-between;margin-bottom:12px}.agent-router-head h3{margin:0 0 5px;font-size:23px}.agent-router-head p{margin:0;color:var(--muted);line-height:1.5}.agent-router-badge{padding:5px 9px;border-radius:999px;background:color-mix(in srgb,#7c3aed 14%,var(--panel));border:1px solid color-mix(in srgb,#7c3aed 36%,var(--line));font-size:11px;font-weight:900;white-space:nowrap}
+.agent-request-grid{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;align-items:stretch}.agent-request{min-height:94px;resize:vertical;background:var(--panel);border-width:2px;font-size:15px}.agent-mode-group{display:grid;grid-template-columns:1fr;gap:7px}.agent-mode{width:100%;justify-content:flex-start}.agent-mode.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-2)}
+.agent-router-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.agent-router-actions .btn.primary{min-width:180px}.agent-router-note{font-size:12px;color:var(--muted)}
+.agent-results{display:none;margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.agent-results.show{display:block}.agent-summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}.agent-summary-chip{padding:5px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12px;font-weight:800}.agent-summary-chip.intent{color:#6d28d9;border-color:color-mix(in srgb,#7c3aed 38%,var(--line));background:color-mix(in srgb,#7c3aed 8%,var(--panel))}
+.agent-result-list{display:flex;flex-direction:column;gap:9px}.agent-result{--agent:#64748b;display:grid;grid-template-columns:34px 70px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px;border:1px solid color-mix(in srgb,var(--agent) 34%,var(--line));border-left:6px solid var(--agent);border-radius:14px;background:color-mix(in srgb,var(--agent) 6%,var(--panel))}.agent-result.primary-match{--agent:#7c3aed}.agent-result.complementary{--agent:#2563eb}.agent-result input[type=checkbox]{margin-top:7px;width:18px;height:18px}.agent-score{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:4px solid color-mix(in srgb,var(--agent) 60%,var(--line));font-size:15px;font-weight:950}.agent-result-title{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.agent-result-title strong{font-size:16px}.agent-role{padding:3px 7px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:10px;font-weight:900}.agent-result p{margin:6px 0;color:var(--muted);font-size:12.5px;line-height:1.48}.agent-cover{display:flex;gap:5px;flex-wrap:wrap}.agent-cover span{padding:3px 6px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:10.5px}.agent-cover .covered{color:var(--success)}.agent-cover .missing{color:var(--warning)}.agent-result-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.agent-feedback.active{background:var(--primary-soft);border-color:var(--primary)}
+.agent-footer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}.agent-empty{padding:22px;text-align:center;border:1px dashed var(--line);border-radius:13px;background:var(--panel);color:var(--muted)}
+@media(max-width:800px){.agent-request-grid{grid-template-columns:1fr}.agent-mode-group{grid-template-columns:repeat(3,1fr)}.agent-result{grid-template-columns:28px 58px minmax(0,1fr)}.agent-result-actions{grid-column:3;justify-content:flex-start}.agent-score{width:52px;height:52px}.agent-router-head{flex-direction:column}.agent-router-badge{white-space:normal}}
+@media(max-width:520px){.agent-mode-group{grid-template-columns:1fr}.agent-result{grid-template-columns:26px minmax(0,1fr)}.agent-score{grid-column:2;width:auto;height:auto;border-radius:9px;border-width:2px;padding:5px 8px;justify-self:start}.agent-result-main{grid-column:2}.agent-result-actions{grid-column:2}.agent-router{padding:14px}}
+
 </style>
 
 </head>
@@ -460,7 +494,7 @@ textarea{resize:vertical;line-height:1.55}
     <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 18.17.0</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
-      <input class="search" id="globalSearch" type="search" placeholder="Cerca in titolo, testo, categoria, tipologie, cliente, progetto, SEO o note&#8230;">
+      <input class="search" id="globalSearch" type="search" placeholder="Cerca… anche cliente:zirafa progetto:seo stato:bozza">
       <button class="search-clear" id="clearSearch">&#215;</button>
     </div>
     <div class="top-actions">
@@ -487,8 +521,10 @@ textarea{resize:vertical;line-height:1.55}
     <section class="side-section library">
       <div class="side-title"><span>Libreria</span></div>
       <button class="side-link" id="dashboardBtn"><span>&#8962;</span><span>Dashboard</span></button>
+      <button class="side-link" id="agentSidebarBtn"><span>✨</span><span>Assistente</span></button>
       <button class="side-link active" data-filter="all"><span>&#9638;</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
       <button class="side-link" data-filter="favorites"><span>&#9733;</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
+      <button class="side-link" data-filter="pinned"><span>⌖</span><span>Pinnati</span><span class="count" id="countPinned">0</span></button>
       <button class="side-link" data-filter="recent"><span>&#9719;</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
       <button class="side-link" data-filter="uncategorized"><span>&#9671;</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
       <button class="side-link" data-filter="archived"><span>&#9635;</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
@@ -498,6 +534,14 @@ textarea{resize:vertical;line-height:1.55}
     <section class="side-section backup">
       <button class="side-link" id="backupBtn"><span>&#8681;</span><span>Crea backup completo</span></button>
       <div class="hint" style="padding:8px;color:var(--sidebar-muted)">Il backup include prompt, variabili e file caricati.</div>
+    </section>
+    <section class="side-section collections">
+      <div class="side-title"><span>Raccolte</span><button class="sidebar-mini-add" id="addCollectionQuick" type="button" title="Nuova raccolta">+</button></div>
+      <div id="collectionSidebarList"></div>
+    </section>
+    <section class="side-section workflows">
+      <div class="side-title"><span>Workflow</span><button class="sidebar-mini-add" id="addWorkflowQuick" type="button" title="Nuovo workflow">+</button></div>
+      <div id="workflowSidebarList"></div>
     </section>
     <section class="side-section management">
       <div class="side-title"><span>Gestione</span></div>
@@ -521,7 +565,9 @@ textarea{resize:vertical;line-height:1.55}
           <option value="created_desc">Creati di recente</option>
           <option value="usage_desc">Pi&#249; utilizzati</option>
         </select>
-        <div class="view-toggle"><button class="btn small" id="gridBtn">&#9638;</button><button class="btn small" id="listBtn">&#9783;</button></div>
+        <button class="btn small" id="advancedFilterBtn" type="button">Filtri</button>
+        <button class="btn small" id="commandPaletteBtn" type="button" title="Cmd/Ctrl+K">⌘K</button>
+        <div class="view-toggle"><button class="btn small" id="gridBtn" title="Griglia">&#9638;</button><button class="btn small" id="listBtn" title="Lista">&#9783;</button><button class="btn small" id="tableBtn" title="Tabella">▦</button><button class="btn small" id="kanbanBtn" title="Kanban">▤</button></div>
       </div>
     </div>
     <div class="bulkbar" id="bulkbar">
@@ -536,6 +582,14 @@ textarea{resize:vertical;line-height:1.55}
       <button class="btn small" id="bulkArchiveBtn">Archivia</button>
       <button class="btn small danger" id="bulkTrashBtn">Cestina</button>
       <button class="btn small" id="clearSelectionBtn">Annulla</button>
+    </div>
+    <div class="advanced-filter-bar" id="advancedFilterBar" hidden>
+      <div class="filter-field"><label>Stato</label><select id="filterStatus"><option value="">Tutti</option><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option></select></div>
+      <div class="filter-field"><label>Utilizzo</label><select id="filterUsage"><option value="">Tutti</option><option value="used">Usati</option><option value="never">Mai usati</option><option value="stale">Non usati da 90 giorni</option></select></div>
+      <label class="filter-check"><input type="checkbox" id="filterWithVariables"> Con variabili</label>
+      <label class="filter-check"><input type="checkbox" id="filterWithFiles"> Con allegati</label>
+      <label class="filter-check"><input type="checkbox" id="filterOnlyDuplicates"> Possibili duplicati</label>
+      <button class="btn small" id="tableColumnsBtn" type="button">Colonne tabella</button><button class="btn small" id="resetAdvancedFilters" type="button">Azzera filtri</button>
     </div>
     <div class="content">
       <div class="stats" id="stats"></div>
@@ -616,7 +670,7 @@ textarea{resize:vertical;line-height:1.55}
       </section>
     </div>
     <div class="editor-footer">
-      <span class="save-status" id="saveStatus">Salvataggio in corso&#8230;</span>
+      <span class="save-status" id="saveStatus">Salvataggio in corso&#8230;</span><span class="autosave-indicator" id="autosaveIndicator">Autosave attivo</span><button class="btn" id="versionHistoryBtn" type="button">Versioni</button><button class="btn" id="smartOrganizeBtn" type="button">✦ Suggerisci organizzazione</button>
       <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia prompt compilato</button>
       <button class="btn primary use-tool-action hidden" id="openToolUseBtn" type="button">Copia e apri il tool</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
@@ -640,6 +694,7 @@ textarea{resize:vertical;line-height:1.55}
           <div class="manage-list" id="manageTypes"></div>
           <div class="inline-form" style="grid-template-columns:1fr auto">
             <input id="newTypeName" type="text" placeholder="Es. Fornitori, Canali, Brand">
+            <select id="newTypeTemplate" title="Template tipologia"><option value="simple">Semplice</option><option value="client">Cliente</option><option value="project">Progetto</option><option value="site">Sito</option><option value="tool">Tool</option><option value="workflow">Workflow</option><option value="tag">Tag avanzato</option></select>
             <button class="btn primary small" id="addTypeBtn">Aggiungi tipologia</button>
           </div>
         </div>
@@ -692,6 +747,7 @@ textarea{resize:vertical;line-height:1.55}
             <button class="btn primary small" id="addSeoBtn">Aggiungi</button>
           </div>
         </div>
+        <div class="panel-box"><h4>Preferenze workspace</h4><label class="filter-check"><input id="hideEmptySidebarTypes" type="checkbox"> Nascondi tipologie senza elementi</label><div class="field" style="margin-top:10px"><label>Elimina automaticamente dal cestino dopo N giorni</label><input id="trashRetentionDays" type="number" min="0" max="3650" value="0"><div class="hint">0 = disattivato. Il backup automatico resta attivo prima delle operazioni distruttive.</div></div></div>
         <div class="dynamic-manage-panels" id="dynamicManagePanels"></div>
       </div>
     </div>
@@ -706,14 +762,15 @@ textarea{resize:vertical;line-height:1.55}
   </div>
 </div>
 
+<div class="command-backdrop" id="commandBackdrop" aria-hidden="true"><div class="command-box" role="dialog" aria-modal="true" aria-label="Comandi rapidi"><input class="command-input" id="commandInput" placeholder="Cerca prompt o comando…"><div class="command-results" id="commandResults"></div></div></div>
 <input type="file" id="importInput" accept=".json,application/json" hidden>
 <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 
 <script>
 (() => {
 "use strict";
-const APP_VERSION="19.1.0";
-const APP_RELEASE_NAME="Tipologie sidebar dinamiche · QA";
+const APP_VERSION="21.0.0";
+const APP_RELEASE_NAME="Agentic Prompt Router · selezione intelligente e workflow";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -723,9 +780,9 @@ console.info(`Prompt Studio v${APP_VERSION} avviato`);
 
 /* ---------- Configurazione e stato ---------- */
 const DB_NAME="PromptStudioStandalone";
-const DB_VERSION=7;
-const ARCHIVE_SCHEMA_VERSION=24;
-const PROMPT_BUNDLE_SCHEMA_VERSION=24;
+const DB_VERSION=8;
+const ARCHIVE_SCHEMA_VERSION=25;
+const PROMPT_BUNDLE_SCHEMA_VERSION=25;
 const STORES=["prompts","categories","clients","projects","gptsites","seo","customTypes","customEntities","settings","backups","versions"];
 const CATEGORY_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488","#9333ea","#c2410c","#0369a1","#be123c","#15803d","#a16207"];
 const VARIABLE_COLORS=["#2563eb","#7c3aed","#db2777","#ea580c","#059669","#0891b2","#ca8a04","#dc2626","#4f46e5","#0d9488"];
@@ -765,6 +822,8 @@ const state={
   recentValues:readStoredJson("ps_recent_values",{}),
   openCategories:new Set(Array.isArray(storedOpenCategories)?storedOpenCategories:[]),
   manageSubcategoryFilter:null,
+  advancedFilters:{status:"",usage:"",withVariables:false,withFiles:false,duplicates:false},
+  collections:[],workflows:[],commandQuery:"",autosaveTimer:null,lastAutosaveAt:null,
   busy:new Set(),modalReturnFocus:{}
 };
 const $=value=>{
@@ -1443,6 +1502,7 @@ function filteredPrompts(){
   else if(filter.type==="archived")items=items.filter(item=>!item.deletedAt&&item.status==="archived");
   else items=items.filter(item=>!item.deletedAt&&item.status!=="archived");
   if(filter.type==="favorites")items=items.filter(item=>item.favorite);
+  if(filter.type==="pinned")items=items.filter(item=>item.pinned);
   if(filter.type==="recent"){const limit=Date.now()-7*864e5;items=items.filter(item=>dateTimestamp(item.updatedAt)>=limit)}
   if(filter.type==="uncategorized")items=items.filter(item=>!item.categoryId&&!item.subcategoryId);
   if(filter.type==="category"){
@@ -1453,12 +1513,12 @@ function filteredPrompts(){
   if(filter.type==="project")items=items.filter(item=>item.projectId===filter.id);
   if(filter.type==="gptsite")items=items.filter(item=>item.gptSiteId===filter.id);
   if(filter.type==="seo")items=items.filter(item=>item.seoId===filter.id);
-  if(filter.type==="custom")items=items.filter(item=>customAssignmentValue(item,filter.typeId)===filter.id);
+  if(filter.type==="custom")items=items.filter(item=>customAssignmentValues(item,filter.typeId).includes(filter.id));
   const query=normalize(state.query);
   if(query){
     const words=query.split(" ").filter(Boolean);
     items=items.filter(item=>{
-      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name,projectById(item.projectId)?.name,gptSiteById(item.gptSiteId)?.name,seoById(item.seoId)?.name,...Object.entries(item.customAssignments||{}).map(([typeId,entityId])=>`${customTypeById(typeId)?.name||""} ${customEntityById(entityId)?.name||""}`)].join(" "));
+      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name,projectById(item.projectId)?.name,gptSiteById(item.gptSiteId)?.name,seoById(item.seoId)?.name,...Object.entries(item.customAssignments||{}).flatMap(([typeId,entityIds])=>customAssignmentValues(item,typeId).map(entityId=>`${customTypeById(typeId)?.name||""} ${customEntityById(entityId)?.name||""}`))].join(" "));
       return words.every(word=>text.includes(word));
     });
   }
@@ -1480,6 +1540,7 @@ function filterInfo(){
   const {type,id}=state.filter;
   if(type==="all")return ["Tutti i prompt","La tua libreria completa"];
   if(type==="favorites")return ["Preferiti","I prompt che utilizzi pi\u00F9 spesso"];
+  if(type==="pinned")return ["Pinnati","Prompt fissati in evidenza"];
   if(type==="recent")return ["Recenti","Modificati negli ultimi sette giorni"];
   if(type==="uncategorized")return ["Senza categoria","Prompt ancora da organizzare"];
   if(type==="archived")return ["Archivio","Prompt esclusi dalla libreria attiva"];
@@ -1500,6 +1561,7 @@ function renderSidebar(){
   const live=livePrompts(),active=activePrompts();
   $("countAll").textContent=live.length;
   $("countFavorites").textContent=live.filter(item=>item.favorite).length;
+  $("countPinned").textContent=live.filter(item=>item.pinned).length;
   $("countRecent").textContent=live.filter(item=>{const timestamp=dateTimestamp(item.updatedAt);return timestamp>0&&Date.now()-timestamp<=7*864e5}).length;
   $("countUncategorized").textContent=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
   $("countArchived").textContent=active.filter(item=>item.status==="archived").length;
@@ -1528,7 +1590,7 @@ function renderSidebar(){
     const selected=definition.custom
       ?(state.filter.type==="custom"&&state.filter.typeId===definition.typeId?state.filter.id:"all")
       :(state.filter.type===definition.type?state.filter.id:"all");
-    const countFor=entity=>live.filter(prompt=>definition.custom?customAssignmentValue(prompt,definition.typeId)===entity.id:prompt[definition.field]===entity.id).length;
+    const countFor=entity=>live.filter(prompt=>definition.custom?customAssignmentValues(prompt,definition.typeId).includes(entity.id):prompt[definition.field]===entity.id).length;
     return {label:definition.label,html:`<section class="side-section ${esc(definition.className||"dynamic-type")}" ${definition.custom?`style="--dynamic-accent:${esc(definition.color||"#64748b")}"`:""}>
       <div class="side-title"><span>${esc(definition.label)}</span></div>
       <select class="sidebar-picker dynamic-sidebar-picker" data-sidebar-type="${esc(definition.type)}" aria-label="Scegli ${esc(definition.label)}">
@@ -1807,7 +1869,7 @@ function cardHtml(prompt){
   if(project)origins.push(`<span class="prompt-origin-item">Progetto: ${esc(project.name)}</span>`);
   if(gptSite)origins.push(`<span class="prompt-origin-item">GPTSites: ${esc(gptSite.name)}</span>`);
   if(seoItem)origins.push(`<span class="prompt-origin-item">SEO: ${esc(seoItem.name)}</span>`);
-  Object.entries(prompt.customAssignments||{}).forEach(([typeId,entityId])=>{const type=customTypeById(typeId),entity=customEntityById(entityId);if(type&&entity)origins.push(`<span class="prompt-origin-item">${esc(type.name)}: ${esc(entity.name)}</span>`)});
+  Object.entries(prompt.customAssignments||{}).forEach(([typeId])=>{const type=customTypeById(typeId);customAssignmentValues(prompt,typeId).forEach(entityId=>{const entity=customEntityById(entityId);if(type&&entity)origins.push(`<span class="prompt-origin-item">${esc(type.name)}: ${esc(entity.name)}</span>`)})});
   if(!origins.length)origins.push('<span class="prompt-origin-item empty">Non assegnato</span>');
   const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
   const variableCount=extractVariables(prompt.content).length;
@@ -1824,13 +1886,13 @@ function cardHtml(prompt){
       ${project?`<span class="chip">Progetto: ${esc(project.name)}</span>`:""}
       ${gptSite?`<span class="chip">GPTSites: ${esc(gptSite.name)}</span>`:""}
       ${seoItem?`<span class="chip">SEO: ${esc(seoItem.name)}</span>`:""}
-      ${Object.entries(prompt.customAssignments||{}).map(([typeId,entityId])=>{const type=customTypeById(typeId),entity=customEntityById(entityId);return type&&entity?`<span class="chip">${esc(type.name)}: ${esc(entity.name)}</span>`:""}).join("")}
+      ${Object.entries(prompt.customAssignments||{}).flatMap(([typeId])=>{const type=customTypeById(typeId);return customAssignmentValues(prompt,typeId).map(entityId=>{const entity=customEntityById(entityId);return type&&entity?`<span class="chip">${esc(type.name)}: ${esc(entity.name)}</span>`:""})}).join("")}
       ${variableCount?`<span class="chip">${variableCount} variabil${variableCount===1?"e":"i"}</span>`:""}
       ${attachmentCount?`<span class="chip">${attachmentCount} file allegat${attachmentCount===1?"o":"i"}</span>`:""}
       <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
     </div>
     <div class="card-actions">
-      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">\u25B6 Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">\u270E Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">\u22EF</button><div class="card-menu-panel"><button class="btn small copy-card">Copia sorgente</button><button class="btn small move-prompt-card">Sposta tra sezioni</button><button class="btn small copy-prompt-card">Copia tra sezioni</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">\u25B6 Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">\u270E Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">\u22EF</button><div class="card-menu-panel"><button class="btn small pin-card ${prompt.pinned?"active":""}">${prompt.pinned?"Sblocca":"Pinna"}</button><button class="btn small copy-card">Copia sorgente</button><button class="btn small move-prompt-card">Sposta tra sezioni</button><button class="btn small copy-prompt-card">Copia tra sezioni</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
     </div>
   </article>`;
 }
@@ -1906,6 +1968,7 @@ function bindCardEvents(){
     card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=extractVariables(prompt.content);if(!vars.length&&!normalizeHttpUrl(prompt.toolUrl||"")){quickCopy(id)}else openEditor(id,"variables","use")});
     card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
     card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();event.currentTarget.closest('.card-menu').classList.toggle('open')});
+    card.querySelector(".pin-card")?.addEventListener("click",async()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;await put("prompts",{...prompt,pinned:!prompt.pinned,updatedAt:now()});await loadData();render();toast(prompt.pinned?"Prompt sbloccato.":"Prompt pinnato.","success")});
     card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopy(id));
     card.querySelector(".move-prompt-card")?.addEventListener("click",()=>openPromptTransferDialog([id],"move"));
     card.querySelector(".copy-prompt-card")?.addEventListener("click",()=>openPromptTransferDialog([id],"copy"));
@@ -2422,6 +2485,7 @@ function editorPayload(){
     notes:$("promptNotes").value.trim(),
     toolUrl:$("promptToolUrl").value.trim(),
     favorite:$("promptFavorite").checked,
+    pinned:existing?.pinned||false,
     usageCount:existing?.usageCount||0,
     version:(existing?.version||0)+1,
     variableValues:collectVariableValues(),
@@ -2871,9 +2935,15 @@ function renderManage(){
   $("manageSeo").innerHTML=state.seo.map(item=>`
     <div class="manage-row"><div class="grow"><strong class="seo-name-editable category-name-editable" data-id="${esc(item.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(item.name)}</strong></div>${moveButton("seo",item.id)}<button class="btn small danger delete-seo" data-id="${esc(item.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun elemento SEO presente.</div>';
 
-  $("manageTypes").innerHTML=state.customTypes.map(type=>`<div class="manage-row type-management-row">
-    <div class="grow"><strong class="custom-type-name-editable category-name-editable" data-id="${esc(type.id)}" tabindex="0" role="button" title="Clicca per rinominare la tipologia">${esc(type.name)}</strong></div>
+  $("manageTypes").innerHTML=state.customTypes.map((type,index)=>`<div class="manage-row type-management-row">
+    <input class="type-icon-input" data-id="${esc(type.id)}" type="text" maxlength="3" value="${esc(type.icon||"◆")}" title="Icona/emoji">
+    <div class="grow"><strong class="custom-type-name-editable category-name-editable" data-id="${esc(type.id)}" tabindex="0" role="button" title="Clicca per rinominare la tipologia">${esc(type.name)}</strong><div class="hint">${type.visible===false?"Nascosta dalla sidebar":"Visibile"} · ${type.multi?"Multi-assegnazione":"Assegnazione singola"}</div></div>
     <input class="color-input custom-type-color" data-id="${esc(type.id)}" type="color" value="${esc(type.color||"#64748b")}">
+    <label class="mini-toggle" title="Mostra/nascondi in sidebar"><input class="custom-type-visible" data-id="${esc(type.id)}" type="checkbox" ${type.visible===false?"":"checked"}>👁</label>
+    <label class="mini-toggle" title="Consenti più valori"><input class="custom-type-multi" data-id="${esc(type.id)}" type="checkbox" ${type.multi?"checked":""}>∞</label>
+    <button class="btn small custom-type-up" data-id="${esc(type.id)}" ${index===0?"disabled":""}>↑</button>
+    <button class="btn small custom-type-down" data-id="${esc(type.id)}" ${index===state.customTypes.length-1?"disabled":""}>↓</button>
+    <button class="btn small duplicate-custom-type" data-id="${esc(type.id)}">Duplica</button>
     <button class="btn small danger delete-custom-type" data-id="${esc(type.id)}">Elimina</button>
   </div>`).join("")||'<div class="hint">Nessuna tipologia personalizzata. Creane una dal campo qui sotto.</div>';
 
@@ -3277,7 +3347,7 @@ async function moveEntityAcrossSections(sourceType,id,targetType){
   const affected=sourceType==="category"
     ?state.prompts.filter(prompt=>removedIds.has(prompt.categoryId)||removedIds.has(prompt.subcategoryId))
     :sourceDefinition.custom
-      ?state.prompts.filter(prompt=>customAssignmentValue(prompt,sourceDefinition.typeId)===id)
+      ?state.prompts.filter(prompt=>customAssignmentValues(prompt,sourceDefinition.typeId).includes(id))
       :state.prompts.filter(prompt=>prompt[sourceDefinition.field]===id);
 
   try{
@@ -3350,15 +3420,15 @@ async function beginInlineCustomEntityRename(labelElement){
   labelElement.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};labelElement.onblur=()=>finish(true);labelElement.onclick=event=>event.stopPropagation();
 }
 function deleteCustomEntity(id){
-  const item=customEntityById(id);if(!item)return;const type=customTypeById(item.typeId);const affected=state.prompts.filter(prompt=>customAssignmentValue(prompt,item.typeId)===id);
+  const item=customEntityById(id);if(!item)return;const type=customTypeById(item.typeId);const affected=state.prompts.filter(prompt=>customAssignmentValues(prompt,item.typeId).includes(id));
   confirmAction("Elimina elemento",`${affected.length} prompt perderanno l’assegnazione a “${item.name}”, ma non saranno eliminati.`,async()=>{
     const tx=state.db.transaction(["prompts","customEntities"],"readwrite"),promptStore=tx.objectStore("prompts"),entityStore=tx.objectStore("customEntities");
-    affected.forEach(prompt=>promptStore.put({...prompt,customAssignments:{...(prompt.customAssignments||{}),[item.typeId]:null},updatedAt:now()}));entityStore.delete(id);await transactionDone(tx);
+    affected.forEach(prompt=>{const type=customTypeById(item.typeId),remaining=customAssignmentValues(prompt,item.typeId).filter(entityId=>entityId!==id);promptStore.put({...prompt,customAssignments:{...(prompt.customAssignments||{}),[item.typeId]:type?.multi?remaining:(remaining[0]||null)},updatedAt:now()})});entityStore.delete(id);await transactionDone(tx);
     if(state.filter.type==="custom"&&state.filter.id===id)state.filter={type:"all",id:null};await loadData();render();renderManage();toast(`Elemento “${item.name}” eliminato da ${type?.name||"tipologia"}.`,"success");
   });
 }
 function deleteCustomType(id){
-  const type=customTypeById(id);if(!type)return;const entities=customEntitiesForType(id);const entityIds=new Set(entities.map(item=>item.id));const affected=state.prompts.filter(prompt=>entityIds.has(customAssignmentValue(prompt,id)));
+  const type=customTypeById(id);if(!type)return;const entities=customEntitiesForType(id);const entityIds=new Set(entities.map(item=>item.id));const affected=state.prompts.filter(prompt=>customAssignmentValues(prompt,id).some(entityId=>entityIds.has(entityId)));
   confirmAction("Elimina tipologia",`La tipologia “${type.name}” e i suoi ${entities.length} elementi verranno eliminati. ${affected.length} prompt perderanno solo questa assegnazione.`,async()=>{
     const tx=state.db.transaction(["prompts","customTypes","customEntities"],"readwrite"),promptStore=tx.objectStore("prompts"),typeStore=tx.objectStore("customTypes"),entityStore=tx.objectStore("customEntities");
     affected.forEach(prompt=>{const assignments={...(prompt.customAssignments||{})};delete assignments[id];promptStore.put({...prompt,customAssignments:assignments,updatedAt:now()})});
@@ -3418,7 +3488,7 @@ function snapshot(){
   return {
     app:"Prompt Studio Standalone",version:ARCHIVE_SCHEMA_VERSION,schemaVersion:ARCHIVE_SCHEMA_VERSION,appVersion:APP_VERSION,exportedAt:now(),
     includesEmbeddedFiles:true,embeddedFileCount:fileCount,excludedFileCount,
-    prompts:state.prompts,categories:state.categories,clients:state.clients,gptsites:state.gptsites,projects:state.projects,seo:state.seo,customTypes:state.customTypes,customEntities:state.customEntities
+    prompts:state.prompts,categories:state.categories,clients:state.clients,gptsites:state.gptsites,projects:state.projects,seo:state.seo,customTypes:state.customTypes,customEntities:state.customEntities,collections:state.collections,workflows:state.workflows
   };
 }
 function downloadJson(data,filename){
@@ -3616,7 +3686,7 @@ async function importData(file){
               if(normalizedIntroSource(prompt)!=="auto")return prompt;
               return {...prompt,intro:generatePromptIntro(prompt),introSource:"auto",introGeneratedAt:now(),introUpdatedAt:now()};
             });
-            await writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,customTypes,customEntities,prompts});
+            await writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,customTypes,customEntities,prompts});if(Array.isArray(data.collections)||mode==="replace"){state.collections=Array.isArray(data.collections)?data.collections:[];await saveSettingsRecord("collections",state.collections)}if(Array.isArray(data.workflows)||mode==="replace"){state.workflows=Array.isArray(data.workflows)?data.workflows:[];await saveSettingsRecord("workflows",state.workflows)}
             await loadData();await generateMissingPromptIntros({silent:true});render();
             const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
             toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
@@ -3842,6 +3912,254 @@ function bindEvents(){
 }
 
 
+
+
+/* ---------- Workspace avanzato 20.0 ---------- */
+function settingsRecord(id,fallback){return getOne("settings",id).then(record=>record?.value??fallback).catch(()=>fallback)}
+async function saveSettingsRecord(id,value){await put("settings",{id,value,updatedAt:now()});return value}
+async function loadWorkspaceSettings(){
+  state.collections=await settingsRecord("collections",[]);state.workflows=await settingsRecord("workflows",[]);
+  if(!Array.isArray(state.collections))state.collections=[];if(!Array.isArray(state.workflows))state.workflows=[];
+}
+function visibleSidebarTypes(){
+  const fixed=FIXED_ENTITY_TYPES;
+  const custom=state.customTypes.filter(type=>type.visible!==false).map((type,index)=>({type:`custom:${type.id}`,label:type.name,singular:type.singular||type.name,field:null,store:"customEntities",prefix:"customentity",className:"dynamic-type",custom:true,typeId:type.id,color:type.color||"#64748b",icon:type.icon||"◆",order:Number.isFinite(type.order)?type.order:index}));
+  return [...fixed,...custom].sort((a,b)=>{const ao=a.custom?(a.order??999):999,bo=b.custom?(b.order??999):999;if(a.custom&&b.custom&&ao!==bo)return ao-bo;return a.label.localeCompare(b.label,"it",{sensitivity:"base",numeric:true})});
+}
+function customAssignmentValues(prompt,typeId){const raw=prompt?.customAssignments?.[typeId];return Array.isArray(raw)?raw.filter(Boolean):(raw?[raw]:[])}
+function promptMatchesCustom(prompt,typeId,entityId){return customAssignmentValues(prompt,typeId).includes(entityId)}
+function promptTextFingerprint(prompt){return normalize(`${prompt?.title||""} ${String(prompt?.content||"").slice(0,1800)}`).replace(/\b(il|lo|la|i|gli|le|un|una|di|del|della|e|o|per|con|su|da|in|a)\b/g," ").replace(/\s+/g," ").trim()}
+function similarityScore(a,b){const aw=new Set(promptTextFingerprint(a).split(" ").filter(w=>w.length>3)),bw=new Set(promptTextFingerprint(b).split(" ").filter(w=>w.length>3));if(!aw.size||!bw.size)return 0;let hit=0;aw.forEach(w=>{if(bw.has(w))hit++});return Math.round(hit/Math.max(aw.size,bw.size)*100)}
+function duplicateCandidates(prompt,threshold=72){return livePrompts().filter(item=>item.id!==prompt.id).map(item=>({item,score:similarityScore(prompt,item)})).filter(x=>x.score>=threshold).sort((a,b)=>b.score-a.score).slice(0,5)}
+function duplicatePromptIds(){const ids=new Set();const live=livePrompts();for(let i=0;i<live.length;i++)for(let j=i+1;j<live.length;j++){if(similarityScore(live[i],live[j])>=78){ids.add(live[i].id);ids.add(live[j].id)}}return ids}
+function applyAdvancedFilters(items){const f=state.advancedFilters||{};const dup=f.duplicates?duplicatePromptIds():null;return items.filter(item=>{
+  if(f.status&&item.status!==f.status)return false;
+  if(f.usage==="used"&&!(item.usageCount>0))return false;if(f.usage==="never"&&(item.usageCount>0))return false;
+  if(f.usage==="stale"&&dateTimestamp(item.lastUsedAt)>Date.now()-90*864e5)return false;
+  if(f.withVariables&&!extractVariables(item.content).length)return false;if(f.withFiles&&!promptAttachmentCount(item))return false;
+  if(dup&&!dup.has(item.id))return false;return true;
+})}
+const _filteredPromptsV19=filteredPrompts;
+filteredPrompts=function(){return applyAdvancedFilters(_filteredPromptsV19())}
+
+function dynamicEntitySelectHtml(definition,prompt){
+  let entities=[],values=[];if(definition.type==="client"){entities=state.clients;values=[prompt?.clientId].filter(Boolean)}else if(definition.type==="project"){entities=state.projects;values=[prompt?.projectId].filter(Boolean)}else if(definition.type==="gptsite"){entities=state.gptsites;values=[prompt?.gptSiteId].filter(Boolean)}else if(definition.type==="seo"){entities=state.seo;values=[prompt?.seoId].filter(Boolean)}else if(definition.custom){entities=customEntitiesForType(definition.typeId);values=customAssignmentValues(prompt,definition.typeId)}
+  const type=definition.custom?customTypeById(definition.typeId):null,multiple=Boolean(type?.multi);
+  return `<div class="field"><label>${esc(definition.label)}</label><div class="inline-create-row"><select class="prompt-entity-select" data-entity-type="${esc(definition.type)}" ${multiple?'multiple size="3"':''}><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${values.includes(item.id)?"selected":""}>${esc(item.name)}</option>`).join("")}</select><button class="btn inline-create-btn" type="button" data-inline-create="${esc(definition.type)}" title="Crea nuovo ${esc(definition.singular||definition.label)}">+</button></div></div>`;
+}
+const _fillEditorSelectsV19=fillEditorSelects;
+fillEditorSelects=function(prompt){
+  const roots=rootCategoriesAlphabetical();$("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");$("promptCategory").value=prompt?.categoryId||"";fillSubcategories(prompt?.subcategoryId||"");
+  $("dynamicEditorFields").innerHTML=visibleSidebarTypes().map(definition=>dynamicEntitySelectHtml(definition,prompt)).join("");
+  $$('[data-inline-create]').forEach(button=>button.onclick=()=>inlineCreateEntity(button.dataset.inlineCreate));
+}
+async function inlineCreateEntity(type){const definition=entityDefinition(type)||sidebarTypeDefinition(type);if(!definition)return;const entered=window.prompt(`Nuovo elemento in ${definition.label}:`,"");if(entered===null)return;const name=entered.trim().replace(/\s+/g," ");if(!name)return;
+  let collection=entityCollection(type);if(collection.some(item=>normalize(item.name)===normalize(name))){toast("Esiste già un elemento con questo nome.","warning");return}
+  let item;if(definition.custom)item={id:uid("customentity"),typeId:definition.typeId,name,createdAt:now()};else item={id:uid(definition.prefix),name,createdAt:now()};await put(definition.store,item);await loadData();const draft=editorPayloadSafe();fillEditorSelects(draft);const select=document.querySelector(`.prompt-entity-select[data-entity-type="${CSS.escape(type)}"]`);if(select){[...select.options].forEach(o=>o.selected=o.value===item.id);select.dispatchEvent(new Event("change",{bubbles:true}))}toast(`“${name}” creato in ${definition.label}.`,"success")}
+function editorPayloadSafe(){try{return editorPayload()}catch{return state.editor.id?state.prompts.find(p=>p.id===state.editor.id)||{}:{}}}
+
+function readEditorAssignments(payload){
+  payload.clientId=document.querySelector('.prompt-entity-select[data-entity-type="client"]')?.value||null;payload.projectId=document.querySelector('.prompt-entity-select[data-entity-type="project"]')?.value||null;payload.gptSiteId=document.querySelector('.prompt-entity-select[data-entity-type="gptsite"]')?.value||null;payload.seoId=document.querySelector('.prompt-entity-select[data-entity-type="seo"]')?.value||null;
+  const custom={...(payload.customAssignments||{})};$$('#dynamicEditorFields .prompt-entity-select').filter(s=>s.dataset.entityType.startsWith("custom:")).forEach(select=>{const typeId=select.dataset.entityType.slice(7),type=customTypeById(typeId);const values=[...select.selectedOptions].map(o=>o.value).filter(Boolean);custom[typeId]=type?.multi?values:(values[0]||null)});payload.customAssignments=custom;return payload;
+}
+const _editorPayloadV19=editorPayload;
+editorPayload=function(){return readEditorAssignments(_editorPayloadV19())}
+
+async function snapshotVersion(prompt,reason="Salvataggio"){
+  if(!prompt?.id)return;const versions=(await getAll("versions")).filter(v=>v.promptId===prompt.id).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt));const last=versions[0];
+  const compact={title:prompt.title,content:prompt.content,intro:prompt.intro,categoryId:prompt.categoryId,subcategoryId:prompt.subcategoryId,clientId:prompt.clientId,projectId:prompt.projectId,gptSiteId:prompt.gptSiteId,seoId:prompt.seoId,customAssignments:prompt.customAssignments,status:prompt.status,tags:prompt.tags,notes:prompt.notes,toolUrl:prompt.toolUrl,favorite:prompt.favorite};
+  if(last&&JSON.stringify(last.snapshot)===JSON.stringify(compact))return;await put("versions",{id:uid("ver"),promptId:prompt.id,createdAt:now(),reason,snapshot:compact});
+  const all=(await getAll("versions")).filter(v=>v.promptId===prompt.id).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt));for(const old of all.slice(30))await remove("versions",old.id)
+}
+const _savePromptV19=savePrompt;
+savePrompt=async function(){const before=state.editor.id?state.prompts.find(p=>p.id===state.editor.id):null;if(before)await snapshotVersion(before,"Prima del salvataggio");return _savePromptV19()}
+function diffText(a,b){const A=String(a||"").split("\n"),B=String(b||"").split("\n"),out=[];const n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if(A[i]===B[i])continue;if(A[i]!==undefined)out.push(`- ${A[i]}`);if(B[i]!==undefined)out.push(`+ ${B[i]}`);if(out.length>80){out.push("… diff abbreviato");break}}return out.join("\n")||"Nessuna differenza testuale."}
+async function openVersionHistory(){if(!state.editor.id){toast("Salva prima il prompt.","warning");return}const current=state.prompts.find(p=>p.id===state.editor.id),versions=(await getAll("versions")).filter(v=>v.promptId===state.editor.id).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt));$("choiceTitle").textContent=`Versioni · ${current?.title||"Prompt"}`;$("choiceBody").innerHTML=versions.length?`<div class="version-list">${versions.map((v,i)=>`<div class="version-row"><div><strong>${esc(formatDate(v.createdAt))}</strong> · ${esc(v.reason||"Versione")}<details><summary>Confronta con versione attuale</summary><div class="version-diff">${esc(diffText(v.snapshot?.content,current?.content))}</div></details></div><button class="btn small restore-version" data-id="${esc(v.id)}">Ripristina</button></div>`).join("")}</div>`:'<div class="hint">Non ci sono ancora versioni precedenti.</div>';$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$$('.restore-version').forEach(btn=>btn.onclick=()=>restoreVersion(btn.dataset.id));openModal("choiceModal")}
+async function restoreVersion(id){const version=await getOne("versions",id);if(!version)return;const current=state.prompts.find(p=>p.id===version.promptId);if(!current)return;await snapshotVersion(current,"Prima del ripristino");await put("prompts",{...current,...version.snapshot,updatedAt:now(),version:(current.version||0)+1});await loadData();closeModal("choiceModal");openEditor(current.id,"prompt","edit");toast("Versione ripristinata.","success")}
+
+function scheduleAutosave(){if(!state.editor.id||state.editor.mode==="use")return;clearTimeout(state.autosaveTimer);const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Modifiche da salvare";indicator.className="autosave-indicator saving"}state.autosaveTimer=setTimeout(autosaveEditor,1200)}
+async function autosaveEditor(){if(!state.editor.id||!state.editor.dirty||!$("editorBackdrop")?.classList.contains("show"))return;try{const payload=editorPayload();if(!payload.title||!payload.content)return;const old=state.prompts.find(p=>p.id===payload.id);if(old)await snapshotVersion(old,"Autosave");await put("prompts",payload);await loadData();state.editor.dirty=false;state.lastAutosaveAt=now();const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Salvato automaticamente";indicator.className="autosave-indicator saved"}}catch(error){console.error(error);const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Autosave non riuscito";indicator.className="autosave-indicator"}}}
+const _markDirtyV19=markDirty;markDirty=function(){_markDirtyV19();scheduleAutosave()}
+
+function promptTableHtml(items){const customCols=state.customTypes.filter(t=>t.visible!==false).slice(0,4);return `<div class="table-wrap"><table class="prompt-table"><thead><tr><th>Prompt</th><th>Categoria</th><th>Cliente</th><th>Progetto</th>${customCols.map(t=>`<th>${esc(t.name)}</th>`).join("")}<th>Stato</th><th>Uso</th><th>Aggiornato</th><th></th></tr></thead><tbody>${items.map(p=>{const cat=catById(p.subcategoryId)||catById(p.categoryId),client=clientById(p.clientId),project=projectById(p.projectId);return `<tr><td><button class="table-title-btn" data-table-open="${esc(p.id)}">${esc(p.title||"Senza titolo")}</button></td><td>${esc(cat?.name||"—")}</td><td>${esc(client?.name||"—")}</td><td>${esc(project?.name||"—")}</td>${customCols.map(t=>`<td>${customAssignmentValues(p,t.id).map(id=>customEntityById(id)?.name).filter(Boolean).map(esc).join(", ")||"—"}</td>`).join("")}<td>${esc(p.status||"")}</td><td>${p.usageCount||0}</td><td>${esc(formatDate(p.updatedAt))}</td><td class="table-actions"><button class="btn small" data-table-use="${esc(p.id)}">Usa</button></td></tr>`}).join("")}</tbody></table></div>`}
+function kanbanHtml(items){const statuses=[['draft','Bozza'],['review','Da verificare'],['approved','Approvato'],['obsolete','Obsoleto'],['archived','Archiviato']];return `<div class="kanban-board">${statuses.map(([status,label])=>{const cards=items.filter(p=>p.status===status);return `<section class="kanban-column" data-kanban-status="${status}"><div class="kanban-head"><span>${label}</span><span>${cards.length}</span></div>${cards.map(p=>`<article class="kanban-card" draggable="true" data-kanban-id="${esc(p.id)}"><strong>${esc(p.title||"Senza titolo")}</strong><small>${esc(catById(p.categoryId)?.name||"Senza categoria")}</small></article>`).join("")}</section>`}).join("")}</div>`}
+const _renderCardsV19=renderCards;
+renderCards=function(){
+  if(!["table","kanban"].includes(state.view)){_renderCardsV19();bindEntityOverviewShortcuts();return}
+  const items=filteredPrompts();$("cards").className="cards";$("cards").innerHTML=state.view==="table"?promptTableHtml(items):kanbanHtml(items);const [title,subtitle]=filterInfo();$("viewTitle").textContent=title;$("viewSubtitle").textContent=state.query?`${items.length} risultati per “${state.query}”`:`${subtitle} · ${items.length} elementi`;updateBulkbar();
+  $$('[data-table-open]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.tableOpen,"prompt","edit"));$$('[data-table-use]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.tableUse,"variables","use"));
+  $$('[data-kanban-id]').forEach(card=>card.ondragstart=e=>e.dataTransfer.setData('text/prompt-id',card.dataset.kanbanId));$$('[data-kanban-status]').forEach(col=>{col.ondragover=e=>e.preventDefault();col.ondrop=async e=>{e.preventDefault();const id=e.dataTransfer.getData('text/prompt-id'),prompt=state.prompts.find(p=>p.id===id);if(!prompt)return;await snapshotVersion(prompt,"Cambio stato Kanban");await put("prompts",{...prompt,status:col.dataset.kanbanStatus,updatedAt:now()});await loadData();renderCards();toast("Stato aggiornato dal Kanban.","success")}})
+}
+
+function renderCollectionSidebar(){const live=livePrompts();$("collectionSidebarList").innerHTML=state.collections.length?state.collections.map(c=>`<button class="collection-chip" data-collection-id="${esc(c.id)}"><span>${esc(c.icon||"◈")}</span><span>${esc(c.name)}</span><span class="count">${(c.promptIds||[]).filter(id=>live.some(p=>p.id===id)).length}</span></button>`).join(""):'<div class="hint" style="padding:4px 8px;color:var(--sidebar-muted)">Nessuna raccolta</div>';$$('[data-collection-id]').forEach(btn=>btn.onclick=()=>openCollection(btn.dataset.collectionId))}
+async function createCollection(){const name=window.prompt("Nome della raccolta:","");if(!name?.trim())return;state.collections.push({id:uid("collection"),name:name.trim(),icon:"◈",promptIds:[],createdAt:now()});await saveSettingsRecord("collections",state.collections);renderCollectionSidebar();toast("Raccolta creata.","success")}
+function openCollection(id){const c=state.collections.find(x=>x.id===id);if(!c)return;state.filter={type:"collection",id};state.selected.clear();renderCards();$("viewTitle").textContent=c.name;$("viewSubtitle").textContent=`Raccolta · ${(c.promptIds||[]).length} prompt`}
+const _filteredPromptsCollection=filteredPrompts;filteredPrompts=function(){let items=_filteredPromptsCollection();if(state.filter.type==="collection"){const c=state.collections.find(x=>x.id===state.filter.id);items=items.filter(p=>(c?.promptIds||[]).includes(p.id))}return items}
+async function addSelectedToCollection(){if(!state.selected.size){toast("Seleziona almeno un prompt.","warning");return}if(!state.collections.length){await createCollection();if(!state.collections.length)return}const options=state.collections.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");choiceAction("Aggiungi a raccolta","Raccolta",options,async id=>{const c=state.collections.find(x=>x.id===id);if(!c)return;c.promptIds=[...new Set([...(c.promptIds||[]),...state.selected])];await saveSettingsRecord("collections",state.collections);state.selected.clear();render();toast("Prompt aggiunti alla raccolta.","success")})}
+
+function renderWorkflowSidebar(){$("workflowSidebarList").innerHTML=state.workflows.length?state.workflows.map(w=>`<button class="workflow-chip-link" data-workflow-id="${esc(w.id)}"><span>⇢</span><span>${esc(w.name)}</span><span class="count">${(w.steps||[]).length}</span></button>`).join(""):'<div class="hint" style="padding:4px 8px;color:var(--sidebar-muted)">Nessun workflow</div>';$$('[data-workflow-id]').forEach(btn=>btn.onclick=()=>openWorkflow(btn.dataset.workflowId))}
+async function createWorkflow(){const name=window.prompt("Nome del workflow:","");if(!name?.trim())return;state.workflows.push({id:uid("workflow"),name:name.trim(),steps:[],createdAt:now()});await saveSettingsRecord("workflows",state.workflows);renderWorkflowSidebar();openWorkflow(state.workflows.at(-1).id)}
+function openWorkflow(id){const w=state.workflows.find(x=>x.id===id);if(!w)return;$("choiceTitle").textContent=`Workflow · ${w.name}`;$("choiceBody").innerHTML=`<div class="hint" style="margin-bottom:10px">Concatena prompt nell'ordine di esecuzione.</div><div class="relation-list">${(w.steps||[]).map((pid,i)=>{const p=state.prompts.find(x=>x.id===pid);return `<div class="relation-row"><strong>${i+1}</strong><span class="grow">${esc(p?.title||"Prompt mancante")}</span><button class="btn small remove-workflow-step" data-index="${i}">Rimuovi</button></div>`}).join("")||'<div class="hint">Nessuno step.</div>'}</div><div class="inline-form" style="grid-template-columns:1fr auto;margin-top:12px"><select id="workflowAddPrompt"><option value="">Scegli prompt…</option>${livePrompts().map(p=>`<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("")}</select><button class="btn primary small" id="workflowAddBtn">Aggiungi</button></div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$("workflowAddBtn").onclick=async()=>{const pid=$("workflowAddPrompt").value;if(!pid)return;w.steps=[...(w.steps||[]),pid];await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)};$$('.remove-workflow-step').forEach(btn=>btn.onclick=async()=>{w.steps.splice(Number(btn.dataset.index),1);await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)});openModal("choiceModal")}
+
+function relatedEntityStats(type,id){const prompts=livePrompts().filter(p=>type==="custom"?promptMatchesCustom(p,state.filter.typeId,id):p[entityDefinition(type)?.field]===id);const projects=new Set(prompts.map(p=>p.projectId).filter(Boolean)),clients=new Set(prompts.map(p=>p.clientId).filter(Boolean)),sites=new Set(prompts.map(p=>p.gptSiteId).filter(Boolean));return {prompts,projects,clients,sites}}
+function openEntityOverview(type,id,typeId=null){let entity,definition;if(type==="custom"){entity=customEntityById(id);definition=customTypeById(typeId)?{label:customTypeById(typeId).name}:null}else{entity=entityByType(type,id);definition=entityDefinition(type)}if(!entity||!definition)return;const prompts=livePrompts().filter(p=>type==="custom"?promptMatchesCustom(p,typeId,id):p[definition.field]===id);const used=prompts.reduce((s,p)=>s+(p.usageCount||0),0),last=prompts.sort((a,b)=>dateTimestamp(b.updatedAt)-dateTimestamp(a.updatedAt))[0];$("choiceTitle").textContent=`${definition.label} · ${entity.name}`;$("choiceBody").innerHTML=`<div class="entity-overview"><div class="stat"><strong>${prompts.length}</strong><span>Prompt</span></div><div class="stat"><strong>${used}</strong><span>Utilizzi</span></div><div class="stat"><strong>${new Set(prompts.map(p=>p.projectId).filter(Boolean)).size}</strong><span>Progetti collegati</span></div><div class="stat"><strong>${last?esc(formatDate(last.updatedAt)):"—"}</strong><span>Ultima attività</span></div></div><div class="relation-list">${prompts.slice(0,40).map(p=>`<div class="relation-row"><span class="grow"><strong>${esc(p.title)}</strong><br><small>${esc(catById(p.categoryId)?.name||"Senza categoria")}</small></span><button class="btn small entity-open-prompt" data-id="${esc(p.id)}">Apri</button></div>`).join("")||'<div class="hint">Nessun prompt collegato.</div>'}</div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$$('.entity-open-prompt').forEach(btn=>btn.onclick=()=>{closeModal("choiceModal");openEditor(btn.dataset.id)});openModal("choiceModal")}
+function bindEntityOverviewShortcuts(){/* riservato per estensioni future */}
+
+function analyticsHtml(){const live=livePrompts(),used=live.filter(p=>p.usageCount>0),never=live.length-used.length,stale=live.filter(p=>p.usageCount>0&&dateTimestamp(p.lastUsedAt)<Date.now()-90*864e5).length,top=[...live].sort((a,b)=>(b.usageCount||0)-(a.usageCount||0))[0];return `<div class="analytics-strip"><div class="analytics-mini"><strong>${used.length}</strong><span>Prompt già utilizzati</span></div><div class="analytics-mini"><strong>${never}</strong><span>Mai utilizzati</span></div><div class="analytics-mini"><strong>${stale}</strong><span>Inattivi da 90+ giorni</span></div><div class="analytics-mini"><strong>${esc(top?.title||"—")}</strong><span>Prompt più usato · ${top?.usageCount||0} utilizzi</span></div></div>`}
+const _renderStatsV19=renderStats;renderStats=function(){_renderStatsV19();if(!$("stats")?.classList.contains("hidden")&&$("stats")?.innerHTML)$("stats").insertAdjacentHTML("afterbegin",analyticsHtml())}
+
+function commandItems(query){const q=normalize(query);const commands=[{label:"Nuovo prompt",hint:"⌘N",run:()=>openEditor()},{label:"Nuova tipologia",hint:"Gestione",run:()=>{renderManage();openModal("manageModal");setTimeout(()=>$("newTypeName")?.focus(),80)}},{label:"Nuova raccolta",hint:"Raccolte",run:createCollection},{label:"Nuovo workflow",hint:"Workflow",run:createWorkflow},{label:"Apri gestione",hint:"Struttura",run:()=>{renderManage();openModal("manageModal")}},{label:"Esporta backup",hint:"Backup",run:exportData},{label:"Diagnostica",hint:"QA",run:()=>performDashboardAction("diagnostics")}];const promptItems=livePrompts().filter(p=>!q||normalize(`${p.title} ${p.content}`).includes(q)).slice(0,20).map(p=>({label:p.title,hint:"Prompt",run:()=>openEditor(p.id,"variables","use")}));return [...commands.filter(c=>!q||normalize(c.label).includes(q)),...promptItems]}
+function renderCommandPalette(){const items=commandItems($("commandInput")?.value||"");$("commandResults").innerHTML=items.map((item,i)=>`<button class="command-item ${i===0?"active":""}" data-command-index="${i}"><span>${esc(item.label)}</span><small>${esc(item.hint||"")}</small></button>`).join("")||'<div class="empty" style="padding:25px">Nessun risultato</div>';$$('[data-command-index]').forEach(btn=>btn.onclick=()=>{closeCommandPalette();items[Number(btn.dataset.commandIndex)]?.run()})}
+function openCommandPalette(){$("commandBackdrop").classList.add("show");$("commandBackdrop").setAttribute("aria-hidden","false");$("commandInput").value="";renderCommandPalette();setTimeout(()=>$("commandInput").focus(),20)}function closeCommandPalette(){$("commandBackdrop").classList.remove("show");$("commandBackdrop").setAttribute("aria-hidden","true")}
+
+async function createSafetyBackup(reason="Operazione sensibile"){try{const data=snapshot();await pruneInternalBackups(Math.max(0,MAX_INTERNAL_BACKUPS-1));await put("backups",{id:uid("backup"),createdAt:now(),reason,data});return true}catch(error){console.warn("Backup automatico non riuscito",error);return false}}
+const _importDataV19=importData;importData=async function(file){await createSafetyBackup("Prima dell'importazione");return _importDataV19(file)}
+const _deletePromptV19=deletePrompt;deletePrompt=function(id){createSafetyBackup("Prima di eliminazione definitiva").finally(()=>_deletePromptV19(id))}
+
+function renderTrashTools(){if(state.filter.type!=="trash")return;const head=$("viewSubtitle");if(!head||$("trashTools"))return;const box=document.createElement("span");box.id="trashTools";box.style.marginLeft="10px";box.innerHTML='<button class="btn small" id="restoreAllTrash">Ripristina tutto</button> <button class="btn small danger" id="emptyTrash">Svuota cestino</button>';head.after(box);$("restoreAllTrash").onclick=async()=>{const deleted=state.prompts.filter(p=>p.deletedAt);for(const p of deleted)await put("prompts",{...p,deletedAt:null,updatedAt:now()});await loadData();render();toast("Cestino ripristinato.","success")};$("emptyTrash").onclick=()=>confirmAction("Svuota cestino","Eliminare definitivamente tutti i prompt nel cestino?",async()=>{await createSafetyBackup("Prima di svuotare il cestino");for(const p of state.prompts.filter(x=>x.deletedAt))await remove("prompts",p.id);await loadData();render();toast("Cestino svuotato.","success")})}
+const _renderV19=render;render=function(){_renderV19();renderCollectionSidebar();renderWorkflowSidebar();renderTrashTools()}
+
+async function moveCustomType(id,direction){const ordered=[...state.customTypes].sort((a,b)=>(a.order??999)-(b.order??999)||a.name.localeCompare(b.name,"it")),index=ordered.findIndex(t=>t.id===id),target=index+direction;if(index<0||target<0||target>=ordered.length)return;[ordered[index],ordered[target]]=[ordered[target],ordered[index]];for(let i=0;i<ordered.length;i++){ordered[i].order=i;await put("customTypes",ordered[i])}await loadData();render();renderManage()}
+async function duplicateCustomType(id){const source=customTypeById(id);if(!source)return;let name=`${source.name} copia`,n=2;while(state.customTypes.some(t=>normalize(t.name)===normalize(name)))name=`${source.name} copia ${n++}`;const copy={...source,id:uid("ctype"),name,order:state.customTypes.length,createdAt:now(),updatedAt:now()};await put("customTypes",copy);for(const item of customEntitiesForType(id))await put("customEntities",{...item,id:uid("customentity"),typeId:copy.id,createdAt:now()});await loadData();render();renderManage();toast("Tipologia duplicata.","success")}
+const _renderManageV19=renderManage;renderManage=function(){_renderManageV19();$$('.custom-type-visible').forEach(input=>input.onchange=async()=>{const t=customTypeById(input.dataset.id);t.visible=input.checked;t.updatedAt=now();await put("customTypes",t);await loadData();render();renderManage()});$$('.custom-type-multi').forEach(input=>input.onchange=async()=>{const t=customTypeById(input.dataset.id);t.multi=input.checked;t.updatedAt=now();await put("customTypes",t);await loadData();render();renderManage()});$$('.type-icon-input').forEach(input=>input.onchange=async()=>{const t=customTypeById(input.dataset.id);t.icon=input.value.trim()||"◆";await put("customTypes",t);await loadData();render();renderManage()});$$('.custom-type-up').forEach(b=>b.onclick=()=>moveCustomType(b.dataset.id,-1));$$('.custom-type-down').forEach(b=>b.onclick=()=>moveCustomType(b.dataset.id,1));$$('.duplicate-custom-type').forEach(b=>b.onclick=()=>duplicateCustomType(b.dataset.id))}
+const _addCustomTypeV19=addCustomType;addCustomType=async function(){const template=$("newTypeTemplate")?.value||"simple",name=$("newTypeName")?.value.trim().replace(/\s+/g," ");if(!name)return _addCustomTypeV19();const presets={simple:{icon:"◆"},client:{icon:"👤"},project:{icon:"▣"},site:{icon:"🌐"},tool:{icon:"🛠"},workflow:{icon:"⇢",multi:true},tag:{icon:"#",multi:true}};if(state.customTypes.some(t=>normalize(t.name)===normalize(name))||FIXED_ENTITY_TYPES.some(t=>normalize(t.label)===normalize(name))){toast("Esiste già una tipologia con questo nome.","warning");return}const preset=presets[template]||presets.simple;await put("customTypes",{id:uid("ctype"),name,color:CATEGORY_COLORS[state.customTypes.length%CATEGORY_COLORS.length],icon:preset.icon,visible:true,multi:!!preset.multi,order:state.customTypes.length,template,createdAt:now()});$("newTypeName").value="";await loadData();render();renderManage();toast(`Tipologia “${name}” creata dal template ${template}.`,"success")}
+
+function enhanceSidebarRendering(){const original=renderSidebar;renderSidebar=function(){original();const container=$("entitySidebarSections");if(container){const sections=[...container.querySelectorAll('.side-section')];sections.forEach(section=>{const picker=section.querySelector('.dynamic-sidebar-picker'),type=picker?.dataset.sidebarType;if(type?.startsWith('custom:')){const t=customTypeById(type.slice(7));const title=section.querySelector('.side-title span');if(title&&t)title.textContent=`${t.icon||'◆'} ${t.name}`}})}renderCollectionSidebar();renderWorkflowSidebar()}}
+enhanceSidebarRendering();
+
+
+function entityDisplayLabel(entity){if(!entity)return "";const parent=entity.parentId?customEntityById(entity.parentId):null;return parent?`${parent.name} › ${entity.name}`:entity.name}
+async function addCustomSubEntity(parentId){const parent=customEntityById(parentId);if(!parent)return;const name=window.prompt(`Nuovo sotto-elemento di “${parent.name}”:`,"");if(!name?.trim())return;const clean=name.trim().replace(/\s+/g," ");if(customEntitiesForType(parent.typeId).some(x=>x.parentId===parent.id&&normalize(x.name)===normalize(clean))){toast("Sotto-elemento già presente.","warning");return}await put("customEntities",{id:uid("customentity"),typeId:parent.typeId,parentId:parent.id,name:clean,createdAt:now()});await loadData();render();renderManage();toast("Sotto-elemento creato.","success")}
+function wireCustomSubEntities(){
+  $$('[data-custom-list] .manage-row').forEach(row=>{const label=row.querySelector('.custom-entity-name-editable');if(!label||row.querySelector('.add-custom-sub'))return;const item=customEntityById(label.dataset.id);if(item?.parentId){const hint=document.createElement('div');hint.className='hint';hint.textContent=`Sotto: ${customEntityById(item.parentId)?.name||'elemento'}`;label.parentElement.appendChild(hint)}const btn=document.createElement('button');btn.className='btn small add-custom-sub';btn.textContent='+ sotto';btn.onclick=()=>addCustomSubEntity(label.dataset.id);row.insertBefore(btn,row.querySelector('.delete-custom-entity'))})
+}
+const _renderManageSubV20=renderManage;renderManage=function(){_renderManageSubV20();wireCustomSubEntities()}
+
+function organizationSuggestions(){const text=normalize(`${$("promptTitle")?.value||""} ${$("promptContent")?.value||""} ${$("promptNotes")?.value||""}`);const result=[];const addBest=(type,label,items)=>{const scored=items.map(item=>{const n=normalize(item.name),tokens=n.split(' ').filter(w=>w.length>2);let score=text.includes(n)?100:tokens.reduce((s,w)=>s+(text.includes(w)?15:0),0);return {item,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);if(scored[0])result.push({type,label,item:scored[0].item,score:scored[0].score})};addBest('client','Cliente',state.clients);addBest('project','Progetto',state.projects);addBest('gptsite','GPTSites',state.gptsites);addBest('seo','SEO',state.seo);state.customTypes.forEach(type=>addBest(`custom:${type.id}`,type.name,customEntitiesForType(type.id)));return result}
+function openSmartOrganization(){const suggestions=organizationSuggestions();$("choiceTitle").textContent="Suggerimenti organizzazione";$("choiceBody").innerHTML=suggestions.length?`<p class="hint">Suggerimenti locali basati su titolo, contenuto e nomi già presenti. Nessun servizio esterno viene chiamato.</p><div class="relation-list">${suggestions.map((s,i)=>`<label class="relation-row"><input type="checkbox" data-smart-index="${i}" checked><span class="grow"><strong>${esc(s.label)}</strong>: ${esc(s.item.name)}</span><span class="similarity-badge">${Math.min(100,s.score)}%</span></label>`).join("")}</div>`:'<div class="hint">Non ho trovato corrispondenze sufficienti con gli elementi già presenti.</div>';$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Annulla</button>'+(suggestions.length?'<button class="btn primary" id="applySmartOrganization">Applica suggerimenti</button>':'');bindModalClose();$("applySmartOrganization")?.addEventListener('click',()=>{suggestions.forEach((s,i)=>{if(!document.querySelector(`[data-smart-index="${i}"]`)?.checked)return;const sel=document.querySelector(`.prompt-entity-select[data-entity-type="${CSS.escape(s.type)}"]`);if(!sel)return;if(sel.multiple){const option=[...sel.options].find(o=>o.value===s.item.id);if(option)option.selected=true}else sel.value=s.item.id;sel.dispatchEvent(new Event('change',{bubbles:true}))});closeModal("choiceModal");toast("Suggerimenti applicati. Verifica e salva.","success")});openModal("choiceModal")}
+
+function currentTableColumns(){return readStoredJson("ps_table_columns",{category:true,client:true,project:true,status:true,usage:true,updated:true,custom:{}})}
+function openTableColumns(){const cfg=currentTableColumns();$("choiceTitle").textContent="Colonne tabella";$("choiceBody").innerHTML=`<div class="relation-list">${[['category','Categoria'],['client','Cliente'],['project','Progetto'],['status','Stato'],['usage','Utilizzo'],['updated','Aggiornato']].map(([k,l])=>`<label class="relation-row"><input type="checkbox" data-col="${k}" ${cfg[k]!==false?'checked':''}> ${l}</label>`).join('')}${state.customTypes.map(t=>`<label class="relation-row"><input type="checkbox" data-custom-col="${esc(t.id)}" ${cfg.custom?.[t.id]?'checked':''}> ${esc(t.name)}</label>`).join('')}</div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Annulla</button><button class="btn primary" id="saveTableColumns">Salva</button>';bindModalClose();$("saveTableColumns").onclick=()=>{const next={custom:{}};$$('[data-col]').forEach(x=>next[x.dataset.col]=x.checked);$$('[data-custom-col]').forEach(x=>next.custom[x.dataset.customCol]=x.checked);localStorage.setItem("ps_table_columns",JSON.stringify(next));closeModal("choiceModal");if(state.view==="table")renderCards();toast("Colonne aggiornate.","success")};openModal("choiceModal")}
+const _promptTableHtmlCols=promptTableHtml;promptTableHtml=function(items){const cfg=currentTableColumns(),customCols=state.customTypes.filter(t=>cfg.custom?.[t.id]);return `<div class="table-wrap"><table class="prompt-table"><thead><tr><th>Prompt</th>${cfg.category!==false?'<th>Categoria</th>':''}${cfg.client!==false?'<th>Cliente</th>':''}${cfg.project!==false?'<th>Progetto</th>':''}${customCols.map(t=>`<th>${esc(t.name)}</th>`).join('')}${cfg.status!==false?'<th>Stato</th>':''}${cfg.usage!==false?'<th>Uso</th>':''}${cfg.updated!==false?'<th>Aggiornato</th>':''}<th></th></tr></thead><tbody>${items.map(p=>{const cat=catById(p.subcategoryId)||catById(p.categoryId),client=clientById(p.clientId),project=projectById(p.projectId);return `<tr><td><button class="table-title-btn" data-table-open="${esc(p.id)}">${esc(p.title||'Senza titolo')}</button></td>${cfg.category!==false?`<td>${esc(cat?.name||'—')}</td>`:''}${cfg.client!==false?`<td>${esc(client?.name||'—')}</td>`:''}${cfg.project!==false?`<td>${esc(project?.name||'—')}</td>`:''}${customCols.map(t=>`<td>${customAssignmentValues(p,t.id).map(id=>customEntityById(id)?.name).filter(Boolean).map(esc).join(', ')||'—'}</td>`).join('')}${cfg.status!==false?`<td>${esc(p.status||'')}</td>`:''}${cfg.usage!==false?`<td>${p.usageCount||0}</td>`:''}${cfg.updated!==false?`<td>${esc(formatDate(p.updatedAt))}</td>`:''}<td class="table-actions"><button class="btn small" data-table-use="${esc(p.id)}">Usa</button></td></tr>`}).join('')}</tbody></table></div>`}
+
+function wireEntityOverviewButtons(){$$('#organizationSidebarSections .side-section').forEach(section=>{const picker=section.querySelector('.dynamic-sidebar-picker');if(!picker||picker.value==='all'||section.querySelector('.entity-info-btn'))return;const btn=document.createElement('button');btn.type='button';btn.className='sidebar-mini-add entity-info-btn';btn.textContent='i';btn.title='Apri scheda elemento';btn.onclick=e=>{e.stopPropagation();const type=picker.dataset.sidebarType;if(type.startsWith('custom:'))openEntityOverview('custom',picker.value,type.slice(7));else openEntityOverview(type,picker.value)};section.querySelector('.side-title')?.appendChild(btn)})}
+const _renderSidebarInfoV20=renderSidebar;renderSidebar=function(){_renderSidebarInfoV20();wireEntityOverviewButtons()}
+
+async function maybeDailyBackup(){const last=await settingsRecord("lastDailyBackup",null),lastTs=dateTimestamp(last);if(lastTs&&Date.now()-lastTs<864e5)return;try{const data=snapshot();await pruneInternalBackups(Math.max(0,MAX_INTERNAL_BACKUPS-1));await put("backups",{id:uid("backup"),createdAt:now(),reason:"Backup automatico giornaliero",data});await saveSettingsRecord("lastDailyBackup",now())}catch(error){console.warn("Backup giornaliero non riuscito",error)}}
+
+function previewImport(file){return new Promise(async resolve=>{try{const raw=await file.text(),data=JSON.parse(raw);const summary={prompts:Array.isArray(data.prompts)?data.prompts.length:(data.prompt?1:0),categories:data.categories?.length||0,clients:data.clients?.length||0,types:data.customTypes?.length||0,entities:data.customEntities?.length||0,collections:data.collections?.length||0,workflows:data.workflows?.length||0};$("choiceTitle").textContent="Anteprima importazione";$("choiceBody").innerHTML=`<div class="entity-overview"><div class="stat"><strong>${summary.prompts}</strong><span>Prompt</span></div><div class="stat"><strong>${summary.categories}</strong><span>Categorie</span></div><div class="stat"><strong>${summary.types}</strong><span>Tipologie</span></div><div class="stat"><strong>${summary.entities}</strong><span>Elementi dinamici</span></div></div><p class="hint">Clienti: ${summary.clients} · Raccolte: ${summary.collections} · Workflow: ${summary.workflows}. Prima dell'importazione verrà creato un backup automatico.</p>`;$("choiceFoot").innerHTML='<button class="btn" id="cancelImportPreview">Annulla</button><button class="btn primary" id="confirmImportPreview">Continua</button>';$("cancelImportPreview").onclick=()=>{closeModal("choiceModal");resolve(false)};$("confirmImportPreview").onclick=()=>{closeModal("choiceModal");resolve(true)};openModal("choiceModal")}catch{resolve(true)}})}
+const _importPreviewBase=_importDataV19;importData=async function(file){if(!(await previewImport(file)))return;await createSafetyBackup("Prima dell'importazione");return _importPreviewBase(file)}
+
+
+function parseAdvancedQuery(query){const tokens=String(query||"").match(/(?:[^\s"]+|"[^"]*")+/g)||[],filters={},text=[];tokens.forEach(token=>{const m=token.match(/^([^:]+):(.+)$/);if(!m){text.push(token.replace(/^"|"$/g,''));return}const key=normalize(m[1]),value=m[2].replace(/^"|"$/g,'');filters[key]=value});return {filters,text:text.join(' ')}}
+function applyQueryOperators(items){const parsed=parseAdvancedQuery(state.query);if(!Object.keys(parsed.filters).length)return items;return items.filter(p=>Object.entries(parsed.filters).every(([key,value])=>{const v=normalize(value);if(['cliente','client'].includes(key))return normalize(clientById(p.clientId)?.name).includes(v);if(['progetto','project'].includes(key))return normalize(projectById(p.projectId)?.name).includes(v);if(['gptsites','sito','site'].includes(key))return normalize(gptSiteById(p.gptSiteId)?.name).includes(v);if(key==='seo')return normalize(seoById(p.seoId)?.name).includes(v);if(['stato','status'].includes(key))return normalize(p.status).includes(v)||normalize({draft:'bozza',review:'da verificare',approved:'approvato',obsolete:'obsoleto',archived:'archiviato'}[p.status]).includes(v);if(['categoria','category'].includes(key))return normalize(`${catById(p.categoryId)?.name||''} ${catById(p.subcategoryId)?.name||''}`).includes(v);const type=state.customTypes.find(t=>normalize(t.name)===key);if(type)return customAssignmentValues(p,type.id).some(id=>normalize(customEntityById(id)?.name).includes(v));return true}))}
+const _filteredPromptsOps=filteredPrompts;filteredPrompts=function(){const parsed=parseAdvancedQuery(state.query);const original=state.query;if(Object.keys(parsed.filters).length)state.query=parsed.text;let items=_filteredPromptsOps();state.query=original;return applyQueryOperators(items)}
+
+function sidebarCollapseState(){return new Set(readStoredJson("ps_collapsed_sidebar_sections",[]))}
+function wireSidebarCollapse(){const collapsed=sidebarCollapseState();$$('#sidebar .side-section').forEach((section,index)=>{const title=section.querySelector(':scope > .side-title');if(!title)return;const key=section.className.split(/\s+/).filter(x=>!['side-section','sidebar-collapsed'].includes(x)).join('-')||`section-${index}`;section.classList.toggle('sidebar-collapsed',collapsed.has(key));title.onclick=event=>{if(event.target.closest('button,input,select'))return;const set=sidebarCollapseState();section.classList.toggle('sidebar-collapsed');section.classList.contains('sidebar-collapsed')?set.add(key):set.delete(key);localStorage.setItem("ps_collapsed_sidebar_sections",JSON.stringify([...set]))}})}
+function applyHideEmptySidebar(){const hide=localStorage.getItem("ps_hide_empty_types")==='1';$$('#organizationSidebarSections .side-section').forEach(section=>{const picker=section.querySelector('select');if(!picker)return;section.classList.toggle('hidden',hide&&picker.options.length<=1)})}
+const _renderSidebarPrefs=renderSidebar;renderSidebar=function(){_renderSidebarPrefs();wireSidebarCollapse();applyHideEmptySidebar()}
+
+async function pruneTrashByRetention(){const days=Number(localStorage.getItem("ps_trash_retention_days")||0);if(!days)return;const cutoff=Date.now()-days*864e5,expired=state.prompts.filter(p=>p.deletedAt&&dateTimestamp(p.deletedAt)<cutoff);if(!expired.length)return;await createSafetyBackup("Prima della pulizia automatica del cestino");for(const p of expired)await remove("prompts",p.id);await loadData();if(expired.length)toast(`${expired.length} prompt eliminati dal cestino secondo la retention impostata.`,"success")}
+const _renderManagePrefs=renderManage;renderManage=function(){_renderManagePrefs();const hide=$("hideEmptySidebarTypes"),days=$("trashRetentionDays");if(hide){hide.checked=localStorage.getItem("ps_hide_empty_types")==='1';hide.onchange=()=>{localStorage.setItem("ps_hide_empty_types",hide.checked?'1':'0');render()}}if(days){days.value=localStorage.getItem("ps_trash_retention_days")||'0';days.onchange=()=>{const value=Math.max(0,Math.min(3650,Number(days.value)||0));localStorage.setItem("ps_trash_retention_days",String(value));days.value=String(value);toast("Retention cestino aggiornata.","success")}}}
+
+function bindWorkspaceEvents(){
+  $("agentSidebarBtn")?.addEventListener("click",()=>{const focusAgent=()=>{history.replaceState(null,"","#dashboard");$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"});$("agentRequest")?.focus()};if($("agentRouter")){focusAgent();return}state.query="";$("globalSearch").value="";setFilter("all");setTimeout(focusAgent,80)});
+  $("tableBtn").onclick=()=>{state.view="table";localStorage.setItem("ps_view","table");renderCards()};$("kanbanBtn").onclick=()=>{state.view="kanban";localStorage.setItem("ps_view","kanban");renderCards()};
+  $("advancedFilterBtn").onclick=()=>{$("advancedFilterBar").hidden=!$("advancedFilterBar").hidden};
+  $("filterStatus").onchange=e=>{state.advancedFilters.status=e.target.value;renderCards()};$("filterUsage").onchange=e=>{state.advancedFilters.usage=e.target.value;renderCards()};$("filterWithVariables").onchange=e=>{state.advancedFilters.withVariables=e.target.checked;renderCards()};$("filterWithFiles").onchange=e=>{state.advancedFilters.withFiles=e.target.checked;renderCards()};$("filterOnlyDuplicates").onchange=e=>{state.advancedFilters.duplicates=e.target.checked;renderCards()};$("resetAdvancedFilters").onclick=()=>{state.advancedFilters={status:"",usage:"",withVariables:false,withFiles:false,duplicates:false};$("filterStatus").value="";$("filterUsage").value="";["filterWithVariables","filterWithFiles","filterOnlyDuplicates"].forEach(id=>$(id).checked=false);renderCards()};
+  $("commandPaletteBtn").onclick=openCommandPalette;$("commandInput").oninput=renderCommandPalette;$("commandBackdrop").onclick=e=>{if(e.target===$("commandBackdrop"))closeCommandPalette()};$("versionHistoryBtn").onclick=openVersionHistory;$("smartOrganizeBtn").onclick=openSmartOrganization;$("tableColumnsBtn").onclick=openTableColumns;
+  $("addCollectionQuick").onclick=createCollection;$("addWorkflowQuick").onclick=createWorkflow;
+  document.addEventListener("keydown",event=>{const modifier=event.metaKey||event.ctrlKey;if(modifier&&event.key.toLowerCase()==="k"){event.preventDefault();openCommandPalette()}if(event.key==="Escape"&&$("commandBackdrop").classList.contains("show"))closeCommandPalette()});
+  $("bulkbar").insertAdjacentHTML("beforeend",'<button class="btn small" id="bulkCollectionBtn">Aggiungi a raccolta</button>');$("bulkCollectionBtn").onclick=addSelectedToCollection;
+}
+
+function showDuplicateWarning(){if(!state.editor.id)return;const prompt=state.prompts.find(p=>p.id===state.editor.id),candidates=duplicateCandidates(prompt);document.querySelector('.duplicate-alert')?.remove();if(!candidates.length)return;const node=document.createElement('div');node.className='duplicate-alert';node.innerHTML=`<strong>Possibili duplicati</strong> · ${candidates.map(c=>`<span class="similarity-badge">${c.score}% · ${esc(c.item.title)}</span>`).join(' ')}`;$("promptContent").parentElement.appendChild(node)}
+const _openEditorV19=openEditor;openEditor=function(...args){_openEditorV19(...args);setTimeout(()=>{showDuplicateWarning();const indicator=$("autosaveIndicator");if(indicator){indicator.textContent=state.editor.id?"Autosave attivo":"Salva per attivare autosave";indicator.className="autosave-indicator"}},0)}
+
+const _bindEventsV19=bindEvents;bindEvents=function(){_bindEventsV19();bindWorkspaceEvents()}
+const _initV19=init;init=async function(){setTheme(true);const previousVersion=localStorage.getItem("ps_app_version");const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);state.db=await openDatabase();await loadData();await loadWorkspaceSettings();await removeLegacyDemoPrompt();await loadData();await seedData();await loadWorkspaceSettings();bindEvents();render();await maybeDailyBackup();await pruneTrashByRetention();const generatedIntros=await generateMissingPromptIntros({silent:true});const refreshedIntros=previousVersion&&previousVersion!==APP_VERSION?await refreshAutomaticPromptIntros({silent:true}):0;localStorage.setItem("ps_app_version",APP_VERSION);if(previousVersion&&previousVersion!==APP_VERSION)toast(`Applicazione aggiornata dalla versione ${previousVersion} alla ${APP_VERSION}. Dati e relazioni mantenuti.${generatedIntros?` Generate ${generatedIntros} note.`:""}${refreshedIntros?` Aggiornate ${refreshedIntros} note automatiche.`:""}`,"success");const hashAction=location.hash.match(/^#step-(.+)$/)?.[1]||localStorage.getItem("ps_last_dashboard_action");if(hashAction&&document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`))setTimeout(()=>highlightDashboardCard(hashAction),100)}
+
+
+/* ---------- Agentic Prompt Router 21.0 ---------- */
+const AGENT_INTENTS={
+  bugfix:{label:"Debug / QA",terms:["bug","debug","errore","errori","correggere","correggi","fix","qa","test","regressioni","regressione","ux","ui","logica","app","applicazione","sicurezza","responsive"],promptIntent:"bugfix"},
+  seoAudit:{label:"SEO",terms:["seo","keyword","serp","posizionamento","search console","crawl","canonical","sitemap","indicizzazione","on-page","local seo","audit seo"],promptIntent:"seoAudit"},
+  webDesign:{label:"Web design / UX",terms:["design","layout","homepage","landing","css","ui","ux","responsive","restyling","hero","sito","pagina web"],promptIntent:"webDesign"},
+  content:{label:"Contenuti / Copy",terms:["articolo","copy","contenuto","testo","scrivere","scrivi","post","headline","meta description","piano editoriale"],promptIntent:"content"},
+  automation:{label:"Automazione",terms:["automazione","automatizzare","n8n","workflow","scheduler","integrazione","agentico","agente","api"],promptIntent:"automation"},
+  benchmark:{label:"Ricerca / Benchmark",terms:["benchmark","ricerca","confronta","migliori","competitor","awwwards","esempi","ispirazione"],promptIntent:"benchmark"},
+  social:{label:"Social",terms:["linkedin","instagram","facebook","social","caption","reel","post social"],promptIntent:"social"},
+  conversion:{label:"Conversione",terms:["conversione","cta","lead","contatti","vendite","prenotazioni","funnel","cro"],promptIntent:"conversion"}
+};
+const AGENT_SUBGOALS=[
+  {id:"analyze",label:"Analisi",terms:["analizza","analizzare","audit","esamina","valuta","controlla","review","revisione"]},
+  {id:"test",label:"Test",terms:["test","prova","verifica","qa","collaudo","browser"]},
+  {id:"fix",label:"Correzione",terms:["correggi","correggere","fix","ripara","risolvi","debug"]},
+  {id:"regression",label:"Regressioni",terms:["regressione","regressioni","ritesta","riprova","retest"]},
+  {id:"uxui",label:"UX/UI",terms:["ux","ui","usabilità","interfaccia","layout","responsive","accessibilità"]},
+  {id:"security",label:"Sicurezza",terms:["sicurezza","security","vulnerabilità","privacy"]},
+  {id:"seo",label:"SEO",terms:["seo","keyword","serp","crawl","indicizzazione","search console"]},
+  {id:"research",label:"Ricerca",terms:["ricerca","benchmark","confronta","competitor","fonti"]},
+  {id:"strategy",label:"Strategia",terms:["strategia","piano","roadmap","priorità","posizionamento"]},
+  {id:"create",label:"Creazione",terms:["crea","genera","scrivi","progetta","costruisci","realizza"]},
+  {id:"automation",label:"Automazione",terms:["automatizza","automazione","workflow","n8n","scheduler","agentico"]},
+  {id:"conversion",label:"Conversione",terms:["conversione","lead","vendite","cta","prenotazioni","contatti"]}
+];
+function agentWords(text){return [...new Set(normalize(text).replace(/[^a-z0-9àèéìòùç\s-]/gi," ").split(/\s+/).filter(word=>word.length>2&&!/^(che|devo|della|delle|degli|del|dei|una|uno|per|con|senza|come|poi|anche|tutto|tutta|fare|voglio|serve|sul|sulla|nel|nella|app)$/.test(word)))]}
+function agentContains(corpus,term){const n=normalize(term);return n.includes(" ")?corpus.includes(n):new RegExp(`(?:^|\\s)${n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:$|\\s)`,`i`).test(corpus)}
+function analyzeAgentRequest(request){
+  const corpus=normalize(request),words=agentWords(request);
+  const ranked=Object.entries(AGENT_INTENTS).map(([id,def])=>({id,label:def.label,promptIntent:def.promptIntent,score:def.terms.reduce((sum,t)=>sum+(agentContains(corpus,t)?(t.includes(" ")?4:2):0),0)})).sort((a,b)=>b.score-a.score);
+  const intent=ranked[0]?.score?ranked[0]:{id:"generic",label:"Obiettivo generale",promptIntent:"generic",score:0};
+  let subgoals=AGENT_SUBGOALS.filter(goal=>goal.terms.some(term=>agentContains(corpus,term)));
+  if(!subgoals.length&&intent.id!=="generic")subgoals=AGENT_SUBGOALS.filter(goal=>goal.id===(intent.id==="bugfix"?"analyze":intent.id==="seoAudit"?"seo":intent.id==="webDesign"?"uxui":intent.id==="automation"?"automation":"create"));
+  return {request:String(request||"").trim(),corpus,words,intent,subgoals};
+}
+function agentPromptCorpus(prompt){
+  const org=[catById(prompt.categoryId)?.name,catById(prompt.subcategoryId)?.name,clientById(prompt.clientId)?.name,projectById(prompt.projectId)?.name,gptSiteById(prompt.gptSiteId)?.name,seoById(prompt.seoId)?.name,...Object.entries(prompt.customAssignments||{}).flatMap(([typeId])=>[customTypeById(typeId)?.name,...customAssignmentValues(prompt,typeId).map(id=>customEntityById(id)?.name)])].filter(Boolean).join(" ");
+  return {title:normalize(prompt.title),intro:normalize(promptIntroText(prompt)),content:normalize(prompt.content),tags:normalize((prompt.tags||[]).join(" ")),org:normalize(org),all:normalize(`${prompt.title} ${promptIntroText(prompt)} ${prompt.content} ${(prompt.tags||[]).join(" ")} ${org}`)};
+}
+function agentFeedbackMap(){return readStoredJson("ps_agent_feedback",{})}
+function agentFeedbackKey(request,promptId){const stem=normalize(request).slice(0,180);let hash=0;for(const ch of stem)hash=((hash<<5)-hash+ch.charCodeAt(0))|0;return `${Math.abs(hash)}:${promptId}`}
+function agentScorePrompt(analysis,prompt){
+  const pc=agentPromptCorpus(prompt),words=analysis.words.length?analysis.words:agentWords(analysis.request);let weighted=0,maxWeighted=Math.max(1,words.length*6),titleHits=0;
+  words.forEach(word=>{let best=0;if(pc.title.includes(word)){best=6;titleHits++}else if(pc.intro.includes(word))best=5;else if(pc.tags.includes(word))best=4;else if(pc.org.includes(word))best=3;else if(pc.content.includes(word))best=2;weighted+=best});
+  const lexical=Math.min(38,weighted/maxWeighted*38);const titleBonus=Math.min(10,titleHits*3);
+  const inferred=inferPromptIntent(prompt),intentMatch=analysis.intent.promptIntent!=="generic"&&inferred===analysis.intent.promptIntent?25:(analysis.intent.id!=="generic"&&AGENT_INTENTS[analysis.intent.id]?.terms.some(t=>agentContains(pc.all,t))?14:0);
+  const covered=analysis.subgoals.filter(goal=>goal.terms.some(term=>agentContains(pc.all,term)));const missing=analysis.subgoals.filter(goal=>!covered.some(item=>item.id===goal.id));const goalScore=analysis.subgoals.length?20*covered.length/analysis.subgoals.length:8*Math.min(1,weighted/maxWeighted);
+  const quality=Math.min(5,Math.log2((prompt.usageCount||0)+1)*1.3+(prompt.favorite?1.5:0)+(prompt.pinned?1.5:0));
+  const feedback=agentFeedbackMap()[agentFeedbackKey(analysis.request,prompt.id)]||0;const feedbackBonus=feedback>0?5:feedback<0?-8:0;
+  const score=Math.max(0,Math.min(99,Math.round(lexical+titleBonus+intentMatch+goalScore+quality+feedbackBonus)));
+  const reasons=[];if(intentMatch>=20)reasons.push(`forte corrispondenza con ${analysis.intent.label}`);else if(intentMatch)reasons.push(`coerente con ${analysis.intent.label}`);if(covered.length)reasons.push(`copre ${covered.map(g=>g.label).join(", ")}`);if(titleHits)reasons.push(`${titleHits} concetti chiave nel titolo`);if(prompt.usageCount)reasons.push(`usato ${prompt.usageCount} volte`);if(feedback>0)reasons.push("già approvato per richieste simili");
+  return {prompt,score,covered,missing,reasons,lexical,intentMatch};
+}
+function agentRankPrompts(request){const analysis=analyzeAgentRequest(request);const ranked=livePrompts().map(prompt=>agentScorePrompt(analysis,prompt)).filter(item=>item.score>4).sort((a,b)=>b.score-a.score||((b.prompt.usageCount||0)-(a.prompt.usageCount||0))||naturalTitleCompare(a.prompt,b.prompt));return {analysis,ranked}}
+function agentComplementarySelection(analysis,ranked,max=4){
+  if(!ranked.length)return[];const selected=[ranked[0]],covered=new Set(ranked[0].covered.map(g=>g.id));
+  while(selected.length<max){let best=null,bestGain=0;for(const candidate of ranked){if(selected.includes(candidate))continue;const gain=candidate.covered.filter(g=>!covered.has(g.id)).length*18+candidate.score*.12;if(gain>bestGain){bestGain=gain;best=candidate}}if(!best||bestGain<5)break;selected.push(best);best.covered.forEach(g=>covered.add(g.id));if(analysis.subgoals.length&&covered.size>=analysis.subgoals.length)break}
+  return selected;
+}
+function agentMode(){return localStorage.getItem("ps_agent_mode")||"find"}
+function setAgentMode(mode){localStorage.setItem("ps_agent_mode",mode);$$('[data-agent-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.agentMode===mode))}
+function agentRouterHtml(){return `<section class="agent-router" id="agentRouter"><div class="agent-router-head"><div><h3>✨ Assistente · Cosa vuoi ottenere?</h3><p>Descrivi il risultato. Prompt Studio individua il prompt migliore o costruisce una sequenza di prompt complementari.</p></div><span class="agent-router-badge">ROUTER LOCALE · NESSUNA API</span></div><div class="agent-request-grid"><textarea class="agent-request" id="agentRequest" placeholder="Es. Devo correggere completamente una web app, trovare bug UX/UI e logici, eseguire i test e verificare le regressioni."></textarea><div class="agent-mode-group"><button class="btn agent-mode" data-agent-mode="find" type="button">⌕ Trova migliore</button><button class="btn agent-mode" data-agent-mode="combine" type="button">⊕ Combina</button><button class="btn agent-mode" data-agent-mode="workflow" type="button">⇢ Workflow</button></div></div><div class="agent-router-actions"><button class="btn primary" id="runAgentRouter" type="button">Analizza richiesta</button><button class="btn" id="clearAgentRouter" type="button">Pulisci</button><span class="agent-router-note">Valuta intento, sotto-obiettivi, contenuto, metadati, utilizzo e feedback locale.</span></div><div class="agent-results" id="agentResults"></div></section>`}
+function injectAgentRouter(){const stats=$("stats");if(!stats||stats.classList.contains("hidden")||$("agentRouter"))return;stats.insertAdjacentHTML("afterbegin",agentRouterHtml());const directTitle=stats.querySelector(".home-primary h3"),directText=stats.querySelector(".home-primary p");if(directTitle)directTitle.textContent="Ricerca diretta";if(directText)directText.textContent="Se sai già quale prompt vuoi trovare, cercalo direttamente nella libreria.";const saved=localStorage.getItem("ps_agent_last_request")||"";$("agentRequest").value=saved;setAgentMode(agentMode());$$('[data-agent-mode]').forEach(btn=>btn.onclick=()=>setAgentMode(btn.dataset.agentMode));$("runAgentRouter").onclick=()=>runAgentRouter();$("clearAgentRouter").onclick=()=>{$("agentRequest").value="";localStorage.removeItem("ps_agent_last_request");localStorage.removeItem("ps_agent_last_run");$("agentResults").className="agent-results";$("agentResults").innerHTML=""};$("agentRequest").onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();runAgentRouter()}};if(saved&&localStorage.getItem("ps_agent_last_run")==="1")runAgentRouter({silent:true})}
+function agentResultReason(item){if(item.reasons.length)return item.reasons.join(" · ");return "Corrispondenza rilevata tra la richiesta e il contenuto del prompt."}
+function agentSelectedIds(){return $$('#agentResults [data-agent-select]:checked').map(input=>input.dataset.agentSelect)}
+function renderAgentResults(request,analysis,results,selected,mode){
+  const box=$("agentResults");box.className="agent-results show";const selectedIds=new Set(selected.map(x=>x.prompt.id));const top=results[0];const totalCovered=new Set(selected.flatMap(x=>x.covered.map(g=>g.id)));const missingOverall=analysis.subgoals.filter(g=>!totalCovered.has(g.id));
+  if(!results.length){box.innerHTML=`<div class="agent-empty"><strong>Nessun prompt sufficientemente pertinente.</strong><p>Puoi creare un nuovo prompt basato sulla richiesta.</p><button class="btn primary" id="agentCreateMissing">＋ Crea prompt mancante</button></div>`;$("agentCreateMissing").onclick=()=>createMissingAgentPrompt(request,analysis);return}
+  const list=results.slice(0,5).map((item,index)=>{const role=index===0?"Migliore":selectedIds.has(item.prompt.id)?"Complementare":"Alternativa";const cls=index===0?"primary-match":selectedIds.has(item.prompt.id)?"complementary":"";const feedback=agentFeedbackMap()[agentFeedbackKey(request,item.prompt.id)]||0;return `<article class="agent-result ${cls}"><input type="checkbox" data-agent-select="${esc(item.prompt.id)}" ${selectedIds.has(item.prompt.id)?"checked":""} aria-label="Seleziona ${esc(item.prompt.title)}"><div class="agent-score">${item.score}%</div><div class="agent-result-main"><div class="agent-result-title"><strong>${esc(item.prompt.title||"Senza titolo")}</strong><span class="agent-role">${role}</span></div><p><strong>Perché:</strong> ${esc(agentResultReason(item))}</p><div class="agent-cover">${item.covered.map(g=>`<span class="covered">✓ ${esc(g.label)}</span>`).join("")}${item.missing.slice(0,4).map(g=>`<span class="missing">○ ${esc(g.label)}</span>`).join("")}</div></div><div class="agent-result-actions"><button class="btn small" data-agent-open="${esc(item.prompt.id)}">Apri</button><button class="btn small agent-feedback ${feedback>0?"active":""}" data-agent-feedback="1" data-agent-prompt="${esc(item.prompt.id)}" title="Era il prompt giusto">👍</button><button class="btn small agent-feedback ${feedback<0?"active":""}" data-agent-feedback="-1" data-agent-prompt="${esc(item.prompt.id)}" title="Non pertinente">👎</button></div></article>`}).join("");
+  box.innerHTML=`<div class="agent-summary"><span class="agent-summary-chip intent">Intento: ${esc(analysis.intent.label)}</span><span class="agent-summary-chip">${analysis.subgoals.length} sotto-obiettivi</span><span class="agent-summary-chip">${selected.length} prompt consigliati</span>${missingOverall.length?`<span class="agent-summary-chip">Manca: ${esc(missingOverall.map(g=>g.label).join(", "))}</span>`:`<span class="agent-summary-chip">✓ Copertura completa stimata</span>`}</div><div class="agent-result-list">${list}</div><div class="agent-footer-actions"><button class="btn primary" id="agentUseBest">▶ Usa migliore</button><button class="btn" id="agentWorkflowSelected">⇢ Crea workflow dai selezionati</button><button class="btn" id="agentSelectRecommended">Seleziona consigliati</button>${missingOverall.length||top.score<58?'<button class="btn" id="agentCreateMissing">＋ Crea ciò che manca</button>':''}</div>`;
+  $$('[data-agent-open]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.agentOpen,"variables","use"));$("agentUseBest").onclick=()=>openEditor(results[0].prompt.id,"variables","use");$("agentWorkflowSelected").onclick=()=>createAgentWorkflow(request,analysis,agentSelectedIds());$("agentSelectRecommended").onclick=()=>{$$('#agentResults [data-agent-select]').forEach(input=>input.checked=selectedIds.has(input.dataset.agentSelect))};$("agentCreateMissing")?.addEventListener("click",()=>createMissingAgentPrompt(request,analysis));$$('[data-agent-feedback]').forEach(btn=>btn.onclick=()=>saveAgentFeedback(request,btn.dataset.agentPrompt,Number(btn.dataset.agentFeedback)));
+}
+function runAgentRouter({silent=false}={}){const request=String($("agentRequest")?.value||"").trim();if(!request){if(!silent)toast("Descrivi prima cosa vuoi ottenere.","warning");$("agentRequest")?.focus();return}localStorage.setItem("ps_agent_last_request",request);localStorage.setItem("ps_agent_last_run","1");const {analysis,ranked}=agentRankPrompts(request);const mode=agentMode();let selected=mode==="find"?(ranked[0]?[ranked[0]]:[]):agentComplementarySelection(analysis,ranked,mode==="workflow"?5:3);if(mode==="combine"&&selected.length<Math.min(3,ranked.length))selected=ranked.slice(0,Math.min(3,ranked.length));renderAgentResults(request,analysis,ranked,selected,mode)}
+async function saveAgentFeedback(request,promptId,value){const feedback=agentFeedbackMap(),key=agentFeedbackKey(request,promptId);feedback[key]=feedback[key]===value?0:value;localStorage.setItem("ps_agent_feedback",JSON.stringify(feedback));runAgentRouter({silent:true});toast(value>0?"Feedback positivo memorizzato localmente.":"Feedback negativo memorizzato localmente.","success")}
+function agentWorkflowName(request){const clean=String(request||"").replace(/\s+/g," ").trim();return `Agent · ${clean.slice(0,55)}${clean.length>55?"…":""}`}
+async function createAgentWorkflow(request,analysis,ids){let promptIds=[...new Set(ids||[])].filter(id=>state.prompts.some(p=>p.id===id&&!p.deletedAt));if(!promptIds.length){const ranked=agentRankPrompts(request).ranked;promptIds=agentComplementarySelection(analysis,ranked,5).map(x=>x.prompt.id)}if(!promptIds.length){toast("Non ci sono prompt da inserire nel workflow.","warning");return}const workflow={id:uid("workflow"),name:agentWorkflowName(request),steps:promptIds,agentic:true,request,intent:analysis.intent.id,createdAt:now()};state.workflows.push(workflow);await saveSettingsRecord("workflows",state.workflows);renderWorkflowSidebar();toast(`Workflow creato con ${promptIds.length} prompt.`,"success");openWorkflow(workflow.id)}
+function createMissingAgentPrompt(request,analysis){const title=`${analysis.intent.label} · ${String(request).replace(/\s+/g," ").trim().slice(0,70)}`;const goals=analysis.subgoals.length?analysis.subgoals.map((g,i)=>`${i+1}. ${g.label}`).join("\n"):"1. Analizza la richiesta\n2. Produci un risultato verificabile";openEditor();$("promptTitle").value=title;$("promptContent").value=`OBIETTIVO\n${request}\n\nSOTTO-OBIETTIVI\n${goals}\n\nISTRUZIONI\n- Esegui il lavoro in modo completo e verificabile.\n- Non assumere che il primo risultato sia corretto.\n- Controlla edge case, errori e regressioni pertinenti.\n- Restituisci un output operativo e direttamente utilizzabile.\n\nVERIFICA FINALE\nControlla che tutti i sotto-obiettivi siano stati coperti prima di concludere.`;$("promptTags").value=`agentico, ${analysis.intent.id}`;$("promptContent").dispatchEvent(new Event("input",{bubbles:true}));$("promptTitle").dispatchEvent(new Event("input",{bubbles:true}));toast("Bozza del prompt mancante creata. Verificala e salvala.","success")}
+const _renderStatsAgentBase=renderStats;renderStats=function(){_renderStatsAgentBase();injectAgentRouter()}
+const _commandItemsAgentBase=commandItems;commandItems=function(query){const items=_commandItemsAgentBase(query);const q=normalize(query);const agentCommand={label:"Assistente · Trova i prompt per una richiesta",hint:"Agentico",run:()=>{closeCommandPalette();history.replaceState(null,"","#dashboard");state.query="";$("globalSearch").value="";setFilter("all");setTimeout(()=>{$("agentRequest")?.focus();$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"})},80)}};return (!q||normalize(agentCommand.label).includes(q)||q.includes("agent"))?[agentCommand,...items]:items}
 
 /* ---------- Avvio ---------- */
 async function init(){
