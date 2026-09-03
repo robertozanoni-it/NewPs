@@ -485,6 +485,34 @@ textarea{resize:vertical;line-height:1.55}
 @media(max-width:800px){.agent-request-grid{grid-template-columns:1fr}.agent-mode-group{grid-template-columns:repeat(3,1fr)}.agent-result{grid-template-columns:28px 58px minmax(0,1fr)}.agent-result-actions{grid-column:3;justify-content:flex-start}.agent-score{width:52px;height:52px}.agent-router-head{flex-direction:column}.agent-router-badge{white-space:normal}}
 @media(max-width:520px){.agent-mode-group{grid-template-columns:1fr}.agent-result{grid-template-columns:26px minmax(0,1fr)}.agent-score{grid-column:2;width:auto;height:auto;border-radius:9px;border-width:2px;padding:5px 8px;justify-self:start}.agent-result-main{grid-column:2}.agent-result-actions{grid-column:2}.agent-router{padding:14px}}
 
+
+/* Performance 21.2 */
+.card,.category-group,.problem-item,.variable-card,.agent-result{contain:layout paint style}
+.cards .card,.category-group,.manage-row{content-visibility:auto;contain-intrinsic-size:auto 210px}
+.agent-result{content-visibility:auto;contain-intrinsic-size:auto 170px}
+.manage-list{overscroll-behavior:contain}
+.sidebar{overscroll-behavior:contain}
+
+.progressive-footer{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 0 6px;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);color:var(--muted);font-size:13px}.progressive-footer strong{color:var(--text)}
+
+@media(max-width:650px){
+  .main-head{flex-direction:column;align-items:stretch;gap:9px}
+  .main-title{width:100%;min-width:0}
+  .toolbar{margin-left:0;width:100%;max-width:100%;justify-content:flex-start;flex-wrap:wrap;gap:6px;overflow:visible}
+  .toolbar>.btn,.toolbar #selectAllBtn,.toolbar #filtersToggleBtn,.toolbar #commandPaletteBtn{max-width:100%;flex:0 0 auto}
+  .toolbar .view-toggle{display:flex!important;gap:5px;max-width:100%;flex-wrap:wrap}
+  .toolbar .view-toggle .btn{min-width:38px}
+  .main-head+.bulkbar{max-width:100%;overflow-x:auto}
+  .agent-router{padding:14px 12px}
+  .agent-router-head{gap:10px}
+  .agent-summary{align-items:flex-start}
+  .agent-summary-chip{max-width:100%;white-space:normal}
+}
+@media(max-width:430px){
+  .toolbar #selectAllBtn{flex:1 1 100%}
+  .toolbar #filtersToggleBtn,.toolbar #commandPaletteBtn{flex:1 1 auto}
+}
+
 </style>
 
 </head>
@@ -770,8 +798,8 @@ textarea{resize:vertical;line-height:1.55}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="21.1.0";
-const APP_RELEASE_NAME="Agentic Prompt Router · ranking contestuale e tipologie";
+const APP_VERSION="21.6.0";
+const APP_RELEASE_NAME="Performance, Stability & Responsive QA";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -865,14 +893,14 @@ const naturalTitleCompare=(a,b,direction=1)=>{
   if(labelCompare)return labelCompare*direction;
   return left.title.localeCompare(right.title,"it",{numeric:true,sensitivity:"variant"})*direction;
 };
-const catById=id=>state.categories.find(item=>item.id===id);
-const clientById=id=>state.clients.find(item=>item.id===id);
-const projectById=id=>state.projects.find(item=>item.id===id);
-const gptSiteById=id=>state.gptsites.find(item=>item.id===id);
-const seoById=id=>state.seo.find(item=>item.id===id);
-const customTypeById=id=>state.customTypes.find(item=>item.id===id);
-const customEntityById=id=>state.customEntities.find(item=>item.id===id);
-const customEntitiesForType=typeId=>state.customEntities.filter(item=>item.typeId===typeId).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true}));
+const catById=id=>state.fastIndexes?.categories?.get(id)||state.categories.find(item=>item.id===id);
+const clientById=id=>state.fastIndexes?.clients?.get(id)||state.clients.find(item=>item.id===id);
+const projectById=id=>state.fastIndexes?.projects?.get(id)||state.projects.find(item=>item.id===id);
+const gptSiteById=id=>state.fastIndexes?.gptsites?.get(id)||state.gptsites.find(item=>item.id===id);
+const seoById=id=>state.fastIndexes?.seo?.get(id)||state.seo.find(item=>item.id===id);
+const customTypeById=id=>state.fastIndexes?.customTypes?.get(id)||state.customTypes.find(item=>item.id===id);
+const customEntityById=id=>state.fastIndexes?.customEntities?.get(id)||state.customEntities.find(item=>item.id===id);
+const customEntitiesForType=typeId=>state.fastIndexes?.customByType?.get(typeId)||state.customEntities.filter(item=>item.typeId===typeId).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true}));
 const FIXED_ENTITY_TYPES=[
   {type:"client",label:"Clienti",singular:"Cliente",field:"clientId",store:"clients",prefix:"client",className:"clients"},
   {type:"gptsite",label:"GPTSites",singular:"GPTSites",field:"gptSiteId",store:"gptsites",prefix:"gptsite",className:"gptsites"},
@@ -885,7 +913,7 @@ function allSidebarTypes(){
     ...state.customTypes.map(type=>({type:`custom:${type.id}`,label:type.name,singular:type.singular||type.name,field:null,store:"customEntities",prefix:"customentity",className:"dynamic-type",custom:true,typeId:type.id,color:type.color||"#64748b"}))
   ].sort((a,b)=>a.label.localeCompare(b.label,"it",{sensitivity:"base",numeric:true}));
 }
-function customAssignmentValue(prompt,typeId){return String(prompt?.customAssignments?.[typeId]||"")}
+function customAssignmentValue(prompt,typeId){return customAssignmentValues(prompt,typeId)[0]||""}
 function setCustomAssignment(prompt,typeId,value){
   return {...prompt,customAssignments:{...(prompt.customAssignments||{}),[typeId]:value||null}};
 }
@@ -903,9 +931,113 @@ function promptCategorySortLabel(prompt){
   const leaf=sub||(direct?.parentId?direct:null);
   return `${root?.name||"Senza categoria"} ${leaf?.name||""}`.trim();
 }
-const livePrompts=()=>state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
-const activePrompts=()=>state.prompts.filter(item=>!item.deletedAt);
+const livePrompts=()=>{
+  if(state._livePromptsRevision===state.dataRevision&&state._livePromptsCache)return state._livePromptsCache;
+  state._livePromptsRevision=state.dataRevision;
+  state._livePromptsCache=state.prompts.filter(item=>!item.deletedAt&&item.status!=="archived");
+  return state._livePromptsCache;
+};
+const activePrompts=()=>{
+  if(state._activePromptsRevision===state.dataRevision&&state._activePromptsCache)return state._activePromptsCache;
+  state._activePromptsRevision=state.dataRevision;
+  state._activePromptsCache=state.prompts.filter(item=>!item.deletedAt);
+  return state._activePromptsCache;
+};
 
+
+
+/* ---------- Performance cache 21.2 ---------- */
+function rebuildFastIndexes(){
+  const byType=new Map();
+  for(const entity of state.customEntities){
+    if(!byType.has(entity.typeId))byType.set(entity.typeId,[]);
+    byType.get(entity.typeId).push(entity);
+  }
+  for(const list of byType.values())list.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true}));
+  state.fastIndexes={
+    categories:new Map(state.categories.map(item=>[item.id,item])),
+    clients:new Map(state.clients.map(item=>[item.id,item])),
+    projects:new Map(state.projects.map(item=>[item.id,item])),
+    gptsites:new Map(state.gptsites.map(item=>[item.id,item])),
+    seo:new Map(state.seo.map(item=>[item.id,item])),
+    customTypes:new Map(state.customTypes.map(item=>[item.id,item])),
+    customEntities:new Map(state.customEntities.map(item=>[item.id,item])),
+    customByType:byType
+  };
+  state._promptMetaCache=new Map();
+  state._searchCorpusCache=new Map();
+  state._agentCorpusCache=new Map();
+  state._fingerprintCache=new Map();
+  state._fingerprintWordsCache=new Map();
+  state._duplicateIdsCache=null;state._duplicateIdsRevision=-1;
+  state._workflowSnapshotCache=null;
+  state._workflowSnapshotRevision=-1;
+  state._livePromptsCache=null;
+  state._activePromptsCache=null;
+  state._livePromptsRevision=-1;
+  state._activePromptsRevision=-1;
+}
+function promptCacheKey(prompt){
+  return `${prompt?.id||""}|${prompt?.version||0}|${prompt?.updatedAt||""}|${String(prompt?.content||"").length}`;
+}
+function cachedPromptMeta(prompt){
+  if(!prompt)return {variables:[],required:[],missingRequired:[],attachments:0};
+  const key=promptCacheKey(prompt),cached=state._promptMetaCache?.get(prompt.id);
+  if(cached?.key===key)return cached.value;
+  const variables=extractVariables(prompt.content||"");
+  const required=variables.filter(def=>def.fileLike&&!def.optional);
+  const missingRequired=required.filter(def=>{
+    const file=prompt?.variableFiles?.[def.name];
+    const value=valueFor(prompt?.variableValues||{},def.name);
+    return !(file?.base64||String(value||"").trim());
+  });
+  const value={variables,required,missingRequired,attachments:promptAttachmentCount(prompt)};
+  state._promptMetaCache?.set(prompt.id,{key,value});
+  return value;
+}
+function promptSearchCorpus(prompt){
+  const key=promptCacheKey(prompt),cached=state._searchCorpusCache?.get(prompt.id);
+  if(cached?.key===key)return cached.value;
+  const value=normalize([
+    prompt.title,prompt.intro,prompt.content,prompt.notes,(prompt.tags||[]).join(" "),
+    catById(prompt.categoryId)?.name,catById(prompt.subcategoryId)?.name,
+    clientById(prompt.clientId)?.name,projectById(prompt.projectId)?.name,
+    gptSiteById(prompt.gptSiteId)?.name,seoById(prompt.seoId)?.name,
+    ...Object.entries(prompt.customAssignments||{}).flatMap(([typeId])=>
+      customAssignmentValues(prompt,typeId).map(entityId=>`${customTypeById(typeId)?.name||""} ${customEntityById(entityId)?.name||""}`)
+    )
+  ].join(" "));
+  state._searchCorpusCache?.set(prompt.id,{key,value});
+  return value;
+}
+function sidebarUsageCounts(live){
+  const cache=state._sidebarCountsCache;
+  if(cache?.revision===state.dataRevision)return cache.value;
+  const fixed={client:new Map(),project:new Map(),gptsite:new Map(),seo:new Map()};
+  const custom=new Map(),category=new Map();
+  let favorites=0,pinned=0,recent=0,uncategorized=0;
+  const recentLimit=Date.now()-7*864e5;
+  for(const prompt of live){
+    if(prompt.favorite)favorites++;
+    if(prompt.pinned)pinned++;
+    if(dateTimestamp(prompt.updatedAt)>=recentLimit)recent++;
+    if(!prompt.categoryId&&!prompt.subcategoryId)uncategorized++;
+    if(prompt.categoryId)category.set(prompt.categoryId,(category.get(prompt.categoryId)||0)+1);
+    if(prompt.subcategoryId)category.set(prompt.subcategoryId,(category.get(prompt.subcategoryId)||0)+1);
+    if(prompt.clientId)fixed.client.set(prompt.clientId,(fixed.client.get(prompt.clientId)||0)+1);
+    if(prompt.projectId)fixed.project.set(prompt.projectId,(fixed.project.get(prompt.projectId)||0)+1);
+    if(prompt.gptSiteId)fixed.gptsite.set(prompt.gptSiteId,(fixed.gptsite.get(prompt.gptSiteId)||0)+1);
+    if(prompt.seoId)fixed.seo.set(prompt.seoId,(fixed.seo.get(prompt.seoId)||0)+1);
+    for(const [typeId] of Object.entries(prompt.customAssignments||{})){
+      if(!custom.has(typeId))custom.set(typeId,new Map());
+      const map=custom.get(typeId);
+      for(const entityId of customAssignmentValues(prompt,typeId))map.set(entityId,(map.get(entityId)||0)+1);
+    }
+  }
+  const value={fixed,custom,category,favorites,pinned,recent,uncategorized};
+  state._sidebarCountsCache={revision:state.dataRevision,value};
+  return value;
+}
 
 
 /* ---------- Database ---------- */
@@ -927,7 +1059,10 @@ function put(name,value){return new Promise((resolve,reject)=>{const request=sto
 function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
 function transactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error||new Error("Transazione annullata"));tx.onerror=()=>reject(tx.error||new Error("Errore nella transazione"))})}
 async function loadData(){
-  [state.prompts,state.categories,state.clients,state.projects,state.gptsites,state.seo,state.customTypes,state.customEntities]=await Promise.all([getAll("prompts"),getAll("categories"),getAll("clients"),getAll("projects"),getAll("gptsites"),getAll("seo"),getAll("customTypes"),getAll("customEntities")]);
+  const names=["prompts","categories","clients","projects","gptsites","seo","customTypes","customEntities"];
+  const tx=state.db.transaction(names,"readonly");
+  const read=name=>new Promise((resolve,reject)=>{const request=tx.objectStore(name).getAll();request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error)});
+  [state.prompts,state.categories,state.clients,state.projects,state.gptsites,state.seo,state.customTypes,state.customEntities]=await Promise.all(names.map(read));
   state.categories.sort(categoryAlphabeticalCompare);
   state.clients.sort((a,b)=>a.name.localeCompare(b.name,"it"));
   state.projects.sort((a,b)=>a.name.localeCompare(b.name,"it"));
@@ -935,6 +1070,10 @@ async function loadData(){
   state.seo.sort((a,b)=>a.name.localeCompare(b.name,"it"));
   state.customTypes.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true}));
   state.customEntities.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true}));
+  state.dataRevision=(state.dataRevision||0)+1;
+  state._sidebarCountsCache=null;
+  state.agentLastResult=null;
+  rebuildFastIndexes();
 }
 async function removeLegacyDemoPrompt(){
   if(localStorage.getItem("ps_legacy_demo_cleanup")==="1")return;
@@ -1491,7 +1630,7 @@ function bindModalClose(){$$("[data-close]").forEach(button=>button.onclick=()=>
 
 /* ---------- Ricerca e filtri ---------- */
 function setFilter(type,id=null){
-  state.filter={type,id};state.selected.clear();
+  state.filter={type,id};state.selected.clear();resetRenderLimit();
   $$(".side-link[data-filter]").forEach(button=>button.classList.toggle("active",button.dataset.filter===type));
   render();
   $("sidebar").classList.remove("open");
@@ -1519,7 +1658,7 @@ function filteredPrompts(){
   if(query){
     const words=query.split(" ").filter(Boolean);
     items=items.filter(item=>{
-      const text=normalize([item.title,item.intro,item.content,item.notes,(item.tags||[]).join(" "),catById(item.categoryId)?.name,catById(item.subcategoryId)?.name,clientById(item.clientId)?.name,projectById(item.projectId)?.name,gptSiteById(item.gptSiteId)?.name,seoById(item.seoId)?.name,...Object.entries(item.customAssignments||{}).flatMap(([typeId,entityIds])=>customAssignmentValues(item,typeId).map(entityId=>`${customTypeById(typeId)?.name||""} ${customEntityById(entityId)?.name||""}`))].join(" "));
+      const text=promptSearchCorpus(item);
       return words.every(word=>text.includes(word));
     });
   }
@@ -1561,18 +1700,15 @@ function filterInfo(){
 function renderSidebar(){
   const live=livePrompts(),active=activePrompts();
   $("countAll").textContent=live.length;
-  $("countFavorites").textContent=live.filter(item=>item.favorite).length;
-  $("countPinned").textContent=live.filter(item=>item.pinned).length;
-  $("countRecent").textContent=live.filter(item=>{const timestamp=dateTimestamp(item.updatedAt);return timestamp>0&&Date.now()-timestamp<=7*864e5}).length;
-  $("countUncategorized").textContent=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
-  $("countArchived").textContent=active.filter(item=>item.status==="archived").length;
-  $("countTrash").textContent=state.prompts.filter(item=>item.deletedAt).length;
+  const usageCounts=sidebarUsageCounts(live);
+  $("countFavorites").textContent=usageCounts.favorites;
+  $("countPinned").textContent=usageCounts.pinned;
+  $("countRecent").textContent=usageCounts.recent;
+  $("countUncategorized").textContent=usageCounts.uncategorized;
+  $("countArchived").textContent=active.length-live.length;
+  $("countTrash").textContent=state.prompts.length-active.length;
 
-  const counts={};
-  live.forEach(item=>{
-    if(item.categoryId)counts[item.categoryId]=(counts[item.categoryId]||0)+1;
-    if(item.subcategoryId)counts[item.subcategoryId]=(counts[item.subcategoryId]||0)+1;
-  });
+  const counts=new Proxy({}, {get:(_,id)=>usageCounts.category.get(id)||0});
   const activeCategory=state.filter.type==="category"?catById(state.filter.id):null;
   const categorySection={label:"Categorie",html:`<section class="side-section categories">
     <div class="side-title"><span>Categorie</span></div>
@@ -1591,7 +1727,10 @@ function renderSidebar(){
     const selected=definition.custom
       ?(state.filter.type==="custom"&&state.filter.typeId===definition.typeId?state.filter.id:"all")
       :(state.filter.type===definition.type?state.filter.id:"all");
-    const countFor=entity=>live.filter(prompt=>definition.custom?customAssignmentValues(prompt,definition.typeId).includes(entity.id):prompt[definition.field]===entity.id).length;
+    const countFor=entity=>{
+      if(definition.custom)return usageCounts.custom.get(definition.typeId)?.get(entity.id)||0;
+      return usageCounts.fixed[definition.type]?.get(entity.id)||0;
+    };
     return {label:definition.label,html:`<section class="side-section ${esc(definition.className||"dynamic-type")}" ${definition.custom?`style="--dynamic-accent:${esc(definition.color||"#64748b")}"`:""}>
       <div class="side-title"><span>${esc(definition.label)}</span></div>
       <select class="sidebar-picker dynamic-sidebar-picker" data-sidebar-type="${esc(definition.type)}" aria-label="Scegli ${esc(definition.label)}">
@@ -1642,7 +1781,7 @@ function openSubcategoryPopup(rootId){
   $("categoryPicker").setAttribute("aria-expanded","false");
   $("choiceTitle").textContent=`Sottocategorie di ${root.name}`;
   $("choiceBody").innerHTML=children.length
-    ?`<div class="subcategory-popup-list">${children.map(child=>`<button class="subcategory-popup-button ${state.filter.type==="category"&&state.filter.id===child.id?"active":""}" type="button" data-subcategory-id="${esc(child.id)}"><span class="tree-dot" style="--dot:${esc(categoryColor(child))}"></span><span>${esc(child.name)}</span><span class="count">${live.filter(prompt=>prompt.subcategoryId===child.id).length}</span></button>`).join("")}</div>`
+    ?`<div class="subcategory-popup-list">${children.map(child=>`<button class="subcategory-popup-button ${state.filter.type==="category"&&state.filter.id===child.id?"active":""}" type="button" data-subcategory-id="${esc(child.id)}"><span class="tree-dot" style="--dot:${esc(categoryColor(child))}"></span><span>${esc(child.name)}</span><span class="count">${sidebarUsageCounts(live).category.get(child.id)||0}</span></button>`).join("")}</div>`
     :'<div class="hint">Questa categoria non contiene sottocategorie.</div>';
   $("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';
   bindModalClose();
@@ -1685,7 +1824,7 @@ function collectProblems(){
   if(orphanGptSite.length)add({id:"data-orphan-gptsite",title:"Riferimenti a GPTSites mancanti",description:"Alcuni prompt puntano a siti GPTSites non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"GPTSites",impact:"Il filtro GPTSites non può rappresentare correttamente i dati.",solution:"Riassegna un sito GPTSites valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanGptSite.length,itemIds:orphanGptSite.map(x=>x.id)});
   const orphanSeo=live.filter(item=>item.seoId&&!seoById(item.seoId));
   if(orphanSeo.length)add({id:"data-orphan-seo",title:"Riferimenti SEO mancanti",description:"Alcuni prompt puntano a elementi SEO non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"SEO",impact:"Il filtro SEO non può rappresentare correttamente i dati.",solution:"Riassegna un elemento SEO valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanSeo.length,itemIds:orphanSeo.map(x=>x.id)});
-  const orphanCustom=live.filter(item=>Object.entries(item.customAssignments||{}).some(([typeId,entityId])=>entityId&&(!customTypeById(typeId)||!customEntityById(entityId))));
+  const orphanCustom=live.filter(item=>Object.entries(item.customAssignments||{}).some(([typeId])=>!customTypeById(typeId)||customAssignmentValues(item,typeId).some(entityId=>!customEntityById(entityId))));
   if(orphanCustom.length)add({id:"data-orphan-custom",title:"Riferimenti a tipologie personalizzate mancanti",description:"Alcuni prompt puntano a tipologie o elementi personalizzati non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Tipologie sidebar",impact:"I filtri dinamici possono risultare incoerenti.",solution:"Riassegna un elemento valido nella tipologia interessata.",mode:"Manuale",target:"organize",count:orphanCustom.length,itemIds:orphanCustom.map(x=>x.id)});
   const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
   if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o pi\u00F9 collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L\u2019apertura del tool pu\u00F2 fallire o essere bloccata.",solution:"Correggi il campo \u201CTool da utilizzare\u201D.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
@@ -1697,7 +1836,7 @@ function collectProblems(){
   }));
   if(invalidFiles.length)add({id:"file-invalid-attachment",title:"File incorporati non validi",description:"Sono presenti file che avrebbero dovuto essere incorporati ma non contengono dati ripristinabili.",priority:"Alta",cause:"Lettura del file non riuscita, importazione incompleta o archivio danneggiato.",functionName:"Variabili e file",impact:"Backup e ripristino del file potrebbero non funzionare.",solution:"Apri il prompt, rimuovi il file e caricalo nuovamente entro il limite.",mode:"Manuale",target:"files",count:new Set(invalidFiles).size,itemIds:[...new Set(invalidFiles)]});
   if(oversizedFiles.length)add({id:"file-backup-excluded",title:"File esclusi dal backup incorporato",description:"Alcuni file superano 20 MB e sono conservati solo come riferimento manuale, come previsto dall'app.",priority:"Informativa",cause:"Il file supera il limite massimo per l'incorporamento Base64.",functionName:"Variabili e file",impact:"Il backup JSON non contiene i byte di questi file e dovrai conservarli separatamente.",solution:"Conserva i file originali separatamente oppure usa una versione più piccola entro 20 MB.",mode:"Manuale",target:"files",count:new Set(oversizedFiles).size,itemIds:[...new Set(oversizedFiles)]});
-  const missingRequiredFiles=live.filter(prompt=>missingRequiredFileDefinitions(prompt).length>0);
+  const missingRequiredFiles=live.filter(prompt=>cachedPromptMeta(prompt).missingRequired.length>0);
   if(missingRequiredFiles.length)add({id:"file-required-missing",title:"File obbligatori mancanti",description:"Alcuni prompt contengono variabili file obbligatorie che non hanno ancora un file o un riferimento manuale.",priority:"Media",cause:"Il prompt richiede un allegato ma il relativo campo non è stato compilato.",functionName:"Variabili e file",impact:"Il prompt può essere copiato con segnaposto irrisolti o senza il materiale necessario.",solution:"Apri il prompt e carica il file richiesto oppure inserisci un riferimento manuale nel relativo campo.",mode:"Manuale",target:"files",count:missingRequiredFiles.length,itemIds:missingRequiredFiles.map(x=>x.id)});
   return problems.sort((a,b)=>problemPriorityRank(a.priority)-problemPriorityRank(b.priority)||a.title.localeCompare(b.title,"it"));
 }
@@ -1713,14 +1852,19 @@ function syncResolvedProblems(activeProblems){
   localStorage.setItem("ps_resolved_problems",JSON.stringify(resolved.slice(0,30)));
 }
 function workflowSnapshot(){
-  const live=livePrompts();
+  if(state._workflowSnapshotRevision===state.dataRevision&&state._workflowSnapshotCache)return state._workflowSnapshotCache;
+  const live=livePrompts(),usage=sidebarUsageCounts(live);
   const configured=state.categories.length>0;
-  const uncategorized=live.filter(item=>!item.categoryId&&!item.subcategoryId).length;
-  const review=live.filter(item=>item.status==="review").length;
-  const attachments=live.reduce((sum,item)=>sum+promptAttachmentCount(item),0);
-  const variables=live.reduce((sum,item)=>sum+extractVariables(item.content).length,0);
-  const requiredFiles=live.reduce((sum,item)=>sum+requiredFileDefinitions(item).length,0);
-  const missingRequiredFiles=live.reduce((sum,item)=>sum+missingRequiredFileDefinitions(item).length,0);
+  const uncategorized=usage.uncategorized;
+  let review=0,attachments=0,variables=0,requiredFiles=0,missingRequiredFiles=0;
+  for(const item of live){
+    if(item.status==="review")review++;
+    const meta=cachedPromptMeta(item);
+    attachments+=meta.attachments;
+    variables+=meta.variables.length;
+    requiredFiles+=meta.required.length;
+    missingRequiredFiles+=meta.missingRequired.length;
+  }
   const hasPrompts=live.length>0;
   const problems=collectProblems();syncResolvedProblems(problems);
   const blocking=problems.filter(item=>item.priority==="Bloccante").length;
@@ -1729,7 +1873,10 @@ function workflowSnapshot(){
   const completed=[configured,hasPrompts,hasPrompts&&uncategorized===0,hasPrompts,hasPrompts&&review===0,hasPrompts&&blocking===0].filter(Boolean).length;
   const total=6;
   const percent=Math.round(completed/total*100);
-  return {live,configured,uncategorized,review,attachments,variables,requiredFiles,missingRequiredFiles,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
+  const snapshot={live,configured,uncategorized,review,attachments,variables,requiredFiles,missingRequiredFiles,hasPrompts,problems,blocking,high,warnings,completed,total,percent};
+  state._workflowSnapshotRevision=state.dataRevision;
+  state._workflowSnapshotCache=snapshot;
+  return snapshot;
 }
 function recommendedWorkflowAction(snapshot){
   if(!snapshot.configured)return {action:"configure",icon:"\u2699",title:"Completa la configurazione",reason:"La struttura delle categorie non è ancora pronta.",priority:"Alta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.gptsites.length} GPTSites · ${state.projects.length} progetti · ${state.seo.length} SEO · ${state.customTypes.length} tipologie personalizzate`,after:"Dopo potrai organizzare correttamente i prompt."};
@@ -1775,13 +1922,13 @@ function renderProblemsPanel(){
 function sanitizedDiagnosticReport(){
   const snapshot=workflowSnapshot();
   const resolved=readStoredJson("ps_resolved_problems",[]);
-  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE,importArchiveLimitBytes:MAX_IMPORT_ARCHIVE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,projects:state.projects.length,gptsites:state.gptsites.length,seo:state.seo.length,customTypes:state.customTypes.length,customEntities:state.customEntities.length,attachments:snapshot.attachments,variables:snapshot.variables,requiredFiles:snapshot.requiredFiles,missingRequiredFiles:snapshot.missingRequiredFiles,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
+  return {app:"Prompt Studio Standalone",version:APP_VERSION,generatedAt:now(),environment:{browser:navigator.userAgent.replace(/\([^)]*\)/g,"(dati sistema omessi)"),language:navigator.language,online:navigator.onLine,indexedDB:Boolean(window.indexedDB),secureContext:window.isSecureContext,database:{name:DB_NAME,version:DB_VERSION},fileLimitBytes:MAX_EMBED_FILE_SIZE,importArchiveLimitBytes:MAX_IMPORT_ARCHIVE_SIZE},states:{configured:snapshot.configured,hasPrompts:snapshot.hasPrompts,progressPercent:snapshot.percent,lastRenderMs:Number((state.lastRenderMs||0).toFixed(1)),dataRevision:state.dataRevision||0},counters:{promptsTotal:state.prompts.length,promptsActive:snapshot.live.length,categories:state.categories.length,clients:state.clients.length,projects:state.projects.length,gptsites:state.gptsites.length,seo:state.seo.length,customTypes:state.customTypes.length,customEntities:state.customEntities.length,attachments:snapshot.attachments,variables:snapshot.variables,requiredFiles:snapshot.requiredFiles,missingRequiredFiles:snapshot.missingRequiredFiles,problems:snapshot.problems.length,blocking:snapshot.blocking,highPriority:snapshot.high,warnings:snapshot.warnings},problems:snapshot.problems.map(({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})=>({id,title,priority,functionName,impact,solution,mode,count,status,lastChecked})),resolvedProblems:resolved.slice(0,20),recentEvents:diagnosticEvents().slice(0,20),privacy:"Il report non include contenuti completi dei prompt, valori delle variabili, file, token, cookie o credenziali."};
 }
 function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prompt-studio-diagnostica-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);toast("Report diagnostico esportato senza contenuti completi o credenziali.","success")}
 function renderDiagnosticsPanel(){
   const snapshot=workflowSnapshot();const report=sanitizedDiagnosticReport();const resolved=report.resolvedProblems;
   $("choiceTitle").textContent="Diagnostica tecnica";
-  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite singolo file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr><tr><th>Limite archivio import</th><td>${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>GPTSites</th><td>${state.gptsites.length}</td></tr><tr><th>Progetti</th><td>${state.projects.length}</td></tr><tr><th>SEO</th><td>${state.seo.length}</td></tr><tr><th>Tipologie personalizzate</th><td>${state.customTypes.length}</td></tr><tr><th>Elementi personalizzati</th><td>${state.customEntities.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
+  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite singolo file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr><tr><th>Limite archivio import</th><td>${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>GPTSites</th><td>${state.gptsites.length}</td></tr><tr><th>Progetti</th><td>${state.projects.length}</td></tr><tr><th>SEO</th><td>${state.seo.length}</td></tr><tr><th>Tipologie personalizzate</th><td>${state.customTypes.length}</td></tr><tr><th>Elementi personalizzati</th><td>${state.customEntities.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr><tr><th>Ultimo render</th><td>${(state.lastRenderMs||0).toFixed(1)} ms</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
   $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
   bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
 }
@@ -1873,7 +2020,7 @@ function cardHtml(prompt){
   Object.entries(prompt.customAssignments||{}).forEach(([typeId])=>{const type=customTypeById(typeId);customAssignmentValues(prompt,typeId).forEach(entityId=>{const entity=customEntityById(entityId);if(type&&entity)origins.push(`<span class="prompt-origin-item">${esc(type.name)}: ${esc(entity.name)}</span>`)})});
   if(!origins.length)origins.push('<span class="prompt-origin-item empty">Non assegnato</span>');
   const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
-  const variableCount=extractVariables(prompt.content).length;
+  const variableCount=cachedPromptMeta(prompt).variables.length;
   const attachmentCount=promptAttachmentCount(prompt);
   return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
@@ -1932,18 +2079,33 @@ function groupedCardsHtml(items){
       </section>`;
     }).join("");
 }
+
+const PERF_RENDER_CHUNK=120;
+function currentRenderLimit(){return Math.max(PERF_RENDER_CHUNK,Number(state.renderLimit)||PERF_RENDER_CHUNK)}
+function resetRenderLimit(){state.renderLimit=PERF_RENDER_CHUNK}
+function renderProgressiveFooter(total,shown){
+  let footer=$("progressiveFooter");
+  if(!footer){footer=document.createElement("div");footer.id="progressiveFooter";footer.className="progressive-footer";$("cards").after(footer)}
+  if(shown>=total){footer.remove();return}
+  footer.innerHTML=`<span>Visualizzati <strong>${shown}</strong> di <strong>${total}</strong> prompt</span><button class="btn" id="loadMorePrompts">Mostra altri ${Math.min(PERF_RENDER_CHUNK,total-shown)}</button><button class="btn small" id="loadAllPrompts">Mostra tutti</button>`;
+  $("loadMorePrompts").onclick=()=>{state.renderLimit=currentRenderLimit()+PERF_RENDER_CHUNK;renderCards()};
+  $("loadAllPrompts").onclick=()=>{state.renderLimit=total;renderCards()};
+}
+
 function renderCards(){
-  const items=filteredPrompts();
-  // Il raggruppamento per categoria viene applicato solo quando richiesto:
-  // in questo modo le opzioni Titolo A-Z/Z-A ordinano davvero l'intera libreria.
+  const allItems=filteredPrompts();
+  const limit=currentRenderLimit();
+  const items=allItems.slice(0,limit);
+  // Il raggruppamento per categoria viene applicato solo quando richiesto.
   const shouldGroup=state.filter.type==="all"&&!state.query&&state.sort==="category_asc";
   $("cards").className=`cards ${shouldGroup?"grouped":(state.view==="list"?"list":"")}`;
-  $("cards").innerHTML=items.length?(shouldGroup?groupedCardsHtml(items):items.map(cardHtml).join("")):`<div class="empty"><div class="big">\u2315</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
+  $("cards").innerHTML=items.length?(shouldGroup?groupedCardsHtml(items):items.map(cardHtml).join("")):`<div class="empty"><div class="big">⌕</div><strong>Nessun prompt trovato</strong><p>Modifica la ricerca o crea un nuovo prompt.</p></div>`;
   const [title,subtitle]=filterInfo();
   $("viewTitle").textContent=title;
-  $("viewSubtitle").textContent=state.query?`${items.length} risultati per \u201C${state.query}\u201D`:`${subtitle} \u00B7 ${items.length} elementi`;
+  $("viewSubtitle").textContent=state.query?`${allItems.length} risultati per “${state.query}”`:`${subtitle} · ${allItems.length} elementi`;
   bindCardEvents();
   updateBulkbar();
+  renderProgressiveFooter(allItems.length,items.length);
 
   if(state.lastSavedId){
     const savedCard=$(`#cards .card[data-id="${CSS.escape(state.lastSavedId)}"]`);
@@ -1956,7 +2118,13 @@ function renderCards(){
     }
   }
 }
-function render(){renderSidebar();renderStats();renderCards()}
+function render(){
+  const started=performance.now();
+  renderSidebar();renderStats();renderCards();
+  const elapsed=performance.now()-started;
+  state.lastRenderMs=elapsed;
+  if(elapsed>120)console.warn(`Render lento: ${elapsed.toFixed(1)} ms`);
+}
 function bindCardEvents(){
   $$("#cards .card").forEach(card=>{
     const id=card.dataset.id;
@@ -1966,7 +2134,7 @@ function bindCardEvents(){
     };
     card.onkeydown=event=>{if(event.target.closest("button,input,select,textarea,a"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
-    card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=extractVariables(prompt.content);if(!vars.length&&!normalizeHttpUrl(prompt.toolUrl||"")){quickCopy(id)}else openEditor(id,"variables","use")});
+    card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=cachedPromptMeta(prompt).variables;if(!vars.length&&!normalizeHttpUrl(prompt.toolUrl||"")){quickCopy(id)}else openEditor(id,"variables","use")});
     card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
     card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();event.currentTarget.closest('.card-menu').classList.toggle('open')});
     card.querySelector(".pin-card")?.addEventListener("click",async()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;await put("prompts",{...prompt,pinned:!prompt.pinned,updatedAt:now()});await loadData();render();toast(prompt.pinned?"Prompt sbloccato.":"Prompt pinnato.","success")});
@@ -2410,7 +2578,7 @@ function closeEditor(force=false){
     return;
   }
   $("editorBackdrop").classList.remove("show");
-  clearTimeout(state.detectTimer);clearTimeout(state.introTimer);
+  clearTimeout(state.detectTimer);clearTimeout(state.introTimer);clearTimeout(state.autosaveTimer);state.autosaveTimer=null;
   state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit",introSource:"auto"};
   const previous=state.modalReturnFocus.editorBackdrop;delete state.modalReturnFocus.editorBackdrop;
   if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
@@ -2527,7 +2695,7 @@ function navigateToSavedPrompt(prompt){
     setFilter("seo",prompt.seoId);
     return;
   }
-  const firstCustom=Object.entries(prompt.customAssignments||{}).find(([typeId,entityId])=>typeId&&entityId&&customTypeById(typeId)&&customEntityById(entityId));
+  const firstCustom=Object.keys(prompt.customAssignments||{}).map(typeId=>[typeId,customAssignmentValues(prompt,typeId).find(entityId=>customEntityById(entityId))]).find(([typeId,entityId])=>typeId&&entityId&&customTypeById(typeId));
   if(firstCustom){
     state.filter={type:"custom",typeId:firstCustom[0],id:firstCustom[1]};state.selected.clear();render();
     return;
@@ -2733,7 +2901,7 @@ async function bulkUpdateCustom(typeId,entityId){
   const ids=[...state.selected];if(!ids.length)return;
   try{
     const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts"),stamp=now();let changed=0;
-    ids.forEach(id=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;promptStore.put({...prompt,customAssignments:{...(prompt.customAssignments||{}),[typeId]:entityId||null},updatedAt:stamp});changed++});
+    ids.forEach(id=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const type=customTypeById(typeId),current=customAssignmentValues(prompt,typeId);const next=entityId?(type?.multi?[...new Set([...current,entityId])]:entityId):(type?.multi?[]:null);promptStore.put({...prompt,customAssignments:{...(prompt.customAssignments||{}),[typeId]:next},updatedAt:stamp});changed++});
     await transactionDone(tx);state.selected.clear();await loadData();render();toast(`${changed} prompt aggiornati.`,"success");
   }catch(error){console.error(error);toast(`Aggiornamento multiplo non riuscito: ${error.message||"errore del database"}.`,"error","PS-BULK-CUSTOM")}
 }
@@ -2741,7 +2909,7 @@ async function bulkUpdateCustom(typeId,entityId){
 function promptSectionValue(prompt,type){
   if(type==="category")return prompt.subcategoryId||prompt.categoryId||"";
   const definition=entityDefinition(type);
-  if(definition?.custom)return customAssignmentValue(prompt,definition.typeId);
+  if(definition?.custom)return customAssignmentValues(prompt,definition.typeId)[0]||"";
   return definition?prompt[definition.field]||"":"";
 }
 
@@ -2842,7 +3010,7 @@ async function transferPromptsAcrossSections(ids,targetType,targetId,mode="move"
           copy.categoryId=categoryId;
           copy.subcategoryId=subcategoryId;
         }else{
-          if(entityDefinition(targetType)?.custom)copy.customAssignments={...(copy.customAssignments||{}),[entityDefinition(targetType).typeId]:targetId};
+          if(entityDefinition(targetType)?.custom){const def=entityDefinition(targetType),current=customAssignmentValues(copy,def.typeId),next=targetId?(customTypeById(def.typeId)?.multi?[...new Set([...current,targetId])]:targetId):(customTypeById(def.typeId)?.multi?[]:null);copy.customAssignments={...(copy.customAssignments||{}),[def.typeId]:next};}
           else copy[entityDefinition(targetType).field]=targetId;
         }
         if(normalizedIntroSource(copy)==="auto"){
@@ -2858,7 +3026,7 @@ async function transferPromptsAcrossSections(ids,targetType,targetId,mode="move"
           updated.categoryId=categoryId;
           updated.subcategoryId=subcategoryId;
         }else{
-          if(entityDefinition(targetType)?.custom)updated.customAssignments={...(updated.customAssignments||{}),[entityDefinition(targetType).typeId]:targetId};
+          if(entityDefinition(targetType)?.custom){const def=entityDefinition(targetType),current=customAssignmentValues(updated,def.typeId),next=targetId?(customTypeById(def.typeId)?.multi?[...new Set([...current,targetId])]:targetId):(customTypeById(def.typeId)?.multi?[]:null);updated.customAssignments={...(updated.customAssignments||{}),[def.typeId]:next};}
           else updated[entityDefinition(targetType).field]=targetId;
         }
         promptStore.put(updated);
@@ -3366,14 +3534,16 @@ async function moveEntityAcrossSections(sourceType,id,targetType){
           if(removedIds.has(updated.subcategoryId))updated.subcategoryId=null;
         }
       }else if(sourceDefinition.custom){
-        updated.customAssignments={...(updated.customAssignments||{}),[sourceDefinition.typeId]:null};
+        const sourceType=customTypeById(sourceDefinition.typeId),remaining=customAssignmentValues(updated,sourceDefinition.typeId).filter(entityId=>entityId!==source.id);
+        updated.customAssignments={...(updated.customAssignments||{}),[sourceDefinition.typeId]:sourceType?.multi?remaining:(remaining[0]||null)};
       }else updated[sourceDefinition.field]=null;
 
       if(targetType==="category"){
         updated.categoryId=target.id;
         updated.subcategoryId=null;
       }else if(targetDefinition.custom){
-        updated.customAssignments={...(updated.customAssignments||{}),[targetDefinition.typeId]:target.id};
+        const targetTypeDef=customTypeById(targetDefinition.typeId),current=customAssignmentValues(updated,targetDefinition.typeId);
+        updated.customAssignments={...(updated.customAssignments||{}),[targetDefinition.typeId]:targetTypeDef?.multi?[...new Set([...current,target.id])]:target.id};
       }else updated[targetDefinition.field]=target.id;
       promptStore.put(updated);
     });
@@ -3429,7 +3599,7 @@ function deleteCustomEntity(id){
   });
 }
 function deleteCustomType(id){
-  const type=customTypeById(id);if(!type)return;const entities=customEntitiesForType(id);const entityIds=new Set(entities.map(item=>item.id));const affected=state.prompts.filter(prompt=>customAssignmentValues(prompt,id).some(entityId=>entityIds.has(entityId)));
+  const type=customTypeById(id);if(!type)return;const entities=customEntitiesForType(id);const affected=state.prompts.filter(prompt=>Object.prototype.hasOwnProperty.call(prompt.customAssignments||{},id));
   confirmAction("Elimina tipologia",`La tipologia “${type.name}” e i suoi ${entities.length} elementi verranno eliminati. ${affected.length} prompt perderanno solo questa assegnazione.`,async()=>{
     const tx=state.db.transaction(["prompts","customTypes","customEntities"],"readwrite"),promptStore=tx.objectStore("prompts"),typeStore=tx.objectStore("customTypes"),entityStore=tx.objectStore("customEntities");
     affected.forEach(prompt=>{const assignments={...(prompt.customAssignments||{})};delete assignments[id];promptStore.put({...prompt,customAssignments:assignments,updatedAt:now()})});
@@ -3463,7 +3633,7 @@ async function exportCurrentPrompt(){
       project:project?{name:project.name}:null,
       gptsite:gptSite?{name:gptSite.name}:null,
       seo:seoItem?{name:seoItem.name}:null,
-      custom:Object.entries(payload.customAssignments||{}).map(([typeId,entityId])=>{const type=customTypeById(typeId),entity=customEntityById(entityId);return type&&entity?{typeName:type.name,entityName:entity.name}:null}).filter(Boolean)
+      custom:Object.keys(payload.customAssignments||{}).flatMap(typeId=>{const type=customTypeById(typeId);return customAssignmentValues(payload,typeId).map(entityId=>{const entity=customEntityById(entityId);return type&&entity?{typeName:type.name,entityName:entity.name,multi:Boolean(type.multi)}:null}).filter(Boolean)})
     },
     prompt:payload
   };
@@ -3617,10 +3787,10 @@ async function resolveImportedPromptOrganization(bundle,prompt){
   for(const entry of organization.custom||[]){
     if(!entry?.typeName||!entry?.entityName)continue;
     let type=state.customTypes.find(item=>normalize(item.name)===normalize(entry.typeName));
-    if(!type){type={id:uid("ctype"),name:String(entry.typeName).trim(),color:CATEGORY_COLORS[state.customTypes.length%CATEGORY_COLORS.length],createdAt:now()};await put("customTypes",type);await loadData()}
+    if(!type){type={id:uid("ctype"),name:String(entry.typeName).trim(),color:CATEGORY_COLORS[state.customTypes.length%CATEGORY_COLORS.length],multi:Boolean(entry.multi),visible:true,createdAt:now()};await put("customTypes",type);await loadData()}else if(entry.multi&&!type.multi){type={...type,multi:true,updatedAt:now()};await put("customTypes",type);await loadData()}
     let entity=customEntitiesForType(type.id).find(item=>normalize(item.name)===normalize(entry.entityName));
     if(!entity){entity={id:uid("customentity"),typeId:type.id,name:String(entry.entityName).trim(),createdAt:now()};await put("customEntities",entity);await loadData()}
-    customAssignments[type.id]=entity.id;
+    if(type.multi){customAssignments[type.id]=[...new Set([...customAssignmentValues({customAssignments},type.id),entity.id])]}else customAssignments[type.id]=entity.id;
   }
   return {...prompt,categoryId,subcategoryId,clientId,projectId,gptSiteId,seoId,customAssignments};
 }
@@ -3681,7 +3851,7 @@ async function importData(file){
               seo=seo.map(item=>{if(state.seo.some(existing=>existing.id===item.id)){const id=uid("seo");seoMap.set(item.id,id);return {...item,id}}return item});
               customTypes=customTypes.map(item=>{if(state.customTypes.some(existing=>existing.id===item.id)){const id=uid("ctype");customTypeMap.set(item.id,id);return {...item,id}}return item});
               customEntities=customEntities.map(item=>{const mappedTypeId=customTypeMap.get(item.typeId)||item.typeId;if(state.customEntities.some(existing=>existing.id===item.id)){const id=uid("customentity");customEntityMap.set(item.id,id);return {...item,id,typeId:mappedTypeId}}return {...item,typeId:mappedTypeId}});
-              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,gptSiteId:gptSiteMap.get(item.gptSiteId)||item.gptSiteId,projectId:projectMap.get(item.projectId)||item.projectId,seoId:seoMap.get(item.seoId)||item.seoId,customAssignments:Object.fromEntries(Object.entries(item.customAssignments||{}).map(([typeId,entityId])=>[customTypeMap.get(typeId)||typeId,customEntityMap.get(entityId)||entityId]))}));
+              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,gptSiteId:gptSiteMap.get(item.gptSiteId)||item.gptSiteId,projectId:projectMap.get(item.projectId)||item.projectId,seoId:seoMap.get(item.seoId)||item.seoId,customAssignments:Object.fromEntries(Object.entries(item.customAssignments||{}).map(([typeId,entityIds])=>{const mappedTypeId=customTypeMap.get(typeId)||typeId;const values=Array.isArray(entityIds)?entityIds:[entityIds].filter(Boolean);const mapped=values.map(entityId=>customEntityMap.get(entityId)||entityId);const importedType=customTypes.find(type=>type.id===mappedTypeId);return [mappedTypeId,importedType?.multi?mapped:(mapped[0]||null)]}))}));
             }
             prompts=prompts.map(prompt=>{
               if(normalizedIntroSource(prompt)!=="auto")return prompt;
@@ -3715,8 +3885,8 @@ async function importData(file){
 function bindEvents(){
   $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");state.query="";$("globalSearch").value="";setFilter("all");setTimeout(()=>{$("workflow-overview")?.scrollIntoView({behavior:"smooth",block:"start"});$("workflowTitle")?.focus?.()},80)};
   $$(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
-  $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;renderStats();renderCards()},160)};
-  $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";renderStats();renderCards()};
+  $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;resetRenderLimit();renderStats();renderCards()},160)};
+  $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";resetRenderLimit();renderStats();renderCards()};
   $("newPromptBtn").onclick=()=>openEditor();
   $("themeBtn").onclick=()=>{setTheme();$("moreMenu").classList.remove("show")};
   $("moreBtn").onclick=event=>{event.stopPropagation();$("moreMenu").classList.toggle("show")};
@@ -3748,9 +3918,9 @@ function bindEvents(){
   $("importBtn").onclick=()=>$("importInput").click();
   $("importInput").onchange=event=>{const file=event.target.files[0];if(file)importData(file);event.target.value=""};
   $("sortSelect").value=state.sort;
-  $("sortSelect").onchange=event=>{state.sort=event.target.value;localStorage.setItem("ps_sort",state.sort);renderCards()};
-  $("gridBtn").onclick=()=>{state.view="grid";localStorage.setItem("ps_view","grid");renderCards()};
-  $("listBtn").onclick=()=>{state.view="list";localStorage.setItem("ps_view","list");renderCards()};
+  $("sortSelect").onchange=event=>{state.sort=event.target.value;localStorage.setItem("ps_sort",state.sort);resetRenderLimit();renderCards()};
+  $("gridBtn").onclick=()=>{state.view="grid";localStorage.setItem("ps_view","grid");resetRenderLimit();renderCards()};
+  $("listBtn").onclick=()=>{state.view="list";localStorage.setItem("ps_view","list");resetRenderLimit();renderCards()};
   $("selectAllBtn").onclick=()=>{filteredPrompts().forEach(prompt=>state.selected.add(prompt.id));renderCards()};
   $("clearSelectionBtn").onclick=()=>{state.selected.clear();renderCards()};
   $("bulkMoveBtn").onclick=()=>choiceAction("Sposta prompt","Categoria",'<option value="">Senza categoria</option>'+state.categories.map(cat=>`<option value="${esc(cat.id)}">${esc(cat.name)}</option>`).join(""),value=>{
@@ -3929,15 +4099,56 @@ function visibleSidebarTypes(){
 }
 function customAssignmentValues(prompt,typeId){const raw=prompt?.customAssignments?.[typeId];return Array.isArray(raw)?raw.filter(Boolean):(raw?[raw]:[])}
 function promptMatchesCustom(prompt,typeId,entityId){return customAssignmentValues(prompt,typeId).includes(entityId)}
-function promptTextFingerprint(prompt){return normalize(`${prompt?.title||""} ${String(prompt?.content||"").slice(0,1800)}`).replace(/\b(il|lo|la|i|gli|le|un|una|di|del|della|e|o|per|con|su|da|in|a)\b/g," ").replace(/\s+/g," ").trim()}
-function similarityScore(a,b){const aw=new Set(promptTextFingerprint(a).split(" ").filter(w=>w.length>3)),bw=new Set(promptTextFingerprint(b).split(" ").filter(w=>w.length>3));if(!aw.size||!bw.size)return 0;let hit=0;aw.forEach(w=>{if(bw.has(w))hit++});return Math.round(hit/Math.max(aw.size,bw.size)*100)}
-function duplicateCandidates(prompt,threshold=72){return livePrompts().filter(item=>item.id!==prompt.id).map(item=>({item,score:similarityScore(prompt,item)})).filter(x=>x.score>=threshold).sort((a,b)=>b.score-a.score).slice(0,5)}
-function duplicatePromptIds(){const ids=new Set();const live=livePrompts();for(let i=0;i<live.length;i++)for(let j=i+1;j<live.length;j++){if(similarityScore(live[i],live[j])>=78){ids.add(live[i].id);ids.add(live[j].id)}}return ids}
+function promptTextFingerprint(prompt){
+  const key=promptCacheKey(prompt),cached=state._fingerprintCache?.get(prompt?.id);
+  if(cached?.key===key)return cached.value;
+  const value=normalize(`${prompt?.title||""} ${String(prompt?.content||"").slice(0,1800)}`).replace(/\b(il|lo|la|i|gli|le|un|una|di|del|della|e|o|per|con|su|da|in|a)\b/g," ").replace(/\s+/g," ").trim();
+  (state._fingerprintCache||(state._fingerprintCache=new Map())).set(prompt?.id,{key,value});
+  return value;
+}
+function fingerprintWords(prompt){
+  const key=promptCacheKey(prompt),cached=state._fingerprintWordsCache?.get(prompt?.id);
+  if(cached?.key===key)return cached.value;
+  const value=new Set(promptTextFingerprint(prompt).split(" ").filter(w=>w.length>3));
+  (state._fingerprintWordsCache||(state._fingerprintWordsCache=new Map())).set(prompt?.id,{key,value});
+  return value;
+}
+function similarityScore(a,b){const aw=fingerprintWords(a),bw=fingerprintWords(b);if(!aw.size||!bw.size)return 0;let hit=0;const small=aw.size<=bw.size?aw:bw,large=small===aw?bw:aw;small.forEach(w=>{if(large.has(w))hit++});return Math.round(hit/Math.max(aw.size,bw.size)*100)}
+function duplicateCandidates(prompt,threshold=72){
+  const sourceWords=fingerprintWords(prompt),live=livePrompts(),candidates=[];
+  for(const item of live){
+    if(item.id===prompt.id)continue;
+    const words=fingerprintWords(item);let shared=0;const small=sourceWords.size<=words.size?sourceWords:words,large=small===sourceWords?words:sourceWords;
+    for(const word of small){if(large.has(word)&&++shared>=2)break}
+    if(shared<2)continue;
+    const score=similarityScore(prompt,item);if(score>=threshold)candidates.push({item,score});
+  }
+  return candidates.sort((a,b)=>b.score-a.score).slice(0,5);
+}
+function duplicatePromptIds(){
+  if(state._duplicateIdsRevision===state.dataRevision&&state._duplicateIdsCache)return state._duplicateIdsCache;
+  const ids=new Set(),live=livePrompts(),tokenIndex=new Map(),byId=new Map(live.map(item=>[item.id,item]));
+  for(const prompt of live){
+    for(const token of fingerprintWords(prompt)){
+      if(token.length<5)continue;
+      if(!tokenIndex.has(token))tokenIndex.set(token,[]);
+      tokenIndex.get(token).push(prompt.id);
+    }
+  }
+  const pairKeys=new Set(),maxBucket=Math.max(24,Math.ceil(live.length*.10));
+  for(const list of tokenIndex.values()){
+    if(list.length<2||list.length>maxBucket)continue;
+    for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){const a=list[i]<list[j]?list[i]:list[j],b=a===list[i]?list[j]:list[i];pairKeys.add(`${a} ${b}`)}
+  }
+  for(const key of pairKeys){const [aId,bId]=key.split(" "),a=byId.get(aId),b=byId.get(bId);if(a&&b&&similarityScore(a,b)>=78){ids.add(aId);ids.add(bId)}}
+  state._duplicateIdsRevision=state.dataRevision;state._duplicateIdsCache=ids;return ids;
+}
 function applyAdvancedFilters(items){const f=state.advancedFilters||{};const dup=f.duplicates?duplicatePromptIds():null;return items.filter(item=>{
   if(f.status&&item.status!==f.status)return false;
   if(f.usage==="used"&&!(item.usageCount>0))return false;if(f.usage==="never"&&(item.usageCount>0))return false;
-  if(f.usage==="stale"&&dateTimestamp(item.lastUsedAt)>Date.now()-90*864e5)return false;
-  if(f.withVariables&&!extractVariables(item.content).length)return false;if(f.withFiles&&!promptAttachmentCount(item))return false;
+  if(f.usage==="stale"&&(!(item.usageCount>0)||dateTimestamp(item.lastUsedAt)>Date.now()-90*864e5))return false;
+  const meta=(f.withVariables||f.withFiles)?cachedPromptMeta(item):null;
+  if(f.withVariables&&!meta.variables.length)return false;if(f.withFiles&&!meta.attachments)return false;
   if(dup&&!dup.has(item.id))return false;return true;
 })}
 const _filteredPromptsV19=filteredPrompts;
@@ -3967,40 +4178,66 @@ const _editorPayloadV19=editorPayload;
 editorPayload=function(){return readEditorAssignments(_editorPayloadV19())}
 
 async function snapshotVersion(prompt,reason="Salvataggio"){
-  if(!prompt?.id)return;const versions=(await getAll("versions")).filter(v=>v.promptId===prompt.id).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt));const last=versions[0];
-  const compact={title:prompt.title,content:prompt.content,intro:prompt.intro,categoryId:prompt.categoryId,subcategoryId:prompt.subcategoryId,clientId:prompt.clientId,projectId:prompt.projectId,gptSiteId:prompt.gptSiteId,seoId:prompt.seoId,customAssignments:prompt.customAssignments,status:prompt.status,tags:prompt.tags,notes:prompt.notes,toolUrl:prompt.toolUrl,favorite:prompt.favorite};
-  if(last&&JSON.stringify(last.snapshot)===JSON.stringify(compact))return;await put("versions",{id:uid("ver"),promptId:prompt.id,createdAt:now(),reason,snapshot:compact});
-  const all=(await getAll("versions")).filter(v=>v.promptId===prompt.id).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt));for(const old of all.slice(30))await remove("versions",old.id)
+  if(!prompt?.id)return;
+  const versions=(await getAll("versions")).filter(v=>v.promptId===prompt.id).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt)),last=versions[0];
+  const compact={title:prompt.title,content:prompt.content,intro:prompt.intro,categoryId:prompt.categoryId,subcategoryId:prompt.subcategoryId,clientId:prompt.clientId,projectId:prompt.projectId,gptSiteId:prompt.gptSiteId,seoId:prompt.seoId,customAssignments:prompt.customAssignments,status:prompt.status,tags:prompt.tags,notes:prompt.notes,toolUrl:prompt.toolUrl,favorite:prompt.favorite,pinned:prompt.pinned};
+  if(last&&JSON.stringify(last.snapshot)===JSON.stringify(compact))return;
+  await put("versions",{id:uid("ver"),promptId:prompt.id,createdAt:now(),reason,snapshot:compact});
+  for(const old of versions.slice(29))await remove("versions",old.id)
 }
 const _savePromptV19=savePrompt;
-savePrompt=async function(){const before=state.editor.id?state.prompts.find(p=>p.id===state.editor.id):null;if(before)await snapshotVersion(before,"Prima del salvataggio");return _savePromptV19()}
+savePrompt=async function(){
+  clearTimeout(state.autosaveTimer);state.autosaveTimer=null;
+  const before=state.editor.id?state.prompts.find(p=>p.id===state.editor.id):null;
+  if(before)await snapshotVersion(before,"Prima del salvataggio");
+  return _savePromptV19();
+}
 function diffText(a,b){const A=String(a||"").split("\n"),B=String(b||"").split("\n"),out=[];const n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if(A[i]===B[i])continue;if(A[i]!==undefined)out.push(`- ${A[i]}`);if(B[i]!==undefined)out.push(`+ ${B[i]}`);if(out.length>80){out.push("… diff abbreviato");break}}return out.join("\n")||"Nessuna differenza testuale."}
 async function openVersionHistory(){if(!state.editor.id){toast("Salva prima il prompt.","warning");return}const current=state.prompts.find(p=>p.id===state.editor.id),versions=(await getAll("versions")).filter(v=>v.promptId===state.editor.id).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt));$("choiceTitle").textContent=`Versioni · ${current?.title||"Prompt"}`;$("choiceBody").innerHTML=versions.length?`<div class="version-list">${versions.map((v,i)=>`<div class="version-row"><div><strong>${esc(formatDate(v.createdAt))}</strong> · ${esc(v.reason||"Versione")}<details><summary>Confronta con versione attuale</summary><div class="version-diff">${esc(diffText(v.snapshot?.content,current?.content))}</div></details></div><button class="btn small restore-version" data-id="${esc(v.id)}">Ripristina</button></div>`).join("")}</div>`:'<div class="hint">Non ci sono ancora versioni precedenti.</div>';$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$$('.restore-version').forEach(btn=>btn.onclick=()=>restoreVersion(btn.dataset.id));openModal("choiceModal")}
 async function restoreVersion(id){const version=await getOne("versions",id);if(!version)return;const current=state.prompts.find(p=>p.id===version.promptId);if(!current)return;await snapshotVersion(current,"Prima del ripristino");await put("prompts",{...current,...version.snapshot,updatedAt:now(),version:(current.version||0)+1});await loadData();closeModal("choiceModal");openEditor(current.id,"prompt","edit");toast("Versione ripristinata.","success")}
 
-function scheduleAutosave(){if(!state.editor.id||state.editor.mode==="use")return;clearTimeout(state.autosaveTimer);const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Modifiche da salvare";indicator.className="autosave-indicator saving"}state.autosaveTimer=setTimeout(autosaveEditor,1200)}
-async function autosaveEditor(){if(!state.editor.id||!state.editor.dirty||!$("editorBackdrop")?.classList.contains("show"))return;try{const payload=editorPayload();if(!payload.title||!payload.content)return;const old=state.prompts.find(p=>p.id===payload.id);if(old)await snapshotVersion(old,"Autosave");await put("prompts",payload);await loadData();state.editor.dirty=false;state.lastAutosaveAt=now();const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Salvato automaticamente";indicator.className="autosave-indicator saved"}}catch(error){console.error(error);const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Autosave non riuscito";indicator.className="autosave-indicator"}}}
-const _markDirtyV19=markDirty;markDirty=function(){_markDirtyV19();scheduleAutosave()}
+function scheduleAutosave(){
+  if(!state.editor.id||state.editor.mode==="use")return;
+  clearTimeout(state.autosaveTimer);
+  const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Modifiche da salvare";indicator.className="autosave-indicator saving"}
+  state.autosaveTimer=setTimeout(autosaveEditor,1200);
+}
+async function autosaveEditor(){
+  if(!state.editor.id||!state.editor.dirty||!$("editorBackdrop")?.classList.contains("show")||state.busy.has("savePrompt")||state.busy.has("autosave"))return;
+  const editorId=state.editor.id,changeSeq=state.editorChangeSeq||0;
+  state.busy.add("autosave");
+  try{
+    const payload=editorPayload();if(!payload.title||!payload.content||payload.id!==editorId)return;
+    const old=state.prompts.find(p=>p.id===payload.id);if(old)await snapshotVersion(old,"Autosave");
+    if(state.busy.has("savePrompt")||state.editor.id!==editorId)return;
+    await put("prompts",payload);await loadData();
+    if(state.editor.id===editorId&&(state.editorChangeSeq||0)===changeSeq)state.editor.dirty=false;
+    else if(state.editor.id===editorId&&state.editor.dirty)scheduleAutosave();
+    state.lastAutosaveAt=now();const indicator=$("autosaveIndicator");if(indicator){indicator.textContent=state.editor.dirty?"Nuove modifiche da salvare":"Salvato automaticamente";indicator.className=`autosave-indicator ${state.editor.dirty?"saving":"saved"}`}
+  }catch(error){console.error(error);const indicator=$("autosaveIndicator");if(indicator){indicator.textContent="Autosave non riuscito";indicator.className="autosave-indicator"}}
+  finally{state.busy.delete("autosave")}
+}
+const _markDirtyV19=markDirty;markDirty=function(){state.editorChangeSeq=(state.editorChangeSeq||0)+1;_markDirtyV19();scheduleAutosave()}
 
 function promptTableHtml(items){const customCols=state.customTypes.filter(t=>t.visible!==false).slice(0,4);return `<div class="table-wrap"><table class="prompt-table"><thead><tr><th>Prompt</th><th>Categoria</th><th>Cliente</th><th>Progetto</th>${customCols.map(t=>`<th>${esc(t.name)}</th>`).join("")}<th>Stato</th><th>Uso</th><th>Aggiornato</th><th></th></tr></thead><tbody>${items.map(p=>{const cat=catById(p.subcategoryId)||catById(p.categoryId),client=clientById(p.clientId),project=projectById(p.projectId);return `<tr><td><button class="table-title-btn" data-table-open="${esc(p.id)}">${esc(p.title||"Senza titolo")}</button></td><td>${esc(cat?.name||"—")}</td><td>${esc(client?.name||"—")}</td><td>${esc(project?.name||"—")}</td>${customCols.map(t=>`<td>${customAssignmentValues(p,t.id).map(id=>customEntityById(id)?.name).filter(Boolean).map(esc).join(", ")||"—"}</td>`).join("")}<td>${esc(p.status||"")}</td><td>${p.usageCount||0}</td><td>${esc(formatDate(p.updatedAt))}</td><td class="table-actions"><button class="btn small" data-table-use="${esc(p.id)}">Usa</button></td></tr>`}).join("")}</tbody></table></div>`}
-function kanbanHtml(items){const statuses=[['draft','Bozza'],['review','Da verificare'],['approved','Approvato'],['obsolete','Obsoleto'],['archived','Archiviato']];return `<div class="kanban-board">${statuses.map(([status,label])=>{const cards=items.filter(p=>p.status===status);return `<section class="kanban-column" data-kanban-status="${status}"><div class="kanban-head"><span>${label}</span><span>${cards.length}</span></div>${cards.map(p=>`<article class="kanban-card" draggable="true" data-kanban-id="${esc(p.id)}"><strong>${esc(p.title||"Senza titolo")}</strong><small>${esc(catById(p.categoryId)?.name||"Senza categoria")}</small></article>`).join("")}</section>`}).join("")}</div>`}
+function kanbanHtml(items,allItems=items){const statuses=[['draft','Bozza'],['review','Da verificare'],['approved','Approvato'],['obsolete','Obsoleto'],['archived','Archiviato']];return `<div class="kanban-board">${statuses.map(([status,label])=>{const cards=items.filter(p=>p.status===status),total=allItems.filter(p=>p.status===status).length;return `<section class="kanban-column" data-kanban-status="${status}"><div class="kanban-head"><span>${label}</span><span title="${cards.length<total?`${cards.length} visualizzati su ${total}`:`${total} prompt`}">${cards.length<total?`${cards.length}/${total}`:total}</span></div>${cards.map(p=>`<article class="kanban-card" draggable="true" data-kanban-id="${esc(p.id)}"><strong>${esc(p.title||"Senza titolo")}</strong><small>${esc(catById(p.categoryId)?.name||"Senza categoria")}</small></article>`).join("")}</section>`}).join("")}</div>`}
 const _renderCardsV19=renderCards;
 renderCards=function(){
   if(!["table","kanban"].includes(state.view)){_renderCardsV19();bindEntityOverviewShortcuts();return}
-  const items=filteredPrompts();$("cards").className="cards";$("cards").innerHTML=state.view==="table"?promptTableHtml(items):kanbanHtml(items);const [title,subtitle]=filterInfo();$("viewTitle").textContent=title;$("viewSubtitle").textContent=state.query?`${items.length} risultati per “${state.query}”`:`${subtitle} · ${items.length} elementi`;updateBulkbar();
+  const allItems=filteredPrompts(),items=allItems.slice(0,currentRenderLimit());$("cards").className="cards";$("cards").innerHTML=state.view==="table"?promptTableHtml(items):kanbanHtml(items,allItems);const [title,subtitle]=filterInfo();$("viewTitle").textContent=title;$("viewSubtitle").textContent=state.query?`${allItems.length} risultati per “${state.query}”`:`${subtitle} · ${allItems.length} elementi`;updateBulkbar();renderProgressiveFooter(allItems.length,items.length);
   $$('[data-table-open]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.tableOpen,"prompt","edit"));$$('[data-table-use]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.tableUse,"variables","use"));
   $$('[data-kanban-id]').forEach(card=>card.ondragstart=e=>e.dataTransfer.setData('text/prompt-id',card.dataset.kanbanId));$$('[data-kanban-status]').forEach(col=>{col.ondragover=e=>e.preventDefault();col.ondrop=async e=>{e.preventDefault();const id=e.dataTransfer.getData('text/prompt-id'),prompt=state.prompts.find(p=>p.id===id);if(!prompt)return;await snapshotVersion(prompt,"Cambio stato Kanban");await put("prompts",{...prompt,status:col.dataset.kanbanStatus,updatedAt:now()});await loadData();renderCards();toast("Stato aggiornato dal Kanban.","success")}})
 }
 
 function renderCollectionSidebar(){const live=livePrompts();$("collectionSidebarList").innerHTML=state.collections.length?state.collections.map(c=>`<button class="collection-chip" data-collection-id="${esc(c.id)}"><span>${esc(c.icon||"◈")}</span><span>${esc(c.name)}</span><span class="count">${(c.promptIds||[]).filter(id=>live.some(p=>p.id===id)).length}</span></button>`).join(""):'<div class="hint" style="padding:4px 8px;color:var(--sidebar-muted)">Nessuna raccolta</div>';$$('[data-collection-id]').forEach(btn=>btn.onclick=()=>openCollection(btn.dataset.collectionId))}
 async function createCollection(){const name=window.prompt("Nome della raccolta:","");if(!name?.trim())return;state.collections.push({id:uid("collection"),name:name.trim(),icon:"◈",promptIds:[],createdAt:now()});await saveSettingsRecord("collections",state.collections);renderCollectionSidebar();toast("Raccolta creata.","success")}
-function openCollection(id){const c=state.collections.find(x=>x.id===id);if(!c)return;state.filter={type:"collection",id};state.selected.clear();renderCards();$("viewTitle").textContent=c.name;$("viewSubtitle").textContent=`Raccolta · ${(c.promptIds||[]).length} prompt`}
+function openCollection(id){const c=state.collections.find(x=>x.id===id);if(!c)return;$("sidebar")?.classList.remove("open");state.filter={type:"collection",id};state.selected.clear();resetRenderLimit();renderCards();$("viewTitle").textContent=c.name;$("viewSubtitle").textContent=`Raccolta · ${(c.promptIds||[]).length} prompt`}
 const _filteredPromptsCollection=filteredPrompts;filteredPrompts=function(){let items=_filteredPromptsCollection();if(state.filter.type==="collection"){const c=state.collections.find(x=>x.id===state.filter.id);items=items.filter(p=>(c?.promptIds||[]).includes(p.id))}return items}
 async function addSelectedToCollection(){if(!state.selected.size){toast("Seleziona almeno un prompt.","warning");return}if(!state.collections.length){await createCollection();if(!state.collections.length)return}const options=state.collections.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");choiceAction("Aggiungi a raccolta","Raccolta",options,async id=>{const c=state.collections.find(x=>x.id===id);if(!c)return;c.promptIds=[...new Set([...(c.promptIds||[]),...state.selected])];await saveSettingsRecord("collections",state.collections);state.selected.clear();render();toast("Prompt aggiunti alla raccolta.","success")})}
 
 function renderWorkflowSidebar(){$("workflowSidebarList").innerHTML=state.workflows.length?state.workflows.map(w=>`<button class="workflow-chip-link" data-workflow-id="${esc(w.id)}"><span>⇢</span><span>${esc(w.name)}</span><span class="count">${(w.steps||[]).length}</span></button>`).join(""):'<div class="hint" style="padding:4px 8px;color:var(--sidebar-muted)">Nessun workflow</div>';$$('[data-workflow-id]').forEach(btn=>btn.onclick=()=>openWorkflow(btn.dataset.workflowId))}
 async function createWorkflow(){const name=window.prompt("Nome del workflow:","");if(!name?.trim())return;state.workflows.push({id:uid("workflow"),name:name.trim(),steps:[],createdAt:now()});await saveSettingsRecord("workflows",state.workflows);renderWorkflowSidebar();openWorkflow(state.workflows.at(-1).id)}
-function openWorkflow(id){const w=state.workflows.find(x=>x.id===id);if(!w)return;$("choiceTitle").textContent=`Workflow · ${w.name}`;$("choiceBody").innerHTML=`<div class="hint" style="margin-bottom:10px">Concatena prompt nell'ordine di esecuzione.</div><div class="relation-list">${(w.steps||[]).map((pid,i)=>{const p=state.prompts.find(x=>x.id===pid);return `<div class="relation-row"><strong>${i+1}</strong><span class="grow">${esc(p?.title||"Prompt mancante")}</span><button class="btn small remove-workflow-step" data-index="${i}">Rimuovi</button></div>`}).join("")||'<div class="hint">Nessuno step.</div>'}</div><div class="inline-form" style="grid-template-columns:1fr auto;margin-top:12px"><select id="workflowAddPrompt"><option value="">Scegli prompt…</option>${livePrompts().map(p=>`<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("")}</select><button class="btn primary small" id="workflowAddBtn">Aggiungi</button></div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$("workflowAddBtn").onclick=async()=>{const pid=$("workflowAddPrompt").value;if(!pid)return;w.steps=[...(w.steps||[]),pid];await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)};$$('.remove-workflow-step').forEach(btn=>btn.onclick=async()=>{w.steps.splice(Number(btn.dataset.index),1);await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)});openModal("choiceModal")}
+function openWorkflow(id){const w=state.workflows.find(x=>x.id===id);if(!w)return;$("sidebar")?.classList.remove("open");$("choiceTitle").textContent=`Workflow · ${w.name}`;$("choiceBody").innerHTML=`<div class="hint" style="margin-bottom:10px">Concatena prompt nell'ordine di esecuzione.</div><div class="relation-list">${(w.steps||[]).map((pid,i)=>{const p=state.prompts.find(x=>x.id===pid);return `<div class="relation-row"><strong>${i+1}</strong><span class="grow">${esc(p?.title||"Prompt mancante")}</span><button class="btn small remove-workflow-step" data-index="${i}">Rimuovi</button></div>`}).join("")||'<div class="hint">Nessuno step.</div>'}</div><div class="inline-form" style="grid-template-columns:1fr auto;margin-top:12px"><select id="workflowAddPrompt"><option value="">Scegli prompt…</option>${livePrompts().map(p=>`<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("")}</select><button class="btn primary small" id="workflowAddBtn">Aggiungi</button></div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$("workflowAddBtn").onclick=async()=>{const pid=$("workflowAddPrompt").value;if(!pid)return;w.steps=[...(w.steps||[]),pid];await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)};$$('.remove-workflow-step').forEach(btn=>btn.onclick=async()=>{w.steps.splice(Number(btn.dataset.index),1);await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)});openModal("choiceModal")}
 
 function relatedEntityStats(type,id){const prompts=livePrompts().filter(p=>type==="custom"?promptMatchesCustom(p,state.filter.typeId,id):p[entityDefinition(type)?.field]===id);const projects=new Set(prompts.map(p=>p.projectId).filter(Boolean)),clients=new Set(prompts.map(p=>p.clientId).filter(Boolean)),sites=new Set(prompts.map(p=>p.gptSiteId).filter(Boolean));return {prompts,projects,clients,sites}}
 function openEntityOverview(type,id,typeId=null){let entity,definition;if(type==="custom"){entity=customEntityById(id);definition=customTypeById(typeId)?{label:customTypeById(typeId).name}:null}else{entity=entityByType(type,id);definition=entityDefinition(type)}if(!entity||!definition)return;const prompts=livePrompts().filter(p=>type==="custom"?promptMatchesCustom(p,typeId,id):p[definition.field]===id);const used=prompts.reduce((s,p)=>s+(p.usageCount||0),0),last=prompts.sort((a,b)=>dateTimestamp(b.updatedAt)-dateTimestamp(a.updatedAt))[0];$("choiceTitle").textContent=`${definition.label} · ${entity.name}`;$("choiceBody").innerHTML=`<div class="entity-overview"><div class="stat"><strong>${prompts.length}</strong><span>Prompt</span></div><div class="stat"><strong>${used}</strong><span>Utilizzi</span></div><div class="stat"><strong>${new Set(prompts.map(p=>p.projectId).filter(Boolean)).size}</strong><span>Progetti collegati</span></div><div class="stat"><strong>${last?esc(formatDate(last.updatedAt)):"—"}</strong><span>Ultima attività</span></div></div><div class="relation-list">${prompts.slice(0,40).map(p=>`<div class="relation-row"><span class="grow"><strong>${esc(p.title)}</strong><br><small>${esc(catById(p.categoryId)?.name||"Senza categoria")}</small></span><button class="btn small entity-open-prompt" data-id="${esc(p.id)}">Apri</button></div>`).join("")||'<div class="hint">Nessun prompt collegato.</div>'}</div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$$('.entity-open-prompt').forEach(btn=>btn.onclick=()=>{closeModal("choiceModal");openEditor(btn.dataset.id)});openModal("choiceModal")}
@@ -4065,10 +4302,10 @@ async function pruneTrashByRetention(){const days=Number(localStorage.getItem("p
 const _renderManagePrefs=renderManage;renderManage=function(){_renderManagePrefs();const hide=$("hideEmptySidebarTypes"),days=$("trashRetentionDays");if(hide){hide.checked=localStorage.getItem("ps_hide_empty_types")==='1';hide.onchange=()=>{localStorage.setItem("ps_hide_empty_types",hide.checked?'1':'0');render()}}if(days){days.value=localStorage.getItem("ps_trash_retention_days")||'0';days.onchange=()=>{const value=Math.max(0,Math.min(3650,Number(days.value)||0));localStorage.setItem("ps_trash_retention_days",String(value));days.value=String(value);toast("Retention cestino aggiornata.","success")}}}
 
 function bindWorkspaceEvents(){
-  $("agentSidebarBtn")?.addEventListener("click",()=>{const focusAgent=()=>{history.replaceState(null,"","#dashboard");$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"});$("agentRequest")?.focus()};if($("agentRouter")){focusAgent();return}state.query="";$("globalSearch").value="";setFilter("all");setTimeout(focusAgent,80)});
-  $("tableBtn").onclick=()=>{state.view="table";localStorage.setItem("ps_view","table");renderCards()};$("kanbanBtn").onclick=()=>{state.view="kanban";localStorage.setItem("ps_view","kanban");renderCards()};
+  $("agentSidebarBtn")?.addEventListener("click",()=>{const focusAgent=()=>{$("sidebar")?.classList.remove("open");history.replaceState(null,"","#dashboard");$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"});$("agentRequest")?.focus()};if($("agentRouter")){focusAgent();return}state.query="";$("globalSearch").value="";setFilter("all");setTimeout(focusAgent,80)});
+  $("tableBtn").onclick=()=>{state.view="table";localStorage.setItem("ps_view","table");resetRenderLimit();renderCards()};$("kanbanBtn").onclick=()=>{state.view="kanban";localStorage.setItem("ps_view","kanban");resetRenderLimit();renderCards()};
   $("advancedFilterBtn").onclick=()=>{$("advancedFilterBar").hidden=!$("advancedFilterBar").hidden};
-  $("filterStatus").onchange=e=>{state.advancedFilters.status=e.target.value;renderCards()};$("filterUsage").onchange=e=>{state.advancedFilters.usage=e.target.value;renderCards()};$("filterWithVariables").onchange=e=>{state.advancedFilters.withVariables=e.target.checked;renderCards()};$("filterWithFiles").onchange=e=>{state.advancedFilters.withFiles=e.target.checked;renderCards()};$("filterOnlyDuplicates").onchange=e=>{state.advancedFilters.duplicates=e.target.checked;renderCards()};$("resetAdvancedFilters").onclick=()=>{state.advancedFilters={status:"",usage:"",withVariables:false,withFiles:false,duplicates:false};$("filterStatus").value="";$("filterUsage").value="";["filterWithVariables","filterWithFiles","filterOnlyDuplicates"].forEach(id=>$(id).checked=false);renderCards()};
+  $("filterStatus").onchange=e=>{state.advancedFilters.status=e.target.value;resetRenderLimit();renderCards()};$("filterUsage").onchange=e=>{state.advancedFilters.usage=e.target.value;resetRenderLimit();renderCards()};$("filterWithVariables").onchange=e=>{state.advancedFilters.withVariables=e.target.checked;resetRenderLimit();renderCards()};$("filterWithFiles").onchange=e=>{state.advancedFilters.withFiles=e.target.checked;resetRenderLimit();renderCards()};$("filterOnlyDuplicates").onchange=e=>{state.advancedFilters.duplicates=e.target.checked;resetRenderLimit();renderCards()};$("resetAdvancedFilters").onclick=()=>{state.advancedFilters={status:"",usage:"",withVariables:false,withFiles:false,duplicates:false};$("filterStatus").value="";$("filterUsage").value="";["filterWithVariables","filterWithFiles","filterOnlyDuplicates"].forEach(id=>$(id).checked=false);renderCards()};
   $("commandPaletteBtn").onclick=openCommandPalette;$("commandInput").oninput=renderCommandPalette;$("commandBackdrop").onclick=e=>{if(e.target===$("commandBackdrop"))closeCommandPalette()};$("versionHistoryBtn").onclick=openVersionHistory;$("smartOrganizeBtn").onclick=openSmartOrganization;$("tableColumnsBtn").onclick=openTableColumns;
   $("addCollectionQuick").onclick=createCollection;$("addWorkflowQuick").onclick=createWorkflow;
   document.addEventListener("keydown",event=>{const modifier=event.metaKey||event.ctrlKey;if(modifier&&event.key.toLowerCase()==="k"){event.preventDefault();openCommandPalette()}if(event.key==="Escape"&&$("commandBackdrop").classList.contains("show"))closeCommandPalette()});
@@ -4076,7 +4313,14 @@ function bindWorkspaceEvents(){
 }
 
 function showDuplicateWarning(){if(!state.editor.id)return;const prompt=state.prompts.find(p=>p.id===state.editor.id),candidates=duplicateCandidates(prompt);document.querySelector('.duplicate-alert')?.remove();if(!candidates.length)return;const node=document.createElement('div');node.className='duplicate-alert';node.innerHTML=`<strong>Possibili duplicati</strong> · ${candidates.map(c=>`<span class="similarity-badge">${c.score}% · ${esc(c.item.title)}</span>`).join(' ')}`;$("promptContent").parentElement.appendChild(node)}
-const _openEditorV19=openEditor;openEditor=function(...args){_openEditorV19(...args);setTimeout(()=>{showDuplicateWarning();const indicator=$("autosaveIndicator");if(indicator){indicator.textContent=state.editor.id?"Autosave attivo":"Salva per attivare autosave";indicator.className="autosave-indicator"}},0)}
+const _openEditorV19=openEditor;openEditor=function(...args){
+  clearTimeout(state.autosaveTimer);state.autosaveTimer=null;state.editorChangeSeq=0;
+  _openEditorV19(...args);
+  const editorId=state.editor.id;
+  setTimeout(()=>{const indicator=$("autosaveIndicator");if(indicator){indicator.textContent=state.editor.id?"Autosave attivo":"Salva per attivare autosave";indicator.className="autosave-indicator"}},0);
+  const runDuplicateCheck=()=>{if(!$("editorBackdrop")?.classList.contains("show")||state.editor.id!==editorId)return;showDuplicateWarning()};
+  if("requestIdleCallback" in window)requestIdleCallback(runDuplicateCheck,{timeout:1200});else setTimeout(runDuplicateCheck,300);
+}
 
 const _bindEventsV19=bindEvents;bindEvents=function(){_bindEventsV19();bindWorkspaceEvents()}
 const _initV19=init;init=async function(){setTheme(true);const previousVersion=localStorage.getItem("ps_app_version");const width=Number(localStorage.getItem("ps_sidebar_width"));if(width>=220&&width<=520)document.documentElement.style.setProperty("--sidebar-width",`${width}px`);state.db=await openDatabase();await loadData();await loadWorkspaceSettings();await removeLegacyDemoPrompt();await loadData();await seedData();await loadWorkspaceSettings();bindEvents();render();await maybeDailyBackup();await pruneTrashByRetention();const generatedIntros=await generateMissingPromptIntros({silent:true});const refreshedIntros=previousVersion&&previousVersion!==APP_VERSION?await refreshAutomaticPromptIntros({silent:true}):0;localStorage.setItem("ps_app_version",APP_VERSION);if(previousVersion&&previousVersion!==APP_VERSION)toast(`Applicazione aggiornata dalla versione ${previousVersion} alla ${APP_VERSION}. Dati e relazioni mantenuti.${generatedIntros?` Generate ${generatedIntros} note.`:""}${refreshedIntros?` Aggiornate ${refreshedIntros} note automatiche.`:""}`,"success");const hashAction=location.hash.match(/^#step-(.+)$/)?.[1]||localStorage.getItem("ps_last_dashboard_action");if(hashAction&&document.querySelector(`[data-dash-action="${CSS.escape(hashAction)}"]`))setTimeout(()=>highlightDashboardCard(hashAction),100)}
@@ -4136,7 +4380,11 @@ const AGENT_SUBGOALS=[
   {id:"conversion",label:"Conversione",terms:["conversione","lead","vendite","cta","prenotazioni","contatti"]}
 ];
 function agentWords(text){return [...new Set(normalize(text).replace(/[^a-z0-9àèéìòùç\s-]/gi," ").split(/\s+/).filter(word=>word.length>2&&!/^(che|devo|della|delle|degli|del|dei|una|uno|per|con|senza|come|poi|anche|tutto|tutta|fare|voglio|serve|sul|sulla|nel|nella|app)$/.test(word)))]}
-function agentContains(corpus,term){const n=normalize(term);return n.includes(" ")?corpus.includes(n):new RegExp(`(?:^|\\s)${n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:$|\\s)`,`i`).test(corpus)}
+function agentContains(corpus,term){
+  const source=String(corpus||""),n=normalize(term),escaped=n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  if(!n)return false;
+  return n.includes(" ")?source.includes(n):new RegExp(`(?:^|[^a-z0-9àèéìòùç])${escaped}(?=$|[^a-z0-9àèéìòùç])`,`i`).test(source);
+}
 function analyzeAgentRequest(request){
   const corpus=normalize(request),words=agentWords(request);
   const ranked=Object.entries(AGENT_INTENTS).map(([id,def])=>({id,label:def.label,promptIntent:def.promptIntent,score:def.terms.reduce((sum,t)=>sum+(agentContains(corpus,t)?(t.includes(" ")?4:2):0),0)})).sort((a,b)=>b.score-a.score);
@@ -4147,12 +4395,17 @@ function analyzeAgentRequest(request){
   return {request:String(request||"").trim(),corpus,words,intent,subgoals,domains,primaryDomain:domains[0]||null};
 }
 function agentPromptCorpus(prompt){
+  const key=promptCacheKey(prompt),cached=state._agentCorpusCache?.get(prompt.id);
+  if(cached?.key===key)return cached.value;
   const org=[catById(prompt.categoryId)?.name,catById(prompt.subcategoryId)?.name,clientById(prompt.clientId)?.name,projectById(prompt.projectId)?.name,gptSiteById(prompt.gptSiteId)?.name,seoById(prompt.seoId)?.name,...Object.entries(prompt.customAssignments||{}).flatMap(([typeId])=>[customTypeById(typeId)?.name,...customAssignmentValues(prompt,typeId).map(id=>customEntityById(id)?.name)])].filter(Boolean).join(" ");
-  return {title:normalize(prompt.title),intro:normalize(promptIntroText(prompt)),content:normalize(prompt.content),tags:normalize((prompt.tags||[]).join(" ")),org:normalize(org),all:normalize(`${prompt.title} ${promptIntroText(prompt)} ${prompt.content} ${(prompt.tags||[]).join(" ")} ${org}`)};
+  const intro=promptIntroText(prompt);
+  const value={title:normalize(prompt.title),intro:normalize(intro),content:normalize(prompt.content),tags:normalize((prompt.tags||[]).join(" ")),org:normalize(org),all:normalize(`${prompt.title} ${intro} ${prompt.content} ${(prompt.tags||[]).join(" ")} ${org}`)};
+  state._agentCorpusCache?.set(prompt.id,{key,value});
+  return value;
 }
 function agentFeedbackMap(){return readStoredJson("ps_agent_feedback",{})}
 function agentFeedbackKey(request,promptId){const stem=normalize(request).slice(0,180);let hash=0;for(const ch of stem)hash=((hash<<5)-hash+ch.charCodeAt(0))|0;return `${Math.abs(hash)}:${promptId}`}
-function agentScorePrompt(analysis,prompt){
+function agentScorePrompt(analysis,prompt,feedbackMap=null){
   const pc=agentPromptCorpus(prompt),words=analysis.words.length?analysis.words:agentWords(analysis.request);let weighted=0,maxWeighted=Math.max(1,words.length*6),titleHits=0;
   words.forEach(word=>{let best=0;if(pc.title.includes(word)){best=6;titleHits++}else if(pc.intro.includes(word))best=5;else if(pc.tags.includes(word))best=4;else if(pc.org.includes(word))best=3;else if(pc.content.includes(word))best=2;weighted+=best});
   const lexical=Math.min(34,weighted/maxWeighted*34),titleBonus=Math.min(9,titleHits*3);
@@ -4163,13 +4416,13 @@ function agentScorePrompt(analysis,prompt){
   requestDomains.slice(0,3).forEach((requestDomain,index)=>{const match=types.domains.find(d=>d.id===requestDomain.id);if(match){const bonus=Math.min(index===0?18:8,Math.max(3,match.score*.75));domainBonus+=bonus;matchedDomains.push(requestDomain)}else if(index===0&&requestDomain.score>=4&&types.domains[0]?.score>=8&&types.domains[0].id!==requestDomain.id){domainMismatch=9}});
   if(types.primary?.source==="categoria"&&analysis.primaryDomain&&normalize(types.primary.label).includes(normalize(analysis.primaryDomain.label.split(" /")[0])))domainBonus+=5;
   const quality=Math.min(5,Math.log2((prompt.usageCount||0)+1)*1.2+(prompt.favorite?1.4:0)+(prompt.pinned?1.6:0));
-  const feedback=agentFeedbackMap()[agentFeedbackKey(analysis.request,prompt.id)]||0,feedbackBonus=feedback>0?6:feedback<0?-12:0;
+  const feedback=(feedbackMap||agentFeedbackMap())[agentFeedbackKey(analysis.request,prompt.id)]||0,feedbackBonus=feedback>0?6:feedback<0?-12:0;
   const specificityPenalty=(analysis.subgoals.length>=3&&covered.length===0)?8:0;
   const score=Math.max(0,Math.min(99,Math.round(lexical+titleBonus+intentMatch+goalScore+domainBonus+quality+feedbackBonus-domainMismatch-specificityPenalty)));
   const reasons=[];if(matchedDomains.length)reasons.push(`tipologia coerente: ${matchedDomains.map(d=>d.label).join(", ")}`);if(intentMatch>=20)reasons.push(`forte corrispondenza con ${analysis.intent.label}`);else if(intentMatch)reasons.push(`coerente con ${analysis.intent.label}`);if(covered.length)reasons.push(`copre ${covered.map(g=>g.label).join(", ")}`);if(titleHits)reasons.push(`${titleHits} concetti chiave nel titolo`);if(domainMismatch)reasons.push("dominio parzialmente diverso");if(prompt.usageCount)reasons.push(`usato ${prompt.usageCount} volte`);if(feedback>0)reasons.push("già approvato per richieste simili");
   return {prompt,score,covered,missing,reasons,lexical,intentMatch,types,domainBonus,domainMismatch,matchedDomains};
 }
-function agentRankPrompts(request){const analysis=analyzeAgentRequest(request);const ranked=livePrompts().map(prompt=>agentScorePrompt(analysis,prompt)).filter(item=>item.score>4).sort((a,b)=>b.score-a.score||((b.prompt.usageCount||0)-(a.prompt.usageCount||0))||naturalTitleCompare(a.prompt,b.prompt));return {analysis,ranked}}
+function agentRankPrompts(request){const analysis=analyzeAgentRequest(request),feedback=agentFeedbackMap();const ranked=livePrompts().map(prompt=>agentScorePrompt(analysis,prompt,feedback)).filter(item=>item.score>4).sort((a,b)=>b.score-a.score||((b.prompt.usageCount||0)-(a.prompt.usageCount||0))||naturalTitleCompare(a.prompt,b.prompt));return {analysis,ranked}}
 function agentComplementarySelection(analysis,ranked,max=4){
   if(!ranked.length)return[];const selected=[ranked[0]],covered=new Set(ranked[0].covered.map(g=>g.id)),selectedDomains=new Set((ranked[0].types?.domains||[]).slice(0,2).map(d=>d.id));
   while(selected.length<max){let best=null,bestGain=-Infinity;for(const candidate of ranked){if(selected.includes(candidate)||candidate.score<28)continue;const newGoals=candidate.covered.filter(g=>!covered.has(g.id)).length;const domainFit=(candidate.matchedDomains||[]).length;const redundant=candidate.covered.length&&candidate.covered.every(g=>covered.has(g.id));const sameDomain=(candidate.types?.domains||[]).slice(0,2).some(d=>selectedDomains.has(d.id));const gain=newGoals*22+domainFit*6+candidate.score*.10-(redundant?12:0)-(sameDomain&&newGoals===0?7:0)-candidate.domainMismatch;if(gain>bestGain){bestGain=gain;best=candidate}}if(!best||bestGain<7)break;selected.push(best);best.covered.forEach(g=>covered.add(g.id));(best.types?.domains||[]).slice(0,2).forEach(d=>selectedDomains.add(d.id));if(analysis.subgoals.length&&covered.size>=analysis.subgoals.length)break}
@@ -4178,7 +4431,31 @@ function agentComplementarySelection(analysis,ranked,max=4){
 function agentMode(){return localStorage.getItem("ps_agent_mode")||"find"}
 function setAgentMode(mode){localStorage.setItem("ps_agent_mode",mode);$$('[data-agent-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.agentMode===mode))}
 function agentRouterHtml(){return `<section class="agent-router" id="agentRouter"><div class="agent-router-head"><div><h3>✨ Assistente · Cosa vuoi ottenere?</h3><p>Descrivi il risultato. Prompt Studio individua il prompt migliore o costruisce una sequenza di prompt complementari.</p></div><span class="agent-router-badge">ROUTER LOCALE · NESSUNA API</span></div><div class="agent-request-grid"><textarea class="agent-request" id="agentRequest" placeholder="Es. Devo correggere completamente una web app, trovare bug UX/UI e logici, eseguire i test e verificare le regressioni."></textarea><div class="agent-mode-group"><button class="btn agent-mode" data-agent-mode="find" type="button">⌕ Trova migliore</button><button class="btn agent-mode" data-agent-mode="combine" type="button">⊕ Combina</button><button class="btn agent-mode" data-agent-mode="workflow" type="button">⇢ Workflow</button></div></div><div class="agent-router-actions"><button class="btn primary" id="runAgentRouter" type="button">Analizza richiesta</button><button class="btn" id="clearAgentRouter" type="button">Pulisci</button><span class="agent-router-note">Valuta intento, tipologia, sotto-obiettivi, contenuto, metadati, utilizzo e feedback locale.</span></div><div class="agent-results" id="agentResults"></div></section>`}
-function injectAgentRouter(){const stats=$("stats");if(!stats||stats.classList.contains("hidden")||$("agentRouter"))return;stats.insertAdjacentHTML("afterbegin",agentRouterHtml());const directTitle=stats.querySelector(".home-primary h3"),directText=stats.querySelector(".home-primary p");if(directTitle)directTitle.textContent="Ricerca diretta";if(directText)directText.textContent="Se sai già quale prompt vuoi trovare, cercalo direttamente nella libreria.";const saved=localStorage.getItem("ps_agent_last_request")||"";$("agentRequest").value=saved;setAgentMode(agentMode());$$('[data-agent-mode]').forEach(btn=>btn.onclick=()=>setAgentMode(btn.dataset.agentMode));$("runAgentRouter").onclick=()=>runAgentRouter();$("clearAgentRouter").onclick=()=>{$("agentRequest").value="";localStorage.removeItem("ps_agent_last_request");localStorage.removeItem("ps_agent_last_run");$("agentResults").className="agent-results";$("agentResults").innerHTML=""};$("agentRequest").onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();runAgentRouter()}};if(saved&&localStorage.getItem("ps_agent_last_run")==="1")runAgentRouter({silent:true})}
+function injectAgentRouter(){
+  const stats=$("stats");if(!stats||stats.classList.contains("hidden")||$("agentRouter"))return;
+  stats.insertAdjacentHTML("afterbegin",agentRouterHtml());
+  const directTitle=stats.querySelector(".home-primary h3"),directText=stats.querySelector(".home-primary p");
+  if(directTitle)directTitle.textContent="Ricerca diretta";
+  if(directText)directText.textContent="Se sai già quale prompt vuoi trovare, cercalo direttamente nella libreria.";
+  const saved=localStorage.getItem("ps_agent_last_request")||"";
+  $("agentRequest").value=saved;setAgentMode(agentMode());
+  $$('[data-agent-mode]').forEach(btn=>btn.onclick=()=>setAgentMode(btn.dataset.agentMode));
+  $("runAgentRouter").onclick=()=>runAgentRouter();
+  $("clearAgentRouter").onclick=()=>{
+    $("agentRequest").value="";state.agentLastResult=null;
+    localStorage.removeItem("ps_agent_last_request");localStorage.removeItem("ps_agent_last_run");
+    $("agentResults").className="agent-results";$("agentResults").innerHTML="";
+  };
+  $("agentRequest").onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();runAgentRouter()}};
+  const cached=state.agentLastResult;
+  if(cached&&cached.request===saved){
+    const mode=agentMode();
+    const ranked=cached.ranked.filter(item=>state.prompts.some(prompt=>prompt.id===item.prompt.id));
+    const selectedIds=new Set(cached.selectedIds||[]);
+    const selected=ranked.filter(item=>selectedIds.has(item.prompt.id));
+    renderAgentResults(saved,cached.analysis,ranked,selected,mode);
+  }
+}
 function agentResultReason(item){if(item.reasons.length)return item.reasons.join(" · ");return "Corrispondenza rilevata tra la richiesta e il contenuto del prompt."}
 function agentSelectedIds(){return $$('#agentResults [data-agent-select]:checked').map(input=>input.dataset.agentSelect)}
 function renderAgentResults(request,analysis,results,selected,mode){
@@ -4188,7 +4465,18 @@ function renderAgentResults(request,analysis,results,selected,mode){
   box.innerHTML=`<div class="agent-summary"><span class="agent-summary-chip intent">Intento: ${esc(analysis.intent.label)}</span>${analysis.domains?.length?`<span class="agent-summary-chip">Tipologia richiesta: ${esc(analysis.domains.slice(0,2).map(d=>d.label).join(" + "))}</span>`:""}<span class="agent-summary-chip">${analysis.subgoals.length} sotto-obiettivi</span><span class="agent-summary-chip">${selected.length} prompt consigliati</span>${missingOverall.length?`<span class="agent-summary-chip">Manca: ${esc(missingOverall.map(g=>g.label).join(", "))}</span>`:`<span class="agent-summary-chip">✓ Copertura completa stimata</span>`}</div><div class="agent-result-list">${list}</div><div class="agent-footer-actions"><button class="btn primary" id="agentUseBest">▶ Usa migliore</button><button class="btn" id="agentWorkflowSelected">⇢ Crea workflow dai selezionati</button><button class="btn" id="agentSelectRecommended">Seleziona consigliati</button>${missingOverall.length||top.score<58?'<button class="btn" id="agentCreateMissing">＋ Crea ciò che manca</button>':''}</div>`;
   $$('[data-agent-open]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.agentOpen,"variables","use"));$("agentUseBest").onclick=()=>openEditor(results[0].prompt.id,"variables","use");$("agentWorkflowSelected").onclick=()=>createAgentWorkflow(request,analysis,agentSelectedIds());$("agentSelectRecommended").onclick=()=>{$$('#agentResults [data-agent-select]').forEach(input=>input.checked=selectedIds.has(input.dataset.agentSelect))};$("agentCreateMissing")?.addEventListener("click",()=>createMissingAgentPrompt(request,analysis));$$('[data-agent-feedback]').forEach(btn=>btn.onclick=()=>saveAgentFeedback(request,btn.dataset.agentPrompt,Number(btn.dataset.agentFeedback)));
 }
-function runAgentRouter({silent=false}={}){const request=String($("agentRequest")?.value||"").trim();if(!request){if(!silent)toast("Descrivi prima cosa vuoi ottenere.","warning");$("agentRequest")?.focus();return}localStorage.setItem("ps_agent_last_request",request);localStorage.setItem("ps_agent_last_run","1");const {analysis,ranked}=agentRankPrompts(request);const mode=agentMode();let selected=mode==="find"?(ranked[0]?[ranked[0]]:[]):agentComplementarySelection(analysis,ranked,mode==="workflow"?5:3);if(mode==="combine"&&selected.length<Math.min(3,ranked.length))selected=ranked.slice(0,Math.min(3,ranked.length));renderAgentResults(request,analysis,ranked,selected,mode)}
+function runAgentRouter({silent=false}={}){
+  const request=String($("agentRequest")?.value||"").trim();
+  if(!request){if(!silent)toast("Descrivi prima cosa vuoi ottenere.","warning");$("agentRequest")?.focus();return}
+  localStorage.setItem("ps_agent_last_request",request);localStorage.setItem("ps_agent_last_run","1");
+  const started=performance.now();
+  const {analysis,ranked}=agentRankPrompts(request);
+  const mode=agentMode();
+  let selected=mode==="find"?(ranked[0]?[ranked[0]]:[]):agentComplementarySelection(analysis,ranked,mode==="workflow"?5:3);
+  if(mode==="combine"&&selected.length<Math.min(3,ranked.length))selected=ranked.slice(0,Math.min(3,ranked.length));
+  state.agentLastResult={request,analysis,ranked,selectedIds:selected.map(item=>item.prompt.id),revision:state.dataRevision,elapsed:performance.now()-started};
+  renderAgentResults(request,analysis,ranked,selected,mode);
+}
 async function saveAgentFeedback(request,promptId,value){const feedback=agentFeedbackMap(),key=agentFeedbackKey(request,promptId);feedback[key]=feedback[key]===value?0:value;localStorage.setItem("ps_agent_feedback",JSON.stringify(feedback));runAgentRouter({silent:true});toast(value>0?"Feedback positivo memorizzato localmente.":"Feedback negativo memorizzato localmente.","success")}
 function agentWorkflowName(request){const clean=String(request||"").replace(/\s+/g," ").trim();return `Agent · ${clean.slice(0,55)}${clean.length>55?"…":""}`}
 async function createAgentWorkflow(request,analysis,ids){let promptIds=[...new Set(ids||[])].filter(id=>state.prompts.some(p=>p.id===id&&!p.deletedAt));if(!promptIds.length){const ranked=agentRankPrompts(request).ranked;promptIds=agentComplementarySelection(analysis,ranked,5).map(x=>x.prompt.id)}if(!promptIds.length){toast("Non ci sono prompt da inserire nel workflow.","warning");return}const workflow={id:uid("workflow"),name:agentWorkflowName(request),steps:promptIds,agentic:true,request,intent:analysis.intent.id,createdAt:now()};state.workflows.push(workflow);await saveSettingsRecord("workflows",state.workflows);renderWorkflowSidebar();toast(`Workflow creato con ${promptIds.length} prompt.`,"success");openWorkflow(workflow.id)}
