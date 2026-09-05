@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="20.0.0">
+<meta name="application-version" content="21.6.0">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -487,8 +487,9 @@ textarea{resize:vertical;line-height:1.55}
 
 
 /* Performance 21.2 */
-.card,.category-group,.problem-item,.variable-card,.agent-result{contain:layout paint style}
-.cards .card,.category-group,.manage-row{content-visibility:auto;contain-intrinsic-size:auto 210px}
+.problem-item,.variable-card,.agent-result{contain:layout paint style}
+.card,.category-group{contain:layout style}
+.manage-row{content-visibility:auto;contain-intrinsic-size:auto 210px}
 .agent-result{content-visibility:auto;contain-intrinsic-size:auto 170px}
 .manage-list{overscroll-behavior:contain}
 .sidebar{overscroll-behavior:contain}
@@ -513,18 +514,102 @@ textarea{resize:vertical;line-height:1.55}
   .toolbar #filtersToggleBtn,.toolbar #commandPaletteBtn{flex:1 1 auto}
 }
 
+
+
+/* ---------- Simple Workflow & UX 22.0 ---------- */
+:root{--touch:44px}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+button:focus-visible,[tabindex]:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid color-mix(in srgb,var(--primary) 45%,transparent);outline-offset:2px}
+.topbar .search{font-size:15px}
+.sidebar{padding-bottom:16px}
+.daily-nav .side-link{min-height:40px}
+.sidebar-organization{margin:0 0 10px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.025);overflow:hidden}
+.sidebar-organization>summary{list-style:none;display:flex;align-items:center;gap:8px;min-height:42px;padding:9px 12px;color:#fff;font-size:11px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.sidebar-organization>summary::-webkit-details-marker{display:none}
+.sidebar-organization>summary .category-caret{margin-left:auto;transition:transform .16s}
+.sidebar-organization[open]>summary .category-caret{transform:rotate(225deg) translate(-2px,-2px)}
+.sidebar-organization #organizationSidebarSections,.sidebar-organization .organization-workflows{padding:0 7px 7px}
+.sidebar-organization .side-section{margin-bottom:7px}
+.sidebar-bottom-tools{margin-top:12px}
+#categorySidebarSection .side-section{margin-bottom:10px}
+
+/* Home: one dominant search, assistant secondary, curated shortcuts */
+.stats.simple-home{display:block!important;margin:0 0 20px}
+.home-simple{display:flex;flex-direction:column;gap:18px;padding:2px 0 8px}
+.home-search-panel{padding:24px;border:1px solid color-mix(in srgb,var(--primary) 34%,var(--line));border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 10%,var(--panel)),var(--panel) 72%)}
+.home-search-panel h3{margin:0 0 7px;font-size:25px}.home-search-panel p{margin:0 0 15px;color:var(--muted);line-height:1.55}
+.home-search-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px}.home-search-row .search{height:52px;font-size:16px;background:var(--panel)}
+.home-section{display:flex;flex-direction:column;gap:9px}.home-section-head{display:flex;align-items:center;gap:10px}.home-section-head h3{margin:0;font-size:16px}.home-section-head .btn{margin-left:auto}
+.home-prompt-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.home-prompt-shortcut{min-width:0;min-height:82px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);text-align:left;display:flex;flex-direction:column;gap:5px;transition:.16s}.home-prompt-shortcut:hover{border-color:var(--primary);background:var(--panel-3);transform:translateY(-1px)}.home-prompt-shortcut strong{font-size:14px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.home-prompt-shortcut small{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-empty{padding:12px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:13px;background:var(--panel-2)}
+.analytics-strip,.workflow-overview,.workflow-legend,.stats.dashboard-grid>.dashboard-card{display:none!important}
+
+/* Assistant stays available without competing with search */
+.agent-router{margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+.agent-router>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:48px;padding:12px 14px;border:1px solid color-mix(in srgb,#7c3aed 32%,var(--line));border-radius:14px;background:color-mix(in srgb,#7c3aed 7%,var(--panel));cursor:pointer;font-weight:850;color:var(--text)}
+.agent-router>summary::-webkit-details-marker{display:none}.agent-router>summary::after{content:'Apri';margin-left:auto;font-size:12px;color:var(--muted)}.agent-router[open]>summary::after{content:'Chiudi'}
+.agent-router-body{margin-top:8px;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2)}
+.agent-router-head{margin-bottom:10px}.agent-router-head h3{font-size:18px}.agent-router-badge{display:none}
+.agent-request{min-height:78px}.agent-router-note{display:none}
+
+/* Lighter prompt cards */
+.cards{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.card{min-height:0;padding:15px 15px 13px;border-left-width:4px;box-shadow:0 2px 9px color-mix(in srgb,var(--accent) 8%,transparent);overflow:visible}
+.card:hover{transform:translateY(-1px);box-shadow:0 10px 25px color-mix(in srgb,var(--accent) 15%,transparent)}
+.card-top{padding-left:26px;align-items:center}.card-title{font-size:17px;line-height:1.3}
+.card-purpose{margin:10px 0 12px;color:var(--muted);font-size:13.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-context{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:auto}.card-context .chip{font-size:11.5px;padding:4px 7px}.card-context .field-count{font-weight:800;color:var(--text)}
+.card-actions{margin-top:13px;padding-top:11px}.card-actions .btn.small{font-size:13px;min-height:36px;padding:6px 10px}.card-actions .use-card{flex:1 1 130px}.card-actions .edit-card{flex:0 0 auto}
+.card-menu-panel{bottom:auto;top:40px;right:0;z-index:150}
+.prompt-origin,.prompt-intro-card,.card>.excerpt,.card>.meta{display:none!important}
+.cards.list .card,.category-group-cards.list .card{grid-template-columns:28px minmax(220px,1fr) minmax(280px,2fr) auto}.cards.list .card-purpose,.category-group-cards.list .card-purpose{margin:0}.cards.list .card-context,.category-group-cards.list .card-context{margin:0}
+
+/* Filters visible and removable */
+.active-filter-strip{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+.active-filter-strip[hidden]{display:none}.active-filter-strip .filter-result-count{font-weight:900;margin-right:3px}.active-filter-chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:var(--panel-2);color:var(--text);font-size:12px;font-weight:750}.active-filter-chip button{width:20px;height:20px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted)}.active-filter-chip button:hover{background:var(--line);color:var(--text)}.active-filter-clear{margin-left:auto}
+#advancedFilterBtn.has-filters{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-2)}
+
+/* Use mode = title, explanation, fields, optional preview, two actions */
+.use-mode .editor-head{align-items:center}.use-mode #editorModeSwitch{margin-left:auto}.use-mode .editor-tabs{display:none}.use-mode .editor-head .spacer{display:none}.use-mode .editor-head strong{font-size:19px;max-width:min(680px,65vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.use-mode .editor-head strong::after{content:none}
+.use-mode .prompt-purpose-note{margin-bottom:14px}.use-mode .variables-header{padding:14px 16px}.use-mode .variables-header h3{font-size:19px}.use-mode .variables-header p{display:none}.use-mode .variable-summary{display:none!important}.use-memory-note{display:none;margin:-3px 0 14px;color:var(--muted);font-size:12px}.use-mode .use-memory-note{display:block}
+.use-mode #versionHistoryBtn,.use-mode #smartOrganizeBtn,.use-mode #saveStatus,.use-mode #autosaveIndicator,.use-mode #savePromptBtn,.use-mode #duplicateBtn,.use-mode #trashBtn,.use-mode #exportPromptBtn{display:none!important}
+.use-mode .editor-footer{gap:8px}.use-mode .copy-compiled{order:1;min-width:160px}.use-mode .use-tool-action{order:2}.use-mode #cancelEditorBtn{order:3;margin-left:auto}.use-mode .editor-footer>.spacer{display:none}
+.use-mode .preview-box{position:static;box-shadow:none}.use-preview-details{padding:0;overflow:hidden}.use-preview-details>summary{list-style:none;cursor:pointer;padding:13px 15px;font-size:14px;font-weight:900}.use-preview-details>summary::-webkit-details-marker{display:none}.use-preview-details>summary::after{content:'Mostra';float:right;color:var(--muted);font-size:12px}.use-preview-details[open]>summary::after{content:'Nascondi'}.use-preview-details .preview-hint{padding:0 15px 8px}.use-preview-details textarea{margin:0 15px 15px;width:calc(100% - 30px)}
+.edit-mode-existing #savePromptBtn{display:none!important}.edit-mode-existing #autosaveIndicator{display:inline-flex}.edit-mode-new #autosaveIndicator{display:none!important}.edit-mode-new #savePromptBtn{display:inline-flex!important}
+
+/* Friendly variables */
+.variable-card-head{align-items:center}.variable-card-head .variable-token{font-size:12px;color:var(--muted);font-weight:750}.variable-badge.required{color:var(--warning);border-color:color-mix(in srgb,var(--warning) 30%,var(--line))}.variable-friendly-title{font-size:18px!important}.variable-example{margin:8px 0 0;color:var(--muted);font-size:12px}.variable-empty-note{display:none;margin-top:7px;color:var(--warning);font-size:12px;font-weight:750}.variable-empty-note.show{display:block}.binary-attachment-warning{margin-top:10px;padding:9px 10px;border:1px solid color-mix(in srgb,var(--warning) 38%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--warning) 8%,var(--panel));font-size:12px;line-height:1.45;color:var(--text)}
+
+/* Toast with undo */
+.toast-action-row{display:flex;align-items:center;gap:10px;margin-top:8px}.toast-action-row button{min-height:30px;padding:4px 9px;border:1px solid rgba(255,255,255,.4);border-radius:8px;background:rgba(255,255,255,.12);color:inherit;font-weight:850}
+
+/* Mobile priorities */
+@media(max-width:650px){
+  .btn,.side-link,.category-menu-trigger,input,select{min-height:var(--touch)}
+  .toolbar #sortSelect{display:block!important;min-width:0;max-width:none;flex:1 1 180px;height:44px}.toolbar .view-toggle #tableBtn,.toolbar .view-toggle #kanbanBtn{display:none!important}.toolbar .view-toggle{display:flex!important}.toolbar #commandPaletteBtn{display:none}
+  .active-filter-strip{padding:8px 12px}.active-filter-clear{margin-left:0}
+  .home-search-panel{padding:17px}.home-search-row{grid-template-columns:1fr}.home-prompt-strip{grid-template-columns:1fr}.home-prompt-shortcut{min-height:66px}
+  .agent-router-body{padding:12px}.agent-mode-group{grid-template-columns:1fr}.agent-router-head p{font-size:13px}
+  .card-actions .use-card{flex:1 1 calc(100% - 115px)}.card-actions .edit-card{flex:0 0 auto}.card-menu{flex:0 0 auto}
+  .use-mode .editor-head strong{max-width:calc(100vw - 165px);font-size:17px}.use-mode #editorModeSwitch{margin-left:0}.use-mode .editor-footer{padding:10px}.use-mode .copy-compiled,.use-mode .use-tool-action{flex:1 1 100%;min-height:48px}.use-mode #cancelEditorBtn{margin-left:0;flex:1 1 100%}
+  .use-mode .preview-box{position:static!important}.preview-box textarea{min-height:180px}
+  .variable-card{border-left-width:6px}.variable-card-body{padding:15px}.variable-input{min-height:120px}
+  .advanced-filter-bar{align-items:stretch}.filter-field{min-width:100%;flex:1 1 100%}.filter-check{min-height:44px}
+}
+@media(max-width:430px){.topbar .search{font-size:14px}.card-title{font-size:16px}.card-actions .btn.small{min-height:42px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <button class="btn icon mobile-menu" id="mobileMenuBtn">&#9776;</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 18.17.0</small></div></div>
+    <button class="btn icon mobile-menu" id="mobileMenuBtn" aria-label="Apri menu">&#9776;</button>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 22.0.0</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
-      <input class="search" id="globalSearch" type="search" placeholder="Cerca… anche cliente:zirafa progetto:seo stato:bozza">
-      <button class="search-clear" id="clearSearch">&#215;</button>
+      <input class="search" id="globalSearch" type="search" list="searchSuggestions" autocomplete="off" placeholder="Cerca un prompt per titolo, argomento o cliente…" aria-label="Cerca nella libreria">
+      <button class="search-clear" id="clearSearch" aria-label="Cancella ricerca">&#215;</button>
     </div>
     <div class="top-actions">
       <button class="btn optional" id="importBtn">Importa JSON</button>
@@ -539,6 +624,8 @@ textarea{resize:vertical;line-height:1.55}
           <button class="btn" id="menuRefreshAutoIntrosBtn"><span class="menu-icon" aria-hidden="true">&#8635;</span><span>Aggiorna note automatiche</span></button>
           <button class="btn menu-section-start" id="menuBackupBtn"><span class="menu-icon" aria-hidden="true">&#128190;</span><span>Crea backup</span></button>
           <button class="btn" id="menuDiagnosticsBtn"><span class="menu-icon" aria-hidden="true">&#128736;</span><span>Diagnostica</span></button>
+          <button class="btn" id="menuTableViewBtn"><span class="menu-icon" aria-hidden="true">▦</span><span>Vista tabella</span></button>
+          <button class="btn" id="menuKanbanViewBtn"><span class="menu-icon" aria-hidden="true">▤</span><span>Vista Kanban</span></button>
           <button class="btn" id="themeBtn" title="Tema"><span class="menu-icon" aria-hidden="true">&#9680;</span><span>Cambia tema</span></button>
           <button class="btn menu-section-start" id="menuManageBtn"><span class="menu-icon" aria-hidden="true">&#9881;</span><span>Gestisci struttura</span></button>
         </div>
@@ -546,37 +633,38 @@ textarea{resize:vertical;line-height:1.55}
     </div>
   </header>
 
-  <aside class="sidebar" id="sidebar">
-    <section class="side-section library">
+  <aside class="sidebar" id="sidebar" aria-label="Navigazione Prompt Studio">
+    <section class="side-section library daily-nav">
       <div class="side-title"><span>Libreria</span></div>
-      <button class="side-link" id="dashboardBtn"><span>&#8962;</span><span>Dashboard</span></button>
-      <button class="side-link" id="agentSidebarBtn"><span>✨</span><span>Assistente</span></button>
-      <button class="side-link active" data-filter="all"><span>&#9638;</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
-      <button class="side-link" data-filter="favorites"><span>&#9733;</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
-      <button class="side-link" data-filter="pinned"><span>⌖</span><span>Pinnati</span><span class="count" id="countPinned">0</span></button>
-      <button class="side-link" data-filter="recent"><span>&#9719;</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
-      <button class="side-link" data-filter="uncategorized"><span>&#9671;</span><span>Senza categoria</span><span class="count" id="countUncategorized">0</span></button>
-      <button class="side-link" data-filter="archived"><span>&#9635;</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
-      <button class="side-link" data-filter="trash"><span>&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
+      <button class="side-link" id="dashboardBtn"><span aria-hidden="true">&#8962;</span><span>Home</span></button>
+      <button class="side-link active" data-filter="all"><span aria-hidden="true">&#9638;</span><span>Tutti i prompt</span><span class="count" id="countAll">0</span></button>
+      <button class="side-link" data-filter="favorites"><span aria-hidden="true">&#9733;</span><span>Preferiti</span><span class="count" id="countFavorites">0</span></button>
+      <button class="side-link" data-filter="recent"><span aria-hidden="true">&#9719;</span><span>Recenti</span><span class="count" id="countRecent">0</span></button>
     </section>
-    <div id="organizationSidebarSections"></div>
-    <section class="side-section backup">
-      <button class="side-link" id="backupBtn"><span>&#8681;</span><span>Crea backup completo</span></button>
-      <div class="hint" style="padding:8px;color:var(--sidebar-muted)">Il backup include prompt, variabili e file caricati.</div>
-    </section>
+
     <section class="side-section collections">
-      <div class="side-title"><span>Raccolte</span><button class="sidebar-mini-add" id="addCollectionQuick" type="button" title="Nuova raccolta">+</button></div>
+      <div class="side-title"><span>Raccolte</span><button class="sidebar-mini-add" id="addCollectionQuick" type="button" title="Nuova raccolta" aria-label="Nuova raccolta">+</button></div>
       <div id="collectionSidebarList"></div>
     </section>
-    <section class="side-section workflows">
-      <div class="side-title"><span>Workflow</span><button class="sidebar-mini-add" id="addWorkflowQuick" type="button" title="Nuovo workflow">+</button></div>
-      <div id="workflowSidebarList"></div>
+
+    <div id="categorySidebarSection"></div>
+
+    <details class="sidebar-organization" id="sidebarOrganization">
+      <summary><span>Organizzazione</span><span class="category-caret" aria-hidden="true"></span></summary>
+      <div id="organizationSidebarSections"></div>
+      <section class="side-section workflows organization-workflows">
+        <div class="side-title"><span>Workflow</span><button class="sidebar-mini-add" id="addWorkflowQuick" type="button" title="Nuovo workflow" aria-label="Nuovo workflow">+</button></div>
+        <div id="workflowSidebarList"></div>
+      </section>
+    </details>
+
+    <section class="side-section management sidebar-bottom-tools">
+      <div class="side-title"><span>Archivio e impostazioni</span></div>
+      <button class="side-link" data-filter="archived"><span aria-hidden="true">&#9635;</span><span>Archivio</span><span class="count" id="countArchived">0</span></button>
+      <button class="side-link" data-filter="trash"><span aria-hidden="true">&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
+      <button class="side-link" id="manageBtn"><span aria-hidden="true">&#9881;</span><span>Impostazioni e struttura</span></button>
     </section>
-    <section class="side-section management">
-      <div class="side-title"><span>Gestione</span></div>
-      <button class="side-link" id="manageBtn"><span>&#9881;</span><span>Gestisci elementi</span></button>
-    </section>
-    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 18.17.0</div>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.0.0</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -596,7 +684,7 @@ textarea{resize:vertical;line-height:1.55}
         </select>
         <button class="btn small" id="advancedFilterBtn" type="button">Filtri</button>
         <button class="btn small" id="commandPaletteBtn" type="button" title="Cmd/Ctrl+K">⌘K</button>
-        <div class="view-toggle"><button class="btn small" id="gridBtn" title="Griglia">&#9638;</button><button class="btn small" id="listBtn" title="Lista">&#9783;</button><button class="btn small" id="tableBtn" title="Tabella">▦</button><button class="btn small" id="kanbanBtn" title="Kanban">▤</button></div>
+        <div class="view-toggle"><button class="btn small" id="gridBtn" title="Griglia" aria-label="Vista griglia">&#9638;</button><button class="btn small" id="listBtn" title="Lista" aria-label="Vista lista">&#9783;</button><button class="btn small" id="tableBtn" title="Tabella" aria-label="Vista tabella">▦</button><button class="btn small" id="kanbanBtn" title="Kanban" aria-label="Vista Kanban">▤</button></div>
       </div>
     </div>
     <div class="bulkbar" id="bulkbar">
@@ -612,14 +700,17 @@ textarea{resize:vertical;line-height:1.55}
       <button class="btn small danger" id="bulkTrashBtn">Cestina</button>
       <button class="btn small" id="clearSelectionBtn">Annulla</button>
     </div>
-    <div class="advanced-filter-bar" id="advancedFilterBar" hidden>
-      <div class="filter-field"><label>Stato</label><select id="filterStatus"><option value="">Tutti</option><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option></select></div>
-      <div class="filter-field"><label>Utilizzo</label><select id="filterUsage"><option value="">Tutti</option><option value="used">Usati</option><option value="never">Mai usati</option><option value="stale">Non usati da 90 giorni</option></select></div>
+    <div class="advanced-filter-bar" id="advancedFilterBar" hidden aria-label="Filtri della libreria">
+      <div class="filter-field"><label for="filterCategory">Categoria</label><select id="filterCategory"><option value="">Tutte</option></select></div>
+      <div class="filter-field"><label for="filterClient">Cliente</label><select id="filterClient"><option value="">Tutti</option></select></div>
+      <div class="filter-field"><label for="filterStatus">Stato</label><select id="filterStatus"><option value="">Tutti</option><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option></select></div>
+      <div class="filter-field"><label for="filterUsage">Utilizzo</label><select id="filterUsage"><option value="">Tutti</option><option value="used">Usati</option><option value="never">Mai usati</option><option value="stale">Non usati da 90 giorni</option></select></div>
       <label class="filter-check"><input type="checkbox" id="filterWithVariables"> Con variabili</label>
       <label class="filter-check"><input type="checkbox" id="filterWithFiles"> Con allegati</label>
       <label class="filter-check"><input type="checkbox" id="filterOnlyDuplicates"> Possibili duplicati</label>
       <button class="btn small" id="tableColumnsBtn" type="button">Colonne tabella</button><button class="btn small" id="resetAdvancedFilters" type="button">Azzera filtri</button>
     </div>
+    <div class="active-filter-strip" id="activeFilterStrip" hidden aria-live="polite"></div>
     <div class="content">
       <div class="stats" id="stats"></div>
       <div class="cards" id="cards"></div>
@@ -636,14 +727,14 @@ textarea{resize:vertical;line-height:1.55}
         <button class="editor-tab" data-tab="variables" id="variablesTab">Variabili</button>
       </div>
       <span class="spacer"></span>
-      <button class="btn icon small" id="closeEditorBtn">&#215;</button>
+      <button class="btn icon small" id="closeEditorBtn" aria-label="Chiudi editor">&#215;</button>
     </div>
     <div class="editor-body">
       <section class="editor-panel active" data-panel="prompt">
         <div class="editor-grid">
-          <div class="field full"><label>Titolo</label><input id="promptTitle" type="text" placeholder="Titolo chiaro e descrittivo"></div>
+          <div class="field full"><label for="promptTitle">Titolo</label><input id="promptTitle" type="text" placeholder="Titolo chiaro e descrittivo"></div>
           <div class="field full">
-            <label>Testo del prompt</label>
+            <label for="promptContent">Testo del prompt</label>
             <textarea id="promptContent" placeholder="Scrivi o incolla il prompt&#8230;"></textarea>
             <div class="hint"><span id="wordCount">0 parole</span> &#183; <span id="charCount">0 caratteri</span> &#183; le variabili vengono rilevate automaticamente</div>
           </div>
@@ -659,10 +750,10 @@ textarea{resize:vertical;line-height:1.55}
             <textarea id="promptIntro" placeholder="Breve spiegazione per capire subito a cosa serve il prompt. Se lasci vuoto, viene generata automaticamente analizzando il contenuto."></textarea>
             <div class="intro-sync-note" id="introSyncNote"><span>&#9432;</span><span><strong>Modalità automatica:</strong> la nota viene rigenerata quando cambia il titolo o il contenuto del prompt. Se modifichi direttamente questo campo diventa personalizzata e non verrà sovrascritta.</span></div>
           </div>
-          <div class="field"><label>Categoria</label><select id="promptCategory"></select></div>
-          <div class="field"><label>Sottocategoria</label><select id="promptSubcategory"></select></div>
+          <div class="field"><label for="promptCategory">Categoria</label><select id="promptCategory"></select></div>
+          <div class="field"><label for="promptSubcategory">Sottocategoria</label><select id="promptSubcategory"></select></div>
           <div class="dynamic-editor-fields" id="dynamicEditorFields"></div>
-          <div class="field"><label>Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
+          <div class="field"><label for="promptStatus">Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
           <div class="field full tool-box">
             <div class="tool-box-head">
               <div>
@@ -676,8 +767,8 @@ textarea{resize:vertical;line-height:1.55}
               <button class="btn primary" id="openToolBtn" type="button">Copia e apri il tool</button>
             </div>
           </div>
-          <div class="field full"><label>Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
-          <div class="field full"><label>Note interne</label><textarea id="promptNotes" placeholder="Note, istruzioni o contesto"></textarea></div>
+          <div class="field full"><label for="promptTags">Tag, separati da virgola</label><input id="promptTags" type="text" placeholder="seo, wordpress, audit"></div>
+          <div class="field full"><label for="promptNotes">Note interne</label><textarea id="promptNotes" placeholder="Note, istruzioni o contesto"></textarea></div>
           <div class="field full"><label><input id="promptFavorite" type="checkbox"> Aggiungi ai preferiti</label></div>
         </div>
       </section>
@@ -689,32 +780,33 @@ textarea{resize:vertical;line-height:1.55}
           <button class="btn" id="detectVariablesBtn">&#8635; Aggiorna campi</button>
         </div>
         <div class="variable-highlight-note"><strong>Come funziona:</strong> compila solo i campi che ti servono. Il pulsante <strong>Copia Prompt</strong> sostituisce le variabili valorizzate; quelle lasciate vuote restano nel testo come segnaposto e non bloccano la copia.</div>
-        <div class="use-progress" id="useProgress"></div><div class="variable-summary" id="variableSummary"></div>
+        <div class="use-progress" id="useProgress"></div><div class="use-memory-note" id="useMemoryNote">I valori inseriti vengono ricordati nel prompt quando copi o chiudi questa schermata.</div><div class="variable-summary" id="variableSummary"></div>
         <div class="variable-list" id="variableList"></div>
         <div class="backup-note"><strong>Backup completo:</strong> i file fino a 20 MB vengono salvati dentro il JSON in formato Base64 e vengono ripristinati durante l&#8217;importazione.</div>
-        <div class="preview-box">
-          <h3>Anteprima del prompt con le variabili inserite</h3>
-          <textarea id="compiledPreview" readonly></textarea>
-        </div>
+        <details class="preview-box use-preview-details">
+          <summary>Anteprima del prompt</summary>
+          <div class="hint preview-hint">Controlla il testo finale solo quando ti serve.</div>
+          <textarea id="compiledPreview" readonly aria-label="Anteprima del prompt compilato"></textarea>
+        </details>
       </section>
     </div>
     <div class="editor-footer">
       <span class="save-status" id="saveStatus">Salvataggio in corso&#8230;</span><span class="autosave-indicator" id="autosaveIndicator">Autosave attivo</span><button class="btn" id="versionHistoryBtn" type="button">Versioni</button><button class="btn" id="smartOrganizeBtn" type="button">✦ Suggerisci organizzazione</button>
-      <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia prompt compilato</button>
+      <button class="btn success copy-compiled" id="copyCompiledBtn" type="button" title="Copia anche se alcune variabili sono vuote">Copia prompt</button>
       <button class="btn primary use-tool-action hidden" id="openToolUseBtn" type="button">Copia e apri il tool</button>
       <button class="btn" id="exportPromptBtn">Esporta prompt</button>
       <button class="btn" id="duplicateBtn">Duplica</button>
       <button class="btn danger" id="trashBtn">Cestina</button>
       <span class="spacer"></span>
       <button class="btn" id="cancelEditorBtn">Chiudi</button>
-      <button class="btn primary" id="savePromptBtn">Salva prompt</button>
+      <button class="btn primary" id="savePromptBtn">Crea prompt</button>
     </div>
   </section>
 </div>
 
 <div class="modal-backdrop" id="manageModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="manageModalTitle" tabindex="-1">
-    <div class="modal-head"><h3 id="manageModalTitle">Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal">&#215;</button></div>
+    <div class="modal-head"><h3 id="manageModalTitle">Gestione struttura</h3><span class="spacer"></span><button class="btn icon small" data-close="manageModal" aria-label="Chiudi gestione">&#215;</button></div>
     <div class="modal-body">
       <div class="manage-grid">
         <div class="panel-box type-management-box">
@@ -785,21 +877,22 @@ textarea{resize:vertical;line-height:1.55}
 
 <div class="modal-backdrop" id="choiceModal">
   <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="choiceTitle" tabindex="-1">
-    <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal">&#215;</button></div>
+    <div class="modal-head"><h3 id="choiceTitle">Operazione</h3><span class="spacer"></span><button class="btn icon small" data-close="choiceModal" aria-label="Chiudi finestra">&#215;</button></div>
     <div class="modal-body" id="choiceBody"></div>
     <div class="modal-foot" id="choiceFoot"></div>
   </div>
 </div>
 
 <div class="command-backdrop" id="commandBackdrop" aria-hidden="true"><div class="command-box" role="dialog" aria-modal="true" aria-label="Comandi rapidi"><input class="command-input" id="commandInput" placeholder="Cerca prompt o comando…"><div class="command-results" id="commandResults"></div></div></div>
+<datalist id="searchSuggestions"></datalist>
 <input type="file" id="importInput" accept=".json,application/json" hidden>
 <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 
 <script>
 (() => {
 "use strict";
-const APP_VERSION="21.6.0";
-const APP_RELEASE_NAME="Performance, Stability & Responsive QA";
+const APP_VERSION="22.0.0";
+const APP_RELEASE_NAME="Simple Workflow & UX";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -851,7 +944,7 @@ const state={
   recentValues:readStoredJson("ps_recent_values",{}),
   openCategories:new Set(Array.isArray(storedOpenCategories)?storedOpenCategories:[]),
   manageSubcategoryFilter:null,
-  advancedFilters:{status:"",usage:"",withVariables:false,withFiles:false,duplicates:false},
+  advancedFilters:{category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false},
   collections:[],workflows:[],commandQuery:"",autosaveTimer:null,lastAutosaveAt:null,
   busy:new Set(),modalReturnFocus:{}
 };
@@ -1018,7 +1111,7 @@ function sidebarUsageCounts(live){
   let favorites=0,pinned=0,recent=0,uncategorized=0;
   const recentLimit=Date.now()-7*864e5;
   for(const prompt of live){
-    if(prompt.favorite)favorites++;
+    if(prompt.favorite||prompt.pinned)favorites++;
     if(prompt.pinned)pinned++;
     if(dateTimestamp(prompt.updatedAt)>=recentLimit)recent++;
     if(!prompt.categoryId&&!prompt.subcategoryId)uncategorized++;
@@ -1055,9 +1148,42 @@ function openDatabase(){
 function store(name,mode="readonly"){return state.db.transaction(name,mode).objectStore(name)}
 function getAll(name){return new Promise((resolve,reject)=>{const request=store(name).getAll();request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error)})}
 function getOne(name,id){return new Promise((resolve,reject)=>{const request=store(name).get(id);request.onsuccess=()=>resolve(request.result||null);request.onerror=()=>reject(request.error)})}
-function put(name,value){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").put(value);request.onsuccess=()=>resolve(value);request.onerror=()=>reject(request.error)})}
-function remove(name,id){return new Promise((resolve,reject)=>{const request=store(name,"readwrite").delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
+function put(name,value){
+  return new Promise((resolve,reject)=>{
+    const tx=state.db.transaction(name,"readwrite");
+    tx.oncomplete=()=>resolve(value);
+    tx.onabort=()=>reject(tx.error||new Error("Transazione annullata"));
+    tx.onerror=()=>reject(tx.error||new Error("Errore nella transazione"));
+    tx.objectStore(name).put(value);
+  });
+}
+function remove(name,id){
+  return new Promise((resolve,reject)=>{
+    const tx=state.db.transaction(name,"readwrite");
+    tx.oncomplete=()=>resolve();
+    tx.onabort=()=>reject(tx.error||new Error("Transazione annullata"));
+    tx.onerror=()=>reject(tx.error||new Error("Errore nella transazione"));
+    tx.objectStore(name).delete(id);
+  });
+}
 function transactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error||new Error("Transazione annullata"));tx.onerror=()=>reject(tx.error||new Error("Errore nella transazione"))})}
+function updatePromptAtomic(id,updater){
+  return new Promise((resolve,reject)=>{
+    const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts");
+    let updated=null,customError=null;
+    tx.oncomplete=()=>resolve(updated);
+    tx.onabort=()=>reject(customError||tx.error||new Error("Transazione annullata"));
+    tx.onerror=()=>reject(customError||tx.error||new Error("Errore nella transazione"));
+    const request=promptStore.get(id);
+    request.onerror=()=>{customError=request.error||new Error("Impossibile leggere il prompt");};
+    request.onsuccess=()=>{
+      const current=request.result;
+      if(!current){customError=new Error("Prompt non trovato");tx.abort();return;}
+      try{updated=updater({...current});promptStore.put(updated)}
+      catch(error){customError=error;tx.abort()}
+    };
+  });
+}
 async function loadData(){
   const names=["prompts","categories","clients","projects","gptsites","seo","customTypes","customEntities"];
   const tx=state.db.transaction(names,"readonly");
@@ -1132,6 +1258,10 @@ function toast(message,type="info",code=""){
   $("toastWrap").appendChild(node);
   if(type==="error"||type==="warning")recordDiagnosticEvent(type,"interfaccia",message,code);
   setTimeout(()=>node.remove(),5200);
+}
+function toastAction(message,actionLabel,onAction,type="success"){
+  const node=document.createElement("div");node.className=`toast ${type}`;node.setAttribute("role","status");node.innerHTML=`<strong>${esc(message)}</strong><div class="toast-action-row"><button type="button">${esc(actionLabel)}</button></div>`;$("toastWrap").appendChild(node);
+  const timer=setTimeout(()=>node.remove(),7000);node.querySelector("button").onclick=async()=>{clearTimeout(timer);try{await onAction();node.remove()}catch(error){console.error(error);toast("Impossibile annullare l’operazione.","error")}};
 }
 function dateTimestamp(value){const timestamp=new Date(value).getTime();return Number.isFinite(timestamp)?timestamp:0}
 function formatDate(value){
@@ -1608,6 +1738,17 @@ function closeModal(id){
   const previous=state.modalReturnFocus[id];delete state.modalReturnFocus[id];
   if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
 }
+function trapActiveDialogFocus(event){
+  if(event.key!=="Tab")return;
+  const backdrops=[$("editorBackdrop"),$("manageModal"),$("choiceModal"),$("commandBackdrop")].filter(node=>node&&(node.classList.contains("show")||node.getAttribute("aria-hidden")==="false"));
+  const backdrop=backdrops[backdrops.length-1];if(!backdrop)return;
+  const dialog=backdrop.querySelector('[role="dialog"],.editor-modal,.command-box');if(!dialog)return;
+  const focusable=[...dialog.querySelectorAll('button:not(:disabled):not(.hidden),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),summary,[href],[tabindex]:not([tabindex="-1"])')].filter(el=>el.offsetParent!==null);
+  if(!focusable.length){event.preventDefault();dialog.focus();return}
+  const first=focusable[0],last=focusable[focusable.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+}
+
 function confirmAction(title,message,onConfirm){
   $("choiceTitle").textContent=title;
   $("choiceBody").innerHTML=`<p>${esc(message)}</p>`;
@@ -1641,7 +1782,7 @@ function filteredPrompts(){
   if(filter.type==="trash")items=items.filter(item=>item.deletedAt);
   else if(filter.type==="archived")items=items.filter(item=>!item.deletedAt&&item.status==="archived");
   else items=items.filter(item=>!item.deletedAt&&item.status!=="archived");
-  if(filter.type==="favorites")items=items.filter(item=>item.favorite);
+  if(filter.type==="favorites")items=items.filter(item=>item.favorite||item.pinned);
   if(filter.type==="pinned")items=items.filter(item=>item.pinned);
   if(filter.type==="recent"){const limit=Date.now()-7*864e5;items=items.filter(item=>dateTimestamp(item.updatedAt)>=limit)}
   if(filter.type==="uncategorized")items=items.filter(item=>!item.categoryId&&!item.subcategoryId);
@@ -1699,25 +1840,25 @@ function filterInfo(){
 /* ---------- Rendering ---------- */
 function renderSidebar(){
   const live=livePrompts(),active=activePrompts();
-  $("countAll").textContent=live.length;
   const usageCounts=sidebarUsageCounts(live);
-  $("countFavorites").textContent=usageCounts.favorites;
-  $("countPinned").textContent=usageCounts.pinned;
-  $("countRecent").textContent=usageCounts.recent;
-  $("countUncategorized").textContent=usageCounts.uncategorized;
-  $("countArchived").textContent=active.length-live.length;
-  $("countTrash").textContent=state.prompts.length-active.length;
+  if($("countAll"))$("countAll").textContent=live.length;
+  if($("countFavorites"))$("countFavorites").textContent=usageCounts.favorites;
+  if($("countRecent"))$("countRecent").textContent=usageCounts.recent;
+  if($("countArchived"))$("countArchived").textContent=active.length-live.length;
+  if($("countTrash"))$("countTrash").textContent=state.prompts.length-active.length;
 
   const counts=new Proxy({}, {get:(_,id)=>usageCounts.category.get(id)||0});
   const activeCategory=state.filter.type==="category"?catById(state.filter.id):null;
-  const categorySection={label:"Categorie",html:`<section class="side-section categories">
+  const categorySection=`<section class="side-section categories">
     <div class="side-title"><span>Categorie</span></div>
     <div class="category-menu-shell" id="categoryMenuShell">
       <button class="category-menu-trigger" id="categoryPicker" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="categoryMenu"><span class="picker-value" id="categoryPickerValue">Categorie</span><span class="category-caret" aria-hidden="true"></span></button>
       <div class="category-menu" id="categoryMenu" role="menu" hidden></div>
     </div>
-  </section>`};
-  const entitySections=allSidebarTypes().map(definition=>{
+  </section>`;
+  if($("categorySidebarSection"))$("categorySidebarSection").innerHTML=categorySection;
+
+  const entitySections=visibleSidebarTypes().map(definition=>{
     let entities=[];
     if(definition.type==="client")entities=state.clients;
     else if(definition.type==="project")entities=state.projects;
@@ -1727,49 +1868,46 @@ function renderSidebar(){
     const selected=definition.custom
       ?(state.filter.type==="custom"&&state.filter.typeId===definition.typeId?state.filter.id:"all")
       :(state.filter.type===definition.type?state.filter.id:"all");
-    const countFor=entity=>{
-      if(definition.custom)return usageCounts.custom.get(definition.typeId)?.get(entity.id)||0;
-      return usageCounts.fixed[definition.type]?.get(entity.id)||0;
-    };
-    return {label:definition.label,html:`<section class="side-section ${esc(definition.className||"dynamic-type")}" ${definition.custom?`style="--dynamic-accent:${esc(definition.color||"#64748b")}"`:""}>
-      <div class="side-title"><span>${esc(definition.label)}</span></div>
-      <select class="sidebar-picker dynamic-sidebar-picker" data-sidebar-type="${esc(definition.type)}" aria-label="Scegli ${esc(definition.label)}">
-        <option value="all">${esc(definition.label)}</option>
-        ${entities.map(entity=>`<option value="${esc(entity.id)}" ${selected===entity.id?"selected":""}>${esc(entity.name)} (${countFor(entity)})</option>`).join("")}
+    const countFor=entity=>definition.custom
+      ?usageCounts.custom.get(definition.typeId)?.get(entity.id)||0
+      :usageCounts.fixed[definition.type]?.get(entity.id)||0;
+    return `<section class="side-section ${esc(definition.className||"dynamic-type")}" ${definition.custom?`style="--dynamic-accent:${esc(definition.color||"#64748b")}"`:""}>
+      <div class="side-title"><span>${definition.custom?`${esc(definition.icon||"◆")} `:""}${esc(definition.label)}</span></div>
+      <select class="sidebar-picker dynamic-sidebar-picker" data-sidebar-type="${esc(definition.type)}" aria-label="Filtra per ${esc(definition.label)}">
+        <option value="all">Tutti</option>
+        ${entities.map(entity=>`<option value="${esc(entity.id)}" ${selected===entity.id?"selected":""}>${esc(entityDisplayLabel(entity)||entity.name)} (${countFor(entity)})</option>`).join("")}
       </select>
-    </section>`};
+    </section>`;
   });
-  $("organizationSidebarSections").innerHTML=[categorySection,...entitySections]
-    .sort((a,b)=>a.label.localeCompare(b.label,"it",{sensitivity:"base",numeric:true}))
-    .map(item=>item.html).join("");
-  $("categoryPickerValue").textContent="Categorie";
-  $("categoryMenu").innerHTML=`
-    ${rootCategoriesAlphabetical().map(root=>{
-      const children=childCategoriesAlphabetical(root.id);
-      return `<div class="category-menu-group">
-        <div class="category-parent-row ${children.length?"":"single"}">
+  if($("organizationSidebarSections"))$("organizationSidebarSections").innerHTML=entitySections.join("");
+  if(["client","project","gptsite","seo","custom"].includes(state.filter.type)&&$("sidebarOrganization"))$("sidebarOrganization").open=true;
+
+  if($("categoryPickerValue"))$("categoryPickerValue").textContent=activeCategory?.name||"Categorie";
+  if($("categoryMenu")){
+    $("categoryMenu").innerHTML=`<button class="category-menu-all ${state.filter.type!=="category"?"active":""}" type="button" role="menuitem" data-category-id="all"><span>Tutte le categorie</span></button>
+      ${rootCategoriesAlphabetical().map(root=>{
+        const children=childCategoriesAlphabetical(root.id);
+        return `<div class="category-menu-group"><div class="category-parent-row ${children.length?"":"single"}">
           <button class="category-parent-choice ${activeCategory?.id===root.id?"active":""}" type="button" role="menuitem" data-category-id="${esc(root.id)}"><span>${esc(root.name)}</span><span class="category-menu-count">${counts[root.id]||0}</span></button>
           ${children.length?`<button class="category-submenu-toggle" type="button" aria-label="Apri le sottocategorie di ${esc(root.name)}" aria-haspopup="dialog" data-submenu-id="${esc(root.id)}"><span class="category-caret" aria-hidden="true"></span></button>`:""}
-        </div>
-      </div>`;
-    }).join("")}`;
-  $("categoryMenu").hidden=true;
-  $("categoryPicker").setAttribute("aria-expanded","false");
-  if($("dynamicBulkActions"))$("dynamicBulkActions").innerHTML=state.customTypes.map(type=>`<button class="btn small bulk-custom-assign" data-type-id="${esc(type.id)}">Assegna ${esc(type.name)}</button>`).join("");
+        </div></div>`;
+      }).join("")}`;
+    $("categoryMenu").hidden=true;
+  }
+  $("categoryPicker")?.setAttribute("aria-expanded","false");
+
+  if($("dynamicBulkActions"))$("dynamicBulkActions").innerHTML=state.customTypes.filter(type=>type.visible!==false).map(type=>`<button class="btn small bulk-custom-assign" data-type-id="${esc(type.id)}">Assegna ${esc(type.name)}</button>`).join("");
   $$(".bulk-custom-assign").forEach(button=>button.onclick=()=>choiceAction(`Assegna ${customTypeById(button.dataset.typeId)?.name||"tipologia"}`,customTypeById(button.dataset.typeId)?.name||"Destinazione",'<option value="">Nessuna assegnazione</option>'+customEntitiesForType(button.dataset.typeId).map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join(""),value=>bulkUpdateCustom(button.dataset.typeId,value||null)));
-  $("categoryPicker").onclick=()=>{
-    const willOpen=$("categoryMenu").hidden;
-    $("categoryMenu").hidden=!willOpen;
-    $("categoryPicker").setAttribute("aria-expanded",String(willOpen));
+  if($("categoryPicker"))$("categoryPicker").onclick=()=>{
+    const willOpen=$("categoryMenu").hidden;$("categoryMenu").hidden=!willOpen;$("categoryPicker").setAttribute("aria-expanded",String(willOpen));
   };
   $$("#categoryMenu [data-category-id]").forEach(button=>button.onclick=()=>button.dataset.categoryId==="all"?setFilter("all"):setFilter("category",button.dataset.categoryId));
   $$("#categoryMenu .category-submenu-toggle").forEach(button=>button.onclick=()=>openSubcategoryPopup(button.dataset.submenuId));
   $$("#organizationSidebarSections .dynamic-sidebar-picker").forEach(picker=>picker.onchange=event=>{
     if(event.target.value==="all"){setFilter("all");return}
     const type=event.target.dataset.sidebarType;
-    if(type.startsWith("custom:")){
-      state.filter={type:"custom",typeId:type.slice(7),id:event.target.value};state.selected.clear();render();$("sidebar").classList.remove("open");
-    }else setFilter(type,event.target.value);
+    if(type.startsWith("custom:")){state.filter={type:"custom",typeId:type.slice(7),id:event.target.value};state.selected.clear();render();$("sidebar").classList.remove("open")}
+    else setFilter(type,event.target.value);
   });
 }
 
@@ -1799,6 +1937,15 @@ function normalizeHttpUrl(value){
   if(/^[a-z][a-z0-9+.-]*:/i.test(raw)&&!/^https?:/i.test(raw))return null;
   const candidate=/^https?:\/\//i.test(raw)?raw:`https://${raw}`;
   try{const url=new URL(candidate);return ["http:","https:"].includes(url.protocol)&&url.hostname?url.href:null}catch{return null}
+}
+function toolNameFromUrl(value){
+  const normalized=normalizeHttpUrl(value);if(!normalized)return "tool";
+  try{const host=new URL(normalized).hostname.replace(/^www\./,"").toLowerCase();if(host.includes("chatgpt")||host.includes("openai"))return "ChatGPT";if(host.includes("claude"))return "Claude";if(host.includes("gemini")||host.includes("google.com"))return "Gemini";if(host.includes("canva"))return "Canva";if(host.includes("perplexity"))return "Perplexity";return host.split(".")[0]?.replace(/^./,c=>c.toUpperCase())||"tool"}catch{return "tool"}
+}
+function updateToolActionLabels(){
+  const value=$("promptToolUrl")?.value||"",name=toolNameFromUrl(value),valid=normalizeHttpUrl(value);
+  if($("openToolUseBtn")){$("openToolUseBtn").textContent=`Copia e apri ${name}`;$("openToolUseBtn").classList.toggle("hidden",!valid)}
+  if($("openToolBtn"))$("openToolBtn").textContent=`Copia e apri ${name}`;
 }
 function validHttpUrl(value){return !String(value||"").trim()||Boolean(normalizeHttpUrl(value))}
 function problemPriorityRank(priority){return {Bloccante:0,Alta:1,Media:2,Bassa:3,Informativa:4}[priority]??9}
@@ -1965,85 +2112,62 @@ function stateDescriptor(stateName){
 }
 
 
+function activeAdvancedFilterCount(){
+  const f=state.advancedFilters||{};
+  return [f.category,f.client,f.status,f.usage,f.withVariables,f.withFiles,f.duplicates].filter(Boolean).length;
+}
+function homePromptShortcut(prompt,label){
+  const category=catById(prompt.subcategoryId)||catById(prompt.categoryId);
+  return `<button class="home-prompt-shortcut" type="button" data-home-prompt="${esc(prompt.id)}"><strong>${esc(prompt.title||"Senza titolo")}</strong><small>${esc(label||category?.name||"Prompt")}</small></button>`;
+}
+function renderSearchSuggestions(){
+  const list=$("searchSuggestions");if(!list)return;
+  const seen=new Set(),values=[];
+  const add=value=>{const clean=String(value||"").trim();if(!clean||seen.has(normalize(clean)))return;seen.add(normalize(clean));values.push(clean)};
+  livePrompts().slice().sort((a,b)=>(b.usageCount||0)-(a.usageCount||0)).slice(0,45).forEach(p=>add(p.title));
+  state.clients.slice(0,20).forEach(x=>add(x.name));rootCategoriesAlphabetical().slice(0,20).forEach(x=>add(x.name));
+  list.innerHTML=values.slice(0,70).map(value=>`<option value="${esc(value)}"></option>`).join("");
+}
 function renderStats(){
-  const visible=state.filter.type==="all"&&!state.query;
-  $("stats").classList.toggle("hidden",!visible);$("stats").classList.toggle("dashboard-grid",visible);if(!visible)return;
-  const s=workflowSnapshot(),recommendation=recommendedWorkflowAction(s);
-  const actionableProblemCount=s.problems.filter(problem=>problem.priority!=="Informativa").length;
-  const problemState=!s.hasPrompts?"Nessun risultato":s.blocking?"Errore":actionableProblemCount?"Correzione disponibile":s.problems.length?"Completato con avvisi":"Tutto corretto";
-  const stepCards=[
-    {action:"configure",step:"Step 1",tone:"blue",icon:"\u2699",title:"Configura la libreria",description:"Gestisci categorie, sottocategorie, clienti, GPTSites, progetti, SEO e tipologie personalizzate.",state:s.configured?"Tutto corretto":"Configurazione incompleta",count:`${state.categories.length} categorie · ${state.clients.length} clienti · ${state.gptsites.length} GPTSites · ${state.projects.length} progetti · ${state.seo.length} SEO · ${state.customTypes.length} tipologie personalizzate`,next:s.configured?"Crea o importa un prompt":"Completa la struttura",className:s.configured?"completed":""},
-    {action:"new",step:"Step 2",tone:"cyan",icon:"\uFF0B",title:"Crea un prompt",description:"Inserisci titolo, contenuto e dati organizzativi.",state:s.hasPrompts?"Analisi completata":"Pronto",count:`${s.live.length} prompt attivi`,next:"Alternativa: importa un archivio JSON",className:s.hasPrompts?"completed":""},
-    {action:"import",step:"Alternativa",tone:"cyan",icon:"\u21E7",title:"Importa prompt o archivio",description:"Acquisisci un singolo prompt o un archivio JSON completo.",state:"Pronto",count:"JSON compatibile",next:"Controlla problemi e organizzazione",className:""},
-    {action:"organize",step:"Step 3",tone:s.uncategorized?"orange":"green",icon:"\uD83D\uDDC2",title:"Organizza la libreria",description:"Assegna categorie e clienti ai prompt ancora da ordinare.",state:!s.hasPrompts?"Bloccato":s.uncategorized?"Correzione disponibile":"Tutto corretto",count:!s.hasPrompts?"Richiede almeno un prompt":`${s.uncategorized} da organizzare`,next:!s.hasPrompts?"Vai allo Step 2":"Controlla i problemi rilevati",className:!s.hasPrompts?"blocked":s.uncategorized?"":"completed",blocked:!s.hasPrompts},
-    {action:"problems",step:"Controllo",tone:s.blocking?"red":actionableProblemCount?"orange":s.problems.length?"yellow":"green",icon:"!",title:"Problemi rilevati",description:"Controlla anomalie, priorit\u00E0, cause e soluzioni collegate.",state:problemState,count:`${s.problems.length} attivi \u00B7 ${s.blocking} bloccanti`,next:actionableProblemCount?"Apri il problema e correggi i dati":s.problems.length?"Consulta gli avvisi informativi":"Prosegui con la verifica",className:!s.hasPrompts?"blocked":actionableProblemCount?"":"completed",blocked:!s.hasPrompts},
-    {action:"library",step:"Step 4",tone:"gray",icon:"\u2315",title:"Cerca e seleziona",description:"Cerca per titolo, contenuto, categoria, tag, tipologia, cliente, progetto, SEO o note.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.live.length} disponibili`,next:s.hasPrompts?"Compila le variabili":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
-    {action:"variables",step:"Step 5",tone:"purple",icon:"\u270E",title:"Compila le variabili",description:"Apri un prompt e completa i campi rilevati automaticamente.",state:s.hasPrompts?"Pronto":"Bloccato",count:`${s.variables} variabili rilevate`,next:s.hasPrompts?"Controlla file e anteprima":"Richiede almeno un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
-    {action:"files",step:"Step 6",tone:s.missingRequiredFiles?"orange":s.requiredFiles?"green":"cyan",icon:"\uD83D\uDCCE",title:"Carica i file richiesti",description:"Gestisci documenti e file incorporati nelle variabili.",state:!s.hasPrompts?"Bloccato":s.missingRequiredFiles?"Verifica necessaria":s.requiredFiles?"Tutto corretto":"Pronto",count:s.requiredFiles?`${s.requiredFiles-s.missingRequiredFiles}/${s.requiredFiles} file obbligatori compilati`:`${s.attachments} file incorporati`,next:!s.hasPrompts?"Richiede almeno un prompt":s.missingRequiredFiles?"Completa i file obbligatori":"Verifica il prompt",className:!s.hasPrompts?"blocked":s.missingRequiredFiles?"":"completed",blocked:!s.hasPrompts},
-    {action:"verify",step:"Step 7",tone:s.review?"yellow":"green",icon:"\u2713",title:"Verifica il prompt",description:"Controlla anteprima, variabili vuote e stato del contenuto.",state:!s.hasPrompts?"Bloccato":s.review?"Verifica necessaria":"Tutto corretto",count:s.hasPrompts?`${s.review} in revisione`:"Nessun risultato",next:!s.hasPrompts?"Crea o importa prima un prompt":"Copia e utilizza",className:!s.hasPrompts?"blocked":s.review?"":"completed",blocked:!s.hasPrompts},
-    {action:"use",step:"Step 8",tone:"green",icon:"\u29C9",title:"Copia e utilizza",description:"Copia il prompt compilato oppure apri il tool associato.",state:s.hasPrompts&&s.blocking===0?"Pronto":s.hasPrompts?"Bloccato":"Nessun risultato",count:s.hasPrompts?"Prompt disponibili":"Nessun prompt",next:s.blocking?"Risolvi prima i problemi bloccanti":"Salva gli eventuali aggiornamenti",className:s.hasPrompts&&s.blocking===0?"":"blocked",blocked:!s.hasPrompts||s.blocking>0},
-    {action:"export",step:"Step 9",tone:"charcoal",icon:"\u21E9",title:"Esporta e crea backup",description:"Scarica l\u2019archivio completo o un backup di sicurezza.",state:s.hasPrompts?"Pronto":"Bloccato",count:s.hasPrompts?`${s.live.length} prompt \u00B7 ${s.attachments} file`:"Nessun dato da esportare",next:s.hasPrompts?"Conserva il file in un luogo sicuro":"Crea o importa prima un prompt",className:s.hasPrompts?"":"blocked",blocked:!s.hasPrompts},
-    {action:"diagnostics",step:"Assistenza",tone:"charcoal",icon:"\uD83D\uDEE0",title:"Diagnostica e informazioni",description:"Consulta ambiente, eventi, problemi risolti e contatori.",state:s.problems.length?"Completato con avvisi":"Tutto corretto",count:`Versione ${APP_VERSION}`,next:"Esporta un report per l\u2019assistenza",className:s.problems.length?"":"completed"}
-  ];
-  const recent=s.live.filter(item=>dateTimestamp(item.lastUsedAt)>0).sort((a,b)=>dateTimestamp(b.lastUsedAt)-dateTimestamp(a.lastUsedAt)||naturalTitleCompare(a,b)).slice(0,4);
-  const recentHtml=recent.length?recent.map(item=>'<button class="btn small" type="button" data-recent-prompt="'+esc(item.id)+'">'+esc(item.title||"Senza titolo")+'</button>').join(""):'<span class="hint">Nessun prompt ancora utilizzato.</span>';
-  $("stats").innerHTML=`<div class="home-actions"><section class="home-primary"><h3>Che cosa vuoi fare?</h3><p>Cerca un prompt e usalo subito. Le funzioni di gestione restano disponibili nel menu \u22EF.</p><input class="search" id="dashboardSearch" type="search" placeholder="Cosa devi fare? Es. audit SEO, articolo, social\u2026"><div class="home-quick-actions"><button class="btn primary" type="button" data-home-action="search">Cerca un prompt</button><button class="btn" type="button" data-home-action="new">Crea nuovo prompt</button></div></section><section class="home-secondary"><h3>Usati di recente</h3><div class="recent-strip">${recentHtml}</div></section></div><div class="workflow-overview" id="workflow-overview"><section class="dashboard-intro" aria-labelledby="workflowTitle"><div class="dashboard-intro-head"><div><h3 id="workflowTitle" tabindex="-1">Percorso guidato della libreria</h3><p>Stati e contatori sono ricalcolati dai dati memorizzati nel browser.</p></div><span class="dashboard-progress-label">${s.completed} di ${s.total} fasi principali \u00B7 ${s.percent}%</span></div><div class="workflow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.percent}" aria-label="Completamento del percorso"><span style="--progress:${s.percent}%"></span></div><div class="workflow-summary"><span class="workflow-chip">\u2713 ${s.completed} completate</span><span class="workflow-chip">${s.problems.length} problemi attivi</span><span class="workflow-chip">${s.blocking} bloccanti</span><span class="workflow-chip">${s.live.length} prompt attivi</span></div></section><aside class="recommended-action" aria-labelledby="recommendedTitle"><div class="recommended-head"><span class="recommended-icon">${recommendation.icon}</span><div><h3 id="recommendedTitle">Prossima azione consigliata</h3><strong>${recommendation.title}</strong></div><span class="priority-badge">Priorit\u00E0 ${recommendation.priority}</span></div><p>${recommendation.reason}</p><div class="recommended-meta"><span class="workflow-chip">${recommendation.count}</span><span class="workflow-chip">${recommendation.after}</span></div><button class="btn primary" type="button" data-recommended-action="${recommendation.action}">Apri il passaggio consigliato</button></aside></div><div class="workflow-legend" aria-label="Legenda stati"><span class="legend-item"><span class="legend-dot" style="--legend:#15803d"></span>Tutto corretto</span><span class="legend-item"><span class="legend-dot" style="--legend:#2563eb"></span>Pronto</span><span class="legend-item"><span class="legend-dot" style="--legend:#c2410c"></span>Correzione disponibile</span><span class="legend-item"><span class="legend-dot" style="--legend:#b91c1c"></span>Errore o blocco</span></div>${stepCards.map(card=>{const controls={configure:"manageModal",new:"editorModal",import:"importInput",organize:"cards",problems:"choiceModal",library:"cards",variables:"editorModal",files:"editorModal",verify:"editorModal",use:"editorModal",export:"exportBtn",diagnostics:"choiceModal"}[card.action];const [stateIcon,stateLevel]=stateDescriptor(card.state);return `<button type="button" class="dashboard-card ${card.tone} ${card.className}" data-dash-action="${card.action}" id="dashboard-${card.action}" aria-controls="${controls}" aria-disabled="${card.blocked?"true":"false"}"><span class="dash-top"><span class="dash-icon" aria-hidden="true">${card.icon}</span><span class="dash-step">${card.step}</span></span><strong>${card.title}</strong><p>${card.description}</p><span class="dash-meta"><span class="dash-state" data-level="${stateLevel}">${stateIcon} ${card.state}</span><span class="dash-count">${card.count}</span><span class="dash-next"><strong>Passaggio successivo:</strong> ${card.next}</span></span></button>`}).join("")}`;
-  $$('[data-dash-action]').forEach(button=>button.onclick=()=>performDashboardAction(button.dataset.dashAction));
-  $('[data-recommended-action]')?.addEventListener('click',event=>performDashboardAction(event.currentTarget.dataset.recommendedAction));
-  $('[data-home-action="new"]')?.addEventListener('click',()=>openEditor());
-  $('[data-home-action="search"]')?.addEventListener('click',()=>{const q=$('dashboardSearch')?.value||'';$('globalSearch').value=q;state.query=q;renderStats();renderCards();setTimeout(()=>$('cards').scrollIntoView({behavior:'smooth',block:'start'}),40)});
-  $('dashboardSearch')?.addEventListener('keydown',event=>{if(event.key==='Enter')$('[data-home-action="search"]')?.click()});
-  $$('[data-recent-prompt]').forEach(button=>button.onclick=()=>openEditor(button.dataset.recentPrompt,'variables','use'));
-  const hashAction=location.hash.match(/^#step-(.+)$/)?.[1];if(hashAction)highlightDashboardCard(hashAction);
+  const visible=state.filter.type==="all"&&!state.query&&!activeAdvancedFilterCount();
+  const stats=$("stats");
+  stats.className=visible?"stats simple-home":"stats hidden";
+  if(!visible){stats.innerHTML="";return}
+  const live=livePrompts();
+  const favorites=live.filter(p=>p.favorite||p.pinned).sort((a,b)=>(b.usageCount||0)-(a.usageCount||0)||dateTimestamp(b.lastUsedAt)-dateTimestamp(a.lastUsedAt)).slice(0,3);
+  const recent=live.filter(p=>dateTimestamp(p.lastUsedAt)>0).sort((a,b)=>dateTimestamp(b.lastUsedAt)-dateTimestamp(a.lastUsedAt)).slice(0,3);
+  const favoriteHtml=favorites.length?favorites.map(p=>homePromptShortcut(p,catById(p.subcategoryId)?.name||catById(p.categoryId)?.name||"Preferito")).join(""):'<div class="home-empty">Aggiungi una stella ai prompt che vuoi ritrovare subito.</div>';
+  const recentHtml=recent.length?recent.map(p=>homePromptShortcut(p,"Usato "+formatDate(p.lastUsedAt))).join(""):'<div class="home-empty">I prompt che utilizzi compariranno qui.</div>';
+  stats.innerHTML=`<div class="home-simple">
+    <section class="home-search-panel"><h3>Trova il prompt giusto</h3><p>Cerca per titolo, argomento, cliente o parola contenuta nel prompt.</p><div class="home-search-row"><input class="search" id="dashboardSearch" type="search" list="searchSuggestions" autocomplete="off" placeholder="Es. audit SEO, Chirurgia Zirafa, landing page…" aria-label="Cerca un prompt"><button class="btn primary" type="button" data-home-action="search">Cerca</button></div></section>
+    <section class="home-section"><div class="home-section-head"><h3>Preferiti</h3><button class="btn small" type="button" data-home-filter="favorites">Vedi tutti</button></div><div class="home-prompt-strip">${favoriteHtml}</div></section>
+    <section class="home-section"><div class="home-section-head"><h3>Usati di recente</h3><button class="btn small" type="button" data-home-filter="recent">Vedi tutti</button></div><div class="home-prompt-strip">${recentHtml}</div></section>
+  </div>`;
+  $("dashboardSearch")?.addEventListener("keydown",event=>{if(event.key==="Enter")$('[data-home-action="search"]')?.click()});
+  $('[data-home-action="search"]')?.addEventListener("click",()=>{const q=$("dashboardSearch")?.value.trim()||"";$("globalSearch").value=q;state.query=q;resetRenderLimit();render();setTimeout(()=>$("cards")?.scrollIntoView({behavior:"smooth",block:"start"}),40)});
+  $$('[data-home-prompt]').forEach(button=>button.onclick=()=>openEditor(button.dataset.homePrompt,"variables","use"));
+  $$('[data-home-filter]').forEach(button=>button.onclick=()=>setFilter(button.dataset.homeFilter));
 }
 
-
-
 function cardHtml(prompt){
-  const mainCategory=catById(prompt.categoryId);
-  const subcategory=catById(prompt.subcategoryId);
-  const category=subcategory||mainCategory;
-  const categoryPath=mainCategory&&subcategory
-    ? `${mainCategory.name} \u203A ${subcategory.name}`
-    : (category?.name||"Senza categoria");
-  const client=clientById(prompt.clientId);
-  const project=projectById(prompt.projectId);
-  const gptSite=gptSiteById(prompt.gptSiteId);
-  const seoItem=seoById(prompt.seoId);
-  const accent=categoryColor(category);
-  const origins=[];
-  if(category)origins.push(`<span class="prompt-origin-item category">Categoria: ${esc(categoryPath)}</span>`);
-  if(client)origins.push(`<span class="prompt-origin-item">Cliente: ${esc(client.name)}</span>`);
-  if(project)origins.push(`<span class="prompt-origin-item">Progetto: ${esc(project.name)}</span>`);
-  if(gptSite)origins.push(`<span class="prompt-origin-item">GPTSites: ${esc(gptSite.name)}</span>`);
-  if(seoItem)origins.push(`<span class="prompt-origin-item">SEO: ${esc(seoItem.name)}</span>`);
-  Object.entries(prompt.customAssignments||{}).forEach(([typeId])=>{const type=customTypeById(typeId);customAssignmentValues(prompt,typeId).forEach(entityId=>{const entity=customEntityById(entityId);if(type&&entity)origins.push(`<span class="prompt-origin-item">${esc(type.name)}: ${esc(entity.name)}</span>`)})});
-  if(!origins.length)origins.push('<span class="prompt-origin-item empty">Non assegnato</span>');
-  const statuses={draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"};
-  const variableCount=cachedPromptMeta(prompt).variables.length;
-  const attachmentCount=promptAttachmentCount(prompt);
-  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0">
-    <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""}>
-    <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite?'<span class="star">\u2605</span>':""}</div>
-    <div class="prompt-origin" aria-label="Origine del prompt"><span class="prompt-origin-label">Origine:</span><div class="prompt-origin-items">${origins.join("")}</div></div>
-    <div class="prompt-intro-card"><strong>Cosa fa questo prompt <span class="intro-card-badge">${normalizedIntroSource(prompt)==="auto"?"AUTO":"PERSONALE"}</span></strong>${esc(promptIntroText(prompt))}</div>
-    <div class="excerpt">${esc(prompt.content||"Nessun contenuto")}</div>
-    <div class="meta">
-      ${category?`<span class="chip accent">${esc(category.name)}</span>`:'<span class="chip">Senza categoria</span>'}
-      ${client?`<span class="chip">Cliente: ${esc(client.name)}</span>`:""}
-      ${project?`<span class="chip">Progetto: ${esc(project.name)}</span>`:""}
-      ${gptSite?`<span class="chip">GPTSites: ${esc(gptSite.name)}</span>`:""}
-      ${seoItem?`<span class="chip">SEO: ${esc(seoItem.name)}</span>`:""}
-      ${Object.entries(prompt.customAssignments||{}).flatMap(([typeId])=>{const type=customTypeById(typeId);return customAssignmentValues(prompt,typeId).map(entityId=>{const entity=customEntityById(entityId);return type&&entity?`<span class="chip">${esc(type.name)}: ${esc(entity.name)}</span>`:""})}).join("")}
-      ${variableCount?`<span class="chip">${variableCount} variabil${variableCount===1?"e":"i"}</span>`:""}
-      ${attachmentCount?`<span class="chip">${attachmentCount} file allegat${attachmentCount===1?"o":"i"}</span>`:""}
-      <span class="chip">${esc(statuses[prompt.status]||prompt.status)}</span><span class="chip">${formatDate(prompt.updatedAt)}</span>
-    </div>
+  const mainCategory=catById(prompt.categoryId),subcategory=catById(prompt.subcategoryId),category=subcategory||mainCategory;
+  const client=clientById(prompt.clientId),accent=categoryColor(category),variableCount=cachedPromptMeta(prompt).variables.length,attachmentCount=promptAttachmentCount(prompt);
+  const context=[];
+  if(category)context.push(`<span class="chip accent">${esc(category.name)}</span>`);
+  if(client)context.push(`<span class="chip">${esc(client.name)}</span>`);
+  if(variableCount)context.push(`<span class="chip field-count">${variableCount} camp${variableCount===1?"o":"i"}</span>`);
+  if(attachmentCount)context.push(`<span class="chip">${attachmentCount} allegat${attachmentCount===1?"o":"i"}</span>`);
+  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0" aria-label="${esc(prompt.title||"Senza titolo")}">
+    <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""} aria-label="Seleziona ${esc(prompt.title||"prompt")}">
+    <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite||prompt.pinned?'<span class="star" aria-label="Preferito">★</span>':""}</div>
+    <div class="card-purpose">${esc(promptIntroText(prompt)||"Apri il prompt per visualizzare e compilare i campi richiesti.")}</div>
+    <div class="card-context">${context.join("")||'<span class="chip">Senza categoria</span>'}</div>
     <div class="card-actions">
-      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina</button>':`<button class="btn small primary use-card">\u25B6 Usa prompt</button><button class="btn small edit-card" title="Modifica questo prompt">\u270E Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni">\u22EF</button><div class="card-menu-panel"><button class="btn small pin-card ${prompt.pinned?"active":""}">${prompt.pinned?"Sblocca":"Pinna"}</button><button class="btn small copy-card">Copia sorgente</button><button class="btn small move-prompt-card">Sposta tra sezioni</button><button class="btn small copy-prompt-card">Copia tra sezioni</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
+      ${prompt.deletedAt?'<button class="btn small restore-card">Ripristina</button><button class="btn small danger delete-card">Elimina definitivamente</button>':`<button class="btn small primary use-card">Usa prompt</button><button class="btn small edit-card">Modifica</button><div class="card-menu"><button class="btn small card-menu-toggle" type="button" aria-label="Altre azioni per ${esc(prompt.title||"prompt")}">⋯</button><div class="card-menu-panel"><button class="btn small favorite-card">${prompt.favorite||prompt.pinned?"Rimuovi dai preferiti":"Aggiungi ai preferiti"}</button><button class="btn small copy-card">Copia subito</button><button class="btn small archive-card">Archivia</button><button class="btn small move-prompt-card">Sposta tra sezioni</button><button class="btn small copy-prompt-card">Copia tra sezioni</button><button class="btn small duplicate-card">Duplica</button><button class="btn small danger trash-card">Cestina</button></div></div>`}
     </div>
   </article>`;
 }
+
 function rootCategoryForPrompt(prompt){
   const direct=catById(prompt.categoryId);
   const sub=catById(prompt.subcategoryId);
@@ -2105,6 +2229,8 @@ function renderCards(){
   $("viewSubtitle").textContent=state.query?`${allItems.length} risultati per “${state.query}”`:`${subtitle} · ${allItems.length} elementi`;
   bindCardEvents();
   updateBulkbar();
+  renderFilterStrip(allItems.length);
+  renderSearchSuggestions();
   renderProgressiveFooter(allItems.length,items.length);
 
   if(state.lastSavedId){
@@ -2128,17 +2254,15 @@ function render(){
 function bindCardEvents(){
   $$("#cards .card").forEach(card=>{
     const id=card.dataset.id;
-    card.onclick=event=>{
-      if(event.target.closest("button,input"))return;
-      openEditor(id);
-    };
-    card.onkeydown=event=>{if(event.target.closest("button,input,select,textarea,a"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id)}};
+    card.onclick=event=>{if(event.target.closest("button,input"))return;openEditor(id,"variables","use")};
+    card.onkeydown=event=>{if(event.target.closest("button,input,select,textarea,a"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(id,"variables","use")}};
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
-    card.querySelector(".use-card")?.addEventListener("click",()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const vars=cachedPromptMeta(prompt).variables;if(!vars.length&&!normalizeHttpUrl(prompt.toolUrl||"")){quickCopy(id)}else openEditor(id,"variables","use")});
+    card.querySelector(".use-card")?.addEventListener("click",()=>openEditor(id,"variables","use"));
     card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
-    card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();event.currentTarget.closest('.card-menu').classList.toggle('open')});
-    card.querySelector(".pin-card")?.addEventListener("click",async()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;await put("prompts",{...prompt,pinned:!prompt.pinned,updatedAt:now()});await loadData();render();toast(prompt.pinned?"Prompt sbloccato.":"Prompt pinnato.","success")});
-    card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopy(id));
+    card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();const menu=event.currentTarget.closest('.card-menu');$$('.card-menu.open').filter(x=>x!==menu).forEach(x=>x.classList.remove('open'));menu.classList.toggle('open')});
+    card.querySelector(".favorite-card")?.addEventListener("click",async()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const next=!(prompt.favorite||prompt.pinned);await put("prompts",{...prompt,favorite:next,pinned:false,updatedAt:now()});await loadData();render();toast(next?"Prompt aggiunto ai preferiti.":"Prompt rimosso dai preferiti.","success")});
+    card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopyCompiled(id));
+    card.querySelector(".archive-card")?.addEventListener("click",()=>archivePrompt(id));
     card.querySelector(".move-prompt-card")?.addEventListener("click",()=>openPromptTransferDialog([id],"move"));
     card.querySelector(".copy-prompt-card")?.addEventListener("click",()=>openPromptTransferDialog([id],"copy"));
     card.querySelector(".duplicate-card")?.addEventListener("click",()=>duplicatePrompt(id));
@@ -2147,6 +2271,7 @@ function bindCardEvents(){
     card.querySelector(".delete-card")?.addEventListener("click",()=>deletePrompt(id));
   });
 }
+
 function updateBulkbar(){
   $("selectedCount").textContent=state.selected.size;
   $("bulkbar").classList.toggle("show",state.selected.size>0);
@@ -2304,56 +2429,44 @@ function refreshVariables(renderNow=true){
 function syncVariableInputs(){
   $$("#variableList .variable-input").forEach(input=>state.editor.values[input.dataset.var]=input.value);
 }
-function variableCardHtml(def,index){
-  const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length];
-  const value=valueFor(state.editor.values,def.name);
-  const file=state.editor.files[def.name];
-  const fileText=file?`${file.name} \u00B7 ${formatBytes(file.size)}${file.base64?" \u00B7 salvato nell\u2019app":" \u00B7 non incorporato"}${file.textExtracted?" \u00B7 testo importato":""}`:"Nessun file selezionato.";
-  const recent=(state.recentValues[def.name]||[]).slice(0,5);
-  const textInput=`<textarea class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="${def.fileLike?"Oppure inserisci un URL, un percorso o una nota manuale\u2026":`Inserisci ${esc(def.label||humanize(def.name))}\u2026`}">${esc(value)}</textarea>
-      <div class="validation-error hidden" data-error-for="${esc(def.name)}"></div>`;
-  const quickValues=recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"\u2026":item)}</button>`).join("")}</div></div>`:"";
-  const filePanel=def.fileLike?`<div class="file-panel file-panel-primary">
-        <div class="file-zone">
-          <div class="file-drop" data-var="${esc(def.name)}">
-            <input class="variable-file" data-var="${esc(def.name)}" type="file">
-            <div class="file-drop-icon">\u21E7</div>
-            <strong>${file?"File caricato":"Carica il file dal computer"}</strong>
-            <div class="file-drop-help">Trascinalo in quest\u2019area oppure usa il pulsante.</div>
-            <div class="file-actions">
-              <button class="btn primary choose-file" type="button">${file?"Sostituisci file":"Scegli file"}</button>
-              ${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica</button>`:""}
-              ${file?`<button class="btn small danger remove-file" type="button" data-var="${esc(def.name)}">Rimuovi</button>`:""}
-            </div>
-            <div class="file-status ${file?"has-file":""}">${esc(fileText)}</div>
-          </div>
-          <div class="hint" style="margin-top:8px">Sono supportati CSV, XLSX, ZIP, PDF, DOCX, TXT, JSON, immagini e altri formati. I file fino a 20 MB vengono conservati nel prompt e nel backup.</div>
-        </div>
-      </div>`:"";
-  return `<article class="variable-card" style="--var-accent:${accent}" data-var="${esc(def.name)}">
-    <div class="variable-card-head">
-      <span class="variable-number">${def.icon} Campo ${index+1}</span>
-      <span class="variable-token">${esc(def.raw)}</span>
-      <span class="variable-badge">${def.optional?"Opzionale \u00B7 ":""}${def.fileLike?"Caricamento file":"Campo testo"}</span>
-    </div>
-    <div class="variable-card-body">
-      <h4>${def.fileLike?"Carica":"Inserisci"} ${esc(def.label||humanize(def.name))}</h4>
-      <p class="variable-help">${def.fileLike?`Il file selezionato verr\u00E0 associato a <strong>${esc(def.raw)}</strong> e salvato insieme al prompt.`:`Questo valore sostituir\u00E0 automaticamente <strong>${esc(def.raw)}</strong> nel prompt finale.`}</p>
-      ${filePanel}
-      ${def.fileLike?'<div class="manual-file-value"><label>In alternativa, inserisci un riferimento manuale</label>':''}
-      ${textInput}
-      ${def.fileLike?'</div>':''}
-      ${quickValues}
-    </div>
-  </article>`;
+function variableGuidance(def){
+  const raw=normalize(`${def.name||""} ${def.label||""} ${def.nearby||""}`),fallback=def.label||humanize(def.name);
+  if(def.fileLike){
+    if(/(gsc|search console|query)/.test(raw))return {title:"Report query di Google Search Console",help:"Carica il CSV esportato da Search Console. Il file resta conservato in Prompt Studio.",example:"Es. query-search-console.csv"};
+    if(/sitemap/.test(raw))return {title:"Sitemap o elenco URL",help:"Carica il file da analizzare oppure inserisci un URL o un riferimento manuale.",example:"Es. sitemap.xml"};
+    if(/(crawl|screaming frog)/.test(raw))return {title:"Report di crawl",help:"Carica il file esportato dal crawler utilizzato per l’analisi.",example:"Es. internal_all.csv"};
+    return {title:fallback.replace(/^File\s+/i,"")||"File da analizzare",help:"Carica il file richiesto. Prompt Studio lo conserva insieme al prompt; i file binari vanno allegati anche nella chat del tool.",example:"Scegli un file oppure inserisci un riferimento manuale"};
+  }
+  if(def.inputType==="url")return {title:fallback,help:"Inserisci l’indirizzo completo della pagina o del sito.",example:"Es. https://www.esempio.it/"};
+  if(def.inputType==="email")return {title:fallback,help:"Inserisci un indirizzo email valido.",example:"Es. nome@azienda.it"};
+  if(/cliente|client/.test(raw))return {title:"Nome del cliente",help:"Inserisci il nome del cliente o del brand a cui si riferisce il prompt.",example:"Es. Studio Dentistico Zirafa"};
+  if(/keyword|parola chiave|query/.test(raw))return {title:fallback,help:"Inserisci la keyword o la query da utilizzare nel prompt.",example:"Es. chirurgia orale Bergamo"};
+  if(/lingua|language/.test(raw))return {title:"Lingua",help:"Indica la lingua in cui vuoi ottenere il risultato.",example:"Es. Italiano"};
+  if(/obiettivo|goal/.test(raw))return {title:"Obiettivo",help:"Descrivi in modo sintetico il risultato che vuoi ottenere.",example:"Es. aumentare i contatti dalla landing page"};
+  return {title:fallback,help:`Questo valore sostituirà ${def.raw} nel prompt finale.`,example:`Inserisci ${fallback.toLowerCase()}…`};
 }
+function variableCardHtml(def,index){
+  const accent=VARIABLE_COLORS[index%VARIABLE_COLORS.length],value=valueFor(state.editor.values,def.name),file=state.editor.files[def.name],guide=variableGuidance(def),inputId=`variableInput_${index}`;
+  const fileText=file?`${file.name} · ${formatBytes(file.size)}${file.base64?" · salvato nell’app":" · non incorporato"}${file.textExtracted?" · testo importato":""}`:"Nessun file selezionato.";
+  const recent=(state.recentValues[def.name]||[]).slice(0,5),emptyRequired=!def.optional&&!String(value||"").trim();
+  const textInput=`<label class="${def.fileLike?"":"sr-only"}" for="${inputId}">${esc(guide.title)}</label><textarea id="${inputId}" class="variable-input" data-var="${esc(def.name)}" data-type="${esc(def.inputType)}" placeholder="${esc(guide.example)}">${esc(value)}</textarea>
+      <div class="validation-error hidden" data-error-for="${esc(def.name)}"></div><div class="variable-empty-note ${emptyRequired?"show":""}" data-empty-for="${esc(def.name)}">Se lo lasci vuoto, il segnaposto ${esc(def.raw)} resterà nel prompt.</div>`;
+  const quickValues=recent.length?`<div class="quick-values"><div class="quick-values-title">Valori usati di recente</div><div class="quick-values-list">${recent.map(item=>`<button class="quick-value-chip" type="button" data-var="${esc(def.name)}" data-value="${esc(item)}">${esc(item.length>55?item.slice(0,55)+"…":item)}</button>`).join("")}</div></div>`:"";
+  const binaryWarning=file?.base64&&!file?.textExtracted?`<div class="binary-attachment-warning"><strong>Da allegare anche nel tool:</strong> il file è conservato in Prompt Studio, ma non può essere trasferito automaticamente nella chat. Dopo la copia allegalo manualmente a ChatGPT, Claude o al tool associato.</div>`:"";
+  const filePanel=def.fileLike?`<div class="file-panel file-panel-primary"><div class="file-zone"><div class="file-drop" data-var="${esc(def.name)}"><input class="variable-file" data-var="${esc(def.name)}" type="file" aria-label="Carica ${esc(guide.title)}"><div class="file-drop-icon" aria-hidden="true">⇧</div><strong>${file?"File caricato":"Carica il file dal computer"}</strong><div class="file-drop-help">Trascinalo qui oppure usa il pulsante.</div><div class="file-actions"><button class="btn primary choose-file" type="button">${file?"Sostituisci file":"Scegli file"}</button>${file?.base64?`<button class="btn small download-file" type="button" data-var="${esc(def.name)}">Scarica</button>`:""}${file?`<button class="btn small danger remove-file" type="button" data-var="${esc(def.name)}">Rimuovi</button>`:""}</div><div class="file-status ${file?"has-file":""}">${esc(fileText)}</div></div>${binaryWarning}</div></div>`:"";
+  return `<article class="variable-card" style="--var-accent:${accent}" data-var="${esc(def.name)}"><div class="variable-card-head"><span class="variable-number">${def.icon} Campo ${index+1}</span><span class="variable-token" title="Segnaposto originale">${esc(def.raw)}</span><span class="variable-badge ${def.optional?"":"required"}">${def.optional?"Opzionale":"Obbligatorio"}</span></div><div class="variable-card-body"><h4 class="variable-friendly-title">${esc(guide.title)}</h4><p class="variable-help">${esc(guide.help)}</p>${filePanel}${def.fileLike?'<div class="manual-file-value"><label>Oppure inserisci un riferimento manuale</label>':""}${textInput}${def.fileLike?"</div>":""}${quickValues}</div></article>`;
+}
+function updateUseProgressState(){
+  const defs=state.editor.variables||[],required=defs.filter(def=>!def.optional),completed=required.filter(def=>String(state.editor.values[def.name]||"").trim()).length,missing=required.length-completed;
+  if($("useProgress"))$("useProgress").textContent=required.length?(missing?`${completed} di ${required.length} campi obbligatori compilati · ${missing} da completare`:`${completed} di ${required.length} campi obbligatori compilati · Prompt pronto`):"Nessun campo obbligatorio · Prompt pronto";
+}
+
 function renderVariables(){
   const definitions=state.editor.variables;
   $("variablesTab").textContent=definitions.length?`Variabili (${definitions.length})`:"Variabili";
-  const values=collectVariableValues();
-  const required=definitions.filter(def=>!def.optional);
-  const completedRequired=required.filter(def=>String(values[def.name]??"").trim()).length;
-  if($("useProgress"))$("useProgress").textContent=required.length?`${completedRequired} di ${required.length} campi obbligatori compilati${completedRequired===required.length?" \u00B7 Prompt pronto":""}`:"Nessun campo obbligatorio \u00B7 Prompt pronto";
+  /* Il rendering legge soltanto lo stato: non deve risincronizzare vecchi input DOM. */
+  const values=Object.fromEntries(definitions.map(def=>[def.name,state.editor.values[def.name]||""]));
+  updateUseProgressState();
   $("variableSummary").textContent=definitions.length?`${definitions.length} variabil${definitions.length===1?"e rilevata":"i rilevate"} automaticamente nel prompt.`:"";
   $("variableSummary").classList.toggle("show",definitions.length>0);
   $("variableList").innerHTML=definitions.length?definitions.map(variableCardHtml).join(""):`<div class="variable-empty"><strong>Nessuna variabile individuata.</strong><br>Usa segnaposto come <code>{DOMINIO_SITO}</code>, <code>{{nome_cliente}}</code>, <code>[FILE_DA_ANALIZZARE]</code> oppure <code>(LINGUA)</code>.</div>`;
@@ -2364,7 +2477,8 @@ function renderVariables(){
     const error=$(`[data-error-for="${CSS.escape(input.dataset.var)}"]`);
     if(error){error.textContent=validationMessage;error.classList.toggle("hidden",!validationMessage)}
     input.classList.toggle("missing",Boolean(validationMessage));
-    markDirty();updateCompiledPreview();
+    const emptyNote=$(`[data-empty-for="${CSS.escape(input.dataset.var)}"]`);if(emptyNote)emptyNote.classList.toggle("show",Boolean(definition&&!definition.optional&&!String(input.value||"").trim()));
+    updateUseProgressState();markDirty();updateCompiledPreview();
   }));
   $$("#variableList .quick-value-chip").forEach(button=>button.onclick=()=>{
     const input=$(`#variableList .variable-input[data-var="${CSS.escape(button.dataset.var)}"]`);
@@ -2470,117 +2584,62 @@ function fillSubcategories(selected=""){
   $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptSubcategory").value=selected;
 }
+function applyEditorModeUI(){
+  const prompt=state.editor.id?state.prompts.find(item=>item.id===state.editor.id):null,modal=$("editorModal"),use=state.editor.mode==="use";
+  modal.classList.toggle("use-mode",use);modal.classList.toggle("edit-mode-existing",!use&&!!prompt);modal.classList.toggle("edit-mode-new",!use&&!prompt);
+  $$('[data-editor-mode]').forEach(button=>button.classList.toggle("active",button.dataset.editorMode===state.editor.mode));
+  if($("editorTitle"))$("editorTitle").textContent=use?(prompt?.title||"Usa prompt"):(prompt?`Modifica · ${prompt.title||"Prompt"}`:"Nuovo prompt");
+  if($("savePromptBtn")){$("savePromptBtn").textContent=prompt?"Salvato automaticamente":"Crea prompt";$("savePromptBtn").disabled=!!prompt}
+  $("versionHistoryBtn")?.classList.toggle("hidden",!prompt);
+  updateToolActionLabels();
+}
 function openEditor(id=null,preferredTab=null,mode=null){
   clearTimeout(state.detectTimer);clearTimeout(state.introTimer);
   state.modalReturnFocus.editorBackdrop=document.activeElement;
   const prompt=id?state.prompts.find(item=>item.id===id):null;
-
   let initialPrompt=prompt;
   if(!prompt){
-    initialPrompt={
-      categoryId:null,
-      subcategoryId:null,
-      clientId:null,
-      projectId:null,
-      gptSiteId:null,
-      seoId:null,
-      customAssignments:{},
-      status:"draft",
-      tags:[],
-      notes:"",
-      intro:"",
-      toolUrl:"",
-      favorite:false,
-      variableValues:{},
-      variableFiles:{}
-    };
-
-    if(state.filter.type==="category"&&state.filter.id){
-      const selectedCategory=catById(state.filter.id);
-      if(selectedCategory?.parentId){
-        initialPrompt.categoryId=selectedCategory.parentId;
-        initialPrompt.subcategoryId=selectedCategory.id;
-      }else if(selectedCategory){
-        initialPrompt.categoryId=selectedCategory.id;
-      }
-    }
-
-    if(state.filter.type==="client"&&state.filter.id){
-      initialPrompt.clientId=state.filter.id;
-    }
-    if(state.filter.type==="project"&&state.filter.id){
-      initialPrompt.projectId=state.filter.id;
-    }
-    if(state.filter.type==="gptsite"&&state.filter.id){
-      initialPrompt.gptSiteId=state.filter.id;
-    }
-    if(state.filter.type==="seo"&&state.filter.id){
-      initialPrompt.seoId=state.filter.id;
-    }
-    if(state.filter.type==="custom"&&state.filter.id&&state.filter.typeId){
-      initialPrompt.customAssignments={...(initialPrompt.customAssignments||{}),[state.filter.typeId]:state.filter.id};
-    }
+    initialPrompt={categoryId:null,subcategoryId:null,clientId:null,projectId:null,gptSiteId:null,seoId:null,customAssignments:{},status:"draft",tags:[],notes:"",intro:"",toolUrl:"",favorite:false,variableValues:{},variableFiles:{}};
+    if(state.filter.type==="category"&&state.filter.id){const selectedCategory=catById(state.filter.id);if(selectedCategory?.parentId){initialPrompt.categoryId=selectedCategory.parentId;initialPrompt.subcategoryId=selectedCategory.id}else if(selectedCategory)initialPrompt.categoryId=selectedCategory.id}
+    if(state.filter.type==="client"&&state.filter.id)initialPrompt.clientId=state.filter.id;
+    if(state.filter.type==="project"&&state.filter.id)initialPrompt.projectId=state.filter.id;
+    if(state.filter.type==="gptsite"&&state.filter.id)initialPrompt.gptSiteId=state.filter.id;
+    if(state.filter.type==="seo"&&state.filter.id)initialPrompt.seoId=state.filter.id;
+    if(state.filter.type==="custom"&&state.filter.id&&state.filter.typeId)initialPrompt.customAssignments={...(initialPrompt.customAssignments||{}),[state.filter.typeId]:state.filter.id};
   }
-
-  state.editor={
-    id:prompt?.id||null,
-    dirty:false,
-    variables:[],
-    values:{...(initialPrompt?.variableValues||{})},
-    files:{...(initialPrompt?.variableFiles||{})},
-    toolUrl:initialPrompt?.toolUrl||"",
-    mode:mode||(prompt?"edit":"edit"),
-    introSource:prompt?normalizedIntroSource(initialPrompt):"auto"
-  };
-
-  $("editorTitle").textContent=prompt?(state.editor.mode==="use"?"Usa prompt":"Modifica prompt"):"Nuovo prompt";
-  $("editorModal").classList.toggle("use-mode",state.editor.mode==="use");
-  $$("[data-editor-mode]").forEach(button=>button.classList.toggle("active",button.dataset.editorMode===state.editor.mode));
+  state.editor={id:prompt?.id||null,dirty:false,variables:[],values:{...(initialPrompt?.variableValues||{})},files:{...(initialPrompt?.variableFiles||{})},toolUrl:initialPrompt?.toolUrl||"",mode:mode||(prompt?"edit":"edit"),introSource:prompt?normalizedIntroSource(initialPrompt):"auto",returnScroll:$(".content")?.scrollTop||0};
   $("editorModeSwitch").classList.toggle("hidden",!prompt);
-  $("promptTitle").value=prompt?.title||"";
-  $("promptContent").value=prompt?.content||"";
-  $("promptIntro").value=initialPrompt?.intro||generatePromptIntro(initialPrompt);
-  $("promptStatus").value=initialPrompt?.status||"draft";
-  updateIntroSourceUI();
-  $("promptTags").value=(initialPrompt?.tags||[]).join(", ");
-  $("promptNotes").value=initialPrompt?.notes||"";
-  $("promptToolUrl").value=initialPrompt?.toolUrl||"";
-  $("openToolUseBtn")?.classList.toggle("hidden",!normalizeHttpUrl(initialPrompt?.toolUrl||""));
-  $("promptFavorite").checked=!!initialPrompt?.favorite;
-  $("duplicateBtn").classList.toggle("hidden",!prompt);
-  $("trashBtn").classList.toggle("hidden",!prompt);
-
-  fillEditorSelects(initialPrompt);
-  refreshVariables(false);
-  renderVariables();
-  updateCounts();
-  updatePromptPurposeNote();
+  $("promptTitle").value=prompt?.title||"";$("promptContent").value=prompt?.content||"";$("promptIntro").value=initialPrompt?.intro||generatePromptIntro(initialPrompt);$("promptStatus").value=initialPrompt?.status||"draft";
+  updateIntroSourceUI();$("promptTags").value=(initialPrompt?.tags||[]).join(", ");$("promptNotes").value=initialPrompt?.notes||"";$("promptToolUrl").value=initialPrompt?.toolUrl||"";$("promptFavorite").checked=!!(initialPrompt?.favorite||initialPrompt?.pinned);
+  $("duplicateBtn").classList.toggle("hidden",!prompt);$("trashBtn").classList.toggle("hidden",!prompt);
+  fillEditorSelects(initialPrompt);refreshVariables(false);renderVariables();updateCounts();updatePromptPurposeNote();applyEditorModeUI();
   setEditorTab(state.editor.mode==="use"?"variables":(preferredTab||(state.editor.variables.length?"variables":"prompt")));
-  $("editorBackdrop").classList.add("show");
-
-  setTimeout(()=>{
-    if(state.editor.mode==="use"){
-      const target=$("variableList")?.querySelector(".variable-input,.choose-file,button")||$("copyCompiledBtn");
-      target?.focus({preventScroll:true});
-    }else{
-      (prompt?$("promptContent"):$("promptTitle"))?.focus({preventScroll:true});
-    }
-  },120);
+  $("editorBackdrop").classList.add("show");$(".editor-body")?.scrollTo?.({top:0});
+  const preview=document.querySelector('.use-preview-details');if(preview)preview.open=false;
+  setTimeout(()=>{if(state.editor.mode==="use"){const target=$("variableList")?.querySelector(".variable-input,.choose-file,button")||$("copyCompiledBtn");target?.focus({preventScroll:true})}else{(prompt?$("promptContent"):$("promptTitle"))?.focus({preventScroll:true})}},80);
 }
 function setEditorTab(name){
   $$(".editor-tab").forEach(button=>button.classList.toggle("active",button.dataset.tab===name));
   $$(".editor-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.panel===name));
   if(name==="variables"){refreshVariables(false);renderVariables()}
 }
-function closeEditor(force=false){
+async function closeEditor(force=false){
+  const refreshAfterClose=Boolean(state.editor.id&&state.editor.mode==="edit");
   if(state.editor.dirty&&!force){
-    confirmAction("Modifiche non salvate","Chiudere il prompt senza salvare le modifiche?",()=>closeEditor(true));
-    return;
+    if(state.editor.id&&state.editor.mode==="use"){
+      try{await persistEditorVariables({renderAfter:false});state.editor.dirty=false}catch(error){console.error(error);toast("Non sono riuscito a ricordare i valori inseriti. Riprova prima di chiudere.","error","PS-USE-SAVE");return}
+    }else if(state.editor.id&&state.editor.mode==="edit"){
+      await autosaveEditor();
+      if(state.editor.dirty){confirmAction("Modifiche non salvate","Il salvataggio automatico non è riuscito o il prompt è incompleto. Chiudere senza salvare?",()=>closeEditor(true));return}
+    }else{
+      confirmAction("Prompt non creato","Chiudere senza creare questo prompt?",()=>closeEditor(true));return;
+    }
   }
-  $("editorBackdrop").classList.remove("show");
-  clearTimeout(state.detectTimer);clearTimeout(state.introTimer);clearTimeout(state.autosaveTimer);state.autosaveTimer=null;
-  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit",introSource:"auto"};
+  const returnScroll=state.editor.returnScroll||0;
+  $("editorBackdrop").classList.remove("show");clearTimeout(state.detectTimer);clearTimeout(state.introTimer);clearTimeout(state.autosaveTimer);state.autosaveTimer=null;
+  state.editor={id:null,dirty:false,variables:[],values:{},files:{},toolUrl:"",mode:"edit",introSource:"auto",returnScroll:0};
   const previous=state.modalReturnFocus.editorBackdrop;delete state.modalReturnFocus.editorBackdrop;
+  if(refreshAfterClose){render();if($(".content"))$(".content").scrollTop=returnScroll}else if($(".content"))$(".content").scrollTop=returnScroll;
   if(previous&&document.contains(previous))setTimeout(()=>previous.focus({preventScroll:true}),20);
 }
 function markDirty(){state.editor.dirty=true}
@@ -2648,13 +2707,23 @@ function editorPayload(){
     projectId:document.querySelector('.prompt-entity-select[data-entity-type="project"]')?.value||null,
     gptSiteId:document.querySelector('.prompt-entity-select[data-entity-type="gptsite"]')?.value||null,
     seoId:document.querySelector('.prompt-entity-select[data-entity-type="seo"]')?.value||null,
-    customAssignments:Object.fromEntries($$("#dynamicEditorFields .prompt-entity-select").filter(select=>select.dataset.entityType.startsWith("custom:")).map(select=>[select.dataset.entityType.slice(7),select.value||null])),
+    customAssignments:(()=>{
+      const custom={...(existing?.customAssignments||{})};
+      $$("#dynamicEditorFields .prompt-entity-select")
+        .filter(select=>select.dataset.entityType.startsWith("custom:"))
+        .forEach(select=>{
+          const typeId=select.dataset.entityType.slice(7),type=customTypeById(typeId);
+          const values=[...select.selectedOptions].map(option=>option.value).filter(Boolean);
+          custom[typeId]=type?.multi?values:(values[0]||null);
+        });
+      return custom;
+    })(),
     status:$("promptStatus").value,
     tags:$("promptTags").value.split(",").map(item=>item.trim()).filter(Boolean),
     notes:$("promptNotes").value.trim(),
     toolUrl:$("promptToolUrl").value.trim(),
     favorite:$("promptFavorite").checked,
-    pinned:existing?.pinned||false,
+    pinned:false,
     usageCount:existing?.usageCount||0,
     version:(existing?.version||0)+1,
     variableValues:collectVariableValues(),
@@ -2757,31 +2826,44 @@ async function savePrompt(){
       ? `${catById(payload.categoryId)?.name||""} / ${catById(payload.subcategoryId)?.name||""}`
       : (catById(payload.categoryId)?.name||"Senza categoria");
 
-    closeEditor(true);
-    navigateToSavedPrompt(payload);
-    toast(`Prompt salvato correttamente in \u201C${categoryName}\u201D.`);
+    const returnScroll=state.editor.returnScroll||0;
+    await closeEditor(true);
+    state.lastSavedId=null;
+    render();
+    if($(".content"))$(".content").scrollTop=returnScroll;
+    toast(`Prompt creato correttamente in “${categoryName}”.`,"success");
   }catch(error){
     console.error(error);
     toast(`Errore nel salvataggio: ${error.message}`,"error","PS-SAVE-001");
   }finally{
     state.busy.delete("savePrompt");
     saveButton.disabled=false;
-    saveButton.textContent="Salva prompt";
+    saveButton.textContent="Crea prompt";
     saveStatus.classList.remove("show");
   }
 }
 async function persistEditorVariables({renderAfter=true}={}){
-  if(!state.editor.id)return;
-  const prompt=state.prompts.find(item=>item.id===state.editor.id);if(!prompt)return;
-  const updated={...prompt,variableValues:collectVariableValues(),variableFiles:{...state.editor.files},toolUrl:$("promptToolUrl").value.trim(),updatedAt:now()};
-  await put("prompts",updated);
+  if(!state.editor.id)return null;
+  const variableValues=collectVariableValues(),variableFiles={...state.editor.files},toolUrl=$("promptToolUrl").value.trim();
+  const updated=await updatePromptAtomic(state.editor.id,prompt=>({...prompt,variableValues,variableFiles,toolUrl,updatedAt:now()}));
+  const index=state.prompts.findIndex(item=>item.id===state.editor.id);if(index>=0&&updated)state.prompts[index]=updated;
   if(renderAfter){await loadData();render()}
+  return updated;
 }
 async function recordPromptUse(id,{renderAfter=true}={}){
-  if(!id)return;
-  const prompt=state.prompts.find(item=>item.id===id)||await getOne("prompts",id);if(!prompt)return;
-  const updated={...prompt,usageCount:(prompt.usageCount||0)+1,lastUsedAt:now()};
-  await put("prompts",updated);await loadData();if(renderAfter)render();
+  if(!id)return null;
+  const updated=await updatePromptAtomic(id,prompt=>({...prompt,usageCount:(prompt.usageCount||0)+1,lastUsedAt:now()}));
+  const index=state.prompts.findIndex(item=>item.id===id);if(index>=0&&updated)state.prompts[index]=updated;
+  if(renderAfter){await loadData();render()}
+  return updated;
+}
+async function persistEditorVariablesAndUse({renderAfter=true}={}){
+  if(!state.editor.id)return null;
+  const variableValues=collectVariableValues(),variableFiles={...state.editor.files},toolUrl=$("promptToolUrl").value.trim();
+  const updated=await updatePromptAtomic(state.editor.id,prompt=>({...prompt,variableValues,variableFiles,toolUrl,usageCount:(prompt.usageCount||0)+1,lastUsedAt:now(),updatedAt:now()}));
+  const index=state.prompts.findIndex(item=>item.id===state.editor.id);if(index>=0&&updated)state.prompts[index]=updated;
+  if(renderAfter){await loadData();render()}
+  return updated;
 }
 async function copyCompiled(){
   const copyButton=$("copyCompiledBtn");
@@ -2830,8 +2912,7 @@ async function copyCompiled(){
 
     /* Un eventuale errore di persistenza non deve annullare una copia riuscita. */
     try{
-      await persistEditorVariables({renderAfter:false});
-      if(state.editor.id)await recordPromptUse(state.editor.id,{renderAfter:true});
+      if(state.editor.id)await persistEditorVariablesAndUse({renderAfter:true});
     }catch(error){
       console.error("Copia riuscita, ma salvataggio dei valori non completato:",error);
       toast("Il prompt \u00E8 stato copiato, ma i valori non sono stati salvati nell\u2019archivio.");
@@ -2841,7 +2922,7 @@ async function copyCompiled(){
     toast(`Impossibile copiare: ${error.message||"errore del browser"}`);
   }finally{
     copyButton.disabled=false;
-    copyButton.textContent="Copia prompt compilato";
+    copyButton.textContent="Copia prompt";
   }
 }
 
@@ -2860,6 +2941,20 @@ async function quickCopy(id){
   }
 }
 
+async function quickCopyCompiled(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  try{
+    const compiled=compilePrompt(prompt.content||"",prompt.variableValues||{});await copyText(compiled);await recordPromptUse(prompt.id,{renderAfter:true});
+    const binary=Object.values(prompt.variableFiles||{}).some(file=>file?.base64&&!file?.textExtracted);
+    toast(binary?"Prompt copiato. Ricorda di allegare manualmente anche i file binari nel tool.":"Prompt copiato.",binary?"warning":"success");
+  }catch(error){console.error("Errore durante la copia rapida:",error);toast(`Impossibile copiare: ${error.message||"errore del browser"}`,"error")}
+}
+async function archivePrompt(id){
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const previousStatus=prompt.status||"draft";
+  try{await put("prompts",{...prompt,status:"archived",updatedAt:now()});await loadData();render();toastAction("Prompt archiviato.","Annulla",async()=>{const current=await getOne("prompts",id);if(!current)return;await put("prompts",{...current,status:previousStatus,updatedAt:now()});await loadData();render();toast("Archiviazione annullata.","success")})}
+  catch(error){console.error(error);toast("Impossibile archiviare il prompt.","error","PS-ARCHIVE-001")}
+}
+
 async function duplicatePrompt(id){
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
   const copy={...prompt,id:uid("prompt"),title:`${prompt.title} \u2014 copia`,favorite:false,usageCount:0,lastUsedAt:null,version:1,createdAt:now(),updatedAt:now(),deletedAt:null};
@@ -2869,8 +2964,8 @@ async function duplicatePrompt(id){
   await put("prompts",copy);await loadData();render();toast("Prompt duplicato.");
 }
 async function trashPrompt(id){
-  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
-  try{await put("prompts",{...prompt,deletedAt:now(),updatedAt:now()});await loadData();render();if(state.editor.id===id)closeEditor(true);toast("Prompt spostato nel cestino.","success")}
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const previous={deletedAt:prompt.deletedAt||null,status:prompt.status};
+  try{await put("prompts",{...prompt,deletedAt:now(),updatedAt:now()});await loadData();render();if(state.editor.id===id)await closeEditor(true);toastAction("Prompt spostato nel cestino.","Annulla",async()=>{const current=await getOne("prompts",id);if(!current)return;await put("prompts",{...current,deletedAt:previous.deletedAt,status:previous.status,updatedAt:now()});await loadData();render();toast("Cestinamento annullato.","success")})}
   catch(error){console.error(error);toast(`Impossibile spostare il prompt nel cestino: ${error.message||"errore del database"}.`,"error","PS-TRASH-001")}
 }
 async function restorePrompt(id){
@@ -2881,7 +2976,7 @@ async function restorePrompt(id){
 function deletePrompt(id){
   confirmAction("Eliminazione definitiva","Questa operazione non pu\u00F2 essere annullata.",async()=>{await remove("prompts",id);await loadData();render();toast("Prompt eliminato definitivamente.")});
 }
-async function bulkUpdate(patch){
+async function bulkUpdate(patch,{silent=false}={}){
   const ids=[...state.selected];if(!ids.length)return;
   try{
     const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts");
@@ -2891,11 +2986,20 @@ async function bulkUpdate(patch){
       promptStore.put({...prompt,...patch,updatedAt:stamp});changed++;
     }
     await transactionDone(tx);
-    state.selected.clear();await loadData();render();toast(`${changed} prompt aggiornati.`,"success");
+    state.selected.clear();await loadData();render();if(!silent)toast(`${changed} prompt aggiornati.`,"success");
   }catch(error){console.error(error);toast(`Aggiornamento multiplo non riuscito: ${error.message||"errore del database"}. Nessuna modifica parziale è stata confermata.`,"error","PS-BULK-001")}
 }
 
 
+
+async function bulkArchiveSelected(){
+  const ids=[...state.selected];if(!ids.length)return;const previous=ids.map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean).map(p=>({id:p.id,status:p.status}));
+  await bulkUpdate({status:"archived"},{silent:true});toastAction(`${previous.length} prompt archiviati.`,"Annulla",async()=>{for(const item of previous){const current=await getOne("prompts",item.id);if(current)await put("prompts",{...current,status:item.status,updatedAt:now()})}await loadData();render();toast("Archiviazione annullata.","success")});
+}
+async function bulkTrashSelected(){
+  const ids=[...state.selected];if(!ids.length)return;const previous=ids.map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean).map(p=>({id:p.id,deletedAt:p.deletedAt||null}));
+  await bulkUpdate({deletedAt:now()},{silent:true});toastAction(`${previous.length} prompt spostati nel cestino.`,"Annulla",async()=>{for(const item of previous){const current=await getOne("prompts",item.id);if(current)await put("prompts",{...current,deletedAt:item.deletedAt,updatedAt:now()})}await loadData();render();toast("Cestinamento annullato.","success")});
+}
 
 async function bulkUpdateCustom(typeId,entityId){
   const ids=[...state.selected];if(!ids.length)return;
@@ -3396,8 +3500,7 @@ async function moveCategoryToEntity(id,targetType){
     categoryStore.delete(category.id);
     await transactionDone(tx);
     await loadData();
-    if(targetDefinition.custom)state.filter={type:"custom",typeId:targetDefinition.typeId,id:target.id};
-    else state.filter={type:targetType,id:target.id};
+    state.filter={type:targetType,id:target.id};
     render();renderManage();
     toast(`“${category.name}” spostata in ${targetLabel}.${children.length?` Incluse ${children.length} sottocategorie.`:""}`,"success");
   }catch(error){console.error(error);toast(`Spostamento non riuscito: ${error.message||"errore del database"}.`,"error","PS-CATEGORY-MOVE")}
@@ -3794,11 +3897,14 @@ async function resolveImportedPromptOrganization(bundle,prompt){
   }
   return {...prompt,categoryId,subcategoryId,clientId,projectId,gptSiteId,seoId,customAssignments};
 }
-async function writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,customTypes=[],customEntities=[],prompts}){
-  const tx=state.db.transaction(["prompts","categories","clients","gptsites","projects","seo","customTypes","customEntities"],"readwrite");
-  const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),clientStore=tx.objectStore("clients"),gptSiteStore=tx.objectStore("gptsites"),projectStore=tx.objectStore("projects"),seoStore=tx.objectStore("seo"),customTypeStore=tx.objectStore("customTypes"),customEntityStore=tx.objectStore("customEntities");
+async function writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,customTypes=[],customEntities=[],prompts,collections=[],workflows=[]}){
+  const tx=state.db.transaction(["prompts","categories","clients","gptsites","projects","seo","customTypes","customEntities","settings"],"readwrite");
+  const promptStore=tx.objectStore("prompts"),categoryStore=tx.objectStore("categories"),clientStore=tx.objectStore("clients"),gptSiteStore=tx.objectStore("gptsites"),projectStore=tx.objectStore("projects"),seoStore=tx.objectStore("seo"),customTypeStore=tx.objectStore("customTypes"),customEntityStore=tx.objectStore("customEntities"),settingsStore=tx.objectStore("settings");
   if(mode==="replace"){promptStore.clear();categoryStore.clear();clientStore.clear();gptSiteStore.clear();projectStore.clear();seoStore.clear();customTypeStore.clear();customEntityStore.clear()}
   categories.forEach(item=>categoryStore.put(item));clients.forEach(item=>clientStore.put(item));gptsites.forEach(item=>gptSiteStore.put(item));projects.forEach(item=>projectStore.put(item));seo.forEach(item=>seoStore.put(item));customTypes.forEach(item=>customTypeStore.put(item));customEntities.forEach(item=>customEntityStore.put(item));prompts.forEach(item=>promptStore.put(item));
+  const stamp=now();
+  settingsStore.put({id:"collections",value:Array.isArray(collections)?collections:[],updatedAt:stamp});
+  settingsStore.put({id:"workflows",value:Array.isArray(workflows)?workflows:[],updatedAt:stamp});
   await transactionDone(tx);
 }
 async function importData(file){
@@ -3839,10 +3945,11 @@ async function importData(file){
         const executeImport=async()=>{
           if(state.busy.has("importApply")){toast("L\u2019archivio \u00E8 gi\u00E0 in fase di importazione.","warning","PS-IMPORT-BUSY");return}
           state.busy.add("importApply");
+          let committed=false;
           try{
-            let categories=data.categories.map(item=>({...item})),clients=data.clients.map(item=>({...item})),gptsites=(data.gptsites||[]).map(item=>({...item})),projects=(data.projects||[]).map(item=>({...item})),seo=(data.seo||[]).map(item=>({...item})),customTypes=(data.customTypes||[]).map(item=>({...item})),customEntities=(data.customEntities||[]).map(item=>({...item})),prompts=data.prompts.map(item=>({...item}));
+            let categories=data.categories.map(item=>({...item})),clients=data.clients.map(item=>({...item})),gptsites=(data.gptsites||[]).map(item=>({...item})),projects=(data.projects||[]).map(item=>({...item})),seo=(data.seo||[]).map(item=>({...item})),customTypes=(data.customTypes||[]).map(item=>({...item})),customEntities=(data.customEntities||[]).map(item=>({...item})),prompts=data.prompts.map(item=>({...item})),collections=Array.isArray(data.collections)?data.collections.map(item=>({...item,promptIds:[...(item.promptIds||[])]})):[],workflows=Array.isArray(data.workflows)?data.workflows.map(item=>({...item,steps:[...(item.steps||[])]})):[];
             if(mode==="merge"){
-              const catMap=new Map(),clientMap=new Map(),gptSiteMap=new Map(),projectMap=new Map(),seoMap=new Map(),customTypeMap=new Map(),customEntityMap=new Map();
+              const catMap=new Map(),clientMap=new Map(),gptSiteMap=new Map(),projectMap=new Map(),seoMap=new Map(),customTypeMap=new Map(),customEntityMap=new Map(),promptIdMap=new Map();
               categories=categories.map(item=>{if(state.categories.some(existing=>existing.id===item.id)){const id=uid("cat");catMap.set(item.id,id);return {...item,id,parentId:item.parentId}}return item});
               categories=categories.map(item=>({...item,parentId:catMap.get(item.parentId)||item.parentId}));
               clients=clients.map(item=>{if(state.clients.some(existing=>existing.id===item.id)){const id=uid("client");clientMap.set(item.id,id);return {...item,id}}return item});
@@ -3851,19 +3958,35 @@ async function importData(file){
               seo=seo.map(item=>{if(state.seo.some(existing=>existing.id===item.id)){const id=uid("seo");seoMap.set(item.id,id);return {...item,id}}return item});
               customTypes=customTypes.map(item=>{if(state.customTypes.some(existing=>existing.id===item.id)){const id=uid("ctype");customTypeMap.set(item.id,id);return {...item,id}}return item});
               customEntities=customEntities.map(item=>{const mappedTypeId=customTypeMap.get(item.typeId)||item.typeId;if(state.customEntities.some(existing=>existing.id===item.id)){const id=uid("customentity");customEntityMap.set(item.id,id);return {...item,id,typeId:mappedTypeId}}return {...item,typeId:mappedTypeId}});
-              prompts=prompts.map(item=>({...item,id:state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,gptSiteId:gptSiteMap.get(item.gptSiteId)||item.gptSiteId,projectId:projectMap.get(item.projectId)||item.projectId,seoId:seoMap.get(item.seoId)||item.seoId,customAssignments:Object.fromEntries(Object.entries(item.customAssignments||{}).map(([typeId,entityIds])=>{const mappedTypeId=customTypeMap.get(typeId)||typeId;const values=Array.isArray(entityIds)?entityIds:[entityIds].filter(Boolean);const mapped=values.map(entityId=>customEntityMap.get(entityId)||entityId);const importedType=customTypes.find(type=>type.id===mappedTypeId);return [mappedTypeId,importedType?.multi?mapped:(mapped[0]||null)]}))}));
+              customEntities=customEntities.map(item=>({...item,parentId:customEntityMap.get(item.parentId)||item.parentId}));
+              prompts=prompts.map(item=>{
+                const mappedId=state.prompts.some(existing=>existing.id===item.id)?uid("prompt"):item.id;
+                promptIdMap.set(item.id,mappedId);
+                return {...item,id:mappedId,categoryId:catMap.get(item.categoryId)||item.categoryId,subcategoryId:catMap.get(item.subcategoryId)||item.subcategoryId,clientId:clientMap.get(item.clientId)||item.clientId,gptSiteId:gptSiteMap.get(item.gptSiteId)||item.gptSiteId,projectId:projectMap.get(item.projectId)||item.projectId,seoId:seoMap.get(item.seoId)||item.seoId,customAssignments:Object.fromEntries(Object.entries(item.customAssignments||{}).map(([typeId,entityIds])=>{const mappedTypeId=customTypeMap.get(typeId)||typeId;const values=Array.isArray(entityIds)?entityIds:[entityIds].filter(Boolean);const mapped=values.map(entityId=>customEntityMap.get(entityId)||entityId);const importedType=customTypes.find(type=>type.id===mappedTypeId);return [mappedTypeId,importedType?.multi?mapped:(mapped[0]||null)]}))};
+              });
+              const existingCollectionIds=new Set(state.collections.map(item=>item.id));
+              const importedCollections=collections.map(item=>({...item,id:existingCollectionIds.has(item.id)?uid("collection"):item.id,promptIds:(item.promptIds||[]).map(id=>promptIdMap.get(id)||id)}));
+              const existingWorkflowIds=new Set(state.workflows.map(item=>item.id));
+              const importedWorkflows=workflows.map(item=>({...item,id:existingWorkflowIds.has(item.id)?uid("workflow"):item.id,steps:(item.steps||[]).map(id=>promptIdMap.get(id)||id)}));
+              collections=[...state.collections.map(item=>({...item,promptIds:[...(item.promptIds||[])]})),...importedCollections];
+              workflows=[...state.workflows.map(item=>({...item,steps:[...(item.steps||[])]})),...importedWorkflows];
             }
             prompts=prompts.map(prompt=>{
               if(normalizedIntroSource(prompt)!=="auto")return prompt;
               return {...prompt,intro:generatePromptIntro(prompt),introSource:"auto",introGeneratedAt:now(),introUpdatedAt:now()};
             });
-            await writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,customTypes,customEntities,prompts});if(Array.isArray(data.collections)||mode==="replace"){state.collections=Array.isArray(data.collections)?data.collections:[];await saveSettingsRecord("collections",state.collections)}if(Array.isArray(data.workflows)||mode==="replace"){state.workflows=Array.isArray(data.workflows)?data.workflows:[];await saveSettingsRecord("workflows",state.workflows)}
-            await loadData();await generateMissingPromptIntros({silent:true});render();
+            await writeCoreDataAtomic({mode,categories,clients,gptsites,projects,seo,customTypes,customEntities,prompts,collections,workflows});
+            committed=true;
+            state.collections=collections;state.workflows=workflows;
+            await loadData();
+            try{await generateMissingPromptIntros({silent:true})}catch(error){console.warn("Importazione completata, ma aggiornamento note automatiche non riuscito",error)}
+            render();
             const importedFiles=data.prompts.reduce((sum,prompt)=>sum+promptAttachmentCount(prompt),0);
             toast(`Importazione completata con ${importedFiles} file incorporat${importedFiles===1?"o":"i"}.`,"success");
           }catch(error){
             console.error(error);
-            toast(`Importazione non riuscita: ${error.message}. La transazione è stata annullata e l'archivio precedente è rimasto invariato.`,"error","PS-IMPORT-APPLY");
+            if(committed)toast(`Importazione salvata, ma l'aggiornamento dell'interfaccia non è stato completato: ${error.message}. Ricarica l'app per riallineare la vista.`,"warning","PS-IMPORT-POST");
+            else toast(`Importazione non riuscita: ${error.message}. La transazione è stata annullata e l'archivio precedente è rimasto invariato.`,"error","PS-IMPORT-APPLY");
           }finally{state.busy.delete("importApply")}
         };
         if(mode==="replace"){
@@ -3883,7 +4006,8 @@ async function importData(file){
 
 /* ---------- Eventi ---------- */
 function bindEvents(){
-  $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");state.query="";$("globalSearch").value="";setFilter("all");setTimeout(()=>{$("workflow-overview")?.scrollIntoView({behavior:"smooth",block:"start"});$("workflowTitle")?.focus?.()},80)};
+  document.addEventListener("keydown",trapActiveDialogFocus);
+  $("dashboardBtn").onclick=()=>{history.replaceState(null,"", "#dashboard");state.query="";$("globalSearch").value="";state.advancedFilters={category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false};setFilter("all");setTimeout(()=>{$(".content")?.scrollTo?.({top:0,behavior:"smooth"});$("dashboardSearch")?.focus?.()},80)};
   $$(".side-link[data-filter]").forEach(button=>button.onclick=()=>setFilter(button.dataset.filter));
   $("globalSearch").oninput=event=>{clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{state.query=event.target.value;resetRenderLimit();renderStats();renderCards()},160)};
   $("clearSearch").onclick=()=>{$("globalSearch").value="";state.query="";resetRenderLimit();renderStats();renderCards()};
@@ -3913,7 +4037,7 @@ function bindEvents(){
   });
   $("mobileMenuBtn").onclick=()=>$("sidebar").classList.add("open");
   $("manageBtn").onclick=()=>{renderManage();openModal("manageModal")};
-  $("backupBtn").onclick=createBackup;
+  $("backupBtn")?.addEventListener("click",createBackup);
   $("exportBtn").onclick=exportData;
   $("importBtn").onclick=()=>$("importInput").click();
   $("importInput").onchange=event=>{const file=event.target.files[0];if(file)importData(file);event.target.value=""};
@@ -3932,11 +4056,11 @@ function bindEvents(){
   $("bulkProjectBtn").onclick=()=>choiceAction("Assegna progetto","Progetto",'<option value="">Nessun progetto</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)}</option>`).join(""),value=>bulkUpdate({projectId:value||null}));
   $("bulkGptSiteBtn").onclick=()=>choiceAction("Assegna GPTSites","Sito GPTSites",'<option value="">Nessun sito GPTSites</option>'+state.gptsites.map(site=>`<option value="${esc(site.id)}">${esc(site.name)}</option>`).join(""),value=>bulkUpdate({gptSiteId:value||null}));
   $("bulkSeoBtn").onclick=()=>choiceAction("Assegna SEO","Elemento SEO",'<option value="">Nessun elemento SEO</option>'+state.seo.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join(""),value=>bulkUpdate({seoId:value||null}));
-  $("bulkArchiveBtn").onclick=()=>bulkUpdate({status:"archived"});
-  $("bulkTrashBtn").onclick=()=>bulkUpdate({deletedAt:now()});
+  $("bulkArchiveBtn").onclick=bulkArchiveSelected;
+  $("bulkTrashBtn").onclick=bulkTrashSelected;
 
   $$(".editor-tab").forEach(button=>button.onclick=()=>setEditorTab(button.dataset.tab));
-  $$("[data-editor-mode]").forEach(button=>button.onclick=()=>{if(!state.editor.id)return;state.editor.mode=button.dataset.editorMode;$("editorModal").classList.toggle("use-mode",state.editor.mode==="use");$$("[data-editor-mode]").forEach(item=>item.classList.toggle("active",item===button));$("editorTitle").textContent=state.editor.mode==="use"?"Usa prompt":"Modifica prompt";setEditorTab(state.editor.mode==="use"?"variables":"prompt")});
+  $$("[data-editor-mode]").forEach(button=>button.onclick=()=>{if(!state.editor.id)return;state.editor.mode=button.dataset.editorMode;applyEditorModeUI();setEditorTab(state.editor.mode==="use"?"variables":"prompt")});
   $("closeEditorBtn").onclick=$("cancelEditorBtn").onclick=()=>closeEditor();
   $("editorBackdrop").onclick=event=>{if(event.target===$("editorBackdrop"))closeEditor()};
   $("promptCategory").onchange=()=>{
@@ -3944,7 +4068,7 @@ function bindEvents(){
     markDirty();
   };
   ["promptTags","promptNotes"].forEach(id=>$(id).oninput=markDirty);
-  $("promptToolUrl").oninput=()=>{markDirty();$("openToolUseBtn")?.classList.toggle("hidden",!normalizeHttpUrl($("promptToolUrl").value))};
+  $("promptToolUrl").oninput=()=>{markDirty();updateToolActionLabels()};
   $("promptTitle").oninput=()=>{markDirty();scheduleAutomaticIntroUpdate()};
   $("promptIntro").oninput=()=>{if(state.editor.introSource!=="manual"){state.editor.introSource="manual";updateIntroSourceUI()}markDirty();updatePromptPurposeNote()};
   $("generateIntroBtn").onclick=()=>{setAutomaticIntro();toast("Nota rigenerata e impostata come automatica.","success")};
@@ -4138,12 +4262,14 @@ function duplicatePromptIds(){
   const pairKeys=new Set(),maxBucket=Math.max(24,Math.ceil(live.length*.10));
   for(const list of tokenIndex.values()){
     if(list.length<2||list.length>maxBucket)continue;
-    for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){const a=list[i]<list[j]?list[i]:list[j],b=a===list[i]?list[j]:list[i];pairKeys.add(`${a} ${b}`)}
+    for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){const a=list[i]<list[j]?list[i]:list[j],b=a===list[i]?list[j]:list[i];pairKeys.add(JSON.stringify([a,b]))}
   }
-  for(const key of pairKeys){const [aId,bId]=key.split(" "),a=byId.get(aId),b=byId.get(bId);if(a&&b&&similarityScore(a,b)>=78){ids.add(aId);ids.add(bId)}}
+  for(const key of pairKeys){const [aId,bId]=JSON.parse(key),a=byId.get(aId),b=byId.get(bId);if(a&&b&&similarityScore(a,b)>=78){ids.add(aId);ids.add(bId)}}
   state._duplicateIdsRevision=state.dataRevision;state._duplicateIdsCache=ids;return ids;
 }
 function applyAdvancedFilters(items){const f=state.advancedFilters||{};const dup=f.duplicates?duplicatePromptIds():null;return items.filter(item=>{
+  if(f.category){const category=catById(f.category),children=category&&!category.parentId?state.categories.filter(c=>c.parentId===category.id).map(c=>c.id):[];if(!(item.categoryId===f.category||item.subcategoryId===f.category||children.includes(item.subcategoryId)))return false}
+  if(f.client&&item.clientId!==f.client)return false;
   if(f.status&&item.status!==f.status)return false;
   if(f.usage==="used"&&!(item.usageCount>0))return false;if(f.usage==="never"&&(item.usageCount>0))return false;
   if(f.usage==="stale"&&(!(item.usageCount>0)||dateTimestamp(item.lastUsedAt)>Date.now()-90*864e5))return false;
@@ -4154,10 +4280,49 @@ function applyAdvancedFilters(items){const f=state.advancedFilters||{};const dup
 const _filteredPromptsV19=filteredPrompts;
 filteredPrompts=function(){return applyAdvancedFilters(_filteredPromptsV19())}
 
+function syncAdvancedFilterControls(){
+  const category=$("filterCategory"),client=$("filterClient");
+  if(category){const current=state.advancedFilters.category||"";category.innerHTML='<option value="">Tutte</option>'+categoriesHierarchicalAlphabetical().map(item=>`<option value="${esc(item.id)}">${item.parentId?"↳ ":""}${esc(item.name)}</option>`).join("");category.value=current}
+  if(client){const current=state.advancedFilters.client||"";client.innerHTML='<option value="">Tutti</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");client.value=current}
+  if($("filterStatus"))$("filterStatus").value=state.advancedFilters.status||"";
+  if($("filterUsage"))$("filterUsage").value=state.advancedFilters.usage||"";
+  if($("filterWithVariables"))$("filterWithVariables").checked=!!state.advancedFilters.withVariables;
+  if($("filterWithFiles"))$("filterWithFiles").checked=!!state.advancedFilters.withFiles;
+  if($("filterOnlyDuplicates"))$("filterOnlyDuplicates").checked=!!state.advancedFilters.duplicates;
+}
+function mainFilterChip(){
+  const f=state.filter||{};
+  if(f.type==="category")return {label:`Categoria: ${catById(f.id)?.name||"Categoria"}`};
+  if(f.type==="client")return {label:`Cliente: ${clientById(f.id)?.name||"Cliente"}`};
+  if(f.type==="project")return {label:`Progetto: ${projectById(f.id)?.name||"Progetto"}`};
+  if(f.type==="gptsite")return {label:`GPTSites: ${gptSiteById(f.id)?.name||"Sito"}`};
+  if(f.type==="seo")return {label:`SEO: ${seoById(f.id)?.name||"SEO"}`};
+  if(f.type==="custom"){const t=customTypeById(f.typeId),e=customEntityById(f.id);return {label:`${t?.name||"Tipologia"}: ${e?.name||"Elemento"}`}}
+  if(f.type==="favorites")return {label:"Preferiti"};if(f.type==="recent")return {label:"Recenti"};if(f.type==="archived")return {label:"Archivio"};if(f.type==="trash")return {label:"Cestino"};
+  return null;
+}
+function renderFilterStrip(resultCount=filteredPrompts().length){
+  syncAdvancedFilterControls();
+  const strip=$("activeFilterStrip"),chips=[],main=mainFilterChip(),f=state.advancedFilters||{};
+  if(main)chips.push({key:"main",label:main.label});
+  if(f.category)chips.push({key:"category",label:`Categoria: ${catById(f.category)?.name||"Categoria"}`});
+  if(f.client)chips.push({key:"client",label:`Cliente: ${clientById(f.client)?.name||"Cliente"}`});
+  if(f.status)chips.push({key:"status",label:`Stato: ${{draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto"}[f.status]||f.status}`});
+  if(f.usage)chips.push({key:"usage",label:`Utilizzo: ${{used:"Usati",never:"Mai usati",stale:"Inattivi 90+ giorni"}[f.usage]||f.usage}`});
+  if(f.withVariables)chips.push({key:"withVariables",label:"Con variabili"});if(f.withFiles)chips.push({key:"withFiles",label:"Con allegati"});if(f.duplicates)chips.push({key:"duplicates",label:"Possibili duplicati"});
+  const total=chips.length;
+  if($("advancedFilterBtn")){$("advancedFilterBtn").textContent=total?`Filtri (${total})`:"Filtri";$("advancedFilterBtn").classList.toggle("has-filters",total>0)}
+  if(!strip)return;
+  strip.hidden=total===0;
+  strip.innerHTML=total?`<span class="filter-result-count">${resultCount} risultat${resultCount===1?"o":"i"}</span>${chips.map(c=>`<span class="active-filter-chip">${esc(c.label)} <button type="button" data-clear-filter="${esc(c.key)}" aria-label="Rimuovi filtro ${esc(c.label)}">×</button></span>`).join("")}<button class="btn small active-filter-clear" id="clearAllVisibleFilters" type="button">Azzera filtri</button>`:"";
+  $$('[data-clear-filter]').forEach(button=>button.onclick=()=>{const key=button.dataset.clearFilter;if(key==="main")state.filter={type:"all",id:null};else state.advancedFilters[key]=["withVariables","withFiles","duplicates"].includes(key)?false:"";resetRenderLimit();render()});
+  $("clearAllVisibleFilters")?.addEventListener("click",()=>{state.filter={type:"all",id:null};state.advancedFilters={category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false};resetRenderLimit();render()});
+}
+
 function dynamicEntitySelectHtml(definition,prompt){
   let entities=[],values=[];if(definition.type==="client"){entities=state.clients;values=[prompt?.clientId].filter(Boolean)}else if(definition.type==="project"){entities=state.projects;values=[prompt?.projectId].filter(Boolean)}else if(definition.type==="gptsite"){entities=state.gptsites;values=[prompt?.gptSiteId].filter(Boolean)}else if(definition.type==="seo"){entities=state.seo;values=[prompt?.seoId].filter(Boolean)}else if(definition.custom){entities=customEntitiesForType(definition.typeId);values=customAssignmentValues(prompt,definition.typeId)}
-  const type=definition.custom?customTypeById(definition.typeId):null,multiple=Boolean(type?.multi);
-  return `<div class="field"><label>${esc(definition.label)}</label><div class="inline-create-row"><select class="prompt-entity-select" data-entity-type="${esc(definition.type)}" ${multiple?'multiple size="3"':''}><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${values.includes(item.id)?"selected":""}>${esc(item.name)}</option>`).join("")}</select><button class="btn inline-create-btn" type="button" data-inline-create="${esc(definition.type)}" title="Crea nuovo ${esc(definition.singular||definition.label)}">+</button></div></div>`;
+  const type=definition.custom?customTypeById(definition.typeId):null,multiple=Boolean(type?.multi),selectId=`promptEntity_${String(definition.type).replace(/[^a-z0-9_-]/gi,"_")}`;
+  return `<div class="field"><label for="${esc(selectId)}">${esc(definition.label)}</label><div class="inline-create-row"><select id="${esc(selectId)}" class="prompt-entity-select" data-entity-type="${esc(definition.type)}" ${multiple?'multiple size="3"':''}><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${values.includes(item.id)?"selected":""}>${esc(item.name)}</option>`).join("")}</select><button class="btn inline-create-btn" type="button" data-inline-create="${esc(definition.type)}" title="Crea nuovo ${esc(definition.singular||definition.label)}" aria-label="Crea nuovo ${esc(definition.singular||definition.label)}">+</button></div></div>`;
 }
 const _fillEditorSelectsV19=fillEditorSelects;
 fillEditorSelects=function(prompt){
@@ -4224,7 +4389,7 @@ function kanbanHtml(items,allItems=items){const statuses=[['draft','Bozza'],['re
 const _renderCardsV19=renderCards;
 renderCards=function(){
   if(!["table","kanban"].includes(state.view)){_renderCardsV19();bindEntityOverviewShortcuts();return}
-  const allItems=filteredPrompts(),items=allItems.slice(0,currentRenderLimit());$("cards").className="cards";$("cards").innerHTML=state.view==="table"?promptTableHtml(items):kanbanHtml(items,allItems);const [title,subtitle]=filterInfo();$("viewTitle").textContent=title;$("viewSubtitle").textContent=state.query?`${allItems.length} risultati per “${state.query}”`:`${subtitle} · ${allItems.length} elementi`;updateBulkbar();renderProgressiveFooter(allItems.length,items.length);
+  const allItems=filteredPrompts(),items=allItems.slice(0,currentRenderLimit());$("cards").className="cards";$("cards").innerHTML=state.view==="table"?promptTableHtml(items):kanbanHtml(items,allItems);const [title,subtitle]=filterInfo();$("viewTitle").textContent=title;$("viewSubtitle").textContent=state.query?`${allItems.length} risultati per “${state.query}”`:`${subtitle} · ${allItems.length} elementi`;updateBulkbar();renderFilterStrip(allItems.length);renderSearchSuggestions();renderProgressiveFooter(allItems.length,items.length);
   $$('[data-table-open]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.tableOpen,"prompt","edit"));$$('[data-table-use]').forEach(btn=>btn.onclick=()=>openEditor(btn.dataset.tableUse,"variables","use"));
   $$('[data-kanban-id]').forEach(card=>card.ondragstart=e=>e.dataTransfer.setData('text/prompt-id',card.dataset.kanbanId));$$('[data-kanban-status]').forEach(col=>{col.ondragover=e=>e.preventDefault();col.ondrop=async e=>{e.preventDefault();const id=e.dataTransfer.getData('text/prompt-id'),prompt=state.prompts.find(p=>p.id===id);if(!prompt)return;await snapshotVersion(prompt,"Cambio stato Kanban");await put("prompts",{...prompt,status:col.dataset.kanbanStatus,updatedAt:now()});await loadData();renderCards();toast("Stato aggiornato dal Kanban.","success")}})
 }
@@ -4244,7 +4409,7 @@ function openEntityOverview(type,id,typeId=null){let entity,definition;if(type==
 function bindEntityOverviewShortcuts(){/* riservato per estensioni future */}
 
 function analyticsHtml(){const live=livePrompts(),used=live.filter(p=>p.usageCount>0),never=live.length-used.length,stale=live.filter(p=>p.usageCount>0&&dateTimestamp(p.lastUsedAt)<Date.now()-90*864e5).length,top=[...live].sort((a,b)=>(b.usageCount||0)-(a.usageCount||0))[0];return `<div class="analytics-strip"><div class="analytics-mini"><strong>${used.length}</strong><span>Prompt già utilizzati</span></div><div class="analytics-mini"><strong>${never}</strong><span>Mai utilizzati</span></div><div class="analytics-mini"><strong>${stale}</strong><span>Inattivi da 90+ giorni</span></div><div class="analytics-mini"><strong>${esc(top?.title||"—")}</strong><span>Prompt più usato · ${top?.usageCount||0} utilizzi</span></div></div>`}
-const _renderStatsV19=renderStats;renderStats=function(){_renderStatsV19();if(!$("stats")?.classList.contains("hidden")&&$("stats")?.innerHTML)$("stats").insertAdjacentHTML("afterbegin",analyticsHtml())}
+const _renderStatsV19=renderStats;renderStats=function(){_renderStatsV19()}
 
 function commandItems(query){const q=normalize(query);const commands=[{label:"Nuovo prompt",hint:"⌘N",run:()=>openEditor()},{label:"Nuova tipologia",hint:"Gestione",run:()=>{renderManage();openModal("manageModal");setTimeout(()=>$("newTypeName")?.focus(),80)}},{label:"Nuova raccolta",hint:"Raccolte",run:createCollection},{label:"Nuovo workflow",hint:"Workflow",run:createWorkflow},{label:"Apri gestione",hint:"Struttura",run:()=>{renderManage();openModal("manageModal")}},{label:"Esporta backup",hint:"Backup",run:exportData},{label:"Diagnostica",hint:"QA",run:()=>performDashboardAction("diagnostics")}];const promptItems=livePrompts().filter(p=>!q||normalize(`${p.title} ${p.content}`).includes(q)).slice(0,20).map(p=>({label:p.title,hint:"Prompt",run:()=>openEditor(p.id,"variables","use")}));return [...commands.filter(c=>!q||normalize(c.label).includes(q)),...promptItems]}
 function renderCommandPalette(){const items=commandItems($("commandInput")?.value||"");$("commandResults").innerHTML=items.map((item,i)=>`<button class="command-item ${i===0?"active":""}" data-command-index="${i}"><span>${esc(item.label)}</span><small>${esc(item.hint||"")}</small></button>`).join("")||'<div class="empty" style="padding:25px">Nessun risultato</div>';$$('[data-command-index]').forEach(btn=>btn.onclick=()=>{closeCommandPalette();items[Number(btn.dataset.commandIndex)]?.run()})}
@@ -4305,8 +4470,11 @@ function bindWorkspaceEvents(){
   $("agentSidebarBtn")?.addEventListener("click",()=>{const focusAgent=()=>{$("sidebar")?.classList.remove("open");history.replaceState(null,"","#dashboard");$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"});$("agentRequest")?.focus()};if($("agentRouter")){focusAgent();return}state.query="";$("globalSearch").value="";setFilter("all");setTimeout(focusAgent,80)});
   $("tableBtn").onclick=()=>{state.view="table";localStorage.setItem("ps_view","table");resetRenderLimit();renderCards()};$("kanbanBtn").onclick=()=>{state.view="kanban";localStorage.setItem("ps_view","kanban");resetRenderLimit();renderCards()};
   $("advancedFilterBtn").onclick=()=>{$("advancedFilterBar").hidden=!$("advancedFilterBar").hidden};
-  $("filterStatus").onchange=e=>{state.advancedFilters.status=e.target.value;resetRenderLimit();renderCards()};$("filterUsage").onchange=e=>{state.advancedFilters.usage=e.target.value;resetRenderLimit();renderCards()};$("filterWithVariables").onchange=e=>{state.advancedFilters.withVariables=e.target.checked;resetRenderLimit();renderCards()};$("filterWithFiles").onchange=e=>{state.advancedFilters.withFiles=e.target.checked;resetRenderLimit();renderCards()};$("filterOnlyDuplicates").onchange=e=>{state.advancedFilters.duplicates=e.target.checked;resetRenderLimit();renderCards()};$("resetAdvancedFilters").onclick=()=>{state.advancedFilters={status:"",usage:"",withVariables:false,withFiles:false,duplicates:false};$("filterStatus").value="";$("filterUsage").value="";["filterWithVariables","filterWithFiles","filterOnlyDuplicates"].forEach(id=>$(id).checked=false);renderCards()};
+  const applyFilterChange=(key,value)=>{state.advancedFilters[key]=value;resetRenderLimit();render()};
+  $("filterCategory").onchange=e=>applyFilterChange("category",e.target.value);$("filterClient").onchange=e=>applyFilterChange("client",e.target.value);$("filterStatus").onchange=e=>applyFilterChange("status",e.target.value);$("filterUsage").onchange=e=>applyFilterChange("usage",e.target.value);$("filterWithVariables").onchange=e=>applyFilterChange("withVariables",e.target.checked);$("filterWithFiles").onchange=e=>applyFilterChange("withFiles",e.target.checked);$("filterOnlyDuplicates").onchange=e=>applyFilterChange("duplicates",e.target.checked);
+  $("resetAdvancedFilters").onclick=()=>{state.advancedFilters={category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false};resetRenderLimit();render()};
   $("commandPaletteBtn").onclick=openCommandPalette;$("commandInput").oninput=renderCommandPalette;$("commandBackdrop").onclick=e=>{if(e.target===$("commandBackdrop"))closeCommandPalette()};$("versionHistoryBtn").onclick=openVersionHistory;$("smartOrganizeBtn").onclick=openSmartOrganization;$("tableColumnsBtn").onclick=openTableColumns;
+  $("menuTableViewBtn")?.addEventListener("click",()=>{$("moreMenu").classList.remove("show");state.view="table";localStorage.setItem("ps_view","table");resetRenderLimit();renderCards()});$("menuKanbanViewBtn")?.addEventListener("click",()=>{$("moreMenu").classList.remove("show");state.view="kanban";localStorage.setItem("ps_view","kanban");resetRenderLimit();renderCards()});
   $("addCollectionQuick").onclick=createCollection;$("addWorkflowQuick").onclick=createWorkflow;
   document.addEventListener("keydown",event=>{const modifier=event.metaKey||event.ctrlKey;if(modifier&&event.key.toLowerCase()==="k"){event.preventDefault();openCommandPalette()}if(event.key==="Escape"&&$("commandBackdrop").classList.contains("show"))closeCommandPalette()});
   $("bulkbar").insertAdjacentHTML("beforeend",'<button class="btn small" id="bulkCollectionBtn">Aggiungi a raccolta</button>');$("bulkCollectionBtn").onclick=addSelectedToCollection;
@@ -4430,13 +4598,10 @@ function agentComplementarySelection(analysis,ranked,max=4){
 }
 function agentMode(){return localStorage.getItem("ps_agent_mode")||"find"}
 function setAgentMode(mode){localStorage.setItem("ps_agent_mode",mode);$$('[data-agent-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.agentMode===mode))}
-function agentRouterHtml(){return `<section class="agent-router" id="agentRouter"><div class="agent-router-head"><div><h3>✨ Assistente · Cosa vuoi ottenere?</h3><p>Descrivi il risultato. Prompt Studio individua il prompt migliore o costruisce una sequenza di prompt complementari.</p></div><span class="agent-router-badge">ROUTER LOCALE · NESSUNA API</span></div><div class="agent-request-grid"><textarea class="agent-request" id="agentRequest" placeholder="Es. Devo correggere completamente una web app, trovare bug UX/UI e logici, eseguire i test e verificare le regressioni."></textarea><div class="agent-mode-group"><button class="btn agent-mode" data-agent-mode="find" type="button">⌕ Trova migliore</button><button class="btn agent-mode" data-agent-mode="combine" type="button">⊕ Combina</button><button class="btn agent-mode" data-agent-mode="workflow" type="button">⇢ Workflow</button></div></div><div class="agent-router-actions"><button class="btn primary" id="runAgentRouter" type="button">Analizza richiesta</button><button class="btn" id="clearAgentRouter" type="button">Pulisci</button><span class="agent-router-note">Valuta intento, tipologia, sotto-obiettivi, contenuto, metadati, utilizzo e feedback locale.</span></div><div class="agent-results" id="agentResults"></div></section>`}
+function agentRouterHtml(){return `<details class="agent-router" id="agentRouter"><summary>✨ Non sai quale prompt scegliere? Descrivi cosa devi fare</summary><div class="agent-router-body"><div class="agent-router-head"><div><h3>Assistente alla scelta</h3><p>Descrivi il risultato che vuoi ottenere. L’analisi avviene localmente sui prompt già presenti.</p></div></div><div class="agent-request-grid"><textarea class="agent-request" id="agentRequest" aria-label="Descrivi cosa devi fare" placeholder="Es. Devo correggere una web app, trovare bug UX/UI e verificare le regressioni."></textarea><div class="agent-mode-group"><button class="btn agent-mode" data-agent-mode="find" type="button">Trova migliore</button><button class="btn agent-mode" data-agent-mode="combine" type="button">Combina</button><button class="btn agent-mode" data-agent-mode="workflow" type="button">Workflow</button></div></div><div class="agent-router-actions"><button class="btn primary" id="runAgentRouter" type="button">Trova i prompt</button><button class="btn" id="clearAgentRouter" type="button">Pulisci</button></div><div class="agent-results" id="agentResults"></div></div></details>`}
 function injectAgentRouter(){
-  const stats=$("stats");if(!stats||stats.classList.contains("hidden")||$("agentRouter"))return;
-  stats.insertAdjacentHTML("afterbegin",agentRouterHtml());
-  const directTitle=stats.querySelector(".home-primary h3"),directText=stats.querySelector(".home-primary p");
-  if(directTitle)directTitle.textContent="Ricerca diretta";
-  if(directText)directText.textContent="Se sai già quale prompt vuoi trovare, cercalo direttamente nella libreria.";
+  const stats=$("stats"),home=stats?.querySelector(".home-simple"),search=home?.querySelector(".home-search-panel");if(!stats||stats.classList.contains("hidden")||$("agentRouter"))return;
+  if(search)search.insertAdjacentHTML("afterend",agentRouterHtml());else stats.insertAdjacentHTML("afterbegin",agentRouterHtml());
   const saved=localStorage.getItem("ps_agent_last_request")||"";
   $("agentRequest").value=saved;setAgentMode(agentMode());
   $$('[data-agent-mode]').forEach(btn=>btn.onclick=()=>setAgentMode(btn.dataset.agentMode));
@@ -4482,7 +4647,7 @@ function agentWorkflowName(request){const clean=String(request||"").replace(/\s+
 async function createAgentWorkflow(request,analysis,ids){let promptIds=[...new Set(ids||[])].filter(id=>state.prompts.some(p=>p.id===id&&!p.deletedAt));if(!promptIds.length){const ranked=agentRankPrompts(request).ranked;promptIds=agentComplementarySelection(analysis,ranked,5).map(x=>x.prompt.id)}if(!promptIds.length){toast("Non ci sono prompt da inserire nel workflow.","warning");return}const workflow={id:uid("workflow"),name:agentWorkflowName(request),steps:promptIds,agentic:true,request,intent:analysis.intent.id,createdAt:now()};state.workflows.push(workflow);await saveSettingsRecord("workflows",state.workflows);renderWorkflowSidebar();toast(`Workflow creato con ${promptIds.length} prompt.`,"success");openWorkflow(workflow.id)}
 function createMissingAgentPrompt(request,analysis){const title=`${analysis.intent.label} · ${String(request).replace(/\s+/g," ").trim().slice(0,70)}`;const goals=analysis.subgoals.length?analysis.subgoals.map((g,i)=>`${i+1}. ${g.label}`).join("\n"):"1. Analizza la richiesta\n2. Produci un risultato verificabile";openEditor();$("promptTitle").value=title;$("promptContent").value=`OBIETTIVO\n${request}\n\nSOTTO-OBIETTIVI\n${goals}\n\nISTRUZIONI\n- Esegui il lavoro in modo completo e verificabile.\n- Non assumere che il primo risultato sia corretto.\n- Controlla edge case, errori e regressioni pertinenti.\n- Restituisci un output operativo e direttamente utilizzabile.\n\nVERIFICA FINALE\nControlla che tutti i sotto-obiettivi siano stati coperti prima di concludere.`;$("promptTags").value=`agentico, ${analysis.intent.id}`;$("promptContent").dispatchEvent(new Event("input",{bubbles:true}));$("promptTitle").dispatchEvent(new Event("input",{bubbles:true}));toast("Bozza del prompt mancante creata. Verificala e salvala.","success")}
 const _renderStatsAgentBase=renderStats;renderStats=function(){_renderStatsAgentBase();injectAgentRouter()}
-const _commandItemsAgentBase=commandItems;commandItems=function(query){const items=_commandItemsAgentBase(query);const q=normalize(query);const agentCommand={label:"Assistente · Trova i prompt per una richiesta",hint:"Agentico",run:()=>{closeCommandPalette();history.replaceState(null,"","#dashboard");state.query="";$("globalSearch").value="";setFilter("all");setTimeout(()=>{$("agentRequest")?.focus();$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"})},80)}};return (!q||normalize(agentCommand.label).includes(q)||q.includes("agent"))?[agentCommand,...items]:items}
+const _commandItemsAgentBase=commandItems;commandItems=function(query){const items=_commandItemsAgentBase(query);const q=normalize(query);const agentCommand={label:"Assistente · Trova i prompt per una richiesta",hint:"Agentico",run:()=>{closeCommandPalette();history.replaceState(null,"","#dashboard");state.query="";$("globalSearch").value="";setFilter("all");setTimeout(()=>{if($("agentRouter"))$("agentRouter").open=true;$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"});$("agentRequest")?.focus()},80)}};return (!q||normalize(agentCommand.label).includes(q)||q.includes("agent"))?[agentCommand,...items]:items}
 
 /* ---------- Avvio ---------- */
 async function init(){
