@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="22.14.1">
+<meta name="application-version" content="22.14.2">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -684,6 +684,71 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 .zip-archive-card .rollback-zip-import{font-weight:850}
 
 .custom-type-up,.custom-type-down{display:none!important}
+
+/* ---------- Selection + card menu UX 22.14.2 ---------- */
+/* Checkbox ~2x larger and easier to hit */
+.card-check{
+  width:28px;
+  height:28px;
+  min-width:28px;
+  min-height:28px;
+  margin:0;
+  accent-color:var(--prompt-type-color,var(--primary));
+  cursor:pointer;
+  z-index:4;
+}
+.card-top{padding-left:42px}
+.cards.list .card,
+.category-group-cards.list .card{
+  grid-template-columns:36px minmax(220px,1fr) minmax(280px,2fr) auto;
+}
+.cards.list .card-top,
+.category-group-cards.list .card-top{padding-left:0}
+.card-check:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--prompt-type-color,var(--primary)) 52%,transparent);
+  outline-offset:3px;
+}
+.card:has(.card-check:checked){
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--prompt-type-color,var(--primary)) 30%,transparent),
+             0 10px 25px color-mix(in srgb,var(--accent) 15%,transparent);
+}
+
+/* A menu must rise above every following card/group */
+.card.menu-open-card{
+  position:relative;
+  z-index:10020!important;
+}
+.category-group.menu-open-group{
+  position:relative;
+  z-index:10010!important;
+}
+.card-menu{position:relative;z-index:10021}
+.card-menu-panel{
+  z-index:10030!important;
+  min-width:210px;
+  max-width:min(280px,calc(100vw - 32px));
+  white-space:normal;
+}
+.card-menu.open-up .card-menu-panel{
+  top:auto!important;
+  bottom:42px!important;
+}
+.card-menu-panel .btn{
+  white-space:normal;
+  line-height:1.25;
+  text-align:left;
+}
+
+/* Prevent containment from visually clipping the active menu */
+.card.menu-open-card{contain:none!important}
+.category-group.menu-open-group{contain:none!important}
+
+@media(max-width:650px){
+  .card-check{width:30px;height:30px;min-width:30px;min-height:30px}
+  .card-top{padding-left:44px}
+  .card-menu-panel{min-width:220px}
+}
+
 </style>
 
 </head>
@@ -691,7 +756,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn" aria-label="Apri menu">&#9776;</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 22.4.0</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 22.14.2</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
       <input class="search" id="globalSearch" type="search" list="searchSuggestions" autocomplete="off" placeholder="Cerca un prompt per titolo, argomento o cliente…" aria-label="Cerca nella libreria">
@@ -754,7 +819,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <button class="side-link" data-filter="trash"><span aria-hidden="true">&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
       <button class="side-link" id="manageBtn"><span aria-hidden="true">&#9881;</span><span>Impostazioni e struttura</span></button>
     </section>
-    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.14.1</div>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.14.2</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -992,7 +1057,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.14.1";
+const APP_VERSION="22.14.2";
 const APP_RELEASE_NAME="QA Stability · ZIP · Gerarchie";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
@@ -2412,7 +2477,36 @@ function bindCardEvents(){
     card.querySelector(".card-check").onchange=event=>{event.target.checked?state.selected.add(id):state.selected.delete(id);updateBulkbar()};
     card.querySelector(".use-card")?.addEventListener("click",()=>openEditor(id,"variables","use"));
     card.querySelector(".edit-card")?.addEventListener("click",()=>openEditor(id,"prompt","edit"));
-    card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{event.stopPropagation();const menu=event.currentTarget.closest('.card-menu');$$('.card-menu.open').filter(x=>x!==menu).forEach(x=>x.classList.remove('open'));menu.classList.toggle('open')});
+    card.querySelector(".card-menu-toggle")?.addEventListener("click",event=>{
+      event.stopPropagation();
+      const menu=event.currentTarget.closest(".card-menu");
+      const ownerCard=menu?.closest(".card");
+      const ownerGroup=menu?.closest(".category-group");
+      const willOpen=!menu?.classList.contains("open");
+
+      $$(".card-menu.open").forEach(other=>{
+        other.classList.remove("open","open-up");
+        other.closest(".card")?.classList.remove("menu-open-card");
+        other.closest(".category-group")?.classList.remove("menu-open-group");
+      });
+
+      if(!willOpen||!menu)return;
+
+      menu.classList.add("open");
+      ownerCard?.classList.add("menu-open-card");
+      ownerGroup?.classList.add("menu-open-group");
+
+      requestAnimationFrame(()=>{
+        const panel=menu.querySelector(".card-menu-panel");
+        if(!panel)return;
+        const panelRect=panel.getBoundingClientRect();
+        const toggleRect=event.currentTarget.getBoundingClientRect();
+        const spaceBelow=window.innerHeight-toggleRect.bottom;
+        const spaceAbove=toggleRect.top;
+        const shouldOpenUp=panelRect.height+18>spaceBelow && spaceAbove>spaceBelow;
+        menu.classList.toggle("open-up",shouldOpenUp);
+      });
+    });
     card.querySelector(".favorite-card")?.addEventListener("click",async()=>{const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;const next=!(prompt.favorite||prompt.pinned);await put("prompts",{...prompt,favorite:next,pinned:false,updatedAt:now()});await loadData();render();toast(next?"Prompt aggiunto ai preferiti.":"Prompt rimosso dai preferiti.","success")});
     card.querySelector(".copy-card")?.addEventListener("click",()=>quickCopyCompiled(id));
     card.querySelector(".archive-card")?.addEventListener("click",()=>archivePrompt(id));
@@ -4399,6 +4493,13 @@ function bindEvents(){
   $("menuDiagnosticsBtn").onclick=()=>{$("moreMenu").classList.remove("show");performDashboardAction("diagnostics")};
   document.addEventListener("click",event=>{
     if(!event.target.closest('.more-menu-wrap'))$("moreMenu")?.classList.remove("show");
+    if(!event.target.closest(".card-menu")){
+      $$(".card-menu.open").forEach(menu=>{
+        menu.classList.remove("open","open-up");
+        menu.closest(".card")?.classList.remove("menu-open-card");
+        menu.closest(".category-group")?.classList.remove("menu-open-group");
+      });
+    }
     if(!event.target.closest("#categorySidebarSection,#categoryMenuShell")){
       if($("categoryMenu"))$("categoryMenu").hidden=true;
       $("categoryPicker")?.setAttribute("aria-expanded","false");
@@ -4565,6 +4666,11 @@ function bindEvents(){
     if(event.key==="Escape"){
       if($("commandBackdrop")?.classList.contains("show")){closeCommandPalette();return}
       $("moreMenu")?.classList.remove("show");$("sidebar")?.classList.remove("open");
+      $$(".card-menu.open").forEach(menu=>{
+        menu.classList.remove("open","open-up");
+        menu.closest(".card")?.classList.remove("menu-open-card");
+        menu.closest(".category-group")?.classList.remove("menu-open-group");
+      });
       const modal=$$(".modal-backdrop.show").at(-1);
       if(modal)closeModal(modal.id);else if($("editorBackdrop").classList.contains("show"))closeEditor();
     }
