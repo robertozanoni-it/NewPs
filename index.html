@@ -986,7 +986,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.12.0";
+const APP_VERSION="22.12.1";
 const APP_RELEASE_NAME="ZIP Import · Destinazioni e Varie";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
@@ -3158,9 +3158,9 @@ function promptSectionValue(prompt,type){
 function promptSectionOptions(type){
   if(type==="category"){
     const options=['<option value="">Senza assegnazione</option>'];
-    for(const root of rootCategoriesAlphabetical()){
+    for(const root of rootVariesAlphabetical()){
       options.push(`<option value="${esc(root.id)}">${esc(root.name)}</option>`);
-      for(const child of childCategoriesAlphabetical(root.id)){
+      for(const child of childVariesAlphabetical(root.id)){
         options.push(`<option value="${esc(child.id)}">↳ ${esc(child.name)}</option>`);
       }
     }
@@ -5269,12 +5269,12 @@ function zipDestinationOptions({includeGeneral=false}={}){
   parts.push('<option value="__none__">Nessuna assegnazione</option>');
 
   const groups=[];
-  const roots=rootCategoriesAlphabetical();
+  const roots=rootVariesAlphabetical();
   if(roots.length){
     const items=[];
     for(const root of roots){
       items.push({id:root.id,name:root.name,child:false});
-      childCategoriesAlphabetical(root.id).forEach(child=>items.push({id:child.id,name:child.name,child:true}));
+      childVariesAlphabetical(root.id).forEach(child=>items.push({id:child.id,name:child.name,child:true}));
     }
     groups.push({label:"Varie",kind:"category",items});
   }
