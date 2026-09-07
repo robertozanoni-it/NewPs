@@ -560,6 +560,7 @@ button:focus-visible,[tabindex]:focus-visible,summary:focus-visible,a:focus-visi
 .card-purpose{margin:10px 0 12px;color:var(--muted);font-size:13.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .card-context{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:auto}.card-context .chip{font-size:11.5px;padding:4px 7px}.card-context .field-count{font-weight:800;color:var(--text)}
 .card-actions{margin-top:13px;padding-top:11px}.card-actions .btn.small{font-size:13px;min-height:36px;padding:6px 10px}.card-actions .use-card{flex:1 1 130px}.card-actions .edit-card{flex:0 0 auto}
+.card-actions .use-card{background:var(--prompt-type-color,var(--primary));border-color:var(--prompt-type-color,var(--primary));color:#fff}.card-actions .use-card:hover{background:color-mix(in srgb,var(--prompt-type-color,var(--primary)) 84%,#000);border-color:color-mix(in srgb,var(--prompt-type-color,var(--primary)) 84%,#000)}
 .card-menu-panel{bottom:auto;top:40px;right:0;z-index:150}
 .prompt-origin,.prompt-intro-card,.card>.excerpt,.card>.meta{display:none!important}
 .cards.list .card,.category-group-cards.list .card{grid-template-columns:28px minmax(220px,1fr) minmax(280px,2fr) auto}.cards.list .card-purpose,.category-group-cards.list .card-purpose{margin:0}.cards.list .card-context,.category-group-cards.list .card-context{margin:0}
@@ -947,7 +948,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.4.0";
+const APP_VERSION="22.5.0";
 const APP_RELEASE_NAME="Sidebar Navigation Clarity";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
@@ -2225,6 +2226,26 @@ function renderStats(){
   $$('[data-home-filter]').forEach(button=>button.onclick=()=>setFilter(button.dataset.homeFilter));
 }
 
+function promptTypeColor(prompt){
+  const filter=state.filter||{};
+  if(filter.type==="category"&&(prompt.categoryId===filter.id||prompt.subcategoryId===filter.id))return categoryColor(catById(filter.id));
+  if(filter.type==="client"&&prompt.clientId===filter.id)return "#0891b2";
+  if(filter.type==="gptsite"&&prompt.gptSiteId===filter.id)return "#ec4899";
+  if(filter.type==="project"&&prompt.projectId===filter.id)return "#f59e0b";
+  if(filter.type==="seo"&&prompt.seoId===filter.id)return "#16a34a";
+  if(filter.type==="custom"&&customAssignmentValues(prompt,filter.typeId).includes(filter.id))return customTypeById(filter.typeId)?.color||"#64748b";
+
+  const category=catById(prompt.subcategoryId)||catById(prompt.categoryId);
+  if(category)return categoryColor(category);
+  const customTypeId=Object.keys(prompt.customAssignments||{}).find(typeId=>customAssignmentValues(prompt,typeId).length&&customTypeById(typeId));
+  if(customTypeId)return customTypeById(customTypeId)?.color||"#64748b";
+  if(prompt.clientId)return "#0891b2";
+  if(prompt.gptSiteId)return "#ec4899";
+  if(prompt.projectId)return "#f59e0b";
+  if(prompt.seoId)return "#16a34a";
+  return "#2563eb";
+}
+
 function cardHtml(prompt){
   const mainCategory=catById(prompt.categoryId),subcategory=catById(prompt.subcategoryId),category=subcategory||mainCategory;
   const client=clientById(prompt.clientId),accent=categoryColor(category),variableCount=cachedPromptMeta(prompt).variables.length,attachmentCount=promptAttachmentCount(prompt);
@@ -2233,7 +2254,7 @@ function cardHtml(prompt){
   if(client)context.push(`<span class="chip">${esc(client.name)}</span>`);
   if(variableCount)context.push(`<span class="chip field-count">${variableCount} camp${variableCount===1?"o":"i"}</span>`);
   if(attachmentCount)context.push(`<span class="chip">${attachmentCount} allegat${attachmentCount===1?"o":"i"}</span>`);
-  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0" aria-label="${esc(prompt.title||"Senza titolo")}">
+  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)};--prompt-type-color:${esc(promptTypeColor(prompt))}" data-id="${esc(prompt.id)}" tabindex="0" aria-label="${esc(prompt.title||"Senza titolo")}">
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""} aria-label="Seleziona ${esc(prompt.title||"prompt")}">
     <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite||prompt.pinned?'<span class="star" aria-label="Preferito">★</span>':""}</div>
     <div class="card-purpose">${esc(promptIntroText(prompt)||"Apri il prompt per visualizzare e compilare i campi richiesti.")}</div>
