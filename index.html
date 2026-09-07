@@ -653,6 +653,15 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 .sidebar-organization #organizationSidebarSections{gap:0}.sidebar-organization .side-section.clients{--section-accent:#0891b2}.sidebar-organization .side-section.gptsites{--section-accent:#ec4899}.sidebar-organization .side-section.projects{--section-accent:#f59e0b}.sidebar-organization .side-section.seo{--section-accent:#16a34a}
 .organization-workflows{margin-top:0}.sidebar-bottom-tools{margin-top:12px}
 
+
+/* ---------- Import ZIP 22.6 ---------- */
+.zip-import-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:14px}
+.zip-import-summary .stat{min-height:78px}.zip-import-controls{display:grid;grid-template-columns:minmax(220px,1fr) minmax(180px,.55fr);gap:10px;margin-bottom:13px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2)}
+.zip-import-controls .field{min-width:0}.zip-import-note{grid-column:1/-1;margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.zip-import-table-wrap{max-height:48vh;overflow:auto;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+.zip-import-table{width:100%;border-collapse:collapse;min-width:940px}.zip-import-table th,.zip-import-table td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.zip-import-table th{position:sticky;top:0;z-index:3;background:var(--panel-2);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.035em}.zip-import-table tr:last-child td{border-bottom:0}.zip-import-table tr.zip-row-disabled{opacity:.62}.zip-import-file{font-weight:850;overflow-wrap:anywhere}.zip-import-path{display:block;margin-top:3px;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.zip-import-title{min-width:270px}.zip-import-category{min-width:220px}.zip-import-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);font-size:10px;font-weight:850;white-space:nowrap}.zip-import-badge.ok{color:var(--success);border-color:color-mix(in srgb,var(--success) 35%,var(--line));background:color-mix(in srgb,var(--success) 8%,var(--panel))}.zip-import-badge.warning{color:var(--warning);border-color:color-mix(in srgb,var(--warning) 38%,var(--line));background:color-mix(in srgb,var(--warning) 8%,var(--panel))}.zip-import-badge.error{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 38%,var(--line));background:color-mix(in srgb,var(--danger) 8%,var(--panel))}.zip-import-footer-note{margin-right:auto;color:var(--muted);font-size:12px}.zip-import-empty{padding:28px;text-align:center;color:var(--muted)}
+@media(max-width:700px){.zip-import-summary{grid-template-columns:1fr 1fr}.zip-import-controls{grid-template-columns:1fr}.zip-import-note{grid-column:1}.zip-import-table-wrap{max-height:54vh}}
+
 </style>
 
 </head>
@@ -674,6 +683,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
         <button class="btn icon" id="moreBtn" title="Altre azioni" aria-label="Altre azioni">&#8943;</button>
         <div class="more-menu" id="moreMenu">
           <button class="btn" id="menuImportBtn"><span class="menu-icon" aria-hidden="true">&#8679;</span><span>Importa JSON</span></button>
+          <button class="btn" id="menuImportZipBtn"><span class="menu-icon" aria-hidden="true">&#128230;</span><span>Importa ZIP di prompt</span></button>
           <button class="btn" id="menuExportBtn"><span class="menu-icon" aria-hidden="true">&#8681;</span><span>Esporta archivio</span></button>
           <button class="btn" id="menuGenerateIntrosBtn"><span class="menu-icon" aria-hidden="true">&#10022;</span><span>Genera note mancanti</span></button>
           <button class="btn" id="menuRefreshAutoIntrosBtn"><span class="menu-icon" aria-hidden="true">&#8635;</span><span>Aggiorna note automatiche</span></button>
@@ -943,13 +953,14 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <div class="command-backdrop" id="commandBackdrop" aria-hidden="true"><div class="command-box" role="dialog" aria-modal="true" aria-label="Comandi rapidi"><input class="command-input" id="commandInput" placeholder="Cerca prompt o comando…"><div class="command-results" id="commandResults"></div></div></div>
 <datalist id="searchSuggestions"></datalist>
 <input type="file" id="importInput" accept=".json,application/json" hidden>
+<input type="file" id="zipImportInput" accept=".zip,application/zip,application/x-zip-compressed" hidden>
 <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.5.0";
-const APP_RELEASE_NAME="Sidebar Navigation Clarity";
+const APP_VERSION="22.6.0";
+const APP_RELEASE_NAME="Universal ZIP Prompt Import";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -4785,6 +4796,102 @@ async function createAgentWorkflow(request,analysis,ids){let promptIds=[...new S
 function createMissingAgentPrompt(request,analysis){const title=`${analysis.intent.label} · ${String(request).replace(/\s+/g," ").trim().slice(0,70)}`;const goals=analysis.subgoals.length?analysis.subgoals.map((g,i)=>`${i+1}. ${g.label}`).join("\n"):"1. Analizza la richiesta\n2. Produci un risultato verificabile";openEditor();$("promptTitle").value=title;$("promptContent").value=`OBIETTIVO\n${request}\n\nSOTTO-OBIETTIVI\n${goals}\n\nISTRUZIONI\n- Esegui il lavoro in modo completo e verificabile.\n- Non assumere che il primo risultato sia corretto.\n- Controlla edge case, errori e regressioni pertinenti.\n- Restituisci un output operativo e direttamente utilizzabile.\n\nVERIFICA FINALE\nControlla che tutti i sotto-obiettivi siano stati coperti prima di concludere.`;$("promptTags").value=`agentico, ${analysis.intent.id}`;$("promptContent").dispatchEvent(new Event("input",{bubbles:true}));$("promptTitle").dispatchEvent(new Event("input",{bubbles:true}));toast("Bozza del prompt mancante creata. Verificala e salvala.","success")}
 const _renderStatsAgentBase=renderStats;renderStats=function(){_renderStatsAgentBase();injectAgentRouter()}
 const _commandItemsAgentBase=commandItems;commandItems=function(query){const items=_commandItemsAgentBase(query);const q=normalize(query);const agentCommand={label:"Assistente · Trova i prompt per una richiesta",hint:"Agentico",run:()=>{closeCommandPalette();history.replaceState(null,"","#dashboard");state.query="";$("globalSearch").value="";setFilter("all");setTimeout(()=>{if($("agentRouter"))$("agentRouter").open=true;if($("agentRouter"))$("agentRouter").open=true;$("agentRouter")?.scrollIntoView({behavior:"smooth",block:"start"});$("agentRequest")?.focus()},80)}};return (!q||normalize(agentCommand.label).includes(q)||q.includes("agent"))?[agentCommand,...items]:items}
+
+
+/* ---------- Import ZIP universale 22.6 ---------- */
+const MAX_ZIP_ARCHIVE_SIZE=MAX_IMPORT_ARCHIVE_SIZE;
+const MAX_ZIP_ENTRY_SIZE=20*1024*1024;
+const MAX_ZIP_TOTAL_UNCOMPRESSED=200*1024*1024;
+const ZIP_TEXT_EXTENSIONS=new Set(["txt","md","markdown","csv","json","xml","html","htm","css","js","mjs","cjs","ts","jsx","tsx","php","py","sql","log","yaml","yml","toml","ini","conf","rst"]);
+let zipCrcTable=null;
+function zipCrc32(bytes){
+  if(!zipCrcTable){zipCrcTable=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);zipCrcTable[n]=c>>>0}}
+  let crc=0xffffffff;for(const byte of bytes)crc=zipCrcTable[(crc^byte)&0xff]^(crc>>>8);return (crc^0xffffffff)>>>0;
+}
+function zipReadU64(view,offset){const lo=BigInt(view.getUint32(offset,true)),hi=BigInt(view.getUint32(offset+4,true));return (hi<<32n)|lo}
+function zipSafeNumber(value,label){const n=typeof value==="bigint"?Number(value):Number(value);if(!Number.isSafeInteger(n)||n<0)throw new Error(`${label} non valido o troppo grande.`);return n}
+function zipDecodeName(bytes,utf8=true){try{return new TextDecoder(utf8?"utf-8":"windows-1252").decode(bytes)}catch{return new TextDecoder("utf-8").decode(bytes)}}
+function zipNormalizePath(value){const path=String(value||"").replace(/\\/g,"/").replace(/^\/+/,"");if(!path||path.split("/").some(part=>part===".."))return null;return path}
+function zipExtension(path){const base=String(path||"").split("/").pop()||"",index=base.lastIndexOf(".");return index>0?base.slice(index+1).toLowerCase():""}
+function zipBaseName(path){return (String(path||"").split("/").pop()||"").replace(/\.[^.]+$/,'')}
+function zipPromptTitle(path){
+  let base=zipBaseName(path).trim();
+  const numbered=base.match(/^(\d+(?:[.\-]\d+)*)(?:[_\-\s]+)(.+)$/);
+  if(numbered)base=`${numbered[1]} - ${numbered[2]}`;
+  base=base.replace(/_/g," ").replace(/\s+/g," ").trim();
+  return base||"Prompt importato";
+}
+function zipLooksInternal(path){const parts=String(path||"").split("/");return parts.includes("__MACOSX")||parts.some(part=>part===".DS_Store"||part.startsWith("._"))}
+function zipFindEocd(bytes){
+  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),min=Math.max(0,bytes.length-65557);
+  for(let i=bytes.length-22;i>=min;i--)if(view.getUint32(i,true)===0x06054b50)return i;
+  return -1;
+}
+function zipExtraZip64(extra,entry){
+  const view=new DataView(extra.buffer,extra.byteOffset,extra.byteLength);let offset=0;
+  while(offset+4<=extra.length){const id=view.getUint16(offset,true),size=view.getUint16(offset+2,true),start=offset+4;if(start+size>extra.length)break;if(id===0x0001){let cursor=start;const read=()=>{if(cursor+8>start+size)throw new Error("Campo ZIP64 incompleto.");const value=zipReadU64(view,cursor);cursor+=8;return value};if(entry.uncompressedSize===0xffffffff)entry.uncompressedSize=zipSafeNumber(read(),"Dimensione ZIP64");if(entry.compressedSize===0xffffffff)entry.compressedSize=zipSafeNumber(read(),"Dimensione ZIP64 compressa");if(entry.localOffset===0xffffffff)entry.localOffset=zipSafeNumber(read(),"Offset ZIP64");return}offset=start+size}
+}
+function parseZipDirectory(arrayBuffer){
+  const bytes=new Uint8Array(arrayBuffer),view=new DataView(arrayBuffer),eocd=zipFindEocd(bytes);if(eocd<0)throw new Error("Il file non contiene una directory ZIP valida.");
+  const disk=view.getUint16(eocd+4,true),centralDisk=view.getUint16(eocd+6,true);if(disk!==0||centralDisk!==0)throw new Error("Gli archivi ZIP multi-volume non sono supportati.");
+  let entriesCount=view.getUint16(eocd+10,true),centralSize=view.getUint32(eocd+12,true),centralOffset=view.getUint32(eocd+16,true);
+  if(entriesCount===0xffff||centralSize===0xffffffff||centralOffset===0xffffffff){
+    const locator=eocd-20;if(locator<0||view.getUint32(locator,true)!==0x07064b50)throw new Error("ZIP64 non valido: locator mancante.");const zip64Offset=zipSafeNumber(zipReadU64(view,locator+8),"Offset ZIP64");if(zip64Offset+56>bytes.length||view.getUint32(zip64Offset,true)!==0x06064b50)throw new Error("ZIP64 non valido: record centrale mancante.");entriesCount=zipSafeNumber(zipReadU64(view,zip64Offset+32),"Numero file ZIP64");centralSize=zipSafeNumber(zipReadU64(view,zip64Offset+40),"Dimensione directory ZIP64");centralOffset=zipSafeNumber(zipReadU64(view,zip64Offset+48),"Offset directory ZIP64");
+  }
+  if(centralOffset+centralSize>bytes.length)throw new Error("Directory ZIP oltre i limiti del file.");
+  const entries=[];let offset=centralOffset,totalUncompressed=0;
+  for(let index=0;index<entriesCount;index++){
+    if(offset+46>bytes.length||view.getUint32(offset,true)!==0x02014b50)throw new Error(`Directory ZIP danneggiata alla voce ${index+1}.`);
+    const flags=view.getUint16(offset+8,true),method=view.getUint16(offset+10,true),crc=view.getUint32(offset+16,true),compressedSize=view.getUint32(offset+20,true),uncompressedSize=view.getUint32(offset+24,true),nameLen=view.getUint16(offset+28,true),extraLen=view.getUint16(offset+30,true),commentLen=view.getUint16(offset+32,true),externalAttrs=view.getUint32(offset+38,true),localOffset=view.getUint32(offset+42,true);const end=offset+46+nameLen+extraLen+commentLen;if(end>bytes.length)throw new Error("Voce ZIP troncata.");
+    const nameBytes=bytes.subarray(offset+46,offset+46+nameLen),extra=bytes.subarray(offset+46+nameLen,offset+46+nameLen+extraLen);const path=zipNormalizePath(zipDecodeName(nameBytes,Boolean(flags&0x800)));
+    const entry={index,path,flags,method,crc,compressedSize,uncompressedSize,localOffset,externalAttrs,directory:Boolean(path&&path.endsWith("/"))};zipExtraZip64(extra,entry);
+    totalUncompressed+=entry.directory?0:entry.uncompressedSize;if(totalUncompressed>MAX_ZIP_TOTAL_UNCOMPRESSED)throw new Error(`Lo ZIP supera il limite di sicurezza di ${formatBytes(MAX_ZIP_TOTAL_UNCOMPRESSED)} dopo la decompressione.`);
+    entries.push(entry);offset=end;
+  }
+  return {bytes,view,entries,totalUncompressed};
+}
+async function inflateZipDeflateRaw(compressed){
+  if(typeof DecompressionStream!=="function")throw new Error("Il browser non supporta la decompressione ZIP. Usa una versione recente di Chrome o Brave.");
+  let stream;try{stream=new DecompressionStream("deflate-raw")}catch{throw new Error("Questo browser non supporta la compressione DEFLATE usata dallo ZIP.")}
+  const result=await new Response(new Blob([compressed]).stream().pipeThrough(stream)).arrayBuffer();return new Uint8Array(result);
+}
+async function extractZipEntry(parsed,entry){
+  if(entry.flags&1)throw new Error("File cifrato: password ZIP non supportata.");if(![0,8].includes(entry.method))throw new Error(`Metodo di compressione ${entry.method} non supportato.`);if(entry.uncompressedSize>MAX_ZIP_ENTRY_SIZE)throw new Error(`File oltre ${formatBytes(MAX_ZIP_ENTRY_SIZE)}.`);
+  const {bytes,view}=parsed,offset=entry.localOffset;if(offset+30>bytes.length||view.getUint32(offset,true)!==0x04034b50)throw new Error("Header locale ZIP non valido.");const nameLen=view.getUint16(offset+26,true),extraLen=view.getUint16(offset+28,true),dataStart=offset+30+nameLen+extraLen,dataEnd=dataStart+entry.compressedSize;if(dataEnd>bytes.length)throw new Error("Dati compressi troncati.");const compressed=bytes.subarray(dataStart,dataEnd);const output=entry.method===0?new Uint8Array(compressed):await inflateZipDeflateRaw(compressed);if(output.length!==entry.uncompressedSize)throw new Error(`Dimensione estratta inattesa (${formatBytes(output.length)} invece di ${formatBytes(entry.uncompressedSize)}).`);if(zipCrc32(output)!==entry.crc)throw new Error("Controllo CRC non superato: file ZIP danneggiato.");return output;
+}
+function decodeZipText(bytes){
+  if(bytes.length>=2&&bytes[0]===0xff&&bytes[1]===0xfe)return new TextDecoder("utf-16le").decode(bytes.subarray(2));
+  if(bytes.length>=2&&bytes[0]===0xfe&&bytes[1]===0xff){const swapped=new Uint8Array(bytes.length-2);for(let i=2;i+1<bytes.length;i+=2){swapped[i-2]=bytes[i+1];swapped[i-1]=bytes[i]}return new TextDecoder("utf-16le").decode(swapped)}
+  const start=bytes.length>=3&&bytes[0]===0xef&&bytes[1]===0xbb&&bytes[2]===0xbf?3:0;let text=new TextDecoder("utf-8").decode(bytes.subarray(start));const replacements=(text.match(/�/g)||[]).length;if(replacements>Math.max(2,text.length/500))try{text=new TextDecoder("windows-1252").decode(bytes)}catch{}return text.replace(/\u0000/g,"").trim();
+}
+function zipCategoryOptions({includeGeneral=false}={}){const parts=[];if(includeGeneral)parts.push('<option value="">Usa categoria generale</option>');parts.push('<option value="__none__">Senza categoria</option>');for(const item of categoriesHierarchicalAlphabetical()){const parent=item.parentId?catById(item.parentId):null,label=item.parentId?`${parent?.name||""} › ${item.name}`:item.name;parts.push(`<option value="${esc(item.id)}">${esc(label)}</option>`)}return parts.join("")}
+function zipAssignmentFromValue(value){if(!value||value==="__none__")return {categoryId:null,subcategoryId:null};const item=catById(value);if(!item)return null;return item.parentId?{categoryId:item.parentId,subcategoryId:item.id}:{categoryId:item.id,subcategoryId:null}}
+function zipImportSelectedRows(){return $$('#zipImportTableBody tr[data-zip-row]').filter(row=>row.querySelector('.zip-import-check')?.checked)}
+function updateZipImportCount(){const rows=zipImportSelectedRows(),label=$("zipImportSelectedCount");if(label)label.textContent=`${rows.length} selezionat${rows.length===1?"o":"i"}`;const button=$("zipImportConfirm");if(button)button.textContent=`Importa ${rows.length} prompt`}
+async function inspectZipForPrompts(file){
+  if(!file||file.size===0)throw new Error("Lo ZIP selezionato è vuoto.");if(file.size>MAX_ZIP_ARCHIVE_SIZE)throw new Error(`Lo ZIP supera il limite di ${formatBytes(MAX_ZIP_ARCHIVE_SIZE)}.`);const parsed=parseZipDirectory(await file.arrayBuffer());const candidates=parsed.entries.filter(entry=>entry.path&&!entry.directory&&!zipLooksInternal(entry.path));const rows=[];const seenTitles=new Set();
+  for(const entry of candidates){const ext=zipExtension(entry.path),supported=ZIP_TEXT_EXTENSIONS.has(ext)||!ext;const title=zipPromptTitle(entry.path),duplicateExisting=livePrompts().some(prompt=>normalize(prompt.title)===normalize(title)),duplicateZip=seenTitles.has(normalize(title));seenTitles.add(normalize(title));const row={entry,path:entry.path,title,extension:ext||"senza estensione",size:entry.uncompressedSize,supported,duplicateExisting,duplicateZip,content:"",error:""};if(!supported){row.error=`Formato .${ext||"?"} non testuale/non supportato`;rows.push(row);continue}try{const bytes=await extractZipEntry(parsed,entry);row.content=decodeZipText(bytes);if(!row.content)row.error="File di testo vuoto"}catch(error){row.error=error.message||"Estrazione non riuscita"}rows.push(row)}
+  return {file,parsed,rows};
+}
+async function openZipImport(file){
+  if(state.busy.has("zipInspect")){toast("Analisi ZIP già in corso.","warning");return}state.busy.add("zipInspect");try{toast("Analizzo lo ZIP prima dell’importazione…","info");const model=await inspectZipForPrompts(file);state.zipImport=model;renderZipImportPreview(model)}catch(error){console.error(error);toast(`ZIP non importabile: ${error.message||"errore sconosciuto"}.`,"error","PS-ZIP-READ")}finally{state.busy.delete("zipInspect")}
+}
+function renderZipImportPreview(model){
+  const usable=model.rows.filter(row=>row.supported&&!row.error),unsupported=model.rows.filter(row=>!row.supported||row.error),duplicates=model.rows.filter(row=>row.duplicateExisting||row.duplicateZip);$("choiceTitle").textContent=`Importa ZIP · ${model.file.name}`;
+  $("choiceBody").innerHTML=`<div class="zip-import-summary"><div class="stat"><strong>${model.rows.length}</strong><span>File rilevati</span></div><div class="stat"><strong>${usable.length}</strong><span>Importabili</span></div><div class="stat"><strong>${duplicates.length}</strong><span>Possibili duplicati</span></div><div class="stat"><strong>${unsupported.length}</strong><span>Saltati / da controllare</span></div></div><div class="zip-import-controls"><div class="field"><label for="zipDefaultCategory">Categoria generale</label><select id="zipDefaultCategory"><option value="" selected>— Scegli categoria —</option>${zipCategoryOptions()}</select></div><div class="field"><label for="zipImportStatus">Stato iniziale</label><select id="zipImportStatus"><option value="draft">Bozza</option><option value="review" selected>Da verificare</option><option value="approved">Approvato</option></select></div><p class="zip-import-note">La categoria generale si applica a tutti i file, ma puoi cambiarla riga per riga. “Senza categoria” è una scelta esplicita. I titoli mantengono la numerazione del nome file.</p></div><div class="zip-import-table-wrap"><table class="zip-import-table"><thead><tr><th><input type="checkbox" id="zipSelectAll" checked aria-label="Seleziona tutti i file importabili"></th><th>File</th><th>Titolo prompt</th><th>Categoria</th><th>Stato file</th></tr></thead><tbody id="zipImportTableBody">${model.rows.map((row,index)=>{const selectable=row.supported&&!row.error,checked=selectable&&!row.duplicateExisting&&!row.duplicateZip;const status=!selectable?`<span class="zip-import-badge error">${esc(row.error||"Non supportato")}</span>`:(row.duplicateExisting||row.duplicateZip)?`<span class="zip-import-badge warning">${row.duplicateExisting?"Titolo già presente":"Duplicato nello ZIP"}</span>`:'<span class="zip-import-badge ok">Pronto</span>';return `<tr data-zip-row="${index}" class="${selectable?"":"zip-row-disabled"}"><td><input class="zip-import-check" type="checkbox" ${checked?"checked":""} ${selectable?"":"disabled"} aria-label="Importa ${esc(row.title)}"></td><td><span class="zip-import-file">${esc((row.path.split('/').pop()||row.path))}</span><span class="zip-import-path">${esc(row.path)} · ${esc(formatBytes(row.size))}</span></td><td><input class="zip-import-title" type="text" value="${esc(row.title)}" ${selectable?"":"disabled"}></td><td><select class="zip-import-category" ${selectable?"":"disabled"}>${zipCategoryOptions({includeGeneral:true})}</select></td><td>${status}</td></tr>`}).join("")||'<tr><td colspan="5"><div class="zip-import-empty">Nessun file utilizzabile trovato nello ZIP.</div></td></tr>'}</tbody></table></div>`;
+  $("choiceFoot").innerHTML=`<span class="zip-import-footer-note" id="zipImportSelectedCount"></span><button class="btn" data-close="choiceModal">Annulla</button><button class="btn primary" id="zipImportConfirm">Importa prompt</button>`;bindModalClose();
+  $("zipSelectAll")?.addEventListener("change",event=>{$$('#zipImportTableBody .zip-import-check:not(:disabled)').forEach(input=>input.checked=event.target.checked);updateZipImportCount()});$$('#zipImportTableBody .zip-import-check').forEach(input=>input.onchange=updateZipImportCount);$("zipImportConfirm").onclick=()=>importPromptsFromZipPreview(model);updateZipImportCount();openModal("choiceModal");
+}
+async function importPromptsFromZipPreview(model){
+  if(state.busy.has("zipApply"))return;const selected=zipImportSelectedRows();if(!selected.length){toast("Seleziona almeno un file da importare.","warning");return}const defaultCategory=$("zipDefaultCategory")?.value||"";const status=$("zipImportStatus")?.value||"review";const prepared=[];
+  for(const rowNode of selected){const index=Number(rowNode.dataset.zipRow),source=model.rows[index],title=String(rowNode.querySelector('.zip-import-title')?.value||"").trim(),override=rowNode.querySelector('.zip-import-category')?.value||"",chosen=override||defaultCategory;if(!title){toast(`Inserisci il titolo per ${source.path}.`,"warning");rowNode.querySelector('.zip-import-title')?.focus();return}if(!chosen){toast("Scegli una categoria generale oppure una categoria specifica per ogni file selezionato.","warning");$("zipDefaultCategory")?.focus();return}const assignment=zipAssignmentFromValue(chosen);if(!assignment){toast(`Categoria non valida per ${source.path}.`,"error","PS-ZIP-CATEGORY");return}prepared.push({source,title,assignment})}
+  state.busy.add("zipApply");const button=$("zipImportConfirm");if(button){button.disabled=true;button.textContent="Importazione…"}try{const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts"),stamp=now();for(const item of prepared){const prompt={id:uid("prompt"),title:item.title,content:item.source.content,intro:"",introSource:"auto",introGeneratedAt:stamp,introUpdatedAt:stamp,categoryId:item.assignment.categoryId,subcategoryId:item.assignment.subcategoryId,clientId:null,projectId:null,gptSiteId:null,seoId:null,customAssignments:{},status,tags:["import-zip"],notes:"",toolUrl:"",favorite:false,pinned:false,usageCount:0,lastUsedAt:null,version:1,variableValues:{},variableFiles:{},createdAt:stamp,updatedAt:stamp,deletedAt:null,importSource:{type:"zip",archive:model.file.name,path:item.source.path}};prompt.intro=generatePromptIntro(prompt);promptStore.put(prompt)}await transactionDone(tx);await loadData();resetRenderLimit();state.sort="title_asc";localStorage.setItem("ps_sort",state.sort);if($("sortSelect"))$("sortSelect").value=state.sort;closeModal("choiceModal");state.filter={type:"all",id:null};render();toast(`${prepared.length} prompt importati dallo ZIP mantenendo la numerazione dei file.`,"success")}catch(error){console.error(error);toast(`Importazione ZIP annullata: ${error.message||"errore del database"}. Nessun prompt parziale è stato confermato.`,"error","PS-ZIP-APPLY")}finally{state.busy.delete("zipApply");if(button){button.disabled=false;updateZipImportCount()}}
+}
+const _bindEventsZipBase=bindEvents;
+bindEvents=function(){_bindEventsZipBase();$("menuImportZipBtn")?.addEventListener("click",()=>{$("moreMenu")?.classList.remove("show");$("zipImportInput")?.click()});$("zipImportInput")?.addEventListener("change",event=>{const file=event.target.files?.[0];event.target.value="";if(file)openZipImport(file)})};
+const _commandItemsZipBase=commandItems;
+commandItems=function(query){const items=_commandItemsZipBase(query),q=normalize(query),command={label:"Importa ZIP di prompt",hint:"ZIP",run:()=>{$("zipImportInput")?.click()}};return (!q||normalize(command.label).includes(q)||q.includes("zip"))?[command,...items]:items};
+
 
 /* ---------- Avvio ---------- */
 async function init(){
