@@ -665,6 +665,16 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 .zip-archive-card{min-height:0;border-style:solid;border-width:2px;border-left-width:7px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,var(--panel)),color-mix(in srgb,var(--accent) 8%,var(--panel)) 76%)}.zip-archive-card .zip-archive-head{display:flex;align-items:center;gap:11px}.zip-archive-card .zip-archive-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 20%,var(--panel));font-size:23px;flex:0 0 44px}.zip-archive-card .zip-archive-meta{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.45}.zip-archive-card .card-actions{justify-content:flex-start}.zip-archive-card .download-source-zip-card{font-weight:900}
 @media(max-width:700px){.zip-import-summary{grid-template-columns:1fr 1fr}.zip-import-controls{grid-template-columns:1fr}.zip-import-note{grid-column:1}.zip-import-table-wrap{max-height:54vh}}
 
+
+/* ---------- Sidebar alphabetical + drag/drop 22.11.1 ---------- */
+.workflow-ui-hidden{display:none!important}
+.card[draggable="true"]{cursor:grab}
+.card[draggable="true"]:active{cursor:grabbing}
+.card.dragging-prompt{opacity:.45}
+.card.drag-over-prompt{outline:3px solid color-mix(in srgb,var(--accent) 62%,transparent);outline-offset:3px}
+.sidebar-drop-target{transition:transform .14s,filter .14s,box-shadow .14s}
+.sidebar-drop-target.drag-over-sidebar{transform:translateX(3px);filter:brightness(1.18);box-shadow:0 0 0 3px rgba(255,255,255,.16)}
+
 </style>
 
 </head>
@@ -722,8 +732,8 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <div id="organizationSidebarSections"></div>
     </div>
 
-    <div class="sidebar-section-label">Workflow</div>
-    <section class="side-section workflows organization-workflows">
+    <div class="sidebar-section-label workflow-ui-hidden" hidden>Workflow</div>
+    <section class="side-section workflows organization-workflows workflow-ui-hidden" hidden>
       <div class="side-title"><span>Workflow</span><button class="sidebar-mini-add" id="addWorkflowQuick" type="button" title="Nuovo workflow" aria-label="Nuovo workflow">+</button></div>
       <div id="workflowSidebarList"></div>
     </section>
@@ -745,7 +755,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <div class="toolbar">
         <button class="btn small" id="selectAllBtn">Seleziona risultati</button>
         <select id="sortSelect" aria-label="Ordina i prompt">
-          <option value="title_asc">Titolo 1&#8211;9 / A&#8211;Z</option>
+          <option value="manual">Ordine manuale</option><option value="title_asc">Titolo 1&#8211;9 / A&#8211;Z</option>
           <option value="title_desc">Titolo Z&#8211;A / 9&#8211;1</option>
           <option value="category_asc">Categoria A&#8211;Z / Titolo 1&#8211;9</option>
           <option value="updated_desc">Modificati di recente</option>
@@ -885,7 +895,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
           <div class="manage-list" id="manageTypes"></div>
           <div class="inline-form" style="grid-template-columns:1fr auto">
             <input id="newTypeName" type="text" placeholder="Es. Fornitori, Canali, Brand">
-            <select id="newTypeTemplate" title="Template tipologia"><option value="simple">Semplice</option><option value="client">Cliente</option><option value="project">Progetto</option><option value="site">Sito</option><option value="tool">Tool</option><option value="workflow">Workflow</option><option value="tag">Tag avanzato</option></select>
+            <select id="newTypeTemplate" title="Template tipologia"><option value="simple">Semplice</option><option value="client">Cliente</option><option value="project">Progetto</option><option value="site">Sito</option><option value="tool">Tool</option><option value="tag">Tag avanzato</option></select>
             <button class="btn primary small" id="addTypeBtn">Aggiungi tipologia</button>
           </div>
         </div>
@@ -962,7 +972,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.9.0";
+const APP_VERSION="22.11.1";
 const APP_RELEASE_NAME="ZIP Import · Destinazioni e Varie";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
@@ -985,7 +995,7 @@ const MAX_IMPORT_ARCHIVE_SIZE=200*1024*1024;
 const MAX_INTERNAL_BACKUPS=3;
 const INTRO_DEBOUNCE_MS=220;
 const SORT_RULE_VERSION="18.2.0";
-const SORT_VALUES=new Set(["title_asc","title_desc","category_asc","updated_desc","created_desc","usage_desc"]);
+const SORT_VALUES=new Set(["manual","title_asc","title_desc","category_asc","updated_desc","created_desc","usage_desc"]);
 const savedSortRuleVersion=localStorage.getItem("ps_sort_rule_version");
 const storedSort=localStorage.getItem("ps_sort");
 const initialSort=savedSortRuleVersion===SORT_RULE_VERSION&&SORT_VALUES.has(storedSort)?storedSort:"title_asc";
@@ -1877,6 +1887,7 @@ function filteredPrompts(){
   }
   return items.sort((a,b)=>{
     if(filter.type==="recent")return dateTimestamp(b.lastUsedAt)-dateTimestamp(a.lastUsedAt)||naturalTitleCompare(a,b);
+    if(state.sort==="manual")return (Number(a.manualOrder??999999)-Number(b.manualOrder??999999))||naturalTitleCompare(a,b);
     if(state.sort==="title_asc")return naturalTitleCompare(a,b);
     if(state.sort==="title_desc")return naturalTitleCompare(a,b,-1);
     if(state.sort==="category_asc"){
@@ -2268,7 +2279,7 @@ function cardHtml(prompt){
   if(client)context.push(`<span class="chip">${esc(client.name)}</span>`);
   if(variableCount)context.push(`<span class="chip field-count">${variableCount} camp${variableCount===1?"o":"i"}</span>`);
   if(attachmentCount)context.push(`<span class="chip">${attachmentCount} allegat${attachmentCount===1?"o":"i"}</span>`);
-  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)};--prompt-type-color:${esc(promptTypeColor(prompt))}" data-id="${esc(prompt.id)}" tabindex="0" aria-label="${esc(prompt.title||"Senza titolo")}">
+  return `<article class="card ${state.lastSavedId===prompt.id?"just-saved":""}" style="--accent:${esc(accent)};--prompt-type-color:${esc(promptTypeColor(prompt))}" data-id="${esc(prompt.id)}" draggable="true" tabindex="0" aria-label="${esc(prompt.title||"Senza titolo")}">
     <input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""} aria-label="Seleziona ${esc(prompt.title||"prompt")}">
     <div class="card-top"><div class="card-title">${esc(prompt.title||"Senza titolo")}</div>${prompt.favorite||prompt.pinned?'<span class="star" aria-label="Preferito">★</span>':""}</div>
     <div class="card-purpose">${esc(promptIntroText(prompt)||"Apri il prompt per visualizzare e compilare i campi richiesti.")}</div>
@@ -2381,6 +2392,7 @@ function bindCardEvents(){
     card.querySelector(".restore-card")?.addEventListener("click",()=>restorePrompt(id));
     card.querySelector(".delete-card")?.addEventListener("click",()=>deletePrompt(id));
   });
+  bindPromptSidebarDragDrop();
 }
 
 function updateBulkbar(){
@@ -3131,14 +3143,18 @@ function promptSectionValue(prompt,type){
 
 function promptSectionOptions(type){
   if(type==="category"){
-    return '<option value="">Senza categoria</option>'+categoriesHierarchicalAlphabetical().map(item=>{
-      const label=item.parentId?`${catById(item.parentId)?.name||""} › ${item.name}`:item.name;
-      return `<option value="${esc(item.id)}">${esc(label)}</option>`;
-    }).join("");
+    const options=['<option value="">Senza assegnazione</option>'];
+    for(const root of rootCategoriesAlphabetical()){
+      options.push(`<option value="${esc(root.id)}">${esc(root.name)}</option>`);
+      for(const child of childCategoriesAlphabetical(root.id)){
+        options.push(`<option value="${esc(child.id)}">↳ ${esc(child.name)}</option>`);
+      }
+    }
+    return options.join("");
   }
   return '<option value="">Nessuna assegnazione</option>'+entityCollection(type)
     .slice()
-    .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true}))
+    .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true}))
     .map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
 }
 
@@ -3672,10 +3688,15 @@ const ENTITY_DEFINITIONS={
   seo:{type:"seo",label:"SEO",singular:"SEO",store:"seo",field:"seoId",prefix:"seo"}
 };
 function allEntityDefinitions(){
-  return [
-    ...Object.values(ENTITY_DEFINITIONS),
+  const definitions=[
+    ...Object.values(ENTITY_DEFINITIONS).map(item=>({...item,label:item.type==="category"?"Varie":item.label})),
     ...state.customTypes.map(type=>({type:`custom:${type.id}`,label:type.name,singular:type.singular||type.name,store:"customEntities",field:null,prefix:"customentity",custom:true,typeId:type.id}))
   ];
+  return definitions.sort((a,b)=>{
+    if(a.type==="category")return -1;
+    if(b.type==="category")return 1;
+    return String(a.label||"").localeCompare(String(b.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true});
+  });
 }
 function entityDefinition(type){
   if(ENTITY_DEFINITIONS[type])return ENTITY_DEFINITIONS[type];
@@ -4331,9 +4352,17 @@ async function loadWorkspaceSettings(){
   if(!Array.isArray(state.collections))state.collections=[];if(!Array.isArray(state.workflows))state.workflows=[];
 }
 function visibleSidebarTypes(){
-  const fixed=FIXED_ENTITY_TYPES;
-  const custom=state.customTypes.filter(type=>type.visible!==false).map((type,index)=>({type:`custom:${type.id}`,label:type.name,singular:type.singular||type.name,field:null,store:"customEntities",prefix:"customentity",className:"dynamic-type",custom:true,typeId:type.id,color:type.color||"#64748b",icon:type.icon||"◆",order:Number.isFinite(type.order)?type.order:index}));
-  return [...fixed,...custom].sort((a,b)=>{const ao=a.custom?(a.order??999):999,bo=b.custom?(b.order??999):999;if(a.custom&&b.custom&&ao!==bo)return ao-bo;return a.label.localeCompare(b.label,"it",{sensitivity:"base",numeric:true})});
+  const fixed=FIXED_ENTITY_TYPES.map(item=>({...item}));
+  const custom=state.customTypes
+    .filter(type=>type.visible!==false)
+    .map(type=>({
+      type:`custom:${type.id}`,label:type.name,singular:type.singular||type.name,
+      field:null,store:"customEntities",prefix:"customentity",className:"dynamic-type",
+      custom:true,typeId:type.id,color:type.color||"#64748b",icon:type.icon||"◆"
+    }));
+  return [...fixed,...custom].sort((a,b)=>
+    String(a.label||"").localeCompare(String(b.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true})
+  );
 }
 function customAssignmentValues(prompt,typeId){const raw=prompt?.customAssignments?.[typeId];return Array.isArray(raw)?raw.filter(Boolean):(raw?[raw]:[])}
 function promptMatchesCustom(prompt,typeId,entityId){return customAssignmentValues(prompt,typeId).includes(entityId)}
@@ -4524,7 +4553,7 @@ function openCollection(id){const c=state.collections.find(x=>x.id===id);if(!c)r
 const _filteredPromptsCollection=filteredPrompts;filteredPrompts=function(){let items=_filteredPromptsCollection();if(state.filter.type==="collection"){const c=state.collections.find(x=>x.id===state.filter.id);items=items.filter(p=>(c?.promptIds||[]).includes(p.id))}return items}
 async function addSelectedToCollection(){if(!state.selected.size){toast("Seleziona almeno un prompt.","warning");return}if(!state.collections.length){await createCollection();if(!state.collections.length)return}const options=state.collections.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");choiceAction("Aggiungi a raccolta","Raccolta",options,async id=>{const c=state.collections.find(x=>x.id===id);if(!c)return;c.promptIds=[...new Set([...(c.promptIds||[]),...state.selected])];await saveSettingsRecord("collections",state.collections);state.selected.clear();render();toast("Prompt aggiunti alla raccolta.","success")})}
 
-function renderWorkflowSidebar(){$("workflowSidebarList").innerHTML=state.workflows.length?state.workflows.map(w=>`<button class="workflow-chip-link" data-workflow-id="${esc(w.id)}"><span>⇢</span><span>${esc(w.name)}</span><span class="count">${(w.steps||[]).length}</span></button>`).join(""):'<div class="hint" style="padding:4px 8px;color:var(--sidebar-muted)">Nessun workflow</div>';$$('[data-workflow-id]').forEach(btn=>btn.onclick=()=>openWorkflow(btn.dataset.workflowId))}
+function renderWorkflowSidebar(){if(!$("workflowSidebarList"))return;$("workflowSidebarList").innerHTML=state.workflows.length?state.workflows.map(w=>`<button class="workflow-chip-link" data-workflow-id="${esc(w.id)}"><span>⇢</span><span>${esc(w.name)}</span><span class="count">${(w.steps||[]).length}</span></button>`).join(""):'<div class="hint" style="padding:4px 8px;color:var(--sidebar-muted)">Nessun workflow</div>';$$('[data-workflow-id]').forEach(btn=>btn.onclick=()=>openWorkflow(btn.dataset.workflowId))}
 async function createWorkflow(){const name=window.prompt("Nome del workflow:","");if(!name?.trim())return;state.workflows.push({id:uid("workflow"),name:name.trim(),steps:[],createdAt:now()});await saveSettingsRecord("workflows",state.workflows);renderWorkflowSidebar();openWorkflow(state.workflows.at(-1).id)}
 function openWorkflow(id){const w=state.workflows.find(x=>x.id===id);if(!w)return;$("sidebar")?.classList.remove("open");$("choiceTitle").textContent=`Workflow · ${w.name}`;$("choiceBody").innerHTML=`<div class="hint" style="margin-bottom:10px">Concatena prompt nell'ordine di esecuzione.</div><div class="relation-list">${(w.steps||[]).map((pid,i)=>{const p=state.prompts.find(x=>x.id===pid);return `<div class="relation-row"><strong>${i+1}</strong><span class="grow">${esc(p?.title||"Prompt mancante")}</span><button class="btn small remove-workflow-step" data-index="${i}">Rimuovi</button></div>`}).join("")||'<div class="hint">Nessuno step.</div>'}</div><div class="inline-form" style="grid-template-columns:1fr auto;margin-top:12px"><select id="workflowAddPrompt"><option value="">Scegli prompt…</option>${livePrompts().map(p=>`<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("")}</select><button class="btn primary small" id="workflowAddBtn">Aggiungi</button></div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Chiudi</button>';bindModalClose();$("workflowAddBtn").onclick=async()=>{const pid=$("workflowAddPrompt").value;if(!pid)return;w.steps=[...(w.steps||[]),pid];await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)};$$('.remove-workflow-step').forEach(btn=>btn.onclick=async()=>{w.steps.splice(Number(btn.dataset.index),1);await saveSettingsRecord("workflows",state.workflows);openWorkflow(id)});openModal("choiceModal")}
 
@@ -4550,6 +4579,156 @@ async function moveCustomType(id,direction){const ordered=[...state.customTypes]
 async function duplicateCustomType(id){const source=customTypeById(id);if(!source)return;let name=`${source.name} copia`,n=2;while(state.customTypes.some(t=>normalize(t.name)===normalize(name)))name=`${source.name} copia ${n++}`;const copy={...source,id:uid("ctype"),name,order:state.customTypes.length,createdAt:now(),updatedAt:now()};await put("customTypes",copy);for(const item of customEntitiesForType(id))await put("customEntities",{...item,id:uid("customentity"),typeId:copy.id,createdAt:now()});await loadData();render();renderManage();toast("Tipologia duplicata.","success")}
 const _renderManageV19=renderManage;renderManage=function(){_renderManageV19();$$('.custom-type-visible').forEach(input=>input.onchange=async()=>{const t=customTypeById(input.dataset.id);t.visible=input.checked;t.updatedAt=now();await put("customTypes",t);await loadData();render();renderManage()});$$('.custom-type-multi').forEach(input=>input.onchange=async()=>{const t=customTypeById(input.dataset.id);t.multi=input.checked;t.updatedAt=now();await put("customTypes",t);await loadData();render();renderManage()});$$('.type-icon-input').forEach(input=>input.onchange=async()=>{const t=customTypeById(input.dataset.id);t.icon=input.value.trim()||"◆";await put("customTypes",t);await loadData();render();renderManage()});$$('.custom-type-up').forEach(b=>b.onclick=()=>moveCustomType(b.dataset.id,-1));$$('.custom-type-down').forEach(b=>b.onclick=()=>moveCustomType(b.dataset.id,1));$$('.duplicate-custom-type').forEach(b=>b.onclick=()=>duplicateCustomType(b.dataset.id))}
 const _addCustomTypeV19=addCustomType;addCustomType=async function(){const template=$("newTypeTemplate")?.value||"simple",name=$("newTypeName")?.value.trim().replace(/\s+/g," ");if(!name)return _addCustomTypeV19();const presets={simple:{icon:"◆"},client:{icon:"👤"},project:{icon:"▣"},site:{icon:"🌐"},tool:{icon:"🛠"},workflow:{icon:"⇢",multi:true},tag:{icon:"#",multi:true}};if(state.customTypes.some(t=>normalize(t.name)===normalize(name))||FIXED_ENTITY_TYPES.some(t=>normalize(t.label)===normalize(name))){toast("Esiste già una tipologia con questo nome.","warning");return}const preset=presets[template]||presets.simple;await put("customTypes",{id:uid("ctype"),name,color:CATEGORY_COLORS[state.customTypes.length%CATEGORY_COLORS.length],icon:preset.icon,visible:true,multi:!!preset.multi,order:state.customTypes.length,template,createdAt:now()});$("newTypeName").value="";await loadData();render();renderManage();toast(`Tipologia “${name}” creata dal template ${template}.`,"success")}
+
+
+function alphabetizeOrganizeSidebar(){
+  const categoryHost=$("categorySidebarSection");
+  const orgHost=$("organizationSidebarSections");
+  if(!categoryHost||!orgHost)return;
+
+  const categorySection=categoryHost.querySelector(".side-section");
+  if(categorySection)orgHost.appendChild(categorySection);
+
+  const sections=[...orgHost.querySelectorAll(":scope > .side-section")]
+    .filter(section=>!section.classList.contains("workflow-ui-hidden"));
+
+  sections.sort((a,b)=>{
+    const aLabel=(a.querySelector(".side-title span")?.textContent||"").replace(/^[^\p{L}\p{N}]+/u,"").trim();
+    const bLabel=(b.querySelector(".side-title span")?.textContent||"").replace(/^[^\p{L}\p{N}]+/u,"").trim();
+    return aLabel.localeCompare(bLabel,"it",{sensitivity:"base",numeric:true,ignorePunctuation:true});
+  });
+  sections.forEach(section=>orgHost.appendChild(section));
+}
+
+function sidebarDnDType(section){
+  if(section.classList.contains("categories"))return "category";
+  const picker=section.querySelector(".dynamic-sidebar-picker");
+  return picker?.dataset.sidebarType||"";
+}
+
+function sidebarDnDOptions(type){
+  if(type==="category"){
+    return categoriesHierarchicalAlphabetical().map(item=>{
+      const label=item.parentId?`↳ ${item.name}`:item.name;
+      return `<option value="${esc(item.id)}">${esc(label)}</option>`;
+    }).join("");
+  }
+  const collection=entityCollection(type).slice().sort((a,b)=>
+    String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true})
+  );
+  return collection.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+}
+
+async function applySidebarPromptDrop(promptId,type,targetId){
+  const prompt=state.prompts.find(item=>item.id===promptId);
+  if(!prompt)return;
+  const updated={...prompt,updatedAt:now()};
+
+  if(type==="category"){
+    const category=catById(targetId);
+    if(!category)return;
+    updated.categoryId=category.parentId||category.id;
+    updated.subcategoryId=category.parentId?category.id:null;
+  }else if(String(type).startsWith("custom:")){
+    const typeId=type.slice(7),customType=customTypeById(typeId);
+    const current=customAssignmentValues(updated,typeId);
+    updated.customAssignments={
+      ...(updated.customAssignments||{}),
+      [typeId]:customType?.multi?[...new Set([...current,targetId])]:targetId
+    };
+  }else{
+    const definition=entityDefinition(type);
+    if(!definition?.field)return;
+    updated[definition.field]=targetId;
+  }
+
+  await put("prompts",updated);
+  await loadData();
+  render();
+  toast("Prompt riassegnato dalla sidebar.","success");
+}
+
+function openSidebarPromptDrop(promptId,type){
+  const label=type==="category"?"Varie":(sidebarTypeDefinition(type)?.label||entityDefinition(type)?.label||"Tipologia");
+  const options=sidebarDnDOptions(type);
+  if(!options){
+    toast(`Nessuna destinazione disponibile in ${label}.`,"warning");
+    return;
+  }
+  choiceAction(`Sposta prompt in ${label}`,"Destinazione",options,value=>applySidebarPromptDrop(promptId,type,value));
+}
+
+async function reorderPromptManual(sourceId,targetId,before){
+  if(!sourceId||!targetId||sourceId===targetId)return;
+  const visible=filteredPrompts().filter(item=>!item.deletedAt);
+  const ids=visible.map(item=>item.id).filter(id=>id!==sourceId);
+  let index=ids.indexOf(targetId);
+  if(index<0)return;
+  if(!before)index++;
+  ids.splice(index,0,sourceId);
+
+  const tx=state.db.transaction("prompts","readwrite");
+  const promptStore=tx.objectStore("prompts");
+  const stamp=now();
+  ids.forEach((id,position)=>{
+    const prompt=state.prompts.find(item=>item.id===id);
+    if(prompt)promptStore.put({...prompt,manualOrder:position,updatedAt:stamp});
+  });
+  await transactionDone(tx);
+
+  state.sort="manual";
+  localStorage.setItem("ps_sort","manual");
+  await loadData();
+  render();
+  if($("sortSelect"))$("sortSelect").value="manual";
+  toast("Ordine manuale aggiornato.","success");
+}
+
+function bindPromptSidebarDragDrop(){
+  $$("#cards .card[draggable='true']").forEach(card=>{
+    card.ondragstart=event=>{
+      event.dataTransfer.effectAllowed="move";
+      event.dataTransfer.setData("text/prompt-id",card.dataset.id);
+      card.classList.add("dragging-prompt");
+    };
+    card.ondragend=()=>card.classList.remove("dragging-prompt","drag-over-prompt");
+    card.ondragover=event=>{
+      if(![...event.dataTransfer.types].includes("text/prompt-id"))return;
+      event.preventDefault();
+      card.classList.add("drag-over-prompt");
+    };
+    card.ondragleave=()=>card.classList.remove("drag-over-prompt");
+    card.ondrop=event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      card.classList.remove("drag-over-prompt");
+      const sourceId=event.dataTransfer.getData("text/prompt-id");
+      const rect=card.getBoundingClientRect();
+      reorderPromptManual(sourceId,card.dataset.id,event.clientY<rect.top+rect.height/2);
+    };
+  });
+
+  $$("#organizationSidebarSections > .side-section").forEach(section=>{
+    const type=sidebarDnDType(section);
+    if(!type)return;
+    const target=section.querySelector("#categoryPicker,[data-sidebar-toggle-type],.side-title");
+    if(!target)return;
+    target.classList.add("sidebar-drop-target");
+    target.ondragover=event=>{
+      if(![...event.dataTransfer.types].includes("text/prompt-id"))return;
+      event.preventDefault();
+      target.classList.add("drag-over-sidebar");
+    };
+    target.ondragleave=()=>target.classList.remove("drag-over-sidebar");
+    target.ondrop=event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      target.classList.remove("drag-over-sidebar");
+      const promptId=event.dataTransfer.getData("text/prompt-id");
+      if(promptId)openSidebarPromptDrop(promptId,type);
+    };
+  });
+}
 
 function enhanceSidebarRendering(){const original=renderSidebar;renderSidebar=function(){original();const container=$("entitySidebarSections");if(container){const sections=[...container.querySelectorAll('.side-section')];sections.forEach(section=>{const picker=section.querySelector('.dynamic-sidebar-picker'),type=picker?.dataset.sidebarType;if(type?.startsWith('custom:')){const t=customTypeById(type.slice(7));const title=section.querySelector('.side-title span');if(title&&t)title.textContent=`${t.icon||'◆'} ${t.name}`}})}renderCollectionSidebar();renderWorkflowSidebar()}}
 enhanceSidebarRendering();
@@ -4612,7 +4791,13 @@ const _filteredPromptsOps=filteredPrompts;filteredPrompts=function(){const parse
 function sidebarCollapseState(){return new Set(readStoredJson("ps_collapsed_sidebar_sections",[]))}
 function wireSidebarCollapse(){const collapsed=sidebarCollapseState();$$('#sidebar .side-section').forEach((section,index)=>{const title=section.querySelector(':scope > .side-title');if(!title)return;const key=section.className.split(/\s+/).filter(x=>!['side-section','sidebar-collapsed'].includes(x)).join('-')||`section-${index}`;section.classList.toggle('sidebar-collapsed',collapsed.has(key));title.onclick=event=>{if(event.target.closest('button,input,select'))return;const set=sidebarCollapseState();section.classList.toggle('sidebar-collapsed');section.classList.contains('sidebar-collapsed')?set.add(key):set.delete(key);localStorage.setItem("ps_collapsed_sidebar_sections",JSON.stringify([...set]))}})}
 function applyHideEmptySidebar(){const hide=localStorage.getItem("ps_hide_empty_types")==='1';$$('#organizationSidebarSections .side-section').forEach(section=>{const picker=section.querySelector('select');if(!picker)return;section.classList.toggle('hidden',hide&&picker.options.length<=1)})}
-const _renderSidebarPrefs=renderSidebar;renderSidebar=function(){_renderSidebarPrefs();wireSidebarCollapse();applyHideEmptySidebar()}
+const _renderSidebarPrefs=renderSidebar;renderSidebar=function(){
+  _renderSidebarPrefs();
+  wireSidebarCollapse();
+  applyHideEmptySidebar();
+  alphabetizeOrganizeSidebar();
+  bindPromptSidebarDragDrop();
+}
 
 async function pruneTrashByRetention(){const days=Number(localStorage.getItem("ps_trash_retention_days")||0);if(!days)return;const cutoff=Date.now()-days*864e5,expired=state.prompts.filter(p=>p.deletedAt&&dateTimestamp(p.deletedAt)<cutoff);if(!expired.length)return;await createSafetyBackup("Prima della pulizia automatica del cestino");for(const p of expired)await remove("prompts",p.id);await loadData();if(expired.length)toast(`${expired.length} prompt eliminati dal cestino secondo la retention impostata.`,"success")}
 const _renderManagePrefs=renderManage;renderManage=function(){_renderManagePrefs();const hide=$("hideEmptySidebarTypes"),days=$("trashRetentionDays");if(hide){hide.checked=localStorage.getItem("ps_hide_empty_types")==='1';hide.onchange=()=>{localStorage.setItem("ps_hide_empty_types",hide.checked?'1':'0');render()}}if(days){days.value=localStorage.getItem("ps_trash_retention_days")||'0';days.onchange=()=>{const value=Math.max(0,Math.min(3650,Number(days.value)||0));localStorage.setItem("ps_trash_retention_days",String(value));days.value=String(value);toast("Retention cestino aggiornata.","success")}}}
@@ -4869,22 +5054,51 @@ function decodeZipText(bytes){
 }
 function zipDestinationOptions({includeGeneral=false}={}){
   const parts=[];
+  const alpha=(a,b)=>String(a?.name||a?.label||"").localeCompare(
+    String(b?.name||b?.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true}
+  );
   if(includeGeneral)parts.push('<option value="">Usa destinazione generale</option>');
   parts.push('<option value="__none__">Nessuna assegnazione</option>');
-  const cats=categoriesHierarchicalAlphabetical();
-  if(cats.length){
-    parts.push('<optgroup label="Varie">');
-    for(const item of cats){const parent=item.parentId?catById(item.parentId):null,label=item.parentId?`${parent?.name||""} › ${item.name}`:item.name;parts.push(`<option value="category:${esc(item.id)}">${esc(label)}</option>`)}
+
+  const groups=[];
+  const roots=rootCategoriesAlphabetical();
+  if(roots.length){
+    const items=[];
+    for(const root of roots){
+      items.push({id:root.id,name:root.name,child:false});
+      childCategoriesAlphabetical(root.id).forEach(child=>items.push({id:child.id,name:child.name,child:true}));
+    }
+    groups.push({label:"Varie",kind:"category",items});
+  }
+
+  groups.push(
+    {label:"Clienti",kind:"client",items:[...state.clients].sort(alpha)},
+    {label:"GPTSites",kind:"gptsite",items:[...state.gptsites].sort(alpha)},
+    {label:"Progetti",kind:"project",items:[...state.projects].sort(alpha)},
+    {label:"SEO",kind:"seo",items:[...state.seo].sort(alpha)},
+    ...state.customTypes.filter(type=>type.visible!==false).map(type=>({
+      label:type.name,kind:"custom",typeId:type.id,items:[...customEntitiesForType(type.id)].sort(alpha)
+    }))
+  );
+
+  groups.sort((a,b)=>String(a.label||"").localeCompare(
+    String(b.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true}
+  ));
+
+  for(const group of groups){
+    if(!group.items.length)continue;
+    parts.push(`<optgroup label="${esc(group.label)}">`);
+    for(const item of group.items){
+      const value=group.kind==="category"
+        ?`category:${esc(item.id)}`
+        :group.kind==="custom"
+          ?`custom:${esc(group.typeId)}:${esc(item.id)}`
+          :`${group.kind}:${esc(item.id)}`;
+      const label=group.kind==="category"&&item.child?`↳ ${esc(item.name)}`:esc(item.name);
+      parts.push(`<option value="${value}">${label}</option>`);
+    }
     parts.push('</optgroup>');
   }
-  const groups=[
-    {label:"Clienti",type:"client",items:state.clients},
-    {label:"GPTSites",type:"gptsite",items:state.gptsites},
-    {label:"Progetti",type:"project",items:state.projects},
-    {label:"SEO",type:"seo",items:state.seo}
-  ];
-  for(const group of groups){if(!group.items.length)continue;parts.push(`<optgroup label="${esc(group.label)}">`);for(const item of group.items)parts.push(`<option value="${group.type}:${esc(item.id)}">${esc(item.name)}</option>`);parts.push('</optgroup>')}
-  for(const type of state.customTypes.filter(item=>item.visible!==false)){const entities=customEntitiesForType(type.id);if(!entities.length)continue;parts.push(`<optgroup label="${esc(type.name)}">`);for(const entity of entities)parts.push(`<option value="custom:${esc(type.id)}:${esc(entity.id)}">${esc(entity.name)}</option>`);parts.push('</optgroup>')}
   return parts.join("");
 }
 function zipAssignmentFromValue(value){
@@ -4936,7 +5150,7 @@ const _cardHtmlZipArchiveBase=cardHtml;
 cardHtml=function(prompt){
   if(!prompt?.isZipArchiveBox||!prompt?.sourceZip)return _cardHtmlZipArchiveBase(prompt);
   const category=catById(prompt.subcategoryId)||catById(prompt.categoryId),accent=categoryColor(category);
-  return `<article class="card zip-archive-card" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" tabindex="0" aria-label="Archivio ZIP ${esc(prompt.sourceZip.name||"")}"><input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""} aria-label="Seleziona archivio ZIP"><div class="zip-archive-head"><div class="zip-archive-icon" aria-hidden="true">📦</div><div><div class="card-title">${esc(prompt.title||"00 - Archivio ZIP")}</div><div class="zip-archive-meta"><strong>${esc(prompt.sourceZip.name||"Archivio ZIP")}</strong> · ${esc(formatBytes(prompt.sourceZip.size||0))}<br>File sorgente originale dell’importazione. Questo box resta nella libreria e permette di riscaricare lo ZIP.</div></div></div><div class="card-actions"><button class="btn small primary download-source-zip-card" type="button">Scarica ZIP</button><button class="btn small danger trash-card" type="button">Cestina box</button></div></article>`;
+  return `<article class="card zip-archive-card" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" draggable="true" tabindex="0" aria-label="Archivio ZIP ${esc(prompt.sourceZip.name||"")}"><input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""} aria-label="Seleziona archivio ZIP"><div class="zip-archive-head"><div class="zip-archive-icon" aria-hidden="true">📦</div><div><div class="card-title">${esc(prompt.title||"00 - Archivio ZIP")}</div><div class="zip-archive-meta"><strong>${esc(prompt.sourceZip.name||"Archivio ZIP")}</strong> · ${esc(formatBytes(prompt.sourceZip.size||0))}<br>File sorgente originale dell’importazione. Questo box resta nella libreria e permette di riscaricare lo ZIP.</div></div></div><div class="card-actions"><button class="btn small primary download-source-zip-card" type="button">Scarica ZIP</button><button class="btn small danger trash-card" type="button">Cestina box</button></div></article>`;
 };
 const _bindCardEventsZipArchiveBase=bindCardEvents;
 bindCardEvents=function(){
