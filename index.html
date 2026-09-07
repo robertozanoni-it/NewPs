@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="22.3.0">
+<meta name="application-version" content="22.4.0">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -624,9 +624,9 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 .sidebar-type-shortcut.active{background:rgba(96,165,250,.24);box-shadow:inset 3px 0 #60a5fa}
 .sidebar-type-shortcut .type-icon{width:22px;text-align:center;flex:0 0 22px}
 .sidebar-type-shortcut .count{margin-left:auto}
-.sidebar-type-panel{display:none;margin-top:5px;padding-left:7px}
+.sidebar-type-panel{display:none;margin-top:5px;padding:0 2px 2px 7px}
 .sidebar-type-panel.open{display:block}
-.sidebar-type-panel .sidebar-picker{width:100%}
+.sidebar-type-panel .sidebar-picker{width:100%;background:color-mix(in srgb,var(--section-accent) 18%,rgba(255,255,255,.08));border-color:color-mix(in srgb,var(--section-accent) 48%,rgba(255,255,255,.20))}
 .side-section.collections{margin-bottom:8px}
 .sidebar-bottom-tools{margin-top:10px}
 .sidebar-version{margin-top:8px}
@@ -643,10 +643,10 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 .library-collections-head{display:flex;align-items:center;gap:8px;padding:10px 8px 4px;color:var(--sidebar-muted);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.library-collections-head .sidebar-mini-add{margin-left:auto}
 .organize-label{margin-top:5px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:11px;color:#fff}
 #categorySidebarSection .side-section,.sidebar-organization .side-section{margin:0 0 7px;padding:6px;border-radius:12px}
-#categorySidebarSection .side-section.categories{--section-accent:#f59e0b;background:rgba(255,255,255,.035);box-shadow:inset 3px 0 #f59e0b}
-.sidebar-type-shortcut{min-height:45px;border-color:color-mix(in srgb,var(--section-accent) 42%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--section-accent) 24%,transparent),rgba(255,255,255,.035));font-size:14px}
-.sidebar-type-shortcut:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--section-accent) 36%,transparent),rgba(255,255,255,.08));border-color:color-mix(in srgb,var(--section-accent) 60%,transparent)}
-.sidebar-type-shortcut.active{background:linear-gradient(90deg,color-mix(in srgb,var(--section-accent) 48%,transparent),rgba(255,255,255,.10));box-shadow:inset 3px 0 var(--section-accent)}
+#categorySidebarSection .side-section.categories{--section-accent:#f59e0b;background:color-mix(in srgb,#f59e0b 15%,rgba(255,255,255,.025));box-shadow:inset 3px 0 #f59e0b}
+.sidebar-type-shortcut{min-height:45px;border-color:color-mix(in srgb,var(--section-accent) 58%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--section-accent) 42%,transparent),color-mix(in srgb,var(--section-accent) 22%,rgba(255,255,255,.04)));font-size:14px;box-shadow:inset 3px 0 var(--section-accent)}
+.sidebar-type-shortcut:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--section-accent) 54%,transparent),color-mix(in srgb,var(--section-accent) 30%,rgba(255,255,255,.08)));border-color:color-mix(in srgb,var(--section-accent) 78%,transparent)}
+.sidebar-type-shortcut.active{background:linear-gradient(90deg,color-mix(in srgb,var(--section-accent) 68%,transparent),color-mix(in srgb,var(--section-accent) 38%,rgba(255,255,255,.10)));border-color:color-mix(in srgb,var(--section-accent) 88%,transparent);box-shadow:inset 4px 0 var(--section-accent)}
 .sidebar-type-shortcut .category-caret{margin-left:2px}.sidebar-type-shortcut[aria-expanded="true"] .category-caret{transform:rotate(225deg) translate(-2px,-2px)}
 .inline-category-menu{position:static;z-index:auto;top:auto;left:auto;width:100%;max-height:330px;margin-top:5px;border-color:rgba(255,255,255,.12);background:rgba(7,17,31,.72);box-shadow:none}
 .sidebar-organization #organizationSidebarSections{gap:0}.sidebar-organization .side-section.clients{--section-accent:#0891b2}.sidebar-organization .side-section.gptsites{--section-accent:#ec4899}.sidebar-organization .side-section.projects{--section-accent:#f59e0b}.sidebar-organization .side-section.seo{--section-accent:#16a34a}
@@ -659,7 +659,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn" aria-label="Apri menu">&#9776;</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 22.3.0</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 22.4.0</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
       <input class="search" id="globalSearch" type="search" list="searchSuggestions" autocomplete="off" placeholder="Cerca un prompt per titolo, argomento o cliente…" aria-label="Cerca nella libreria">
@@ -704,10 +704,9 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 
     <div class="sidebar-section-label organize-label">Organizza per</div>
     <div id="categorySidebarSection"></div>
-    <details class="sidebar-organization" id="sidebarOrganization" open>
-      <summary><span>Organizza per</span><span class="category-caret" aria-hidden="true"></span></summary>
+    <div class="sidebar-organization" id="sidebarOrganization">
       <div id="organizationSidebarSections"></div>
-    </details>
+    </div>
 
     <div class="sidebar-section-label">Workflow</div>
     <section class="side-section workflows organization-workflows">
@@ -721,7 +720,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <button class="side-link" data-filter="trash"><span aria-hidden="true">&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
       <button class="side-link" id="manageBtn"><span aria-hidden="true">&#9881;</span><span>Impostazioni e struttura</span></button>
     </section>
-    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.3.0</div>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.4.0</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -948,7 +947,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.3.0";
+const APP_VERSION="22.4.0";
 const APP_RELEASE_NAME="Sidebar Navigation Clarity";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
@@ -1939,7 +1938,7 @@ function renderSidebar(){
       </button>
       <div class="sidebar-type-panel ${active?"open":""}" data-sidebar-panel-type="${esc(definition.type)}">
         <select class="sidebar-picker dynamic-sidebar-picker" data-sidebar-type="${esc(definition.type)}" aria-label="Filtra per ${esc(definition.label)}">
-          <option value="all">Tutti ${esc(definition.label)}</option>
+          ${selected==="all"?`<option value="" selected disabled>Seleziona ${esc(definition.label.toLowerCase())}…</option>`:""}
           ${entities.map(entity=>`<option value="${esc(entity.id)}" ${selected===entity.id?"selected":""}>${esc(entityDisplayLabel(entity)||entity.name)} (${countFor(entity)})</option>`).join("")}
         </select>
       </div>
@@ -1950,8 +1949,7 @@ function renderSidebar(){
 
   if($("categoryPickerValue"))$("categoryPickerValue").textContent=activeCategory?.name||"Categorie";
   if($("categoryMenu")){
-    $("categoryMenu").innerHTML=`<button class="category-menu-all ${state.filter.type!=="category"?"active":""}" type="button" role="menuitem" data-category-id="all"><span>Tutte le categorie</span></button>
-      ${rootCategoriesAlphabetical().map(root=>{
+    $("categoryMenu").innerHTML=`${rootCategoriesAlphabetical().map(root=>{
         const children=childCategoriesAlphabetical(root.id);
         return `<div class="category-menu-group"><div class="category-parent-row ${children.length?"":"single"}">
           <button class="category-parent-choice ${activeCategory?.id===root.id?"active":""}" type="button" role="menuitem" data-category-id="${esc(root.id)}"><span>${esc(root.name)}</span><span class="category-menu-count">${counts[root.id]||0}</span></button>
@@ -1964,7 +1962,8 @@ function renderSidebar(){
 
   if($("dynamicBulkActions"))$("dynamicBulkActions").innerHTML=state.customTypes.filter(type=>type.visible!==false).map(type=>`<button class="btn small bulk-custom-assign" data-type-id="${esc(type.id)}">Assegna ${esc(type.name)}</button>`).join("");
   $$(".bulk-custom-assign").forEach(button=>button.onclick=()=>choiceAction(`Assegna ${customTypeById(button.dataset.typeId)?.name||"tipologia"}`,customTypeById(button.dataset.typeId)?.name||"Destinazione",'<option value="">Nessuna assegnazione</option>'+customEntitiesForType(button.dataset.typeId).map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join(""),value=>bulkUpdateCustom(button.dataset.typeId,value||null)));
-  if($("categoryPicker"))$("categoryPicker").onclick=()=>{
+  if($("categoryPicker"))$("categoryPicker").onclick=event=>{
+    event.preventDefault();event.stopPropagation();
     const willOpen=$("categoryMenu").hidden;
     $$('[data-sidebar-panel-type].open').forEach(item=>item.classList.remove("open"));
     $$('[data-sidebar-toggle-type][aria-expanded="true"]').forEach(item=>item.setAttribute("aria-expanded","false"));
@@ -1972,7 +1971,8 @@ function renderSidebar(){
   };
   $$("#categoryMenu [data-category-id]").forEach(button=>button.onclick=()=>button.dataset.categoryId==="all"?setFilter("all"):setFilter("category",button.dataset.categoryId));
   $$("#categoryMenu .category-submenu-toggle").forEach(button=>button.onclick=()=>openSubcategoryPopup(button.dataset.submenuId));
-  $$('[data-sidebar-toggle-type]').forEach(button=>button.onclick=()=>{
+  $$('[data-sidebar-toggle-type]').forEach(button=>button.onclick=event=>{
+    event.preventDefault();event.stopPropagation();
     if($("categoryMenu"))$("categoryMenu").hidden=true;if($("categoryPicker"))$("categoryPicker").setAttribute("aria-expanded","false");
     const type=button.dataset.sidebarToggleType,panel=document.querySelector(`[data-sidebar-panel-type="${CSS.escape(type)}"]`),open=!panel?.classList.contains("open");
     $$('[data-sidebar-panel-type].open').forEach(item=>item.classList.remove("open"));
@@ -1980,7 +1980,7 @@ function renderSidebar(){
     if(open&&panel){panel.classList.add("open");button.setAttribute("aria-expanded","true")}
   });
   $$("#organizationSidebarSections .dynamic-sidebar-picker").forEach(picker=>picker.onchange=event=>{
-    if(event.target.value==="all"){setFilter("all");return}
+    if(!event.target.value)return;
     const type=event.target.dataset.sidebarType;
     if(type.startsWith("custom:")){state.filter={type:"custom",typeId:type.slice(7),id:event.target.value};state.selected.clear();render();$("sidebar").classList.remove("open")}
     else setFilter(type,event.target.value);
@@ -4101,7 +4101,7 @@ function bindEvents(){
   $("menuDiagnosticsBtn").onclick=()=>{$("moreMenu").classList.remove("show");performDashboardAction("diagnostics")};
   document.addEventListener("click",event=>{
     if(!event.target.closest('.more-menu-wrap'))$("moreMenu")?.classList.remove("show");
-    if(!event.target.closest("#categoryMenuShell")){
+    if(!event.target.closest("#categorySidebarSection,#categoryMenuShell")){
       if($("categoryMenu"))$("categoryMenu").hidden=true;
       $("categoryPicker")?.setAttribute("aria-expanded","false");
     }
