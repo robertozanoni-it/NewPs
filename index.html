@@ -675,6 +675,10 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 .sidebar-drop-target{transition:transform .14s,filter .14s,box-shadow .14s}
 .sidebar-drop-target.drag-over-sidebar{transform:translateX(3px);filter:brightness(1.18);box-shadow:0 0 0 3px rgba(255,255,255,.16)}
 
+
+.subcategory-management-filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.subcategory-management-filters .field{gap:5px}
+@media(max-width:650px){.subcategory-management-filters{grid-template-columns:1fr}}
 </style>
 
 </head>
@@ -908,12 +912,22 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
           </div>
         </div>
         <div class="panel-box">
-          <h4>Sottocategorie</h4><div class="hint" style="margin-bottom:10px">Seleziona una categoria dal menu in basso per vedere e modificare solo le sue sottocategorie. Il colore viene ereditato automaticamente.</div>
+          <h4>Sottocategorie</h4>
+          <div class="hint" style="margin-bottom:10px">1. Scegli la tipologia. 2. Scegli l’elemento principale. 3. Gestisci o aggiungi le sottocategorie appartenenti a quell’elemento.</div>
+          <div class="subcategory-management-filters">
+            <div class="field">
+              <label for="manageSubcategoryType">Tipologia</label>
+              <select id="manageSubcategoryType"></select>
+            </div>
+            <div class="field">
+              <label for="newSubcategoryParent">Elemento principale</label>
+              <select id="newSubcategoryParent"></select>
+            </div>
+          </div>
           <div class="manage-list" id="manageSubcategories"></div>
-          <div class="inline-form">
+          <div class="inline-form subcategory-add-row" style="grid-template-columns:minmax(0,1fr) auto">
             <input id="newSubcategoryName" type="text" placeholder="Nome sottocategoria">
-            <select id="newSubcategoryParent"><option value="">Tutte le categorie</option></select>
-            <button class="btn primary small" id="addSubcategoryBtn">Aggiungi</button>
+            <button class="btn primary small" id="addSubcategoryBtn">Aggiungi sottocategoria</button>
           </div>
         </div>
         <div class="panel-box">
@@ -972,7 +986,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.11.1";
+const APP_VERSION="22.12.0";
 const APP_RELEASE_NAME="ZIP Import · Destinazioni e Varie";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
@@ -1024,7 +1038,7 @@ const state={
   lastSavedId:null,
   recentValues:readStoredJson("ps_recent_values",{}),
   openVaries:new Set(Array.isArray(storedOpenVaries)?storedOpenVaries:[]),
-  manageSubcategoryFilter:null,
+  manageSubcategoryFilter:null,manageSubcategoryType:"category",
   advancedFilters:{category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false},
   collections:[],workflows:[],commandQuery:"",autosaveTimer:null,lastAutosaveAt:null,
   busy:new Set(),modalReturnFocus:{}
@@ -3294,6 +3308,199 @@ async function transferPromptsAcrossSections(ids,targetType,targetId,mode="move"
 
 
 /* ---------- Gestione e scambio fra tutte le sezioni ---------- */
+
+function subcategoryTypeDefinitions(){
+  return [
+    {type:"category",label:"Varie",store:"categories",prefix:"cat"},
+    ...visibleSidebarTypes().map(def=>({
+      type:def.type,label:def.label,store:def.store,prefix:def.prefix,
+      custom:Boolean(def.custom),typeId:def.typeId
+    }))
+  ].sort((a,b)=>String(a.label||"").localeCompare(
+    String(b.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true}
+  ));
+}
+
+function hierarchyCollection(type){
+  if(type==="category")return state.categories;
+  return entityCollection(type);
+}
+
+function hierarchyParentById(type,id){
+  if(!id)return null;
+  if(type==="category")return catById(id);
+  return entityByType(type,id);
+}
+
+function hierarchyRoots(type){
+  return hierarchyCollection(type).filter(item=>!item.parentId).slice().sort((a,b)=>
+    String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true})
+  );
+}
+
+function hierarchyChildren(type,parentId){
+  return hierarchyCollection(type).filter(item=>item.parentId===parentId).slice().sort((a,b)=>
+    String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true})
+  );
+}
+
+function hierarchyTypeDefinition(type){
+  if(type==="category")return {type:"category",label:"Varie",store:"categories",prefix:"cat"};
+  return sidebarTypeDefinition(type)||entityDefinition(type);
+}
+
+function hierarchyEntityLabel(type,item){
+  if(!item)return "";
+  const parent=item.parentId?hierarchyParentById(type,item.parentId):null;
+  return parent?`${parent.name} › ${item.name}`:item.name;
+}
+
+async function addManagedSubcategory(){
+  const type=$("manageSubcategoryType")?.value||"category";
+  const parentId=$("newSubcategoryParent")?.value||"";
+  const name=String($("newSubcategoryName")?.value||"").trim().replace(/\s+/g," ");
+  if(!parentId){toast("Seleziona prima l’elemento principale.","warning");return}
+  if(!name){toast("Inserisci il nome della sottocategoria.","warning");return}
+
+  const parent=hierarchyParentById(type,parentId);
+  const definition=hierarchyTypeDefinition(type);
+  if(!parent||!definition){toast("Tipologia o elemento principale non valido.","error");return}
+
+  if(hierarchyChildren(type,parentId).some(item=>normalize(item.name)===normalize(name))){
+    toast("Esiste già una sottocategoria con questo nome.","warning");return
+  }
+
+  let item;
+  if(type==="category"){
+    item={id:uid("cat"),name,parentId,color:categoryColor(parent),order:state.categories.length,createdAt:now()};
+  }else if(definition.custom){
+    item={id:uid("customentity"),typeId:definition.typeId,parentId,name,createdAt:now()};
+  }else{
+    item={id:uid(definition.prefix),name,parentId,createdAt:now()};
+  }
+
+  await put(definition.store,item);
+  $("newSubcategoryName").value="";
+  await loadData();
+  state.manageSubcategoryType=type;
+  state.manageSubcategoryFilter=parentId;
+  render();renderManage();
+  toast(`Sottocategoria “${name}” aggiunta a “${parent.name}”.`,"success");
+}
+
+async function renameManagedSubcategory(type,id,newName){
+  const definition=hierarchyTypeDefinition(type),item=hierarchyParentById(type,id);
+  if(!definition||!item||!item.parentId)return;
+  const name=String(newName||"").trim().replace(/\s+/g," ");
+  if(!name)return;
+  if(hierarchyChildren(type,item.parentId).some(other=>other.id!==id&&normalize(other.name)===normalize(name))){
+    toast("Esiste già una sottocategoria con questo nome.","warning");return
+  }
+  item.name=name;item.updatedAt=now();
+  await put(definition.store,item);await loadData();render();renderManage();
+  toast("Sottocategoria rinominata.","success");
+}
+
+function beginManagedSubcategoryRename(label){
+  if(label.dataset.editing==="true")return;
+  const type=label.dataset.subType,id=label.dataset.id,item=hierarchyParentById(type,id);
+  if(!item)return;
+  const original=item.name;
+  label.dataset.editing="true";label.contentEditable="true";label.classList.add("editing");
+  requestAnimationFrame(()=>{label.focus();const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(label);selection.removeAllRanges();selection.addRange(range)});
+  let settled=false;
+  const finish=async save=>{
+    if(settled)return;settled=true;
+    const value=String(label.textContent||"").trim();
+    label.contentEditable="false";label.classList.remove("editing");
+    if(save&&value&&value!==original)await renameManagedSubcategory(type,id,value);
+    else renderManage();
+  };
+  label.onkeydown=event=>{event.stopPropagation();if(event.key==="Enter"){event.preventDefault();finish(true)}else if(event.key==="Escape"){event.preventDefault();finish(false)}};
+  label.onblur=()=>finish(true);label.onclick=event=>event.stopPropagation();
+}
+
+function deleteManagedSubcategory(type,id){
+  const definition=hierarchyTypeDefinition(type),item=hierarchyParentById(type,id);
+  if(!definition||!item||!item.parentId)return;
+  const nested=hierarchyChildren(type,id);
+  if(nested.length){toast("Prima elimina le sottocategorie annidate. È consentito un solo livello.","warning");return}
+
+  const affected=state.prompts.filter(prompt=>{
+    if(type==="category")return prompt.subcategoryId===id||prompt.categoryId===id;
+    if(String(type).startsWith("custom:"))return customAssignmentValues(prompt,definition.typeId).includes(id);
+    return definition.field?prompt[definition.field]===id:false;
+  });
+
+  confirmAction("Elimina sottocategoria",`${affected.length} prompt perderanno questa assegnazione, ma non saranno eliminati.`,async()=>{
+    const stores=["prompts",definition.store];
+    const tx=state.db.transaction([...new Set(stores)],"readwrite");
+    const promptStore=tx.objectStore("prompts"),entityStore=tx.objectStore(definition.store);
+    affected.forEach(prompt=>{
+      const updated={...prompt,updatedAt:now()};
+      if(type==="category"){
+        if(updated.subcategoryId===id)updated.subcategoryId=null;
+        if(updated.categoryId===id)updated.categoryId=item.parentId||null;
+      }else if(String(type).startsWith("custom:")){
+        const customType=customTypeById(definition.typeId);
+        const remaining=customAssignmentValues(updated,definition.typeId).filter(x=>x!==id);
+        updated.customAssignments={...(updated.customAssignments||{}),[definition.typeId]:customType?.multi?remaining:(remaining[0]||null)};
+      }else if(definition.field){
+        updated[definition.field]=null;
+      }
+      promptStore.put(updated);
+    });
+    entityStore.delete(id);
+    await transactionDone(tx);await loadData();render();renderManage();
+    toast("Sottocategoria eliminata.","success");
+  });
+}
+
+function renderManagedSubcategories(){
+  const typeSelect=$("manageSubcategoryType"),parentSelect=$("newSubcategoryParent"),list=$("manageSubcategories");
+  if(!typeSelect||!parentSelect||!list)return;
+
+  const definitions=subcategoryTypeDefinitions();
+  if(!definitions.some(def=>def.type===state.manageSubcategoryType))state.manageSubcategoryType=definitions[0]?.type||"category";
+  typeSelect.innerHTML=definitions.map(def=>`<option value="${esc(def.type)}" ${def.type===state.manageSubcategoryType?"selected":""}>${esc(def.label)}</option>`).join("");
+
+  const roots=hierarchyRoots(state.manageSubcategoryType);
+  if(state.manageSubcategoryFilter&&!roots.some(item=>item.id===state.manageSubcategoryFilter))state.manageSubcategoryFilter=null;
+  if(!state.manageSubcategoryFilter&&roots.length)state.manageSubcategoryFilter=roots[0].id;
+
+  parentSelect.innerHTML=roots.length
+    ?roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(item.name)}</option>`).join("")
+    :'<option value="">Nessun elemento principale</option>';
+
+  const children=state.manageSubcategoryFilter?hierarchyChildren(state.manageSubcategoryType,state.manageSubcategoryFilter):[];
+  const parent=hierarchyParentById(state.manageSubcategoryType,state.manageSubcategoryFilter);
+
+  list.innerHTML=children.length?children.map(item=>`
+    <div class="manage-row">
+      <div class="grow">
+        <strong class="managed-subcategory-name category-name-editable" data-sub-type="${esc(state.manageSubcategoryType)}" data-id="${esc(item.id)}" tabindex="0" role="button" title="Clicca per rinominare">${esc(item.name)}</strong>
+        <div class="hint">Sotto: ${esc(parent?.name||"")}</div>
+      </div>
+      <button class="btn small danger managed-subcategory-delete" data-sub-type="${esc(state.manageSubcategoryType)}" data-id="${esc(item.id)}">Elimina</button>
+    </div>`).join("")
+    :`<div class="hint">${parent?`Nessuna sottocategoria presente sotto “${esc(parent.name)}”.`:"Seleziona o crea prima un elemento principale nella tipologia scelta."}</div>`;
+
+  typeSelect.onchange=()=>{
+    state.manageSubcategoryType=typeSelect.value;
+    state.manageSubcategoryFilter=null;
+    renderManage();
+  };
+  parentSelect.onchange=()=>{
+    state.manageSubcategoryFilter=parentSelect.value||null;
+    renderManage();
+  };
+  $$(".managed-subcategory-name").forEach(label=>{
+    label.onclick=event=>{event.stopPropagation();beginManagedSubcategoryRename(label)};
+    label.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();beginManagedSubcategoryRename(label)}};
+  });
+  $$(".managed-subcategory-delete").forEach(button=>button.onclick=()=>deleteManagedSubcategory(button.dataset.subType,button.dataset.id));
+}
+
 function renderManage(){
   const roots=rootVariesAlphabetical();
   const allSubcategories=state.categories.filter(item=>item.parentId).sort((a,b)=>{
@@ -3356,10 +3563,7 @@ function renderManage(){
 
   $$(".category-color").forEach(input=>input.onchange=async()=>{const category=catById(input.dataset.id);category.color=input.value;await put("categories",category);await loadData();render();renderManage()});
 
-  $("newSubcategoryParent").onchange=()=>{
-    state.manageSubcategoryFilter=$("newSubcategoryParent").value||null;
-    renderManage();
-  };
+
 
   [$("manageVaries"),$("manageSubcategories")].forEach(categoryList=>{
     categoryList.onclick=event=>{
@@ -4137,6 +4341,13 @@ async function importData(file){
 
 
 
+
+const _renderManageHierarchyV2212=renderManage;
+renderManage=function(){
+  _renderManageHierarchyV2212();
+  renderManagedSubcategories();
+}
+
 /* ---------- Eventi ---------- */
 function bindEvents(){
   document.addEventListener("keydown",trapActiveDialogFocus);
@@ -4280,17 +4491,7 @@ function bindEvents(){
     $("newCategoryName").value="";
     await loadData();render();renderManage();toast("Categoria aggiunta.","success");
   };
-  $("addSubcategoryBtn").onclick=async()=>{
-    const name=$("newSubcategoryName").value.trim().replace(/\s+/g," ");
-    const parentId=$("newSubcategoryParent").value||null;
-    if(!name){toast("Inserisci il nome della sottocategoria.","warning");return}
-    if(!parentId){toast("Seleziona la categoria principale.","warning");return}
-    const duplicate=state.categories.some(category=>category.parentId===parentId&&normalize(category.name)===normalize(name));
-    if(duplicate){toast("Esiste gi\u00E0 una sottocategoria con questo nome nella categoria selezionata.","warning");return}
-    await put("categories",{id:uid("cat"),name,parentId,color:categoryColor(catById(parentId)),order:state.categories.length,createdAt:now()});
-    $("newSubcategoryName").value="";
-    await loadData();render();renderManage();toast("Sottocategoria aggiunta.","success");
-  };
+  $("addSubcategoryBtn").onclick=addManagedSubcategory;
   $("addClientBtn").onclick=async()=>{
     const name=$("newClientName").value.trim().replace(/\s+/g," ");if(!name){toast("Inserisci il nome del cliente.","warning");return}
     if(state.clients.some(client=>normalize(client.name)===normalize(name))){toast("Esiste gi\u00E0 un cliente con questo nome.","warning");return}
@@ -4467,7 +4668,7 @@ function renderFilterStrip(resultCount=filteredPrompts().length){
 function dynamicEntitySelectHtml(definition,prompt){
   let entities=[],values=[];if(definition.type==="client"){entities=state.clients;values=[prompt?.clientId].filter(Boolean)}else if(definition.type==="project"){entities=state.projects;values=[prompt?.projectId].filter(Boolean)}else if(definition.type==="gptsite"){entities=state.gptsites;values=[prompt?.gptSiteId].filter(Boolean)}else if(definition.type==="seo"){entities=state.seo;values=[prompt?.seoId].filter(Boolean)}else if(definition.custom){entities=customEntitiesForType(definition.typeId);values=customAssignmentValues(prompt,definition.typeId)}
   const type=definition.custom?customTypeById(definition.typeId):null,multiple=Boolean(type?.multi),selectId=`promptEntity_${String(definition.type).replace(/[^a-z0-9_-]/gi,"_")}`;
-  return `<div class="field"><label for="${esc(selectId)}">${esc(definition.label)}</label><div class="inline-create-row"><select id="${esc(selectId)}" class="prompt-entity-select" data-entity-type="${esc(definition.type)}" ${multiple?'multiple size="3"':''}><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${values.includes(item.id)?"selected":""}>${esc(item.name)}</option>`).join("")}</select><button class="btn inline-create-btn" type="button" data-inline-create="${esc(definition.type)}" title="Crea nuovo ${esc(definition.singular||definition.label)}" aria-label="Crea nuovo ${esc(definition.singular||definition.label)}">+</button></div></div>`;
+  return `<div class="field"><label for="${esc(selectId)}">${esc(definition.label)}</label><div class="inline-create-row"><select id="${esc(selectId)}" class="prompt-entity-select" data-entity-type="${esc(definition.type)}" ${multiple?'multiple size="3"':''}><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${values.includes(item.id)?"selected":""}>${esc(entityDisplayLabel(item)||item.name)}</option>`).join("")}</select><button class="btn inline-create-btn" type="button" data-inline-create="${esc(definition.type)}" title="Crea nuovo ${esc(definition.singular||definition.label)}" aria-label="Crea nuovo ${esc(definition.singular||definition.label)}">+</button></div></div>`;
 }
 const _fillEditorSelectsV19=fillEditorSelects;
 fillEditorSelects=function(prompt){
@@ -4734,7 +4935,14 @@ function enhanceSidebarRendering(){const original=renderSidebar;renderSidebar=fu
 enhanceSidebarRendering();
 
 
-function entityDisplayLabel(entity){if(!entity)return "";const parent=entity.parentId?customEntityById(entity.parentId):null;return parent?`${parent.name} › ${entity.name}`:entity.name}
+function entityDisplayLabel(entity){
+  if(!entity)return "";
+  let parent=null;
+  if(entity.parentId){
+    parent=catById(entity.parentId)||clientById(entity.parentId)||projectById(entity.parentId)||gptSiteById(entity.parentId)||seoById(entity.parentId)||customEntityById(entity.parentId);
+  }
+  return parent?`${parent.name} › ${entity.name}`:entity.name;
+}
 async function addCustomSubEntity(parentId){const parent=customEntityById(parentId);if(!parent)return;const name=window.prompt(`Nuovo sotto-elemento di “${parent.name}”:`,"");if(!name?.trim())return;const clean=name.trim().replace(/\s+/g," ");if(customEntitiesForType(parent.typeId).some(x=>x.parentId===parent.id&&normalize(x.name)===normalize(clean))){toast("Sotto-elemento già presente.","warning");return}await put("customEntities",{id:uid("customentity"),typeId:parent.typeId,parentId:parent.id,name:clean,createdAt:now()});await loadData();render();renderManage();toast("Sotto-elemento creato.","success")}
 function wireCustomSubEntities(){
   $$('[data-custom-list] .manage-row').forEach(row=>{const label=row.querySelector('.custom-entity-name-editable');if(!label||row.querySelector('.add-custom-sub'))return;const item=customEntityById(label.dataset.id);if(item?.parentId){const hint=document.createElement('div');hint.className='hint';hint.textContent=`Sotto: ${customEntityById(item.parentId)?.name||'elemento'}`;label.parentElement.appendChild(hint)}const btn=document.createElement('button');btn.className='btn small add-custom-sub';btn.textContent='+ sotto';btn.onclick=()=>addCustomSubEntity(label.dataset.id);row.insertBefore(btn,row.querySelector('.delete-custom-entity'))})
