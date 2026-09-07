@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="22.4.0">
+<meta name="application-version" content="22.14.1">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -455,7 +455,7 @@ textarea{resize:vertical;line-height:1.55}
 .side-section.collections{--section-accent:#0f766e}.side-section.workflows{--section-accent:#9333ea}
 .sidebar-mini-add{margin-left:auto;width:24px;height:24px;border:1px solid rgba(255,255,255,.18);border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font-weight:900}
 .sidebar-mini-add:hover{background:rgba(255,255,255,.18)}
-.type-management-row{grid-template-columns:38px minmax(150px,1fr) 42px auto auto auto auto auto auto!important}.type-icon-input{width:38px;height:34px;text-align:center;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}.mini-toggle{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--text)}
+.type-management-row{grid-template-columns:38px minmax(150px,1fr) 42px auto auto auto auto!important}.type-icon-input{width:38px;height:34px;text-align:center;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}.mini-toggle{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--text)}
 .advanced-filter-bar{display:flex;align-items:end;gap:9px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}.advanced-filter-bar[hidden]{display:none}.filter-field{min-width:150px}.filter-field label{display:block;margin-bottom:4px}.filter-field select{height:36px;padding:5px 30px 5px 8px}.filter-check{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 9px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.prompt-table{width:100%;border-collapse:collapse;min-width:980px}.prompt-table th,.prompt-table td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.prompt-table th{position:sticky;top:0;z-index:2;background:var(--panel-2);font-size:12px;color:var(--muted)}.prompt-table tr:hover td{background:var(--panel-3)}.table-title-btn{border:0;background:transparent;color:var(--text);font-weight:850;text-align:left;padding:0}.table-actions{white-space:nowrap}
 .kanban-board{display:grid;grid-template-columns:repeat(5,minmax(240px,1fr));gap:12px;overflow:auto;align-items:start}.kanban-column{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:10px;min-height:240px}.kanban-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;font-weight:900}.kanban-card{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel);margin-bottom:8px;cursor:grab}.kanban-card:active{cursor:grabbing}.kanban-card small{display:block;margin-top:5px;color:var(--muted)}
@@ -679,6 +679,11 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 .subcategory-management-filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
 .subcategory-management-filters .field{gap:5px}
 @media(max-width:650px){.subcategory-management-filters{grid-template-columns:1fr}}
+
+.zip-rollback-note{margin-top:8px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--warning) 34%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--warning) 8%,var(--panel));font-size:12px;color:var(--muted)}
+.zip-archive-card .rollback-zip-import{font-weight:850}
+
+.custom-type-up,.custom-type-down{display:none!important}
 </style>
 
 </head>
@@ -705,6 +710,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
           <button class="btn" id="menuGenerateIntrosBtn"><span class="menu-icon" aria-hidden="true">&#10022;</span><span>Genera note mancanti</span></button>
           <button class="btn" id="menuRefreshAutoIntrosBtn"><span class="menu-icon" aria-hidden="true">&#8635;</span><span>Aggiorna note automatiche</span></button>
           <button class="btn menu-section-start" id="menuBackupBtn"><span class="menu-icon" aria-hidden="true">&#128190;</span><span>Crea backup</span></button>
+          <button class="btn" id="menuRestoreBackupBtn"><span class="menu-icon" aria-hidden="true">&#8634;</span><span>Ripristina ultimo backup interno</span></button>
           <button class="btn" id="menuDiagnosticsBtn"><span class="menu-icon" aria-hidden="true">&#128736;</span><span>Diagnostica</span></button>
           <button class="btn" id="menuTableViewBtn"><span class="menu-icon" aria-hidden="true">▦</span><span>Vista tabella</span></button>
           <button class="btn" id="menuKanbanViewBtn"><span class="menu-icon" aria-hidden="true">▤</span><span>Vista Kanban</span></button>
@@ -748,7 +754,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <button class="side-link" data-filter="trash"><span aria-hidden="true">&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
       <button class="side-link" id="manageBtn"><span aria-hidden="true">&#9881;</span><span>Impostazioni e struttura</span></button>
     </section>
-    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.4.0</div>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.14.1</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -761,7 +767,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
         <select id="sortSelect" aria-label="Ordina i prompt">
           <option value="manual">Ordine manuale</option><option value="title_asc">Titolo 1&#8211;9 / A&#8211;Z</option>
           <option value="title_desc">Titolo Z&#8211;A / 9&#8211;1</option>
-          <option value="category_asc">Categoria A&#8211;Z / Titolo 1&#8211;9</option>
+          <option value="category_asc">Varie A&#8211;Z / Titolo 1&#8211;9</option>
           <option value="updated_desc">Modificati di recente</option>
           <option value="created_desc">Creati di recente</option>
           <option value="usage_desc">Pi&#249; utilizzati</option>
@@ -773,7 +779,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
     </div>
     <div class="bulkbar" id="bulkbar">
       <strong><span id="selectedCount">0</span> selezionati</strong>
-      <button class="btn small" id="bulkMoveBtn">Sposta categoria</button>
+      <button class="btn small" id="bulkMoveBtn">Sposta in Varie</button>
       <button class="btn small" id="bulkTransferBtn">Sposta tra sezioni</button>
       <button class="btn small" id="bulkCopyTransferBtn">Copia tra sezioni</button>
       <button class="btn small" id="bulkClientBtn">Assegna cliente</button>
@@ -781,11 +787,11 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <button class="btn small" id="bulkProjectBtn">Assegna progetto</button>
       <button class="btn small" id="bulkSeoBtn">Assegna SEO</button><span class="dynamic-bulk-actions" id="dynamicBulkActions"></span>
       <button class="btn small" id="bulkArchiveBtn">Archivia</button>
-      <button class="btn small danger" id="bulkTrashBtn">Cestina</button>
+      <button class="btn small danger" id="bulkTrashBtn">Cestina</button><button class="btn small danger" id="bulkDeleteBtn">Elimina selezionati</button>
       <button class="btn small" id="clearSelectionBtn">Annulla</button>
     </div>
     <div class="advanced-filter-bar" id="advancedFilterBar" hidden aria-label="Filtri della libreria">
-      <div class="filter-field"><label for="filterCategory">Categoria</label><select id="filterCategory"><option value="">Tutte</option></select></div>
+      <div class="filter-field"><label for="filterCategory">Varie</label><select id="filterCategory"><option value="">Tutte</option></select></div>
       <div class="filter-field"><label for="filterClient">Cliente</label><select id="filterClient"><option value="">Tutti</option></select></div>
       <div class="filter-field"><label for="filterStatus">Stato</label><select id="filterStatus"><option value="">Tutti</option><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option></select></div>
       <div class="filter-field"><label for="filterUsage">Utilizzo</label><select id="filterUsage"><option value="">Tutti</option><option value="used">Usati</option><option value="never">Mai usati</option><option value="stale">Non usati da 90 giorni</option></select></div>
@@ -834,7 +840,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
             <textarea id="promptIntro" placeholder="Breve spiegazione per capire subito a cosa serve il prompt. Se lasci vuoto, viene generata automaticamente analizzando il contenuto."></textarea>
             <div class="intro-sync-note" id="introSyncNote"><span>&#9432;</span><span><strong>Modalità automatica:</strong> la nota viene rigenerata quando cambia il titolo o il contenuto del prompt. Se modifichi direttamente questo campo diventa personalizzata e non verrà sovrascritta.</span></div>
           </div>
-          <div class="field"><label for="promptCategory">Categoria</label><select id="promptCategory"></select></div>
+          <div class="field"><label for="promptCategory">Varie</label><select id="promptCategory"></select></div>
           <div class="field"><label for="promptSubcategory">Sottocategoria</label><select id="promptSubcategory"></select></div>
           <div class="dynamic-editor-fields" id="dynamicEditorFields"></div>
           <div class="field"><label for="promptStatus">Stato</label><select id="promptStatus"><option value="draft">Bozza</option><option value="review">Da verificare</option><option value="approved">Approvato</option><option value="obsolete">Obsoleto</option><option value="archived">Archiviato</option></select></div>
@@ -895,7 +901,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <div class="manage-grid">
         <div class="panel-box type-management-box">
           <h4>Tipologie sidebar</h4>
-          <div class="hint" style="margin-bottom:10px">Crea nuove tipologie organizzative. Verranno inserite nella sidebar in ordine alfabetico e avranno filtro, assegnazione, gestione, spostamento/copia, backup e import/export.</div>
+          <div class="hint" style="margin-bottom:10px">Crea nuove tipologie organizzative. Sidebar e dropdown le ordinano automaticamente A→Z.</div>
           <div class="manage-list" id="manageTypes"></div>
           <div class="inline-form" style="grid-template-columns:1fr auto">
             <input id="newTypeName" type="text" placeholder="Es. Fornitori, Canali, Brand">
@@ -907,7 +913,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
           <h4>Varie</h4><div class="hint" style="margin-bottom:10px">Clicca sul nome di una categoria per rinominarla.</div>
           <div class="manage-list" id="manageVaries"></div>
           <div class="inline-form" style="grid-template-columns:1fr auto">
-            <input id="newCategoryName" type="text" placeholder="Nome categoria">
+            <input id="newCategoryName" type="text" placeholder="Nome voce in Varie">
             <button class="btn primary small" id="addCategoryBtn">Aggiungi</button>
           </div>
         </div>
@@ -986,8 +992,8 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.12.1";
-const APP_RELEASE_NAME="ZIP Import · Destinazioni e Varie";
+const APP_VERSION="22.14.1";
+const APP_RELEASE_NAME="QA Stability · ZIP · Gerarchie";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -1038,7 +1044,7 @@ const state={
   lastSavedId:null,
   recentValues:readStoredJson("ps_recent_values",{}),
   openVaries:new Set(Array.isArray(storedOpenVaries)?storedOpenVaries:[]),
-  manageSubcategoryFilter:null,manageSubcategoryType:"category",
+  manageSubcategoryFilter:null,manageSubcategoryType:"category",manageHierarchyParentId:null,
   advancedFilters:{category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false},
   collections:[],workflows:[],commandQuery:"",autosaveTimer:null,lastAutosaveAt:null,
   busy:new Set(),modalReturnFocus:{}
@@ -1958,11 +1964,11 @@ function renderSidebar(){
 
   const entitySections=visibleSidebarTypes().map(definition=>{
     let entities=[];
-    if(definition.type==="client")entities=state.clients;
-    else if(definition.type==="project")entities=state.projects;
-    else if(definition.type==="gptsite")entities=state.gptsites;
-    else if(definition.type==="seo")entities=state.seo;
-    else if(definition.custom)entities=customEntitiesForType(definition.typeId);
+    if(definition.type==="client")entities=hierarchicalEntitiesForType("client");
+    else if(definition.type==="project")entities=hierarchicalEntitiesForType("project");
+    else if(definition.type==="gptsite")entities=hierarchicalEntitiesForType("gptsite");
+    else if(definition.type==="seo")entities=hierarchicalEntitiesForType("seo");
+    else if(definition.custom)entities=hierarchicalEntitiesForType(`custom:${definition.typeId}`);
     const selected=definition.custom
       ?(state.filter.type==="custom"&&state.filter.typeId===definition.typeId?state.filter.id:"all")
       :(state.filter.type===definition.type?state.filter.id:"all");
@@ -2001,7 +2007,7 @@ function renderSidebar(){
   $("categoryPicker")?.setAttribute("aria-expanded",String(categoryActive));
 
   if($("dynamicBulkActions"))$("dynamicBulkActions").innerHTML=state.customTypes.filter(type=>type.visible!==false).map(type=>`<button class="btn small bulk-custom-assign" data-type-id="${esc(type.id)}">Assegna ${esc(type.name)}</button>`).join("");
-  $$(".bulk-custom-assign").forEach(button=>button.onclick=()=>choiceAction(`Assegna ${customTypeById(button.dataset.typeId)?.name||"tipologia"}`,customTypeById(button.dataset.typeId)?.name||"Destinazione",'<option value="">Nessuna assegnazione</option>'+customEntitiesForType(button.dataset.typeId).map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join(""),value=>bulkUpdateCustom(button.dataset.typeId,value||null)));
+  $$(".bulk-custom-assign").forEach(button=>button.onclick=()=>choiceAction(`Assegna ${customTypeById(button.dataset.typeId)?.name||"tipologia"}`,customTypeById(button.dataset.typeId)?.name||"Destinazione",'<option value="">Nessuna assegnazione</option>'+hierarchicalEntitiesForType(`custom:${button.dataset.typeId}`).map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join(""),value=>bulkUpdateCustom(button.dataset.typeId,value||null)));
   if($("categoryPicker"))$("categoryPicker").onclick=event=>{
     event.preventDefault();event.stopPropagation();
     const willOpen=$("categoryMenu").hidden;
@@ -2088,6 +2094,16 @@ function collectProblems(){
   const orphanSeo=live.filter(item=>item.seoId&&!seoById(item.seoId));
   if(orphanSeo.length)add({id:"data-orphan-seo",title:"Riferimenti SEO mancanti",description:"Alcuni prompt puntano a elementi SEO non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"SEO",impact:"Il filtro SEO non può rappresentare correttamente i dati.",solution:"Riassegna un elemento SEO valido oppure rimuovi l’associazione.",mode:"Manuale",target:"organize",count:orphanSeo.length,itemIds:orphanSeo.map(x=>x.id)});
   const orphanCustom=live.filter(item=>Object.entries(item.customAssignments||{}).some(([typeId])=>!customTypeById(typeId)||customAssignmentValues(item,typeId).some(entityId=>!customEntityById(entityId))));
+  const hierarchyCollections=[
+    ["Clienti",state.clients],["Progetti",state.projects],["GPTSites",state.gptsites],["SEO",state.seo],["Tipologie personalizzate",state.customEntities]
+  ];
+  for(const [label,collection] of hierarchyCollections){
+    const ids=new Set(collection.map(item=>item.id));
+    const orphanChildren=collection.filter(item=>item.parentId&&!ids.has(item.parentId));
+    if(orphanChildren.length)add({id:`hierarchy-orphan-${normalize(label)}`,title:`Sottocategorie ${label} senza elemento principale`,description:`Sono presenti ${orphanChildren.length} sottocategorie con un riferimento padre non valido.`,priority:"Alta",cause:"Eliminazione/importazione o dati gerarchici incompleti.",functionName:"Gestione sottocategorie",impact:"I menu gerarchici possono risultare incompleti o incoerenti.",solution:"Riassegna o elimina le sottocategorie orfane.",mode:"Manuale",target:"organize",count:orphanChildren.length,itemIds:[]});
+    const nested=collection.filter(item=>item.parentId&&collection.find(parent=>parent.id===item.parentId)?.parentId);
+    if(nested.length)add({id:`hierarchy-depth-${normalize(label)}`,title:`Gerarchia troppo profonda in ${label}`,description:"Sono presenti elementi oltre il livello principale → sottocategoria previsto dall’interfaccia.",priority:"Media",cause:"Dati importati o modificati da una versione precedente.",functionName:"Gestione sottocategorie",impact:"Alcuni elementi potrebbero non essere mostrati correttamente.",solution:"Riporta gli elementi a un solo livello di sottocategoria.",mode:"Manuale",target:"organize",count:nested.length,itemIds:[]});
+  }
   if(orphanCustom.length)add({id:"data-orphan-custom",title:"Riferimenti a tipologie personalizzate mancanti",description:"Alcuni prompt puntano a tipologie o elementi personalizzati non più presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Tipologie sidebar",impact:"I filtri dinamici possono risultare incoerenti.",solution:"Riassegna un elemento valido nella tipologia interessata.",mode:"Manuale",target:"organize",count:orphanCustom.length,itemIds:orphanCustom.map(x=>x.id)});
   const invalidTools=live.filter(item=>item.toolUrl&&!validHttpUrl(item.toolUrl));
   if(invalidTools.length)add({id:"tool-invalid-url",title:"URL del tool non valido",description:"Uno o pi\u00F9 collegamenti ai tool non usano un URL HTTP o HTTPS valido.",priority:"Alta",cause:"URL incompleto o protocollo non supportato.",functionName:"Copia e apri tool",impact:"L\u2019apertura del tool pu\u00F2 fallire o essere bloccata.",solution:"Correggi il campo \u201CTool da utilizzare\u201D.",mode:"Manuale",target:"use",count:invalidTools.length,itemIds:invalidTools.map(x=>x.id)});
@@ -2103,6 +2119,7 @@ function collectProblems(){
   if(missingRequiredFiles.length)add({id:"file-required-missing",title:"File obbligatori mancanti",description:"Alcuni prompt contengono variabili file obbligatorie che non hanno ancora un file o un riferimento manuale.",priority:"Media",cause:"Il prompt richiede un allegato ma il relativo campo non è stato compilato.",functionName:"Variabili e file",impact:"Il prompt può essere copiato con segnaposto irrisolti o senza il materiale necessario.",solution:"Apri il prompt e carica il file richiesto oppure inserisci un riferimento manuale nel relativo campo.",mode:"Manuale",target:"files",count:missingRequiredFiles.length,itemIds:missingRequiredFiles.map(x=>x.id)});
   return problems.sort((a,b)=>problemPriorityRank(a.priority)-problemPriorityRank(b.priority)||a.title.localeCompare(b.title,"it"));
 }
+const _collectProblemsQA=collectProblems;collectProblems=function(){const problems=_collectProblemsQA(),liveIds=new Set(state.prompts.map(prompt=>prompt.id));const add=problem=>problems.push({...problem,lastChecked:now(),status:"Attivo"});const danglingCollections=(state.collections||[]).flatMap(item=>(item.promptIds||[]).filter(id=>!liveIds.has(id)));if(danglingCollections.length)add({id:"workspace-dangling-collections",title:"Riferimenti mancanti nelle raccolte",description:"Alcune raccolte contengono riferimenti a prompt non più presenti.",priority:"Media",cause:"Eliminazioni definitive o dati precedenti.",functionName:"Raccolte",impact:"Conteggi e raccolte possono risultare incoerenti.",solution:"Il sistema ora ripulisce automaticamente questi riferimenti.",mode:"Automatica",target:"organize",count:danglingCollections.length,itemIds:[]});const missingZip=state.prompts.filter(prompt=>prompt.isZipArchiveBox&&(!prompt.sourceZip?.blob||!prompt.sourceZip?.name));if(missingZip.length)add({id:"zip-source-missing",title:"ZIP sorgente non scaricabile",description:"Uno o più box ZIP non contengono più il file originale.",priority:"Media",cause:"Backup JSON precedente o dati incompleti.",functionName:"Import ZIP",impact:"Scarica ZIP non può ricostruire il file originale.",solution:"Reimporta lo ZIP originale.",mode:"Manuale",target:"files",count:missingZip.length,itemIds:missingZip.map(item=>item.id)});return problems.sort((a,b)=>problemPriorityRank(a.priority)-problemPriorityRank(b.priority)||a.title.localeCompare(b.title,"it"))};
 function syncResolvedProblems(activeProblems){
   const previous=readStoredJson("ps_active_problem_ids",[]);
   const activeIds=activeProblems.map(item=>item.id);
@@ -2701,7 +2718,7 @@ function updateCompiledPreview(){
 /* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
   const roots=rootVariesAlphabetical();
-  $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join("");
   $("promptCategory").value=prompt?.categoryId||"";
   fillSubcategories(prompt?.subcategoryId||"");
   $("dynamicEditorFields").innerHTML=allSidebarTypes().map(definition=>{
@@ -2712,13 +2729,13 @@ function fillEditorSelects(prompt){
     else if(definition.type==="gptsite"){entities=state.gptsites;value=prompt?.gptSiteId||""}
     else if(definition.type==="seo"){entities=state.seo;value=prompt?.seoId||""}
     else if(definition.custom){entities=customEntitiesForType(definition.typeId);value=customAssignmentValue(prompt,definition.typeId)}
-    return `<div class="field"><label>${esc(definition.label)}</label><select class="prompt-entity-select" data-entity-type="${esc(definition.type)}"><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${value===item.id?"selected":""}>${esc(item.name)}</option>`).join("")}</select></div>`;
+    return `<div class="field"><label>${esc(definition.label)}</label><select class="prompt-entity-select" data-entity-type="${esc(definition.type)}"><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${value===item.id?"selected":""}>${esc(entityDisplayLabel(item)||item.name)}</option>`).join("")}</select></div>`;
   }).join("");
 }
 function fillSubcategories(selected=""){
   const parent=$("promptCategory").value;
   const children=childVariesAlphabetical(parent);
-  $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join("");
   $("promptSubcategory").value=selected;
 }
 function applyEditorModeUI(){
@@ -3139,6 +3156,8 @@ async function bulkTrashSelected(){
   await bulkUpdate({deletedAt:now()},{silent:true});toastAction(`${previous.length} prompt spostati nel cestino.`,"Annulla",async()=>{for(const item of previous){const current=await getOne("prompts",item.id);if(current)await put("prompts",{...current,deletedAt:item.deletedAt,updatedAt:now()})}await loadData();render();toast("Cestinamento annullato.","success")});
 }
 
+async function bulkDeleteSelectedPermanent(){const ids=[...state.selected];if(!ids.length){toast("Seleziona almeno un prompt da eliminare.","warning");return}confirmAction("Elimina definitivamente i prompt selezionati",`Verranno eliminati definitivamente ${ids.length} elementi e ripuliti i relativi riferimenti nelle raccolte. Prima verrà creato un backup interno automatico.`,async()=>{try{if(!(await createSafetyBackup("Prima di eliminazione multipla"))){toast("Backup interno non riuscito: eliminazione annullata per sicurezza.","error","PS-BULK-DELETE-BACKUP");return}const count=await deletePromptIdsAtomic(ids);render();toast(`${count} elementi eliminati definitivamente. Puoi ripristinare l’ultimo backup interno dal menu ⋯.`,"success")}catch(error){console.error(error);toast(`Eliminazione multipla non riuscita: ${error.message||"errore del database"}.`,"error","PS-BULK-DELETE")}})}
+
 async function bulkUpdateCustom(typeId,entityId){
   const ids=[...state.selected];if(!ids.length)return;
   try{
@@ -3169,7 +3188,7 @@ function promptSectionOptions(type){
   return '<option value="">Nessuna assegnazione</option>'+entityCollection(type)
     .slice()
     .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true}))
-    .map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+    .map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join("");
 }
 
 function transferSectionLabel(type){
@@ -3309,6 +3328,21 @@ async function transferPromptsAcrossSections(ids,targetType,targetId,mode="move"
 
 /* ---------- Gestione e scambio fra tutte le sezioni ---------- */
 
+
+function hierarchicalEntitiesForType(type){
+  const collection=type==="category"?state.categories:entityCollection(type);
+  const alpha=(a,b)=>String(a?.name||"").localeCompare(String(b?.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true});
+  const roots=collection.filter(item=>!item.parentId).slice().sort(alpha);
+  const result=[];
+  for(const root of roots){
+    result.push(root);
+    collection.filter(item=>item.parentId===root.id).slice().sort(alpha).forEach(child=>result.push(child));
+  }
+  const known=new Set(result.map(item=>item.id));
+  collection.filter(item=>!known.has(item.id)).slice().sort(alpha).forEach(item=>result.push(item));
+  return result;
+}
+
 function subcategoryTypeDefinitions(){
   return [
     {type:"category",label:"Varie",store:"categories",prefix:"cat"},
@@ -3383,7 +3417,7 @@ async function addManagedSubcategory(){
   $("newSubcategoryName").value="";
   await loadData();
   state.manageSubcategoryType=type;
-  state.manageSubcategoryFilter=parentId;
+  state.manageHierarchyParentId=parentId;
   render();renderManage();
   toast(`Sottocategoria “${name}” aggiunta a “${parent.name}”.`,"success");
 }
@@ -3465,15 +3499,15 @@ function renderManagedSubcategories(){
   typeSelect.innerHTML=definitions.map(def=>`<option value="${esc(def.type)}" ${def.type===state.manageSubcategoryType?"selected":""}>${esc(def.label)}</option>`).join("");
 
   const roots=hierarchyRoots(state.manageSubcategoryType);
-  if(state.manageSubcategoryFilter&&!roots.some(item=>item.id===state.manageSubcategoryFilter))state.manageSubcategoryFilter=null;
-  if(!state.manageSubcategoryFilter&&roots.length)state.manageSubcategoryFilter=roots[0].id;
+  if(state.manageHierarchyParentId&&!roots.some(item=>item.id===state.manageHierarchyParentId))state.manageHierarchyParentId=null;
+  if(!state.manageHierarchyParentId&&roots.length)state.manageHierarchyParentId=roots[0].id;
 
   parentSelect.innerHTML=roots.length
-    ?roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(item.name)}</option>`).join("")
+    ?roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageHierarchyParentId?"selected":""}>${esc(entityDisplayLabel(item)||item.name)}</option>`).join("")
     :'<option value="">Nessun elemento principale</option>';
 
-  const children=state.manageSubcategoryFilter?hierarchyChildren(state.manageSubcategoryType,state.manageSubcategoryFilter):[];
-  const parent=hierarchyParentById(state.manageSubcategoryType,state.manageSubcategoryFilter);
+  const children=state.manageHierarchyParentId?hierarchyChildren(state.manageSubcategoryType,state.manageHierarchyParentId):[];
+  const parent=hierarchyParentById(state.manageSubcategoryType,state.manageHierarchyParentId);
 
   list.innerHTML=children.length?children.map(item=>`
     <div class="manage-row">
@@ -3487,11 +3521,11 @@ function renderManagedSubcategories(){
 
   typeSelect.onchange=()=>{
     state.manageSubcategoryType=typeSelect.value;
-    state.manageSubcategoryFilter=null;
+    state.manageHierarchyParentId=null;
     renderManage();
   };
   parentSelect.onchange=()=>{
-    state.manageSubcategoryFilter=parentSelect.value||null;
+    state.manageHierarchyParentId=parentSelect.value||null;
     renderManage();
   };
   $$(".managed-subcategory-name").forEach(label=>{
@@ -3514,7 +3548,7 @@ function renderManage(){
     : allSubcategories;
   const moveButton=(sourceType,id)=>`<button class="btn small move-entity" data-source-type="${esc(sourceType)}" data-id="${esc(id)}">Sposta in…</button>`;
 
-  $("newSubcategoryParent").innerHTML='<option value="">Tutte le categorie</option>'+roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(item.name)}</option>`).join("");
+  $("newSubcategoryParent").innerHTML='<option value="">Tutte le categorie</option>'+roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(entityDisplayLabel(item)||item.name)}</option>`).join("");
 
   $("manageVaries").innerHTML=roots.map(category=>`
     <div class="manage-row">
@@ -3534,13 +3568,13 @@ function renderManage(){
       <button class="btn small danger delete-category" data-id="${esc(category.id)}">Elimina</button>
     </div>`).join("")||`<div class="hint">${state.manageSubcategoryFilter?`Nessuna sottocategoria presente in \u201C${esc(catById(state.manageSubcategoryFilter)?.name||"")}\u201D.`:'Nessuna sottocategoria presente.'}</div>`;
 
-  $("manageClients").innerHTML=state.clients.map(client=>`
+  $("manageClients").innerHTML=state.clients.filter(client=>!client.parentId).map(client=>`
     <div class="manage-row"><div class="grow"><strong class="client-name-editable category-name-editable" data-id="${esc(client.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(client.name)}</strong></div>${moveButton("client",client.id)}<button class="btn small danger delete-client" data-id="${esc(client.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun cliente presente.</div>';
-  $("manageProjects").innerHTML=state.projects.map(project=>`
+  $("manageProjects").innerHTML=state.projects.filter(project=>!project.parentId).map(project=>`
     <div class="manage-row"><div class="grow"><strong class="project-name-editable category-name-editable" data-id="${esc(project.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(project.name)}</strong></div>${moveButton("project",project.id)}<button class="btn small danger delete-project" data-id="${esc(project.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun progetto presente.</div>';
-  $("manageGptSites").innerHTML=state.gptsites.map(site=>`
+  $("manageGptSites").innerHTML=state.gptsites.filter(site=>!site.parentId).map(site=>`
     <div class="manage-row"><div class="grow"><strong class="gptsite-name-editable category-name-editable" data-id="${esc(site.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(site.name)}</strong></div>${moveButton("gptsite",site.id)}<button class="btn small danger delete-gptsite" data-id="${esc(site.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun sito GPTSites presente.</div>';
-  $("manageSeo").innerHTML=state.seo.map(item=>`
+  $("manageSeo").innerHTML=state.seo.filter(item=>!item.parentId).map(item=>`
     <div class="manage-row"><div class="grow"><strong class="seo-name-editable category-name-editable" data-id="${esc(item.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(item.name)}</strong></div>${moveButton("seo",item.id)}<button class="btn small danger delete-seo" data-id="${esc(item.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun elemento SEO presente.</div>';
 
   $("manageTypes").innerHTML=state.customTypes.map((type,index)=>`<div class="manage-row type-management-row">
@@ -3557,7 +3591,7 @@ function renderManage(){
 
   $("dynamicManagePanels").innerHTML=state.customTypes.map(type=>`<div class="panel-box">
     <h4>${esc(type.name)}</h4><div class="hint" style="margin-bottom:10px">Gestisci gli elementi della tipologia “${esc(type.name)}”.</div>
-    <div class="manage-list" data-custom-list="${esc(type.id)}">${customEntitiesForType(type.id).map(item=>`<div class="manage-row"><div class="grow"><strong class="custom-entity-name-editable category-name-editable" data-id="${esc(item.id)}" data-type-id="${esc(type.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(item.name)}</strong></div>${moveButton(`custom:${type.id}`,item.id)}<button class="btn small danger delete-custom-entity" data-id="${esc(item.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun elemento presente.</div>'}</div>
+    <div class="manage-list" data-custom-list="${esc(type.id)}">${customEntitiesForType(type.id).filter(item=>!item.parentId).map(item=>`<div class="manage-row"><div class="grow"><strong class="custom-entity-name-editable category-name-editable" data-id="${esc(item.id)}" data-type-id="${esc(type.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(item.name)}</strong></div>${moveButton(`custom:${type.id}`,item.id)}<button class="btn small danger delete-custom-entity" data-id="${esc(item.id)}">Elimina</button></div>`).join("")||'<div class="hint">Nessun elemento presente.</div>'}</div>
     <div class="inline-form" style="grid-template-columns:1fr auto"><input class="new-custom-entity-name" data-type-id="${esc(type.id)}" type="text" placeholder="Nuovo elemento"><button class="btn primary small add-custom-entity" data-type-id="${esc(type.id)}">Aggiungi</button></div>
   </div>`).join("");
 
@@ -3892,15 +3926,12 @@ const ENTITY_DEFINITIONS={
   seo:{type:"seo",label:"SEO",singular:"SEO",store:"seo",field:"seoId",prefix:"seo"}
 };
 function allEntityDefinitions(){
-  const definitions=[
+  return [
     ...Object.values(ENTITY_DEFINITIONS).map(item=>({...item,label:item.type==="category"?"Varie":item.label})),
     ...state.customTypes.map(type=>({type:`custom:${type.id}`,label:type.name,singular:type.singular||type.name,store:"customEntities",field:null,prefix:"customentity",custom:true,typeId:type.id}))
-  ];
-  return definitions.sort((a,b)=>{
-    if(a.type==="category")return -1;
-    if(b.type==="category")return 1;
-    return String(a.label||"").localeCompare(String(b.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true});
-  });
+  ].sort((a,b)=>String(a.label||"").localeCompare(
+    String(b.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true}
+  ));
 }
 function entityDefinition(type){
   if(ENTITY_DEFINITIONS[type])return ENTITY_DEFINITIONS[type];
@@ -4392,17 +4423,17 @@ function bindEvents(){
   $("listBtn").onclick=()=>{state.view="list";localStorage.setItem("ps_view","list");resetRenderLimit();renderCards()};
   $("selectAllBtn").onclick=()=>{filteredPrompts().forEach(prompt=>state.selected.add(prompt.id));renderCards()};
   $("clearSelectionBtn").onclick=()=>{state.selected.clear();renderCards()};
-  $("bulkMoveBtn").onclick=()=>choiceAction("Sposta prompt","Categoria",'<option value="">Senza categoria</option>'+state.categories.map(cat=>`<option value="${esc(cat.id)}">${esc(cat.name)}</option>`).join(""),value=>{
+  $("bulkMoveBtn").onclick=()=>choiceAction("Sposta prompt","Varie",'<option value="">Senza assegnazione</option>'+categoriesHierarchicalAlphabetical().map(cat=>`<option value="${esc(cat.id)}">${cat.parentId?"↳ ":""}${esc(cat.name)}</option>`).join(""),value=>{
     const category=catById(value);bulkUpdate(category?.parentId?{categoryId:category.parentId,subcategoryId:category.id}:{categoryId:value||null,subcategoryId:null});
   });
   $("bulkTransferBtn").onclick=()=>openPromptTransferDialog([...state.selected],"move");
   $("bulkCopyTransferBtn").onclick=()=>openPromptTransferDialog([...state.selected],"copy");
-  $("bulkClientBtn").onclick=()=>choiceAction("Assegna cliente","Cliente",'<option value="">Nessun cliente</option>'+state.clients.map(client=>`<option value="${esc(client.id)}">${esc(client.name)}</option>`).join(""),value=>bulkUpdate({clientId:value||null}));
-  $("bulkProjectBtn").onclick=()=>choiceAction("Assegna progetto","Progetto",'<option value="">Nessun progetto</option>'+state.projects.map(project=>`<option value="${esc(project.id)}">${esc(project.name)}</option>`).join(""),value=>bulkUpdate({projectId:value||null}));
-  $("bulkGptSiteBtn").onclick=()=>choiceAction("Assegna GPTSites","Sito GPTSites",'<option value="">Nessun sito GPTSites</option>'+state.gptsites.map(site=>`<option value="${esc(site.id)}">${esc(site.name)}</option>`).join(""),value=>bulkUpdate({gptSiteId:value||null}));
-  $("bulkSeoBtn").onclick=()=>choiceAction("Assegna SEO","Elemento SEO",'<option value="">Nessun elemento SEO</option>'+state.seo.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join(""),value=>bulkUpdate({seoId:value||null}));
+  $("bulkClientBtn").onclick=()=>choiceAction("Assegna cliente","Cliente",'<option value="">Nessun cliente</option>'+hierarchicalEntitiesForType("client").map(client=>`<option value="${esc(client.id)}">${client.parentId?"↳ ":""}${esc(entityDisplayLabel(client)||client.name)}</option>`).join(""),value=>bulkUpdate({clientId:value||null}));
+  $("bulkProjectBtn").onclick=()=>choiceAction("Assegna progetto","Progetto",'<option value="">Nessun progetto</option>'+hierarchicalEntitiesForType("project").map(project=>`<option value="${esc(project.id)}">${project.parentId?"↳ ":""}${esc(entityDisplayLabel(project)||project.name)}</option>`).join(""),value=>bulkUpdate({projectId:value||null}));
+  $("bulkGptSiteBtn").onclick=()=>choiceAction("Assegna GPTSites","Sito GPTSites",'<option value="">Nessun sito GPTSites</option>'+hierarchicalEntitiesForType("gptsite").map(site=>`<option value="${esc(site.id)}">${site.parentId?"↳ ":""}${esc(entityDisplayLabel(site)||site.name)}</option>`).join(""),value=>bulkUpdate({gptSiteId:value||null}));
+  $("bulkSeoBtn").onclick=()=>choiceAction("Assegna SEO","Elemento SEO",'<option value="">Nessun elemento SEO</option>'+state.seo.map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join(""),value=>bulkUpdate({seoId:value||null}));
   $("bulkArchiveBtn").onclick=bulkArchiveSelected;
-  $("bulkTrashBtn").onclick=bulkTrashSelected;
+  $("bulkTrashBtn").onclick=bulkTrashSelected;$("bulkDeleteBtn").onclick=bulkDeleteSelectedPermanent;
 
   $$(".editor-tab").forEach(button=>button.onclick=()=>setEditorTab(button.dataset.tab));
   $$("[data-editor-mode]").forEach(button=>button.onclick=()=>{if(!state.editor.id)return;state.editor.mode=button.dataset.editorMode;applyEditorModeUI();setEditorTab(state.editor.mode==="use"?"variables":"prompt")});
@@ -4552,6 +4583,7 @@ async function loadWorkspaceSettings(){
   state.collections=await settingsRecord("collections",[]);state.workflows=await settingsRecord("workflows",[]);
   if(!Array.isArray(state.collections))state.collections=[];if(!Array.isArray(state.workflows))state.workflows=[];
 }
+const _loadWorkspaceSettingsQA=loadWorkspaceSettings;loadWorkspaceSettings=async function(){await _loadWorkspaceSettingsQA();await repairWorkspaceIntegrity()};
 function visibleSidebarTypes(){
   const fixed=FIXED_ENTITY_TYPES.map(item=>({...item}));
   const custom=state.customTypes
@@ -4627,7 +4659,7 @@ filteredPrompts=function(){return applyAdvancedFilters(_filteredPromptsV19())}
 function syncAdvancedFilterControls(){
   const category=$("filterCategory"),client=$("filterClient");
   if(category){const current=state.advancedFilters.category||"";category.innerHTML='<option value="">Tutte</option>'+categoriesHierarchicalAlphabetical().map(item=>`<option value="${esc(item.id)}">${item.parentId?"↳ ":""}${esc(item.name)}</option>`).join("");category.value=current}
-  if(client){const current=state.advancedFilters.client||"";client.innerHTML='<option value="">Tutti</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");client.value=current}
+  if(client){const current=state.advancedFilters.client||"";client.innerHTML='<option value="">Tutti</option>'+state.clients.map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join("");client.value=current}
   if($("filterStatus"))$("filterStatus").value=state.advancedFilters.status||"";
   if($("filterUsage"))$("filterUsage").value=state.advancedFilters.usage||"";
   if($("filterWithVariables"))$("filterWithVariables").checked=!!state.advancedFilters.withVariables;
@@ -4666,13 +4698,13 @@ function renderFilterStrip(resultCount=filteredPrompts().length){
 }
 
 function dynamicEntitySelectHtml(definition,prompt){
-  let entities=[],values=[];if(definition.type==="client"){entities=state.clients;values=[prompt?.clientId].filter(Boolean)}else if(definition.type==="project"){entities=state.projects;values=[prompt?.projectId].filter(Boolean)}else if(definition.type==="gptsite"){entities=state.gptsites;values=[prompt?.gptSiteId].filter(Boolean)}else if(definition.type==="seo"){entities=state.seo;values=[prompt?.seoId].filter(Boolean)}else if(definition.custom){entities=customEntitiesForType(definition.typeId);values=customAssignmentValues(prompt,definition.typeId)}
+  let entities=[],values=[];if(definition.type==="client"){entities=hierarchicalEntitiesForType("client");values=[prompt?.clientId].filter(Boolean)}else if(definition.type==="project"){entities=hierarchicalEntitiesForType("project");values=[prompt?.projectId].filter(Boolean)}else if(definition.type==="gptsite"){entities=hierarchicalEntitiesForType("gptsite");values=[prompt?.gptSiteId].filter(Boolean)}else if(definition.type==="seo"){entities=hierarchicalEntitiesForType("seo");values=[prompt?.seoId].filter(Boolean)}else if(definition.custom){entities=hierarchicalEntitiesForType(`custom:${definition.typeId}`);values=customAssignmentValues(prompt,definition.typeId)}
   const type=definition.custom?customTypeById(definition.typeId):null,multiple=Boolean(type?.multi),selectId=`promptEntity_${String(definition.type).replace(/[^a-z0-9_-]/gi,"_")}`;
   return `<div class="field"><label for="${esc(selectId)}">${esc(definition.label)}</label><div class="inline-create-row"><select id="${esc(selectId)}" class="prompt-entity-select" data-entity-type="${esc(definition.type)}" ${multiple?'multiple size="3"':''}><option value="">Nessuna assegnazione</option>${entities.map(item=>`<option value="${esc(item.id)}" ${values.includes(item.id)?"selected":""}>${esc(entityDisplayLabel(item)||item.name)}</option>`).join("")}</select><button class="btn inline-create-btn" type="button" data-inline-create="${esc(definition.type)}" title="Crea nuovo ${esc(definition.singular||definition.label)}" aria-label="Crea nuovo ${esc(definition.singular||definition.label)}">+</button></div></div>`;
 }
 const _fillEditorSelectsV19=fillEditorSelects;
 fillEditorSelects=function(prompt){
-  const roots=rootVariesAlphabetical();$("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");$("promptCategory").value=prompt?.categoryId||"";fillSubcategories(prompt?.subcategoryId||"");
+  const roots=rootVariesAlphabetical();$("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join("");$("promptCategory").value=prompt?.categoryId||"";fillSubcategories(prompt?.subcategoryId||"");
   $("dynamicEditorFields").innerHTML=visibleSidebarTypes().map(definition=>dynamicEntitySelectHtml(definition,prompt)).join("");
   $$('[data-inline-create]').forEach(button=>button.onclick=()=>inlineCreateEntity(button.dataset.inlineCreate));
 }
@@ -4817,7 +4849,7 @@ function sidebarDnDOptions(type){
   const collection=entityCollection(type).slice().sort((a,b)=>
     String(a.name||"").localeCompare(String(b.name||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true})
   );
-  return collection.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+  return collection.map(item=>`<option value="${esc(item.id)}">${esc(entityDisplayLabel(item)||item.name)}</option>`).join("");
 }
 
 async function applySidebarPromptDrop(promptId,type,targetId){
@@ -4939,7 +4971,8 @@ function entityDisplayLabel(entity){
   if(!entity)return "";
   let parent=null;
   if(entity.parentId){
-    parent=catById(entity.parentId)||clientById(entity.parentId)||projectById(entity.parentId)||gptSiteById(entity.parentId)||seoById(entity.parentId)||customEntityById(entity.parentId);
+    parent=catById(entity.parentId)||clientById(entity.parentId)||projectById(entity.parentId)||
+      gptSiteById(entity.parentId)||seoById(entity.parentId)||customEntityById(entity.parentId);
   }
   return parent?`${parent.name} › ${entity.name}`:entity.name;
 }
@@ -5198,6 +5231,16 @@ const _commandItemsAgentBase=commandItems;commandItems=function(query){const ite
 const MAX_ZIP_ARCHIVE_SIZE=MAX_IMPORT_ARCHIVE_SIZE;
 const MAX_ZIP_ENTRY_SIZE=20*1024*1024;
 const MAX_ZIP_TOTAL_UNCOMPRESSED=200*1024*1024;
+/* ---------- QA integrity & recovery 22.14.1 ---------- */
+function entityDescendantIds(type,rootId){const collection=type==="category"?state.categories:entityCollection(type),childrenByParent=new Map();collection.forEach(item=>{if(!item.parentId)return;if(!childrenByParent.has(item.parentId))childrenByParent.set(item.parentId,[]);childrenByParent.get(item.parentId).push(item.id)});const result=[],queue=[rootId],seen=new Set([rootId]);while(queue.length){const current=queue.shift();for(const childId of childrenByParent.get(current)||[]){if(seen.has(childId))continue;seen.add(childId);result.push(childId);queue.push(childId)}}return result}
+async function deleteEntityCascade(type,id){const definition=entityDefinition(type),source=entityByType(type,id);if(!definition||!source)return;const descendants=entityDescendantIds(type,id),removedIds=new Set([id,...descendants]);const affected=state.prompts.filter(prompt=>definition.custom?customAssignmentValues(prompt,definition.typeId).some(value=>removedIds.has(value)):(definition.field?removedIds.has(prompt[definition.field]):false));const detail=descendants.length?` Verranno eliminate anche ${descendants.length} sottocategori${descendants.length===1?"a":"e"}.`:"";confirmAction(`Elimina ${definition.singular||"elemento"}`,`${affected.length} prompt perderanno questa assegnazione, ma non saranno eliminati.${detail}`,async()=>{if(!(await createSafetyBackup(`Prima di eliminare ${definition.label} · ${source.name}`))){toast("Backup automatico non riuscito: eliminazione annullata per sicurezza.","error","PS-ENTITY-DELETE-BACKUP");return}try{const tx=state.db.transaction(["prompts",definition.store],"readwrite"),promptStore=tx.objectStore("prompts"),entityStore=tx.objectStore(definition.store),stamp=now();affected.forEach(prompt=>{const updated={...prompt,updatedAt:stamp};if(definition.custom){const customType=customTypeById(definition.typeId),remaining=customAssignmentValues(updated,definition.typeId).filter(value=>!removedIds.has(value));updated.customAssignments={...(updated.customAssignments||{}),[definition.typeId]:customType?.multi?remaining:(remaining[0]||null)}}else if(definition.field&&removedIds.has(updated[definition.field]))updated[definition.field]=null;promptStore.put(updated)});removedIds.forEach(entityId=>entityStore.delete(entityId));await transactionDone(tx);if((state.filter.type===type&&removedIds.has(state.filter.id))||(state.filter.type==="custom"&&definition.custom&&state.filter.typeId===definition.typeId&&removedIds.has(state.filter.id)))state.filter={type:"all",id:null};await loadData();render();renderManage();toast(`${definition.singular||"Elemento"} “${source.name}” eliminato senza lasciare sottocategorie orfane.`,"success")}catch(error){console.error(error);toast(`Eliminazione non riuscita: ${error.message||"errore del database"}.`,"error","PS-ENTITY-CASCADE")}})}
+function workspaceWithoutPromptIds(ids){const removed=new Set(ids);return {collections:(state.collections||[]).map(item=>({...item,promptIds:(item.promptIds||[]).filter(id=>!removed.has(id))})),workflows:(state.workflows||[]).map(item=>({...item,steps:(item.steps||[]).filter(id=>!removed.has(id))}))}}
+async function deletePromptIdsAtomic(ids){const unique=[...new Set((ids||[]).filter(id=>state.prompts.some(prompt=>prompt.id===id)))];if(!unique.length)return 0;const next=workspaceWithoutPromptIds(unique),tx=state.db.transaction(["prompts","settings"],"readwrite"),promptStore=tx.objectStore("prompts"),settingsStore=tx.objectStore("settings"),stamp=now();unique.forEach(id=>promptStore.delete(id));settingsStore.put({id:"collections",value:next.collections,updatedAt:stamp});settingsStore.put({id:"workflows",value:next.workflows,updatedAt:stamp});await transactionDone(tx);state.collections=next.collections;state.workflows=next.workflows;state.selected=new Set([...state.selected].filter(id=>!unique.includes(id)));await loadData();return unique.length}
+async function restoreLatestInternalBackup(){const backups=(await getAll("backups")).sort((a,b)=>dateTimestamp(b.createdAt)-dateTimestamp(a.createdAt)),backup=backups[0];if(!backup?.data){toast("Non è disponibile alcun backup interno da ripristinare.","warning");return}const data=backup.data;confirmAction("Ripristina ultimo backup interno",`Ripristinare il backup del ${formatDate(backup.createdAt)}${backup.reason?` · ${backup.reason}`:""}? Lo stato attuale verrà prima salvato in un nuovo backup interno.`,async()=>{try{if(!(await createSafetyBackup("Prima del ripristino backup interno"))){toast("Backup dello stato attuale non riuscito: ripristino annullato.","error","PS-BACKUP-RESTORE-SAFETY");return}validateArchiveData(data);await writeCoreDataAtomic({mode:"replace",categories:data.categories||[],clients:data.clients||[],gptsites:data.gptsites||[],projects:data.projects||[],seo:data.seo||[],customTypes:data.customTypes||[],customEntities:data.customEntities||[],prompts:data.prompts||[],collections:data.collections||[],workflows:data.workflows||[]});state.collections=Array.isArray(data.collections)?data.collections:[];state.workflows=Array.isArray(data.workflows)?data.workflows:[];state.selected.clear();state.filter={type:"all",id:null};state.query="";if($("globalSearch"))$("globalSearch").value="";await loadData();render();toast("Backup interno ripristinato correttamente.","success")}catch(error){console.error(error);toast(`Ripristino backup non riuscito: ${error.message||"errore del database"}.`,"error","PS-BACKUP-RESTORE")}})}
+async function repairWorkspaceIntegrity(){const liveIds=new Set(state.prompts.map(prompt=>prompt.id)),collections=(state.collections||[]).map(item=>({...item,promptIds:(item.promptIds||[]).filter(id=>liveIds.has(id))})),workflows=(state.workflows||[]).map(item=>({...item,steps:(item.steps||[]).filter(id=>liveIds.has(id))}));const changed=JSON.stringify(collections)!==JSON.stringify(state.collections||[])||JSON.stringify(workflows)!==JSON.stringify(state.workflows||[]);if(changed){state.collections=collections;state.workflows=workflows;await saveSettingsRecord("collections",collections);await saveSettingsRecord("workflows",workflows)}return changed}
+deleteClient=id=>deleteEntityCascade("client",id);deleteProject=id=>deleteEntityCascade("project",id);deleteGptSite=id=>deleteEntityCascade("gptsite",id);deleteSeo=id=>deleteEntityCascade("seo",id);deleteCustomEntity=id=>{const item=customEntityById(id);if(item)deleteEntityCascade(`custom:${item.typeId}`,id)};
+const _openMoveEntityDialogQA=openMoveEntityDialog;openMoveEntityDialog=function(sourceType,id){if(sourceType!=="category"){const descendants=entityDescendantIds(sourceType,id);if(descendants.length){toast(`“${entityByType(sourceType,id)?.name||"Elemento"}” contiene ${descendants.length} sottocategori${descendants.length===1?"a":"e"}. Sposta o elimina prima le sottocategorie per evitare riferimenti incoerenti.`,"warning","PS-ENTITY-MOVE-CHILDREN");return}}return _openMoveEntityDialogQA(sourceType,id)};
+deletePrompt=function(id){const prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;confirmAction("Eliminazione definitiva","Il prompt verrà eliminato definitivamente e verranno rimossi anche eventuali riferimenti nelle raccolte.",async()=>{if(!(await createSafetyBackup(`Prima di eliminare prompt · ${prompt.title||"Senza titolo"}`))){toast("Backup automatico non riuscito: eliminazione annullata.","error","PS-PROMPT-DELETE-BACKUP");return}try{await deletePromptIdsAtomic([id]);render();toast("Prompt eliminato definitivamente.","success")}catch(error){console.error(error);toast("Eliminazione definitiva non riuscita.","error","PS-PROMPT-DELETE")}})};
 const ZIP_TEXT_EXTENSIONS=new Set(["txt","md","markdown","csv","json","xml","html","htm","css","js","mjs","cjs","ts","jsx","tsx","php","py","sql","log","yaml","yml","toml","ini","conf","rst"]);
 let zipCrcTable=null;
 function zipCrc32(bytes){
@@ -5269,32 +5312,39 @@ function zipDestinationOptions({includeGeneral=false}={}){
   parts.push('<option value="__none__">Nessuna assegnazione</option>');
 
   const groups=[];
-  const roots=rootVariesAlphabetical();
-  if(roots.length){
-    const items=[];
-    for(const root of roots){
-      items.push({id:root.id,name:root.name,child:false});
-      childVariesAlphabetical(root.id).forEach(child=>items.push({id:child.id,name:child.name,child:true}));
-    }
-    groups.push({label:"Varie",kind:"category",items});
+
+  const categoryItems=[];
+  for(const root of rootVariesAlphabetical()){
+    categoryItems.push({id:root.id,name:root.name,child:false});
+    for(const child of childVariesAlphabetical(root.id))categoryItems.push({id:child.id,name:child.name,child:true});
+  }
+  if(categoryItems.length)groups.push({label:"Varie",kind:"category",items:categoryItems});
+
+  const fixed=[
+    {label:"Clienti",kind:"client"},
+    {label:"GPTSites",kind:"gptsite"},
+    {label:"Progetti",kind:"project"},
+    {label:"SEO",kind:"seo"}
+  ];
+  for(const group of fixed){
+    const items=hierarchicalEntitiesForType(group.kind).map(item=>({
+      id:item.id,name:item.name,child:Boolean(item.parentId),display:entityDisplayLabel(item)
+    }));
+    if(items.length)groups.push({...group,items});
   }
 
-  groups.push(
-    {label:"Clienti",kind:"client",items:[...state.clients].sort(alpha)},
-    {label:"GPTSites",kind:"gptsite",items:[...state.gptsites].sort(alpha)},
-    {label:"Progetti",kind:"project",items:[...state.projects].sort(alpha)},
-    {label:"SEO",kind:"seo",items:[...state.seo].sort(alpha)},
-    ...state.customTypes.filter(type=>type.visible!==false).map(type=>({
-      label:type.name,kind:"custom",typeId:type.id,items:[...customEntitiesForType(type.id)].sort(alpha)
-    }))
-  );
+  for(const type of state.customTypes.filter(item=>item.visible!==false)){
+    const items=hierarchicalEntitiesForType(`custom:${type.id}`).map(item=>({
+      id:item.id,name:item.name,child:Boolean(item.parentId),display:entityDisplayLabel(item)
+    }));
+    if(items.length)groups.push({label:type.name,kind:"custom",typeId:type.id,items});
+  }
 
   groups.sort((a,b)=>String(a.label||"").localeCompare(
     String(b.label||""),"it",{sensitivity:"base",numeric:true,ignorePunctuation:true}
   ));
 
   for(const group of groups){
-    if(!group.items.length)continue;
     parts.push(`<optgroup label="${esc(group.label)}">`);
     for(const item of group.items){
       const value=group.kind==="category"
@@ -5302,7 +5352,9 @@ function zipDestinationOptions({includeGeneral=false}={}){
         :group.kind==="custom"
           ?`custom:${esc(group.typeId)}:${esc(item.id)}`
           :`${group.kind}:${esc(item.id)}`;
-      const label=group.kind==="category"&&item.child?`↳ ${esc(item.name)}`:esc(item.name);
+      const label=group.kind==="category"
+        ?`${item.child?"↳ ":""}${esc(item.name)}`
+        :`${item.child?"↳ ":""}${esc(item.display||item.name)}`;
       parts.push(`<option value="${value}">${label}</option>`);
     }
     parts.push('</optgroup>');
@@ -5343,14 +5395,111 @@ function renderZipImportPreview(model){
   $("zipSelectAll")?.addEventListener("change",event=>{$$('#zipImportTableBody .zip-import-check:not(:disabled)').forEach(input=>input.checked=event.target.checked);updateZipImportCount()});$$('#zipImportTableBody .zip-import-check').forEach(input=>input.onchange=updateZipImportCount);$("zipImportConfirm").onclick=()=>importPromptsFromZipPreview(model);updateZipImportCount();openModal("choiceModal");
 }
 async function importPromptsFromZipPreview(model){
-  if(state.busy.has("zipApply"))return;const selected=zipImportSelectedRows();if(!selected.length){toast("Seleziona almeno un file da importare.","warning");return}const defaultCategory=$("zipDefaultCategory")?.value||"";const status=$("zipImportStatus")?.value||"review";const prepared=[];
-  for(const rowNode of selected){const index=Number(rowNode.dataset.zipRow),source=model.rows[index],title=String(rowNode.querySelector('.zip-import-title')?.value||"").trim(),override=rowNode.querySelector('.zip-import-destination')?.value||"",chosen=override||defaultCategory;if(!title){toast(`Inserisci il titolo per ${source.path}.`,"warning");rowNode.querySelector('.zip-import-title')?.focus();return}if(!chosen){toast("Scegli una destinazione generale oppure una destinazione specifica per ogni file selezionato.","warning");$("zipDefaultCategory")?.focus();return}const assignment=zipAssignmentFromValue(chosen);if(!assignment){toast(`Destinazione non valida per ${source.path}.`,"error","PS-ZIP-CATEGORY");return}prepared.push({source,title,assignment})}
-  state.busy.add("zipApply");const button=$("zipImportConfirm");if(button){button.disabled=true;button.textContent="Importazione…"}try{const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts"),stamp=now();const archiveAssignment=defaultCategory?zipAssignmentFromValue(defaultCategory):prepared[0].assignment;if(!archiveAssignment)throw new Error("Destinazione archivio ZIP non valida.");const archivePrompt={id:uid("prompt"),title:`00 - Archivio ZIP · ${model.file.name}`,content:`Archivio ZIP sorgente dell’importazione: ${model.file.name}`,intro:`File ZIP originale usato per creare ${prepared.length} prompt. Puoi scaricarlo direttamente da questo box.`,introSource:"manual",introGeneratedAt:stamp,introUpdatedAt:stamp,categoryId:archiveAssignment.categoryId,subcategoryId:archiveAssignment.subcategoryId,clientId:archiveAssignment.clientId,projectId:archiveAssignment.projectId,gptSiteId:archiveAssignment.gptSiteId,seoId:archiveAssignment.seoId,customAssignments:archiveAssignment.customAssignments||{},status:"approved",tags:["import-zip","archivio-sorgente"],notes:"Box archivio creato automaticamente durante l’importazione ZIP.",toolUrl:"",favorite:false,pinned:false,usageCount:0,lastUsedAt:null,version:1,variableValues:{},variableFiles:{},createdAt:stamp,updatedAt:stamp,deletedAt:null,isZipArchiveBox:true,sourceZip:{name:model.file.name,size:model.file.size,type:model.file.type||"application/zip",lastModified:model.file.lastModified||null,blob:model.file},importSource:{type:"zip-archive",archive:model.file.name}};promptStore.put(archivePrompt);for(const item of prepared){const prompt={id:uid("prompt"),title:item.title,content:item.source.content,intro:"",introSource:"auto",introGeneratedAt:stamp,introUpdatedAt:stamp,categoryId:item.assignment.categoryId,subcategoryId:item.assignment.subcategoryId,clientId:item.assignment.clientId,projectId:item.assignment.projectId,gptSiteId:item.assignment.gptSiteId,seoId:item.assignment.seoId,customAssignments:item.assignment.customAssignments||{},status,tags:["import-zip"],notes:"",toolUrl:"",favorite:false,pinned:false,usageCount:0,lastUsedAt:null,version:1,variableValues:{},variableFiles:{},createdAt:stamp,updatedAt:stamp,deletedAt:null,importSource:{type:"zip",archive:model.file.name,path:item.source.path}};prompt.intro=generatePromptIntro(prompt);promptStore.put(prompt)}await transactionDone(tx);await loadData();resetRenderLimit();state.sort="title_asc";localStorage.setItem("ps_sort",state.sort);if($("sortSelect"))$("sortSelect").value=state.sort;closeModal("choiceModal");state.filter=archiveAssignment.customAssignments&&Object.keys(archiveAssignment.customAssignments).length?{type:"all",id:null}:archiveAssignment.clientId?{type:"client",id:archiveAssignment.clientId}:archiveAssignment.projectId?{type:"project",id:archiveAssignment.projectId}:archiveAssignment.gptSiteId?{type:"gptsite",id:archiveAssignment.gptSiteId}:archiveAssignment.seoId?{type:"seo",id:archiveAssignment.seoId}:archiveAssignment.subcategoryId?{type:"category",id:archiveAssignment.subcategoryId}:archiveAssignment.categoryId?{type:"category",id:archiveAssignment.categoryId}:{type:"all",id:null};render();toast(`Creato il box dello ZIP sorgente e importati ${prepared.length} prompt mantenendo la numerazione dei file.`,"success")}catch(error){console.error(error);toast(`Importazione ZIP annullata: ${error.message||"errore del database"}. Nessun prompt parziale è stato confermato.`,"error","PS-ZIP-APPLY")}finally{state.busy.delete("zipApply");if(button){button.disabled=false;updateZipImportCount()}}
+  if(state.busy.has("zipApply"))return;
+  const selected=zipImportSelectedRows();
+  if(!selected.length){toast("Seleziona almeno un file da importare.","warning");return}
+
+  const defaultDestination=$("zipDefaultCategory")?.value||"";
+  const status=$("zipImportStatus")?.value||"review";
+  const prepared=[];
+
+  for(const rowNode of selected){
+    const index=Number(rowNode.dataset.zipRow),source=model.rows[index];
+    const title=String(rowNode.querySelector('.zip-import-title')?.value||"").trim();
+    const override=rowNode.querySelector('.zip-import-destination')?.value||"";
+    const chosen=override||defaultDestination;
+    if(!title){toast(`Inserisci il titolo per ${source.path}.`,"warning");rowNode.querySelector('.zip-import-title')?.focus();return}
+    if(!chosen){toast("Scegli una destinazione generale oppure una destinazione specifica per ogni file selezionato.","warning");$("zipDefaultCategory")?.focus();return}
+    const assignment=zipAssignmentFromValue(chosen);
+    if(!assignment){toast(`Destinazione non valida per ${source.path}.`,"error","PS-ZIP-CATEGORY");return}
+    prepared.push({source,title,assignment});
+  }
+
+  state.busy.add("zipApply");
+  const button=$("zipImportConfirm");
+  if(button){button.disabled=true;button.textContent="Importazione…"}
+
+  const batchId=uid("zipbatch");
+  try{
+    const tx=state.db.transaction("prompts","readwrite");
+    const promptStore=tx.objectStore("prompts"),stamp=now();
+    const archiveAssignment=defaultDestination?zipAssignmentFromValue(defaultDestination):prepared[0].assignment;
+    if(!archiveAssignment)throw new Error("Destinazione archivio ZIP non valida.");
+
+    const archivePrompt={
+      id:uid("prompt"),title:`00 - Archivio ZIP · ${model.file.name}`,
+      content:`Archivio ZIP sorgente dell’importazione: ${model.file.name}`,
+      intro:`File ZIP originale usato per creare ${prepared.length} prompt. Puoi scaricarlo oppure annullare l’intera importazione da questo box.`,
+      introSource:"manual",introGeneratedAt:stamp,introUpdatedAt:stamp,
+      categoryId:archiveAssignment.categoryId,subcategoryId:archiveAssignment.subcategoryId,
+      clientId:archiveAssignment.clientId,projectId:archiveAssignment.projectId,
+      gptSiteId:archiveAssignment.gptSiteId,seoId:archiveAssignment.seoId,
+      customAssignments:archiveAssignment.customAssignments||{},status:"approved",
+      tags:["import-zip","archivio-sorgente"],notes:"Box archivio creato automaticamente durante l’importazione ZIP.",
+      toolUrl:"",favorite:false,pinned:false,usageCount:0,lastUsedAt:null,version:1,
+      variableValues:{},variableFiles:{},createdAt:stamp,updatedAt:stamp,deletedAt:null,
+      isZipArchiveBox:true,zipImportBatchId:batchId,
+      sourceZip:{name:model.file.name,size:model.file.size,type:model.file.type||"application/zip",lastModified:model.file.lastModified||null,blob:model.file},
+      importSource:{type:"zip-archive",archive:model.file.name,batchId}
+    };
+    promptStore.put(archivePrompt);
+
+    for(const item of prepared){
+      const prompt={
+        id:uid("prompt"),title:item.title,content:item.source.content,intro:"",
+        introSource:"auto",introGeneratedAt:stamp,introUpdatedAt:stamp,
+        categoryId:item.assignment.categoryId,subcategoryId:item.assignment.subcategoryId,
+        clientId:item.assignment.clientId,projectId:item.assignment.projectId,
+        gptSiteId:item.assignment.gptSiteId,seoId:item.assignment.seoId,
+        customAssignments:item.assignment.customAssignments||{},status,
+        tags:["import-zip"],notes:"",toolUrl:"",favorite:false,pinned:false,
+        usageCount:0,lastUsedAt:null,version:1,variableValues:{},variableFiles:{},
+        createdAt:stamp,updatedAt:stamp,deletedAt:null,zipImportBatchId:batchId,
+        importSource:{type:"zip",archive:model.file.name,path:item.source.path,batchId}
+      };
+      prompt.intro=generatePromptIntro(prompt);
+      promptStore.put(prompt);
+    }
+
+    await transactionDone(tx);
+    await loadData();
+    resetRenderLimit();
+    state.sort="title_asc";localStorage.setItem("ps_sort",state.sort);
+    if($("sortSelect"))$("sortSelect").value=state.sort;
+    closeModal("choiceModal");
+    state.filter={type:"all",id:null};
+    render();
+
+    toastAction(
+      `Importati ${prepared.length} prompt + box ZIP.`,
+      "Annulla importazione",
+      ()=>rollbackZipImport(batchId),
+      "success"
+    );
+  }catch(error){
+    console.error(error);
+    toast(`Importazione ZIP annullata: ${error.message||"errore del database"}. Nessun prompt parziale è stato confermato.`,"error","PS-ZIP-APPLY");
+  }finally{
+    state.busy.delete("zipApply");
+    if(button){button.disabled=false;updateZipImportCount()}
+  }
+}
+
+async function rollbackZipImport(batchId){const id=String(batchId||"").trim();if(!id){toast("Rollback non disponibile: batch ZIP non identificato.","error","PS-ZIP-ROLLBACK-ID");return}const items=state.prompts.filter(prompt=>prompt.zipImportBatchId===id||prompt.importSource?.batchId===id);if(!items.length){toast("Questa importazione è già stata rimossa o non è più disponibile.","warning");return}try{await createSafetyBackup("Prima del rollback ZIP");const count=await deletePromptIdsAtomic(items.map(item=>item.id));render();toast(`Rollback completato: rimossi ${count} elementi creati da quella importazione ZIP e ripuliti i relativi collegamenti.`,"success")}catch(error){console.error(error);toast(`Rollback ZIP non riuscito: ${error.message||"errore del database"}.`,"error","PS-ZIP-ROLLBACK")}}
+
+function confirmRollbackZipImport(batchId){
+  const items=state.prompts.filter(prompt=>prompt.zipImportBatchId===batchId||prompt.importSource?.batchId===batchId);
+  confirmAction(
+    "Annulla importazione ZIP",
+    `Verranno eliminati ${items.length} elementi creati esclusivamente da questa importazione. Gli altri prompt resteranno invariati.`,
+    ()=>rollbackZipImport(batchId)
+  );
 }
 const _bindEventsZipBase=bindEvents;
 bindEvents=function(){_bindEventsZipBase();$("menuImportZipBtn")?.addEventListener("click",()=>{$("moreMenu")?.classList.remove("show");$("zipImportInput")?.click()});$("zipImportInput")?.addEventListener("change",event=>{const file=event.target.files?.[0];event.target.value="";if(file)openZipImport(file)})};
 const _commandItemsZipBase=commandItems;
 commandItems=function(query){const items=_commandItemsZipBase(query),q=normalize(query),command={label:"Importa ZIP di prompt",hint:"ZIP",run:()=>{$("zipImportInput")?.click()}};return (!q||normalize(command.label).includes(q)||q.includes("zip"))?[command,...items]:items};
+const _bindEventsQARecovery=bindEvents;bindEvents=function(){_bindEventsQARecovery();$("menuRestoreBackupBtn")?.addEventListener("click",()=>{$("moreMenu")?.classList.remove("show");restoreLatestInternalBackup()})};
 
 
 /* ---------- ZIP archive box 22.9 ---------- */
@@ -5358,12 +5507,12 @@ const _cardHtmlZipArchiveBase=cardHtml;
 cardHtml=function(prompt){
   if(!prompt?.isZipArchiveBox||!prompt?.sourceZip)return _cardHtmlZipArchiveBase(prompt);
   const category=catById(prompt.subcategoryId)||catById(prompt.categoryId),accent=categoryColor(category);
-  return `<article class="card zip-archive-card" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" draggable="true" tabindex="0" aria-label="Archivio ZIP ${esc(prompt.sourceZip.name||"")}"><input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""} aria-label="Seleziona archivio ZIP"><div class="zip-archive-head"><div class="zip-archive-icon" aria-hidden="true">📦</div><div><div class="card-title">${esc(prompt.title||"00 - Archivio ZIP")}</div><div class="zip-archive-meta"><strong>${esc(prompt.sourceZip.name||"Archivio ZIP")}</strong> · ${esc(formatBytes(prompt.sourceZip.size||0))}<br>File sorgente originale dell’importazione. Questo box resta nella libreria e permette di riscaricare lo ZIP.</div></div></div><div class="card-actions"><button class="btn small primary download-source-zip-card" type="button">Scarica ZIP</button><button class="btn small danger trash-card" type="button">Cestina box</button></div></article>`;
+  return `<article class="card zip-archive-card" style="--accent:${esc(accent)}" data-id="${esc(prompt.id)}" draggable="true" tabindex="0" aria-label="Archivio ZIP ${esc(prompt.sourceZip.name||"")}"><input class="card-check" type="checkbox" ${state.selected.has(prompt.id)?"checked":""} aria-label="Seleziona archivio ZIP"><div class="zip-archive-head"><div class="zip-archive-icon" aria-hidden="true">📦</div><div><div class="card-title">${esc(prompt.title||"00 - Archivio ZIP")}</div><div class="zip-archive-meta"><strong>${esc(prompt.sourceZip.name||"Archivio ZIP")}</strong> · ${esc(formatBytes(prompt.sourceZip.size||0))}<br>File sorgente originale dell’importazione. Questo box resta nella libreria e permette di riscaricare lo ZIP.</div></div></div><div class="card-actions"><button class="btn small primary download-source-zip-card" type="button">Scarica ZIP</button>${prompt.zipImportBatchId?'<button class="btn small rollback-zip-import" type="button">Rollback importazione</button>':""}<button class="btn small danger trash-card" type="button">Cestina box</button></div></article>`;
 };
 const _bindCardEventsZipArchiveBase=bindCardEvents;
 bindCardEvents=function(){
   _bindCardEventsZipArchiveBase();
-  $$('#cards .zip-archive-card').forEach(card=>{const id=card.dataset.id;card.onclick=event=>{if(event.target.closest("button,input"))return;const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)};card.onkeydown=event=>{if(event.target.closest("button,input"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)}};card.querySelector('.download-source-zip-card')?.addEventListener('click',()=>{const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)})});
+  $$('#cards .zip-archive-card').forEach(card=>{const id=card.dataset.id;card.onclick=event=>{if(event.target.closest("button,input"))return;const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)};card.onkeydown=event=>{if(event.target.closest("button,input"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)}};card.querySelector('.download-source-zip-card')?.addEventListener('click',()=>{const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)});card.querySelector('.rollback-zip-import')?.addEventListener('click',()=>{const prompt=state.prompts.find(item=>item.id===id);if(prompt?.zipImportBatchId)confirmRollbackZipImport(prompt.zipImportBatchId)})});
 };
 
 
