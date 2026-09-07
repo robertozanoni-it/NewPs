@@ -887,8 +887,8 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
           </div>
         </div>
         <div class="panel-box">
-          <h4>Categorie</h4><div class="hint" style="margin-bottom:10px">Clicca sul nome di una categoria per rinominarla.</div>
-          <div class="manage-list" id="manageCategories"></div>
+          <h4>Varie</h4><div class="hint" style="margin-bottom:10px">Clicca sul nome di una categoria per rinominarla.</div>
+          <div class="manage-list" id="manageVaries"></div>
           <div class="inline-form" style="grid-template-columns:1fr auto">
             <input id="newCategoryName" type="text" placeholder="Nome categoria">
             <button class="btn primary small" id="addCategoryBtn">Aggiungi</button>
@@ -959,8 +959,8 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.6.0";
-const APP_RELEASE_NAME="Universal ZIP Prompt Import";
+const APP_VERSION="22.7.0";
+const APP_RELEASE_NAME="ZIP Import · Destinazioni e Varie";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -1000,7 +1000,7 @@ function readStoredJson(key,fallback){
     return fallback;
   }
 }
-const storedOpenCategories=readStoredJson("ps_open_categories",[]);
+const storedOpenVaries=readStoredJson("ps_open_categories",[]);
 const state={
   db:null,prompts:[],categories:[],clients:[],projects:[],gptsites:[],seo:[],customTypes:[],customEntities:[],
   filter:{type:"all",id:null},query:"",selected:new Set(),
@@ -1010,7 +1010,7 @@ const state={
   searchTimer:null,detectTimer:null,introTimer:null,
   lastSavedId:null,
   recentValues:readStoredJson("ps_recent_values",{}),
-  openCategories:new Set(Array.isArray(storedOpenCategories)?storedOpenCategories:[]),
+  openVaries:new Set(Array.isArray(storedOpenVaries)?storedOpenVaries:[]),
   manageSubcategoryFilter:null,
   advancedFilters:{category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false},
   collections:[],workflows:[],commandQuery:"",autosaveTimer:null,lastAutosaveAt:null,
@@ -1740,14 +1740,14 @@ function categoryColor(category){
   if(category.color)return category.color;
   return CATEGORY_COLORS[Math.abs([...category.id].reduce((sum,char)=>sum+char.charCodeAt(0),0))%CATEGORY_COLORS.length];
 }
-function rootCategoriesAlphabetical(){
+function rootVariesAlphabetical(){
   return state.categories.filter(item=>!item.parentId).sort(categoryAlphabeticalCompare);
 }
-function childCategoriesAlphabetical(parentId){
+function childVariesAlphabetical(parentId){
   return state.categories.filter(item=>item.parentId===parentId).sort(categoryAlphabeticalCompare);
 }
 function categoriesHierarchicalAlphabetical(){
-  return rootCategoriesAlphabetical().flatMap(root=>[root,...childCategoriesAlphabetical(root.id)]);
+  return rootVariesAlphabetical().flatMap(root=>[root,...childVariesAlphabetical(root.id)]);
 }
 async function copyText(text){
   const value=String(text??"");
@@ -1923,7 +1923,7 @@ function renderSidebar(){
   const categoryTotal=live.filter(item=>item.categoryId||item.subcategoryId).length;
   const categoryActive=state.filter.type==="category";
   const categorySection=`<section class="side-section categories organize-card">
-    <button class="sidebar-type-shortcut organize-category ${categoryActive?"active":""}" id="categoryPicker" type="button" aria-expanded="${categoryActive?"true":"false"}" aria-controls="categoryMenu"><span class="type-icon" aria-hidden="true">🏷️</span><span>Categorie</span><span class="count">${categoryTotal}</span><span class="category-caret" aria-hidden="true"></span></button>
+    <button class="sidebar-type-shortcut organize-category ${categoryActive?"active":""}" id="categoryPicker" type="button" aria-expanded="${categoryActive?"true":"false"}" aria-controls="categoryMenu"><span class="type-icon" aria-hidden="true">🏷️</span><span>Varie</span><span class="count">${categoryTotal}</span><span class="category-caret" aria-hidden="true"></span></button>
     <div class="category-menu inline-category-menu" id="categoryMenu" role="menu" ${categoryActive?"":"hidden"}></div>
   </section>`;
   if($("categorySidebarSection"))$("categorySidebarSection").innerHTML=categorySection;
@@ -1959,10 +1959,10 @@ function renderSidebar(){
   if($("organizationSidebarSections"))$("organizationSidebarSections").innerHTML=entitySections.join("");
   if($("sidebarOrganization"))$("sidebarOrganization").open=true;
 
-  if($("categoryPickerValue"))$("categoryPickerValue").textContent=activeCategory?.name||"Categorie";
+  if($("categoryPickerValue"))$("categoryPickerValue").textContent=activeCategory?.name||"Varie";
   if($("categoryMenu")){
-    $("categoryMenu").innerHTML=`${rootCategoriesAlphabetical().map(root=>{
-        const children=childCategoriesAlphabetical(root.id);
+    $("categoryMenu").innerHTML=`${rootVariesAlphabetical().map(root=>{
+        const children=childVariesAlphabetical(root.id);
         return `<div class="category-menu-group"><div class="category-parent-row ${children.length?"":"single"}">
           <button class="category-parent-choice ${activeCategory?.id===root.id?"active":""}" type="button" role="menuitem" data-category-id="${esc(root.id)}"><span>${esc(root.name)}</span><span class="category-menu-count">${counts[root.id]||0}</span></button>
           ${children.length?`<button class="category-submenu-toggle" type="button" aria-label="Apri le sottocategorie di ${esc(root.name)}" aria-haspopup="dialog" data-submenu-id="${esc(root.id)}"><span class="category-caret" aria-hidden="true"></span></button>`:""}
@@ -2001,7 +2001,7 @@ function renderSidebar(){
 
 function openSubcategoryPopup(rootId){
   const root=catById(rootId);if(!root)return;
-  const children=childCategoriesAlphabetical(root.id);
+  const children=childVariesAlphabetical(root.id);
   const live=livePrompts();
   $("categoryMenu").hidden=true;
   $("categoryPicker").setAttribute("aria-expanded","false");
@@ -2050,7 +2050,7 @@ function collectProblems(){
   const review=live.filter(item=>item.status==="review");
   if(review.length)add({id:"verification-review",title:"Prompt da verificare",description:"Sono presenti prompt con stato \u201CDa verificare\u201D.",priority:"Media",cause:"Revisione non ancora conclusa.",functionName:"Verifica prompt",impact:"I contenuti potrebbero non essere pronti per l\u2019uso.",solution:"Apri i prompt, controlla anteprima e contenuto, quindi aggiorna lo stato.",mode:"Manuale",target:"verify",count:review.length,itemIds:review.map(x=>x.id)});
   const orphanCategory=live.filter(item=>(item.categoryId&&!catById(item.categoryId))||(item.subcategoryId&&!catById(item.subcategoryId)));
-  if(orphanCategory.length)add({id:"data-orphan-category",title:"Riferimenti a categorie mancanti",description:"Alcuni prompt puntano a categorie non pi\u00F9 presenti.",priority:"Alta",cause:"Eliminazione, importazione o dati non coerenti.",functionName:"Categorie",impact:"Filtri e raggruppamenti possono mostrare risultati incoerenti.",solution:"Riassegna una categoria valida ai prompt coinvolti.",mode:"Manuale",target:"organize",count:orphanCategory.length,itemIds:orphanCategory.map(x=>x.id)});
+  if(orphanCategory.length)add({id:"data-orphan-category",title:"Riferimenti a categorie mancanti",description:"Alcuni prompt puntano a categorie non pi\u00F9 presenti.",priority:"Alta",cause:"Eliminazione, importazione o dati non coerenti.",functionName:"Varie",impact:"Filtri e raggruppamenti possono mostrare risultati incoerenti.",solution:"Riassegna una categoria valida ai prompt coinvolti.",mode:"Manuale",target:"organize",count:orphanCategory.length,itemIds:orphanCategory.map(x=>x.id)});
   const orphanClient=live.filter(item=>item.clientId&&!clientById(item.clientId));
   if(orphanClient.length)add({id:"data-orphan-client",title:"Riferimenti a clienti mancanti",description:"Alcuni prompt puntano a clienti non pi\u00F9 presenti.",priority:"Media",cause:"Eliminazione o importazione con riferimenti incompleti.",functionName:"Clienti",impact:"Il filtro per cliente non pu\u00F2 rappresentare correttamente i dati.",solution:"Riassegna un cliente valido oppure rimuovi l\u2019associazione.",mode:"Manuale",target:"organize",count:orphanClient.length,itemIds:orphanClient.map(x=>x.id)});
   const orphanProject=live.filter(item=>item.projectId&&!projectById(item.projectId));
@@ -2163,7 +2163,7 @@ function exportDiagnosticReport(){downloadJson(sanitizedDiagnosticReport(),`prom
 function renderDiagnosticsPanel(){
   const snapshot=workflowSnapshot();const report=sanitizedDiagnosticReport();const resolved=report.resolvedProblems;
   $("choiceTitle").textContent="Diagnostica tecnica";
-  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite singolo file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr><tr><th>Limite archivio import</th><td>${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Categorie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>GPTSites</th><td>${state.gptsites.length}</td></tr><tr><th>Progetti</th><td>${state.projects.length}</td></tr><tr><th>SEO</th><td>${state.seo.length}</td></tr><tr><th>Tipologie personalizzate</th><td>${state.customTypes.length}</td></tr><tr><th>Elementi personalizzati</th><td>${state.customEntities.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr><tr><th>Ultimo render</th><td>${(state.lastRenderMs||0).toFixed(1)} ms</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
+  $("choiceBody").innerHTML=`<div id="section-diagnostics" tabindex="-1"><div class="diagnostic-grid"><section class="panel-box"><h4>Ambiente</h4><table class="diagnostic-table"><tr><th>Applicazione</th><td>Prompt Studio ${esc(APP_VERSION)}</td></tr><tr><th>Archivio</th><td>IndexedDB ${esc(DB_NAME)} v${DB_VERSION}</td></tr><tr><th>Browser online</th><td>${navigator.onLine?"S\u00EC":"No"}</td></tr><tr><th>Contesto sicuro</th><td>${window.isSecureContext?"S\u00EC":"No"}</td></tr><tr><th>Limite singolo file</th><td>${formatBytes(MAX_EMBED_FILE_SIZE)}</td></tr><tr><th>Limite archivio import</th><td>${formatBytes(MAX_IMPORT_ARCHIVE_SIZE)}</td></tr></table></section><section class="panel-box"><h4>Stati e contatori</h4><table class="diagnostic-table"><tr><th>Prompt attivi</th><td>${snapshot.live.length}</td></tr><tr><th>Varie</th><td>${state.categories.length}</td></tr><tr><th>Clienti</th><td>${state.clients.length}</td></tr><tr><th>GPTSites</th><td>${state.gptsites.length}</td></tr><tr><th>Progetti</th><td>${state.projects.length}</td></tr><tr><th>SEO</th><td>${state.seo.length}</td></tr><tr><th>Tipologie personalizzate</th><td>${state.customTypes.length}</td></tr><tr><th>Elementi personalizzati</th><td>${state.customEntities.length}</td></tr><tr><th>File</th><td>${snapshot.attachments}</td></tr><tr><th>Problemi attivi</th><td>${snapshot.problems.length}</td></tr><tr><th>Avanzamento</th><td>${snapshot.percent}%</td></tr><tr><th>Ultimo render</th><td>${(state.lastRenderMs||0).toFixed(1)} ms</td></tr></table></section></div><section class="panel-box" style="margin-top:12px"><h4>Ultimi eventi</h4>${report.recentEvents.length?`<div class="resolved-list">${report.recentEvents.map(event=>`<div class="resolved-item"><strong>${esc(event.level.toUpperCase())}</strong> \u00B7 ${esc(event.operation)} \u00B7 ${esc(formatDate(event.at))}<br>${esc(event.message)} ${event.code?`<small>(${esc(event.code)})</small>`:""}</div>`).join("")}</div>`:"<p>Nessun errore o avviso registrato in questa sessione locale.</p>"}</section><details class="panel-box" style="margin-top:12px"><summary><strong>Problemi risolti</strong> (${resolved.length})</summary>${resolved.length?`<div class="resolved-list" style="margin-top:10px">${resolved.map(item=>`<div class="resolved-item"><strong>${esc(item.id)}</strong><br>${esc(item.verification)} \u00B7 ${esc(formatDate(item.resolvedAt))}</div>`).join("")}</div>`:"<p>Nessun problema risolto registrato.</p>"}</details><p class="hint" style="margin-top:12px">Il report diagnostico non include contenuti completi dei prompt, file, cookie, password, token o credenziali.</p></div>`;
   $("choiceFoot").innerHTML=`<button class="btn" data-close="choiceModal">Chiudi</button><button class="btn" id="diagBackupBtn">Crea backup</button><button class="btn primary" id="diagExportBtn">Esporta report diagnostico</button>`;
   bindModalClose();$("diagBackupBtn").onclick=()=>{closeModal("choiceModal");createBackup()};$("diagExportBtn").onclick=exportDiagnosticReport;openModal("choiceModal");setTimeout(()=>$("section-diagnostics")?.focus(),60);
 }
@@ -2213,7 +2213,7 @@ function renderSearchSuggestions(){
   const seen=new Set(),values=[];
   const add=value=>{const clean=String(value||"").trim();if(!clean||seen.has(normalize(clean)))return;seen.add(normalize(clean));values.push(clean)};
   livePrompts().slice().sort((a,b)=>(b.usageCount||0)-(a.usageCount||0)).slice(0,45).forEach(p=>add(p.title));
-  state.clients.slice(0,20).forEach(x=>add(x.name));rootCategoriesAlphabetical().slice(0,20).forEach(x=>add(x.name));
+  state.clients.slice(0,20).forEach(x=>add(x.name));rootVariesAlphabetical().slice(0,20).forEach(x=>add(x.name));
   list.innerHTML=values.slice(0,70).map(value=>`<option value="${esc(value)}"></option>`).join("");
 }
 function renderStats(){
@@ -2291,7 +2291,7 @@ function groupedCardsHtml(items){
     if(!groups.has(key))groups.set(key,{category:root,items:[]});
     groups.get(key).items.push(prompt);
   });
-  const categoryOrder=new Map(rootCategoriesAlphabetical().map((cat,index)=>[cat.id,index]));
+  const categoryOrder=new Map(rootVariesAlphabetical().map((cat,index)=>[cat.id,index]));
   return [...groups.values()]
     .sort((a,b)=>{
       if(!a.category)return 1;
@@ -2671,7 +2671,7 @@ function updateCompiledPreview(){
 
 /* ---------- Editor ---------- */
 function fillEditorSelects(prompt){
-  const roots=rootCategoriesAlphabetical();
+  const roots=rootVariesAlphabetical();
   $("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptCategory").value=prompt?.categoryId||"";
   fillSubcategories(prompt?.subcategoryId||"");
@@ -2688,7 +2688,7 @@ function fillEditorSelects(prompt){
 }
 function fillSubcategories(selected=""){
   const parent=$("promptCategory").value;
-  const children=childCategoriesAlphabetical(parent);
+  const children=childVariesAlphabetical(parent);
   $("promptSubcategory").innerHTML='<option value="">Nessuna sottocategoria</option>'+children.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
   $("promptSubcategory").value=selected;
 }
@@ -3276,7 +3276,7 @@ async function transferPromptsAcrossSections(ids,targetType,targetId,mode="move"
 
 /* ---------- Gestione e scambio fra tutte le sezioni ---------- */
 function renderManage(){
-  const roots=rootCategoriesAlphabetical();
+  const roots=rootVariesAlphabetical();
   const allSubcategories=state.categories.filter(item=>item.parentId).sort((a,b)=>{
     const parentCompare=String(catById(a.parentId)?.name||"").localeCompare(String(catById(b.parentId)?.name||""),"it",{sensitivity:"base"});
     return parentCompare||a.name.localeCompare(b.name,"it",{sensitivity:"base"});
@@ -3290,7 +3290,7 @@ function renderManage(){
 
   $("newSubcategoryParent").innerHTML='<option value="">Tutte le categorie</option>'+roots.map(item=>`<option value="${esc(item.id)}" ${item.id===state.manageSubcategoryFilter?"selected":""}>${esc(item.name)}</option>`).join("");
 
-  $("manageCategories").innerHTML=roots.map(category=>`
+  $("manageVaries").innerHTML=roots.map(category=>`
     <div class="manage-row">
       <span class="tree-dot" style="--dot:${esc(categoryColor(category))}"></span>
       <div class="grow"><strong class="category-name-editable" data-id="${esc(category.id)}" tabindex="0" role="button" title="Clicca per modificare il nome">${esc(category.name)}</strong></div>
@@ -3342,7 +3342,7 @@ function renderManage(){
     renderManage();
   };
 
-  [$("manageCategories"),$("manageSubcategories")].forEach(categoryList=>{
+  [$("manageVaries"),$("manageSubcategories")].forEach(categoryList=>{
     categoryList.onclick=event=>{
       const name=event.target.closest(".category-name-editable");
       if(!name||!categoryList.contains(name))return;
@@ -3620,7 +3620,7 @@ async function moveEntityToCategory(sourceType,id){
   const sourceStoreName=isClient?"clients":"projects";
   const sourceField=isClient?"clientId":"projectId";
   const sourceLabel=isClient?"Cliente":"Progetto";
-  const existing=rootCategoriesAlphabetical().find(item=>normalize(item.name)===normalize(source.name));
+  const existing=rootVariesAlphabetical().find(item=>normalize(item.name)===normalize(source.name));
   const category=existing||{id:uid("cat"),name:source.name,parentId:null,color:CATEGORY_COLORS[state.categories.length%CATEGORY_COLORS.length],order:state.categories.length,createdAt:now()};
   try{
     const tx=state.db.transaction(["prompts","categories",sourceStoreName],"readwrite");
@@ -3633,7 +3633,7 @@ async function moveEntityToCategory(sourceType,id){
     });
     sourceStore.delete(id);
     await transactionDone(tx);
-    await loadData();state.filter={type:"category",id:category.id};render();renderManage();toast(`${sourceLabel} “${source.name}” spostato in Categorie.`,"success");
+    await loadData();state.filter={type:"category",id:category.id};render();renderManage();toast(`${sourceLabel} “${source.name}” spostato in Varie.`,"success");
   }catch(error){console.error(error);toast(`Spostamento non riuscito: ${error.message||"errore del database"}.`,"error","PS-ENTITY-TO-CATEGORY")}
 }
 function moveClientToCategory(id){return moveEntityToCategory("client",id)}
@@ -3662,7 +3662,7 @@ async function moveProjectToClients(id){
 }
 
 const ENTITY_DEFINITIONS={
-  category:{type:"category",label:"Categorie",singular:"Categoria",store:"categories",field:"categoryId",prefix:"cat"},
+  category:{type:"category",label:"Varie",singular:"Categoria",store:"categories",field:"categoryId",prefix:"cat"},
   client:{type:"client",label:"Clienti",singular:"Cliente",store:"clients",field:"clientId",prefix:"client"},
   gptsite:{type:"gptsite",label:"GPTSites",singular:"GPTSites",store:"gptsites",field:"gptSiteId",prefix:"gptsite"},
   project:{type:"project",label:"Progetti",singular:"Progetto",store:"projects",field:"projectId",prefix:"project"},
@@ -3774,7 +3774,7 @@ async function moveEntityAcrossSections(sourceType,id,targetType){
 async function addCustomType(){
   const name=$("newTypeName")?.value.trim().replace(/\s+/g," ");
   if(!name){toast("Inserisci il nome della tipologia.","warning");return}
-  const reserved=["Categorie","Gestione","Libreria"];
+  const reserved=["Varie","Gestione","Libreria"];
   if(reserved.some(value=>normalize(value)===normalize(name))||allSidebarTypes().some(type=>normalize(type.label)===normalize(name))){
     toast("Esiste già una tipologia o sezione con questo nome.","warning");return;
   }
@@ -3918,7 +3918,7 @@ function validateArchiveData(data){
   if(!data||typeof data!=="object")throw new Error("Archivio JSON non valido.");
   const schema=Number(data.schemaVersion??data.version);
   if(Number.isFinite(schema)&&schema>ARCHIVE_SCHEMA_VERSION)throw new Error(`Archivio creato con un formato più recente (v${schema}). Aggiorna Prompt Studio prima di importarlo.`);
-  validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Categorie");validateImportItems(data.clients,"Clienti");validateImportItems(data.gptsites||[],"GPTSites");validateImportItems(data.projects||[],"Progetti");validateImportItems(data.seo||[],"SEO");validateImportItems(data.customTypes||[],"Tipologie");validateImportItems(data.customEntities||[],"Elementi tipologie");
+  validateImportItems(data.prompts,"Prompt");validateImportItems(data.categories,"Varie");validateImportItems(data.clients,"Clienti");validateImportItems(data.gptsites||[],"GPTSites");validateImportItems(data.projects||[],"Progetti");validateImportItems(data.seo||[],"SEO");validateImportItems(data.customTypes||[],"Tipologie");validateImportItems(data.customEntities||[],"Elementi tipologie");
 }
 async function resolveImportedPromptOrganization(bundle,prompt){
   const organization=bundle?.organization||{};
@@ -4439,7 +4439,7 @@ function dynamicEntitySelectHtml(definition,prompt){
 }
 const _fillEditorSelectsV19=fillEditorSelects;
 fillEditorSelects=function(prompt){
-  const roots=rootCategoriesAlphabetical();$("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");$("promptCategory").value=prompt?.categoryId||"";fillSubcategories(prompt?.subcategoryId||"");
+  const roots=rootVariesAlphabetical();$("promptCategory").innerHTML='<option value="">Senza categoria</option>'+roots.map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");$("promptCategory").value=prompt?.categoryId||"";fillSubcategories(prompt?.subcategoryId||"");
   $("dynamicEditorFields").innerHTML=visibleSidebarTypes().map(definition=>dynamicEntitySelectHtml(definition,prompt)).join("");
   $$('[data-inline-create]').forEach(button=>button.onclick=()=>inlineCreateEntity(button.dataset.inlineCreate));
 }
@@ -4505,7 +4505,7 @@ async function performAutosaveEditor(){
 }
 const _markDirtyV19=markDirty;markDirty=function(){state.editorChangeSeq=(state.editorChangeSeq||0)+1;_markDirtyV19();scheduleAutosave()}
 
-function promptTableHtml(items){const customCols=state.customTypes.filter(t=>t.visible!==false).slice(0,4);return `<div class="table-wrap"><table class="prompt-table"><thead><tr><th>Prompt</th><th>Categoria</th><th>Cliente</th><th>Progetto</th>${customCols.map(t=>`<th>${esc(t.name)}</th>`).join("")}<th>Stato</th><th>Uso</th><th>Aggiornato</th><th></th></tr></thead><tbody>${items.map(p=>{const cat=catById(p.subcategoryId)||catById(p.categoryId),client=clientById(p.clientId),project=projectById(p.projectId);return `<tr><td><button class="table-title-btn" data-table-open="${esc(p.id)}">${esc(p.title||"Senza titolo")}</button></td><td>${esc(cat?.name||"—")}</td><td>${esc(client?.name||"—")}</td><td>${esc(project?.name||"—")}</td>${customCols.map(t=>`<td>${customAssignmentValues(p,t.id).map(id=>customEntityById(id)?.name).filter(Boolean).map(esc).join(", ")||"—"}</td>`).join("")}<td>${esc(p.status||"")}</td><td>${p.usageCount||0}</td><td>${esc(formatDate(p.updatedAt))}</td><td class="table-actions"><button class="btn small" data-table-use="${esc(p.id)}">Usa</button></td></tr>`}).join("")}</tbody></table></div>`}
+function promptTableHtml(items){const customCols=state.customTypes.filter(t=>t.visible!==false).slice(0,4);return `<div class="table-wrap"><table class="prompt-table"><thead><tr><th>Prompt</th><th>Destinazione</th><th>Cliente</th><th>Progetto</th>${customCols.map(t=>`<th>${esc(t.name)}</th>`).join("")}<th>Stato</th><th>Uso</th><th>Aggiornato</th><th></th></tr></thead><tbody>${items.map(p=>{const cat=catById(p.subcategoryId)||catById(p.categoryId),client=clientById(p.clientId),project=projectById(p.projectId);return `<tr><td><button class="table-title-btn" data-table-open="${esc(p.id)}">${esc(p.title||"Senza titolo")}</button></td><td>${esc(cat?.name||"—")}</td><td>${esc(client?.name||"—")}</td><td>${esc(project?.name||"—")}</td>${customCols.map(t=>`<td>${customAssignmentValues(p,t.id).map(id=>customEntityById(id)?.name).filter(Boolean).map(esc).join(", ")||"—"}</td>`).join("")}<td>${esc(p.status||"")}</td><td>${p.usageCount||0}</td><td>${esc(formatDate(p.updatedAt))}</td><td class="table-actions"><button class="btn small" data-table-use="${esc(p.id)}">Usa</button></td></tr>`}).join("")}</tbody></table></div>`}
 function kanbanHtml(items,allItems=items){const statuses=[['draft','Bozza'],['review','Da verificare'],['approved','Approvato'],['obsolete','Obsoleto'],['archived','Archiviato']];return `<div class="kanban-board">${statuses.map(([status,label])=>{const cards=items.filter(p=>p.status===status),total=allItems.filter(p=>p.status===status).length;return `<section class="kanban-column" data-kanban-status="${status}"><div class="kanban-head"><span>${label}</span><span title="${cards.length<total?`${cards.length} visualizzati su ${total}`:`${total} prompt`}">${cards.length<total?`${cards.length}/${total}`:total}</span></div>${cards.map(p=>`<article class="kanban-card" draggable="true" data-kanban-id="${esc(p.id)}"><strong>${esc(p.title||"Senza titolo")}</strong><small>${esc(catById(p.categoryId)?.name||"Senza categoria")}</small></article>`).join("")}</section>`}).join("")}</div>`}
 const _renderCardsV19=renderCards;
 renderCards=function(){
@@ -4564,7 +4564,7 @@ function openSmartOrganization(){const suggestions=organizationSuggestions();$("
 
 function currentTableColumns(){return readStoredJson("ps_table_columns",{category:true,client:true,project:true,status:true,usage:true,updated:true,custom:{}})}
 function openTableColumns(){const cfg=currentTableColumns();$("choiceTitle").textContent="Colonne tabella";$("choiceBody").innerHTML=`<div class="relation-list">${[['category','Categoria'],['client','Cliente'],['project','Progetto'],['status','Stato'],['usage','Utilizzo'],['updated','Aggiornato']].map(([k,l])=>`<label class="relation-row"><input type="checkbox" data-col="${k}" ${cfg[k]!==false?'checked':''}> ${l}</label>`).join('')}${state.customTypes.map(t=>`<label class="relation-row"><input type="checkbox" data-custom-col="${esc(t.id)}" ${cfg.custom?.[t.id]?'checked':''}> ${esc(t.name)}</label>`).join('')}</div>`;$("choiceFoot").innerHTML='<button class="btn" data-close="choiceModal">Annulla</button><button class="btn primary" id="saveTableColumns">Salva</button>';bindModalClose();$("saveTableColumns").onclick=()=>{const next={custom:{}};$$('[data-col]').forEach(x=>next[x.dataset.col]=x.checked);$$('[data-custom-col]').forEach(x=>next.custom[x.dataset.customCol]=x.checked);localStorage.setItem("ps_table_columns",JSON.stringify(next));closeModal("choiceModal");if(state.view==="table")renderCards();toast("Colonne aggiornate.","success")};openModal("choiceModal")}
-const _promptTableHtmlCols=promptTableHtml;promptTableHtml=function(items){const cfg=currentTableColumns(),customCols=state.customTypes.filter(t=>cfg.custom?.[t.id]);return `<div class="table-wrap"><table class="prompt-table"><thead><tr><th>Prompt</th>${cfg.category!==false?'<th>Categoria</th>':''}${cfg.client!==false?'<th>Cliente</th>':''}${cfg.project!==false?'<th>Progetto</th>':''}${customCols.map(t=>`<th>${esc(t.name)}</th>`).join('')}${cfg.status!==false?'<th>Stato</th>':''}${cfg.usage!==false?'<th>Uso</th>':''}${cfg.updated!==false?'<th>Aggiornato</th>':''}<th></th></tr></thead><tbody>${items.map(p=>{const cat=catById(p.subcategoryId)||catById(p.categoryId),client=clientById(p.clientId),project=projectById(p.projectId);return `<tr><td><button class="table-title-btn" data-table-open="${esc(p.id)}">${esc(p.title||'Senza titolo')}</button></td>${cfg.category!==false?`<td>${esc(cat?.name||'—')}</td>`:''}${cfg.client!==false?`<td>${esc(client?.name||'—')}</td>`:''}${cfg.project!==false?`<td>${esc(project?.name||'—')}</td>`:''}${customCols.map(t=>`<td>${customAssignmentValues(p,t.id).map(id=>customEntityById(id)?.name).filter(Boolean).map(esc).join(', ')||'—'}</td>`).join('')}${cfg.status!==false?`<td>${esc(({draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"})[p.status]||p.status||"—")}</td>`:''}${cfg.usage!==false?`<td>${p.usageCount||0}</td>`:''}${cfg.updated!==false?`<td>${esc(formatDate(p.updatedAt))}</td>`:''}<td class="table-actions"><button class="btn small" data-table-use="${esc(p.id)}">Usa</button></td></tr>`}).join('')}</tbody></table></div>`}
+const _promptTableHtmlCols=promptTableHtml;promptTableHtml=function(items){const cfg=currentTableColumns(),customCols=state.customTypes.filter(t=>cfg.custom?.[t.id]);return `<div class="table-wrap"><table class="prompt-table"><thead><tr><th>Prompt</th>${cfg.category!==false?'<th>Destinazione</th>':''}${cfg.client!==false?'<th>Cliente</th>':''}${cfg.project!==false?'<th>Progetto</th>':''}${customCols.map(t=>`<th>${esc(t.name)}</th>`).join('')}${cfg.status!==false?'<th>Stato</th>':''}${cfg.usage!==false?'<th>Uso</th>':''}${cfg.updated!==false?'<th>Aggiornato</th>':''}<th></th></tr></thead><tbody>${items.map(p=>{const cat=catById(p.subcategoryId)||catById(p.categoryId),client=clientById(p.clientId),project=projectById(p.projectId);return `<tr><td><button class="table-title-btn" data-table-open="${esc(p.id)}">${esc(p.title||'Senza titolo')}</button></td>${cfg.category!==false?`<td>${esc(cat?.name||'—')}</td>`:''}${cfg.client!==false?`<td>${esc(client?.name||'—')}</td>`:''}${cfg.project!==false?`<td>${esc(project?.name||'—')}</td>`:''}${customCols.map(t=>`<td>${customAssignmentValues(p,t.id).map(id=>customEntityById(id)?.name).filter(Boolean).map(esc).join(', ')||'—'}</td>`).join('')}${cfg.status!==false?`<td>${esc(({draft:"Bozza",review:"Da verificare",approved:"Approvato",obsolete:"Obsoleto",archived:"Archiviato"})[p.status]||p.status||"—")}</td>`:''}${cfg.usage!==false?`<td>${p.usageCount||0}</td>`:''}${cfg.updated!==false?`<td>${esc(formatDate(p.updatedAt))}</td>`:''}<td class="table-actions"><button class="btn small" data-table-use="${esc(p.id)}">Usa</button></td></tr>`}).join('')}</tbody></table></div>`}
 
 function wireEntityOverviewButtons(){$$('#organizationSidebarSections .side-section').forEach(section=>{const picker=section.querySelector('.dynamic-sidebar-picker');if(!picker||picker.value==='all'||section.querySelector('.entity-info-btn'))return;const btn=document.createElement('button');btn.type='button';btn.className='sidebar-mini-add entity-info-btn';btn.textContent='i';btn.title='Apri scheda elemento';btn.onclick=e=>{e.stopPropagation();const type=picker.dataset.sidebarType;if(type.startsWith('custom:'))openEntityOverview('custom',picker.value,type.slice(7));else openEntityOverview(type,picker.value)};section.querySelector('.side-title')?.appendChild(btn)})}
 const _renderSidebarInfoV20=renderSidebar;renderSidebar=function(){_renderSidebarInfoV20();wireEntityOverviewButtons()}
@@ -4864,8 +4864,38 @@ function decodeZipText(bytes){
   if(bytes.length>=2&&bytes[0]===0xfe&&bytes[1]===0xff){const swapped=new Uint8Array(bytes.length-2);for(let i=2;i+1<bytes.length;i+=2){swapped[i-2]=bytes[i+1];swapped[i-1]=bytes[i]}return new TextDecoder("utf-16le").decode(swapped)}
   const start=bytes.length>=3&&bytes[0]===0xef&&bytes[1]===0xbb&&bytes[2]===0xbf?3:0;let text=new TextDecoder("utf-8").decode(bytes.subarray(start));const replacements=(text.match(/�/g)||[]).length;if(replacements>Math.max(2,text.length/500))try{text=new TextDecoder("windows-1252").decode(bytes)}catch{}return text.replace(/\u0000/g,"").trim();
 }
-function zipCategoryOptions({includeGeneral=false}={}){const parts=[];if(includeGeneral)parts.push('<option value="">Usa categoria generale</option>');parts.push('<option value="__none__">Senza categoria</option>');for(const item of categoriesHierarchicalAlphabetical()){const parent=item.parentId?catById(item.parentId):null,label=item.parentId?`${parent?.name||""} › ${item.name}`:item.name;parts.push(`<option value="${esc(item.id)}">${esc(label)}</option>`)}return parts.join("")}
-function zipAssignmentFromValue(value){if(!value||value==="__none__")return {categoryId:null,subcategoryId:null};const item=catById(value);if(!item)return null;return item.parentId?{categoryId:item.parentId,subcategoryId:item.id}:{categoryId:item.id,subcategoryId:null}}
+function zipDestinationOptions({includeGeneral=false}={}){
+  const parts=[];
+  if(includeGeneral)parts.push('<option value="">Usa destinazione generale</option>');
+  parts.push('<option value="__none__">Nessuna assegnazione</option>');
+  const cats=categoriesHierarchicalAlphabetical();
+  if(cats.length){
+    parts.push('<optgroup label="Varie">');
+    for(const item of cats){const parent=item.parentId?catById(item.parentId):null,label=item.parentId?`${parent?.name||""} › ${item.name}`:item.name;parts.push(`<option value="category:${esc(item.id)}">${esc(label)}</option>`)}
+    parts.push('</optgroup>');
+  }
+  const groups=[
+    {label:"Clienti",type:"client",items:state.clients},
+    {label:"GPTSites",type:"gptsite",items:state.gptsites},
+    {label:"Progetti",type:"project",items:state.projects},
+    {label:"SEO",type:"seo",items:state.seo}
+  ];
+  for(const group of groups){if(!group.items.length)continue;parts.push(`<optgroup label="${esc(group.label)}">`);for(const item of group.items)parts.push(`<option value="${group.type}:${esc(item.id)}">${esc(item.name)}</option>`);parts.push('</optgroup>')}
+  for(const type of state.customTypes.filter(item=>item.visible!==false)){const entities=customEntitiesForType(type.id);if(!entities.length)continue;parts.push(`<optgroup label="${esc(type.name)}">`);for(const entity of entities)parts.push(`<option value="custom:${esc(type.id)}:${esc(entity.id)}">${esc(entity.name)}</option>`);parts.push('</optgroup>')}
+  return parts.join("");
+}
+function zipAssignmentFromValue(value){
+  const empty={categoryId:null,subcategoryId:null,clientId:null,projectId:null,gptSiteId:null,seoId:null,customAssignments:{}};
+  if(!value||value==="__none__")return empty;
+  const raw=String(value);
+  if(raw.startsWith("category:")){const item=catById(raw.slice(9));if(!item)return null;return {...empty,...(item.parentId?{categoryId:item.parentId,subcategoryId:item.id}:{categoryId:item.id,subcategoryId:null})}}
+  if(raw.startsWith("client:")){const id=raw.slice(7);return clientById(id)?{...empty,clientId:id}:null}
+  if(raw.startsWith("gptsite:")){const id=raw.slice(8);return gptSiteById(id)?{...empty,gptSiteId:id}:null}
+  if(raw.startsWith("project:")){const id=raw.slice(8);return projectById(id)?{...empty,projectId:id}:null}
+  if(raw.startsWith("seo:")){const id=raw.slice(4);return seoById(id)?{...empty,seoId:id}:null}
+  if(raw.startsWith("custom:")){const parts=raw.split(":");const typeId=parts[1],entityId=parts.slice(2).join(":");const type=customTypeById(typeId),entity=customEntityById(entityId);if(!type||!entity||entity.typeId!==typeId)return null;return {...empty,customAssignments:{[typeId]:type.multi?[entityId]:entityId}}}
+  return null;
+}
 function zipImportSelectedRows(){return $$('#zipImportTableBody tr[data-zip-row]').filter(row=>row.querySelector('.zip-import-check')?.checked)}
 function updateZipImportCount(){const rows=zipImportSelectedRows(),label=$("zipImportSelectedCount");if(label)label.textContent=`${rows.length} selezionat${rows.length===1?"o":"i"}`;const button=$("zipImportConfirm");if(button)button.textContent=`Importa ${rows.length} prompt`}
 async function inspectZipForPrompts(file){
@@ -4878,14 +4908,14 @@ async function openZipImport(file){
 }
 function renderZipImportPreview(model){
   const usable=model.rows.filter(row=>row.supported&&!row.error),unsupported=model.rows.filter(row=>!row.supported||row.error),duplicates=model.rows.filter(row=>row.duplicateExisting||row.duplicateZip);$("choiceTitle").textContent=`Importa ZIP · ${model.file.name}`;
-  $("choiceBody").innerHTML=`<div class="zip-import-summary"><div class="stat"><strong>${model.rows.length}</strong><span>File rilevati</span></div><div class="stat"><strong>${usable.length}</strong><span>Importabili</span></div><div class="stat"><strong>${duplicates.length}</strong><span>Possibili duplicati</span></div><div class="stat"><strong>${unsupported.length}</strong><span>Saltati / da controllare</span></div></div><div class="zip-import-controls"><div class="field"><label for="zipDefaultCategory">Categoria generale</label><select id="zipDefaultCategory"><option value="" selected>— Scegli categoria —</option>${zipCategoryOptions()}</select></div><div class="field"><label for="zipImportStatus">Stato iniziale</label><select id="zipImportStatus"><option value="draft">Bozza</option><option value="review" selected>Da verificare</option><option value="approved">Approvato</option></select></div><p class="zip-import-note">La categoria generale si applica a tutti i file, ma puoi cambiarla riga per riga. “Senza categoria” è una scelta esplicita. I titoli mantengono la numerazione del nome file.</p></div><div class="zip-import-table-wrap"><table class="zip-import-table"><thead><tr><th><input type="checkbox" id="zipSelectAll" checked aria-label="Seleziona tutti i file importabili"></th><th>File</th><th>Titolo prompt</th><th>Categoria</th><th>Stato file</th></tr></thead><tbody id="zipImportTableBody">${model.rows.map((row,index)=>{const selectable=row.supported&&!row.error,checked=selectable&&!row.duplicateExisting&&!row.duplicateZip;const status=!selectable?`<span class="zip-import-badge error">${esc(row.error||"Non supportato")}</span>`:(row.duplicateExisting||row.duplicateZip)?`<span class="zip-import-badge warning">${row.duplicateExisting?"Titolo già presente":"Duplicato nello ZIP"}</span>`:'<span class="zip-import-badge ok">Pronto</span>';return `<tr data-zip-row="${index}" class="${selectable?"":"zip-row-disabled"}"><td><input class="zip-import-check" type="checkbox" ${checked?"checked":""} ${selectable?"":"disabled"} aria-label="Importa ${esc(row.title)}"></td><td><span class="zip-import-file">${esc((row.path.split('/').pop()||row.path))}</span><span class="zip-import-path">${esc(row.path)} · ${esc(formatBytes(row.size))}</span></td><td><input class="zip-import-title" type="text" value="${esc(row.title)}" ${selectable?"":"disabled"}></td><td><select class="zip-import-category" ${selectable?"":"disabled"}>${zipCategoryOptions({includeGeneral:true})}</select></td><td>${status}</td></tr>`}).join("")||'<tr><td colspan="5"><div class="zip-import-empty">Nessun file utilizzabile trovato nello ZIP.</div></td></tr>'}</tbody></table></div>`;
+  $("choiceBody").innerHTML=`<div class="zip-import-summary"><div class="stat"><strong>${model.rows.length}</strong><span>File rilevati</span></div><div class="stat"><strong>${usable.length}</strong><span>Importabili</span></div><div class="stat"><strong>${duplicates.length}</strong><span>Possibili duplicati</span></div><div class="stat"><strong>${unsupported.length}</strong><span>Saltati / da controllare</span></div></div><div class="zip-import-controls"><div class="field"><label for="zipDefaultCategory">Destinazione generale</label><select id="zipDefaultCategory"><option value="" selected>— Scegli destinazione —</option>${zipDestinationOptions()}</select></div><div class="field"><label for="zipImportStatus">Stato iniziale</label><select id="zipImportStatus"><option value="draft">Bozza</option><option value="review" selected>Da verificare</option><option value="approved">Approvato</option></select></div><p class="zip-import-note">La destinazione generale si applica a tutti i file, ma puoi cambiarla riga per riga. Puoi scegliere Varie, Clienti, GPTSites, Progetti, SEO o una tipologia personalizzata. “Nessuna assegnazione” è una scelta esplicita. I titoli mantengono la numerazione del nome file.</p></div><div class="zip-import-table-wrap"><table class="zip-import-table"><thead><tr><th><input type="checkbox" id="zipSelectAll" checked aria-label="Seleziona tutti i file importabili"></th><th>File</th><th>Titolo prompt</th><th>Destinazione</th><th>Stato file</th></tr></thead><tbody id="zipImportTableBody">${model.rows.map((row,index)=>{const selectable=row.supported&&!row.error,checked=selectable&&!row.duplicateExisting&&!row.duplicateZip;const status=!selectable?`<span class="zip-import-badge error">${esc(row.error||"Non supportato")}</span>`:(row.duplicateExisting||row.duplicateZip)?`<span class="zip-import-badge warning">${row.duplicateExisting?"Titolo già presente":"Duplicato nello ZIP"}</span>`:'<span class="zip-import-badge ok">Pronto</span>';return `<tr data-zip-row="${index}" class="${selectable?"":"zip-row-disabled"}"><td><input class="zip-import-check" type="checkbox" ${checked?"checked":""} ${selectable?"":"disabled"} aria-label="Importa ${esc(row.title)}"></td><td><span class="zip-import-file">${esc((row.path.split('/').pop()||row.path))}</span><span class="zip-import-path">${esc(row.path)} · ${esc(formatBytes(row.size))}</span></td><td><input class="zip-import-title" type="text" value="${esc(row.title)}" ${selectable?"":"disabled"}></td><td><select class="zip-import-destination" ${selectable?"":"disabled"}>${zipDestinationOptions({includeGeneral:true})}</select></td><td>${status}</td></tr>`}).join("")||'<tr><td colspan="5"><div class="zip-import-empty">Nessun file utilizzabile trovato nello ZIP.</div></td></tr>'}</tbody></table></div>`;
   $("choiceFoot").innerHTML=`<span class="zip-import-footer-note" id="zipImportSelectedCount"></span><button class="btn" data-close="choiceModal">Annulla</button><button class="btn primary" id="zipImportConfirm">Importa prompt</button>`;bindModalClose();
   $("zipSelectAll")?.addEventListener("change",event=>{$$('#zipImportTableBody .zip-import-check:not(:disabled)').forEach(input=>input.checked=event.target.checked);updateZipImportCount()});$$('#zipImportTableBody .zip-import-check').forEach(input=>input.onchange=updateZipImportCount);$("zipImportConfirm").onclick=()=>importPromptsFromZipPreview(model);updateZipImportCount();openModal("choiceModal");
 }
 async function importPromptsFromZipPreview(model){
   if(state.busy.has("zipApply"))return;const selected=zipImportSelectedRows();if(!selected.length){toast("Seleziona almeno un file da importare.","warning");return}const defaultCategory=$("zipDefaultCategory")?.value||"";const status=$("zipImportStatus")?.value||"review";const prepared=[];
-  for(const rowNode of selected){const index=Number(rowNode.dataset.zipRow),source=model.rows[index],title=String(rowNode.querySelector('.zip-import-title')?.value||"").trim(),override=rowNode.querySelector('.zip-import-category')?.value||"",chosen=override||defaultCategory;if(!title){toast(`Inserisci il titolo per ${source.path}.`,"warning");rowNode.querySelector('.zip-import-title')?.focus();return}if(!chosen){toast("Scegli una categoria generale oppure una categoria specifica per ogni file selezionato.","warning");$("zipDefaultCategory")?.focus();return}const assignment=zipAssignmentFromValue(chosen);if(!assignment){toast(`Categoria non valida per ${source.path}.`,"error","PS-ZIP-CATEGORY");return}prepared.push({source,title,assignment})}
-  state.busy.add("zipApply");const button=$("zipImportConfirm");if(button){button.disabled=true;button.textContent="Importazione…"}try{const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts"),stamp=now();for(const item of prepared){const prompt={id:uid("prompt"),title:item.title,content:item.source.content,intro:"",introSource:"auto",introGeneratedAt:stamp,introUpdatedAt:stamp,categoryId:item.assignment.categoryId,subcategoryId:item.assignment.subcategoryId,clientId:null,projectId:null,gptSiteId:null,seoId:null,customAssignments:{},status,tags:["import-zip"],notes:"",toolUrl:"",favorite:false,pinned:false,usageCount:0,lastUsedAt:null,version:1,variableValues:{},variableFiles:{},createdAt:stamp,updatedAt:stamp,deletedAt:null,importSource:{type:"zip",archive:model.file.name,path:item.source.path}};prompt.intro=generatePromptIntro(prompt);promptStore.put(prompt)}await transactionDone(tx);await loadData();resetRenderLimit();state.sort="title_asc";localStorage.setItem("ps_sort",state.sort);if($("sortSelect"))$("sortSelect").value=state.sort;closeModal("choiceModal");state.filter={type:"all",id:null};render();toast(`${prepared.length} prompt importati dallo ZIP mantenendo la numerazione dei file.`,"success")}catch(error){console.error(error);toast(`Importazione ZIP annullata: ${error.message||"errore del database"}. Nessun prompt parziale è stato confermato.`,"error","PS-ZIP-APPLY")}finally{state.busy.delete("zipApply");if(button){button.disabled=false;updateZipImportCount()}}
+  for(const rowNode of selected){const index=Number(rowNode.dataset.zipRow),source=model.rows[index],title=String(rowNode.querySelector('.zip-import-title')?.value||"").trim(),override=rowNode.querySelector('.zip-import-destination')?.value||"",chosen=override||defaultCategory;if(!title){toast(`Inserisci il titolo per ${source.path}.`,"warning");rowNode.querySelector('.zip-import-title')?.focus();return}if(!chosen){toast("Scegli una destinazione generale oppure una destinazione specifica per ogni file selezionato.","warning");$("zipDefaultCategory")?.focus();return}const assignment=zipAssignmentFromValue(chosen);if(!assignment){toast(`Destinazione non valida per ${source.path}.`,"error","PS-ZIP-CATEGORY");return}prepared.push({source,title,assignment})}
+  state.busy.add("zipApply");const button=$("zipImportConfirm");if(button){button.disabled=true;button.textContent="Importazione…"}try{const tx=state.db.transaction("prompts","readwrite"),promptStore=tx.objectStore("prompts"),stamp=now();for(const item of prepared){const prompt={id:uid("prompt"),title:item.title,content:item.source.content,intro:"",introSource:"auto",introGeneratedAt:stamp,introUpdatedAt:stamp,categoryId:item.assignment.categoryId,subcategoryId:item.assignment.subcategoryId,clientId:item.assignment.clientId,projectId:item.assignment.projectId,gptSiteId:item.assignment.gptSiteId,seoId:item.assignment.seoId,customAssignments:item.assignment.customAssignments||{},status,tags:["import-zip"],notes:"",toolUrl:"",favorite:false,pinned:false,usageCount:0,lastUsedAt:null,version:1,variableValues:{},variableFiles:{},createdAt:stamp,updatedAt:stamp,deletedAt:null,importSource:{type:"zip",archive:model.file.name,path:item.source.path}};prompt.intro=generatePromptIntro(prompt);promptStore.put(prompt)}await transactionDone(tx);await loadData();resetRenderLimit();state.sort="title_asc";localStorage.setItem("ps_sort",state.sort);if($("sortSelect"))$("sortSelect").value=state.sort;closeModal("choiceModal");state.filter={type:"all",id:null};render();toast(`${prepared.length} prompt importati dallo ZIP mantenendo la numerazione dei file.`,"success")}catch(error){console.error(error);toast(`Importazione ZIP annullata: ${error.message||"errore del database"}. Nessun prompt parziale è stato confermato.`,"error","PS-ZIP-APPLY")}finally{state.busy.delete("zipApply");if(button){button.disabled=false;updateZipImportCount()}}
 }
 const _bindEventsZipBase=bindEvents;
 bindEvents=function(){_bindEventsZipBase();$("menuImportZipBtn")?.addEventListener("click",()=>{$("moreMenu")?.classList.remove("show");$("zipImportInput")?.click()});$("zipImportInput")?.addEventListener("change",event=>{const file=event.target.files?.[0];event.target.value="";if(file)openZipImport(file)})};
