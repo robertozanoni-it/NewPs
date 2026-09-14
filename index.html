@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<meta name="application-version" content="22.14.2">
+<meta name="application-version" content="22.15.0">
 <title>Prompt Studio</title>
 <style>
 :root{
@@ -685,7 +685,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 
 .custom-type-up,.custom-type-down{display:none!important}
 
-/* ---------- Selection + card menu UX 22.14.2 ---------- */
+/* ---------- Selection + card menu UX 22.15.0 ---------- */
 /* Checkbox ~2x larger and easier to hit */
 .card-check{
   width:28px;
@@ -749,6 +749,22 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
   .card-menu-panel{min-width:220px}
 }
 
+
+/* ---------- Subcategory flow 22.15.0 ---------- */
+.subcategory-flow-box{display:flex;flex-direction:column;gap:0}
+.subcategory-management-filters{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.subcategory-management-filters select:disabled{opacity:.58;cursor:not-allowed}
+.subcategory-editor{min-height:108px;padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--panel);margin-bottom:12px}
+.subcategory-editor-empty{min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px;line-height:1.5;padding:12px}
+.subcategory-edit-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:end}
+.subcategory-edit-grid .field{min-width:0}
+.subcategory-context{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.subcategory-context span{padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--panel-2);font-size:11px;font-weight:800;color:var(--muted)}
+.subcategory-create-box{padding-top:12px;border-top:1px solid var(--line)}
+.subcategory-create-title{margin-bottom:8px;font-size:12px;font-weight:900;color:var(--text)}
+@media(max-width:980px){.subcategory-management-filters{grid-template-columns:1fr 1fr}.subcategory-management-filters .field:last-child{grid-column:1/-1}}
+@media(max-width:650px){.subcategory-management-filters{grid-template-columns:1fr}.subcategory-management-filters .field:last-child{grid-column:auto}.subcategory-edit-grid{grid-template-columns:1fr}.subcategory-edit-grid .btn{width:100%}}
+
 </style>
 
 </head>
@@ -756,7 +772,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <div class="app">
   <header class="topbar">
     <button class="btn icon mobile-menu" id="mobileMenuBtn" aria-label="Apri menu">&#9776;</button>
-    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 22.14.2</small></div></div>
+    <div class="brand"><div class="logo">P</div><div><h1>Prompt Studio</h1><small id="appVersionLabel">Versione 22.15.0</small></div></div>
     <div class="search-wrap">
       <span>&#8981;</span>
       <input class="search" id="globalSearch" type="search" list="searchSuggestions" autocomplete="off" placeholder="Cerca un prompt per titolo, argomento o cliente…" aria-label="Cerca nella libreria">
@@ -819,7 +835,7 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
       <button class="side-link" data-filter="trash"><span aria-hidden="true">&#9003;</span><span>Cestino</span><span class="count" id="countTrash">0</span></button>
       <button class="side-link" id="manageBtn"><span aria-hidden="true">&#9881;</span><span>Impostazioni e struttura</span></button>
     </section>
-    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.14.2</div>
+    <div class="sidebar-version" id="sidebarVersionLabel">Prompt Studio · Versione 22.15.0</div>
   </aside>
 
   <div class="resizer" id="sidebarResizer" title="Trascina per ridimensionare"></div>
@@ -982,24 +998,32 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
             <button class="btn primary small" id="addCategoryBtn">Aggiungi</button>
           </div>
         </div>
-        <div class="panel-box">
+        <div class="panel-box subcategory-flow-box">
           <h4>Sottocategorie</h4>
-          <div class="hint" style="margin-bottom:10px">1. Scegli la tipologia. 2. Scegli l’elemento principale. 3. Gestisci o aggiungi le sottocategorie appartenenti a quell’elemento.</div>
+          <div class="hint" style="margin-bottom:12px">1. Scegli una voce di <strong>Organizza per</strong>. 2. Scegli la tipologia o categoria principale. 3. Seleziona la sottocategoria da modificare o eliminare, oppure creane una nuova.</div>
           <div class="subcategory-management-filters">
             <div class="field">
-              <label for="manageSubcategoryType">Tipologia</label>
+              <label for="manageSubcategoryType">Organizza per</label>
               <select id="manageSubcategoryType"></select>
             </div>
             <div class="field">
-              <label for="newSubcategoryParent">Elemento principale</label>
+              <label for="newSubcategoryParent">Tipologia o categoria</label>
               <select id="newSubcategoryParent"></select>
             </div>
+            <div class="field">
+              <label for="manageSubcategoryItem">Sottocategoria</label>
+              <select id="manageSubcategoryItem"></select>
+            </div>
           </div>
-          <div class="manage-list" id="manageSubcategories"></div>
-          <div class="inline-form subcategory-add-row" style="grid-template-columns:minmax(0,1fr) auto">
-            <input id="newSubcategoryName" type="text" placeholder="Nome sottocategoria">
-            <button class="btn primary small" id="addSubcategoryBtn">Aggiungi sottocategoria</button>
+          <div class="subcategory-editor" id="manageSubcategoryEditor" aria-live="polite"></div>
+          <div class="subcategory-create-box">
+            <div class="subcategory-create-title">Aggiungi una nuova sottocategoria</div>
+            <div class="inline-form subcategory-add-row" style="grid-template-columns:minmax(0,1fr) auto">
+              <input id="newSubcategoryName" type="text" placeholder="Nome nuova sottocategoria">
+              <button class="btn primary small" id="addSubcategoryBtn">Aggiungi sottocategoria</button>
+            </div>
           </div>
+          <div class="manage-list hidden" id="manageSubcategories" aria-hidden="true"></div>
         </div>
         <div class="panel-box">
           <h4>Clienti</h4><div class="hint" style="margin-bottom:10px">Gestisci esclusivamente i clienti.</div>
@@ -1057,8 +1081,8 @@ body.dark .btn.primary,body.dark .btn.success{color:#07111f}
 <script>
 (() => {
 "use strict";
-const APP_VERSION="22.14.2";
-const APP_RELEASE_NAME="QA Stability · ZIP · Gerarchie";
+const APP_VERSION="22.15.0";
+const APP_RELEASE_NAME="Flusso sottocategorie · Organizza per";
 document.title=`Prompt Studio v${APP_VERSION} \u2014 ${APP_RELEASE_NAME}`;
 const versionLabel=document.getElementById("appVersionLabel");
 if(versionLabel)versionLabel.textContent=`Versione ${APP_VERSION} · ${APP_RELEASE_NAME}`;
@@ -1109,7 +1133,7 @@ const state={
   lastSavedId:null,
   recentValues:readStoredJson("ps_recent_values",{}),
   openVaries:new Set(Array.isArray(storedOpenVaries)?storedOpenVaries:[]),
-  manageSubcategoryFilter:null,manageSubcategoryType:"category",manageHierarchyParentId:null,
+  manageSubcategoryFilter:null,manageSubcategoryType:"",manageHierarchyParentId:null,manageHierarchyChildId:null,
   advancedFilters:{category:"",client:"",status:"",usage:"",withVariables:false,withFiles:false,duplicates:false},
   collections:[],workflows:[],commandQuery:"",autosaveTimer:null,lastAutosaveAt:null,
   busy:new Set(),modalReturnFocus:{}
@@ -5620,6 +5644,173 @@ bindCardEvents=function(){
   _bindCardEventsZipArchiveBase();
   $$('#cards .zip-archive-card').forEach(card=>{const id=card.dataset.id;card.onclick=event=>{if(event.target.closest("button,input"))return;const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)};card.onkeydown=event=>{if(event.target.closest("button,input"))return;if(event.key==="Enter"||event.key===" "){event.preventDefault();const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)}};card.querySelector('.download-source-zip-card')?.addEventListener('click',()=>{const prompt=state.prompts.find(item=>item.id===id);if(prompt)downloadStoredZip(prompt)});card.querySelector('.rollback-zip-import')?.addEventListener('click',()=>{const prompt=state.prompts.find(item=>item.id===id);if(prompt?.zipImportBatchId)confirmRollbackZipImport(prompt.zipImportBatchId)})});
 };
+
+
+/* ---------- Flusso sottocategorie 22.15.0 ---------- */
+subcategoryTypeDefinitions=function(){
+  return [
+    {type:"category",label:"Varie",store:"categories",prefix:"cat"},
+    ...visibleSidebarTypes().map(def=>({
+      type:def.type,label:def.label,store:def.store,prefix:def.prefix,
+      custom:Boolean(def.custom),typeId:def.typeId
+    }))
+  ];
+};
+
+function selectedManagedSubcategory(){
+  const type=state.manageSubcategoryType||"";
+  const id=state.manageHierarchyChildId||"";
+  return type&&id?hierarchyParentById(type,id):null;
+}
+
+function resetManagedSubcategorySelection({keepType=true,keepParent=true}={}){
+  if(!keepType)state.manageSubcategoryType="";
+  if(!keepParent)state.manageHierarchyParentId=null;
+  state.manageHierarchyChildId=null;
+}
+
+addManagedSubcategory=async function(){
+  const type=$('manageSubcategoryType')?.value||"";
+  const parentId=$('newSubcategoryParent')?.value||"";
+  const name=String($('newSubcategoryName')?.value||"").trim().replace(/\s+/g," ");
+  if(!type){toast("Scegli prima una voce di Organizza per.","warning");return}
+  if(!parentId){toast("Scegli prima la tipologia o categoria principale.","warning");return}
+  if(!name){toast("Inserisci il nome della nuova sottocategoria.","warning");return}
+
+  const parent=hierarchyParentById(type,parentId);
+  const definition=hierarchyTypeDefinition(type);
+  if(!parent||!definition){toast("Tipologia o categoria principale non valida.","error");return}
+  if(hierarchyChildren(type,parentId).some(item=>normalize(item.name)===normalize(name))){
+    toast("Esiste già una sottocategoria con questo nome.","warning");return
+  }
+
+  let item;
+  if(type==="category"){
+    item={id:uid("cat"),name,parentId,color:categoryColor(parent),order:state.categories.length,createdAt:now()};
+  }else if(definition.custom){
+    item={id:uid("customentity"),typeId:definition.typeId,parentId,name,createdAt:now()};
+  }else{
+    item={id:uid(definition.prefix),name,parentId,createdAt:now()};
+  }
+
+  await put(definition.store,item);
+  $('newSubcategoryName').value="";
+  await loadData();
+  state.manageSubcategoryType=type;
+  state.manageHierarchyParentId=parentId;
+  state.manageHierarchyChildId=item.id;
+  render();renderManage();
+  toast(`Sottocategoria “${name}” aggiunta a “${parent.name}”.`,"success");
+};
+
+renderManagedSubcategories=function(){
+  const typeSelect=$('manageSubcategoryType');
+  const parentSelect=$('newSubcategoryParent');
+  const childSelect=$('manageSubcategoryItem');
+  const editor=$('manageSubcategoryEditor');
+  const legacyList=$('manageSubcategories');
+  const addInput=$('newSubcategoryName');
+  const addButton=$('addSubcategoryBtn');
+  if(!typeSelect||!parentSelect||!childSelect||!editor)return;
+  if(legacyList){legacyList.innerHTML="";legacyList.classList.add("hidden");legacyList.setAttribute("aria-hidden","true")}
+
+  const definitions=subcategoryTypeDefinitions();
+  if(state.manageSubcategoryType&&!definitions.some(def=>def.type===state.manageSubcategoryType)){
+    resetManagedSubcategorySelection({keepType:false,keepParent:false});
+  }
+
+  typeSelect.innerHTML='<option value="">Seleziona da Organizza per…</option>'+definitions.map(def=>
+    `<option value="${esc(def.type)}" ${def.type===state.manageSubcategoryType?"selected":""}>${esc(def.label)}</option>`
+  ).join("");
+
+  const type=state.manageSubcategoryType||"";
+  const roots=type?hierarchyRoots(type):[];
+  if(state.manageHierarchyParentId&&!roots.some(item=>item.id===state.manageHierarchyParentId)){
+    state.manageHierarchyParentId=null;
+    state.manageHierarchyChildId=null;
+  }
+
+  parentSelect.disabled=!type||!roots.length;
+  parentSelect.innerHTML=!type
+    ?'<option value="">Scegli prima Organizza per</option>'
+    :roots.length
+      ?'<option value="">Seleziona tipologia o categoria…</option>'+roots.map(item=>
+          `<option value="${esc(item.id)}" ${item.id===state.manageHierarchyParentId?"selected":""}>${esc(entityDisplayLabel(item)||item.name)}</option>`
+        ).join("")
+      :'<option value="">Nessuna tipologia o categoria disponibile</option>';
+
+  const parentId=state.manageHierarchyParentId||"";
+  const children=type&&parentId?hierarchyChildren(type,parentId):[];
+  if(state.manageHierarchyChildId&&!children.some(item=>item.id===state.manageHierarchyChildId))state.manageHierarchyChildId=null;
+
+  childSelect.disabled=!type||!parentId||!children.length;
+  childSelect.innerHTML=!type
+    ?'<option value="">Scegli prima Organizza per</option>'
+    :!parentId
+      ?'<option value="">Scegli prima tipologia o categoria</option>'
+      :children.length
+        ?'<option value="">Seleziona sottocategoria…</option>'+children.map(item=>
+            `<option value="${esc(item.id)}" ${item.id===state.manageHierarchyChildId?"selected":""}>${esc(item.name)}</option>`
+          ).join("")
+        :'<option value="">Nessuna sottocategoria presente</option>';
+
+  if(addInput)addInput.disabled=!type||!parentId;
+  if(addButton)addButton.disabled=!type||!parentId;
+
+  const definition=definitions.find(def=>def.type===type);
+  const parent=type&&parentId?hierarchyParentById(type,parentId):null;
+  const child=selectedManagedSubcategory();
+
+  if(!type){
+    editor.innerHTML='<div class="subcategory-editor-empty">Scegli una voce di <strong>Organizza per</strong> per iniziare.</div>';
+  }else if(!roots.length){
+    editor.innerHTML=`<div class="subcategory-editor-empty">In “${esc(definition?.label||"questa sezione")}” non esistono ancora tipologie o categorie principali. Creane prima una nella relativa sezione di Gestione struttura.</div>`;
+  }else if(!parent){
+    editor.innerHTML='<div class="subcategory-editor-empty">Ora scegli la tipologia o categoria principale.</div>';
+  }else if(!children.length){
+    editor.innerHTML=`<div class="subcategory-editor-empty">“${esc(parent.name)}” non contiene ancora sottocategorie. Puoi crearne una dal campo qui sotto.</div>`;
+  }else if(!child){
+    editor.innerHTML=`<div class="subcategory-editor-empty">Seleziona una sottocategoria di “${esc(parent.name)}” per modificarla o eliminarla.</div>`;
+  }else{
+    editor.innerHTML=`
+      <div class="subcategory-context"><span>${esc(definition?.label||"")}</span><span>${esc(parent.name)}</span><span>${esc(child.name)}</span></div>
+      <div class="subcategory-edit-grid">
+        <div class="field"><label for="manageSubcategoryNameEdit">Nome sottocategoria</label><input id="manageSubcategoryNameEdit" type="text" value="${esc(child.name)}"></div>
+        <button class="btn primary small" id="saveManagedSubcategoryBtn" type="button">Salva modifica</button>
+        <button class="btn danger small" id="deleteManagedSubcategoryBtn" type="button">Elimina</button>
+      </div>`;
+    const editInput=$('manageSubcategoryNameEdit');
+    const saveButton=$('saveManagedSubcategoryBtn');
+    const deleteButton=$('deleteManagedSubcategoryBtn');
+    const saveRename=async()=>{
+      const value=String(editInput?.value||"").trim().replace(/\s+/g," ");
+      if(!value){toast("Il nome della sottocategoria non può essere vuoto.","warning");editInput?.focus();return}
+      if(value===child.name){toast("Nessuna modifica da salvare.","info");return}
+      await renameManagedSubcategory(type,child.id,value);
+      state.manageHierarchyChildId=child.id;
+    };
+    if(saveButton)saveButton.onclick=saveRename;
+    if(editInput)editInput.onkeydown=event=>{if(event.key==="Enter"){event.preventDefault();saveRename()}};
+    if(deleteButton)deleteButton.onclick=()=>deleteManagedSubcategory(type,child.id);
+  }
+
+  typeSelect.onchange=()=>{
+    state.manageSubcategoryType=typeSelect.value||"";
+    state.manageHierarchyParentId=null;
+    state.manageHierarchyChildId=null;
+    renderManagedSubcategories();
+  };
+  parentSelect.onchange=()=>{
+    state.manageHierarchyParentId=parentSelect.value||null;
+    state.manageHierarchyChildId=null;
+    renderManagedSubcategories();
+  };
+  childSelect.onchange=()=>{
+    state.manageHierarchyChildId=childSelect.value||null;
+    renderManagedSubcategories();
+  };
+};
+
 
 
 /* ---------- Avvio ---------- */
